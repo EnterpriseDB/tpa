@@ -2,7 +2,6 @@
 description: Upgrading your TPA cluster.
 ---
 
-
 # Upgrading your cluster
 
 The `tpaexec upgrade` command is used to upgrade the software running on
@@ -25,9 +24,9 @@ Instead, you must use `tpaexec upgrade` to perform software upgrades.
 
 What TPA can upgrade is dependent on architecture:
 
-* The M1 architecture and all applicable failover managers for M1, `upgrade` will perform minor version upgrades of Postgres only.
-* With PGD architectures, `upgrade` will perform minor version upgrades of Postgres and the BDR extension.
-* With PGD architectures, and only in combination with the `reconfigure` command, `upgrade` can perform major-version upgrades of the BDR extension.
+-   The M1 architecture and all applicable failover managers for M1, `upgrade` will perform minor version upgrades of Postgres only.
+-   With PGD architectures, `upgrade` will perform minor version upgrades of Postgres and the BDR extension.
+-   With PGD architectures, and only in combination with the `reconfigure` command, `upgrade` can perform major-version upgrades of the BDR extension.
 
 Support for upgrading other cluster components is planned for future releases.
 !!!
@@ -83,7 +82,7 @@ unrelated pending changes before you begin the software upgrade process.
 To upgrade from BDR-Always-ON to PGD-Always-ON (that is, from BDR3/4 to
 PGD5), first run `tpaexec reconfigure`:
 
-``` bash
+```bash
 $ tpaexec reconfigure ~/clusters/speedy\
   --architecture PGD-Always-ON\
   --pgd-proxy-routing local
@@ -95,13 +94,13 @@ invocation, see [the command's own
 documentation](tpaexec-reconfigure.md). After reviewing the
 changes, run `tpaexec upgrade` to perform the upgrade:
 
-``` bash
+```bash
 $ tpaexec upgrade ~/clusters/speedy\
 ```
 
 Or to run the upgrade with proxy monitoring enabled,
 
-``` bash
+```bash
 $ tpaexec upgrade ~/clusters/speedy\
   -e enable_proxy_monitoring=true
 ```
@@ -127,6 +126,172 @@ the ansible inventory. The upgrade process does the following:
     - Stops harp-proxy.
     - Starts pgd-proxy.
 6. Removes harp-proxy and its support files.
+
+## Upgrading from PGD-Always-ON to PGD-X
+
+Upgrading a `PGD-Always-ON` cluster to `PGD-X` is a **significant
+architectural evolution**, involving changes beyond a simple **software
+update**. It is a _carefully orchestrated, multi-stage process_ that
+requires reconfiguring your cluster in distinct phases before the final
+software upgrade can take place. The procedure first modernizes your
+`PGD 5` cluster's connection handling by replacing `pgd-proxy` with the
+built-in `Connection Manager`, and then transitions the cluster to the
+new `PGD-X` architecture.
+
+The upgrade process transitions the cluster through three distinct states:
+
+1.  **Start:** `PGD` 5.9+ (`PGD-Always-ON`) using `PGD-Proxy`
+2.  **Intermediate:** `PGD` 5.9+ (`PGD-Always-ON`) now using the built-in `Connection Manager`
+3.  **Final:** `PGD` 6 (`PGD-X Architecture`)
+
+### Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+-   **Cluster Version:** Your cluster must be running `PGD` version 5.9 or
+    later. If you are on an earlier 5.x version, use `tpaexec upgrade`
+    to upgrade to the latest minor version first. See the section
+    (#pgd-always-on) for details on minor version upgrade of a PGD-Always-ON
+    cluster.
+
+-   **Backup:** You have a current, tested backup of your cluster.
+
+-   **Review Overrides:** You have reviewed your `config.yml` for any
+    instance-level proxy overrides (e.g., `pgd_proxy_options`). These
+    cannot be migrated automatically and will require manual
+    intervention.
+
+-   **Co-hosted Proxies:** Your `PGD 5` cluster must be configured with
+    co-hosted proxies (where the `pgd-proxy` role is on the same
+    instance as the `bdr` role). Standalone proxy instances are **not
+    supported** by this upgrade path.
+
+### Stage 1: Migrating to the Built-in Connection Manager
+
+The first stage is to reconfigure your `PGD 5.9+` cluster to switch
+from using the external `pgd-proxy` to the modern, built-in
+`Connection Manager`.
+
+!!! Note Transitional State Only
+
+This process creates a transitional `PGD 5.9+` cluster state that is
+intended only as an intermediate step before upgrading to `PGD 6`.
+TPA does not currently support using `tpaexec upgrade` on this
+specific `Connection Manager` configuration. A future TPA release
+will fully support lifecycle management of `PGD 5` with
+`Connection Manager`.
+!!!
+
+!!! Warning Significant Manual Operations Required
+
+This stage involves significant manual intervention on your live
+cluster to apply the configuration changes. If you are not
+comfortable performing these steps, we recommend waiting for a
+future TPA release that will fully automate this process.
+!!!
+
+#### Step 1.1: Reconfigure for Connection Manager
+
+Run the following command to update your `config.yml` file. This adds
+the settings required to enable the built-in `Connection Manager`.
+
+**This action only modifies the configuration file; it does not change
+the running state of your database cluster yet.**
+
+Before writing the new version, `reconfigure` automatically saves a
+backup of the current file (e.g., `config.yml.~1~`), providing a safe
+restore point.
+
+For details of its invocation, see [the
+command's own documentation](tpaexec-reconfigure.md).
+
+```bash
+$ tpaexec reconfigure ~/clusters/speedy --enable-connection-manager
+```
+
+#### Step 1.2: Apply the Configuration and Activate Connection Manager
+
+Apply the configuration changes to your live cluster. This is a
+**manual** operational task that involves, adding Postgres configuration
+parameter, stopping the `pgd-proxy` service and restarting `PostgreSQL`
+nodes in a rolling fashion to activate the `Connection Manager`.
+
+For the detailed, step-by-step instructions for this process, please
+follow the official [Connection Manager Migration
+Guide](https://www.enterprisedb.com/docs/pgd/latest/upgrades/manual_overview/#pgd-5---moving-from-pgd-proxy-to-connection-manager).
+
+### Stage 1 Complete
+
+At the end of this stage, you will have a `PGD` cluster running with
+the built-in `Connection Manager`. This is an intermediate state, and you
+should proceed directly to Stage 2. While `tpaexec upgrade` for minor
+version upgrades is **not supported** in this intermediate state, we
+also advise agaist running `tpaexec deploy` until the upgrade to PGD 6
+is complete.
+
+### Stage 2: Upgrading the Architecture to PGD-X
+
+Once your cluster is running with the `Connection Manager`, you can
+proceed with the final configuration step to prepare for the `PGD 6`
+upgrade.
+
+!!! Note
+
+You **must** start this process from a cluster that has successfully
+completed `Stage 1` and is running with the built-in `Connection
+Manager`.
+!!!
+
+#### Step 2.1: Reconfigure for the PGD-X Architecture
+
+Run the following command to update your `config.yml` for the new
+architecture. This changes the cluster architecture type, sets the `BDR`
+version to 6, and removes any obsolete legacy settings.
+
+**This action only modifies the configuration file; it does not change
+the running state of your database cluster yet.**
+
+```bash
+$ tpaexec reconfigure ~/clusters/speedy --architecture PGD-X
+```
+
+#### Step 2.2: Perform the Software Upgrade
+
+After reviewing the final changes in `config.yml`, you can now run the
+standard `tpaexec upgrade` command. This will perform the software
+upgrade on all nodes, bringing your cluster to `PGD 6`.
+
+```bash
+$ tpaexec upgrade ~/clusters/speedy
+```
+
+Or to run the upgrade with proxy monitoring enabled,
+
+```bash
+$ tpaexec upgrade ~/clusters/speedy\
+  -e enable_proxy_monitoring=true
+```
+
+`tpaexec upgrade` will automatically run `tpaexec provision`, to update
+the ansible inventory. The upgrade process does the following:
+
+1. Checks that all preconditions for upgrading the cluster are met.
+2. For each instance in the cluster, checks that it has the correct
+   repositories configured and that the required postgres packages are
+   available in them.
+3. For each BDR node in the cluster, one at a time:
+    - Fences the node off so there are no connections to it.
+    - Stops, updates, and restarts postgres, including replacing PGD5
+      with PGD6.
+    - Unfences the node so it can receive connections again.
+    - Updates pgbouncer and pgd-cli, as applicable for this node.
+4. Applies BDR configuration specifically for BDR v6
+
+### Upgrade Complete
+
+Your cluster is now running `PGD 6` with the `PGD-X` architecture and is
+fully manageable with both `tpaexec deploy` and `tpaexec upgrade` as
+usual.
 
 ## PGD-Always-ON
 
@@ -182,7 +347,7 @@ switchover back to the initial primary node.
 You can control the order in which the cluster's instances are upgraded
 by defining the `update_hosts` variable:
 
-``` bash
+```bash
 $ tpaexec upgrade ~/clusters/speedy \
   -e update_hosts=quirk,keeper,quaver
 ```
@@ -200,9 +365,9 @@ installation step.
 
 You can perform a rolling upgrade on a subset of instances by setting the `update_hosts` variable. However, support for this feature varies by architecture.
 
-* For the **M1** architecture, this feature is supported in all its upgrade scenarios.
+-   For the **M1** architecture, this feature is supported in all its upgrade scenarios.
 
-* For **PGD-Always-ON/BDR-Always-ON**, this is supported **only** during minor version upgrades.
+-   For **PGD-Always-ON/BDR-Always-ON**, this is supported **only** during minor version upgrades.
 
 ### Best Practice for PGD-Always-ON/BDR-Always-ON
 
@@ -227,7 +392,7 @@ re-run `tpaexec provision`. The update will then install the latest
 available packages. You can still update to a specific version by
 specifying versions on the command line as shown below:
 
-``` bash
+```bash
 $ tpaexec upgrade ~/clusters/speedy -vv         \
   -e postgres_package_version="2:11.6r2ndq1.6.13*"      \
   -e pglogical_package_version="2:3.6.11*"              \
