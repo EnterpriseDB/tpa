@@ -2,28 +2,26 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-from typing import List, Dict, Any
-from argparse import ArgumentParser, Namespace, SUPPRESS
+from argparse import SUPPRESS, ArgumentParser, Namespace
 from functools import reduce
 from operator import add
+from typing import Any, Dict, List
 
 from ..transmogrifier import Transmogrifier
-
-from .common import Common
+from .architecture import Architecture
 from .bdr4pgd5 import BDR4PGD5
+from .common import Common
 from .pgd5pgdx import PGD5PGDX
-from .repositories import Repositories
-from .replace_2q_repositories import Replace2qRepositories
 from .pgdproxy_cm import PgdproxyCM
-
+from .replace_2q_repositories import Replace2qRepositories
+from .repositories import Repositories
 
 # Transmogrifier classes that represent changes a user can request directly via
 # command-line options. (This list omits "Basic", which is always included, so
 # that every other class doesn't have to declare it as a dependency.)
 
 selectable_transmogrifiers = [
-    BDR4PGD5,
-    PGD5PGDX,
+    Architecture,
     Repositories,
     Replace2qRepositories,
     PgdproxyCM,

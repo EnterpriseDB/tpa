@@ -56,17 +56,6 @@ class PGD5PGDX(Transmogrifier):
     def __init__(self):
         self.require(Repositories(default_repos=["postgres_distributed"]))
 
-    @classmethod
-    def options(cls):
-        return {
-            **opt(
-                "--architecture",
-                choices=["PGD-X"],
-                dest="target_architecture",
-                help="change the cluster's architecture",
-            ),
-        }
-
     def is_applicable(self, cluster):
         return self.args.target_architecture == "PGD-X"
 

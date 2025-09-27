@@ -12,37 +12,16 @@
 # the fundamental case it makes and addresses. Something to think about for
 # later ...
 
-from ..exceptions import ConfigureError
-from ..transmogrifier import Transmogrifier, opt
 from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
+from ..exceptions import ConfigureError
+from ..transmogrifier import Transmogrifier, opt
 from .repositories import Repositories
 
 
 class BDR4PGD5(Transmogrifier):
     def __init__(self):
         self.require(Repositories(default_repos=["postgres_distributed"]))
-
-    @classmethod
-    def options(cls):
-        return {
-            **opt(
-                "--architecture",
-                choices=["PGD-Always-ON"],
-                dest="target_architecture",
-                help="change the cluster's architecture",
-            ),
-            **opt(
-                "--pgd-proxy-routing",
-                help="Configure each PGD-Proxy to route connections to a \
-                globally-elected write leader (global)\
-                or a write leader within its own location (local)",
-                choices=["global", "local"],
-                dest="pgd_proxy_routing",
-                default=None,
-                required=True,
-            ),
-        }
 
     def is_applicable(self, cluster):
         return self.args.target_architecture == "PGD-Always-ON"
@@ -272,7 +251,7 @@ class BDR4PGD5(Transmogrifier):
             sra = pg_conf_settings.get("synchronous_replication_availability", "ASYNC")
             timeout = pg_conf_settings.get("bdr.global_commit_timeout", 60)
 
-            if sra.casefold() in ["WAIT".casefold(),"OFF".casefold()]:
+            if sra.casefold() in ["WAIT".casefold(), "OFF".casefold()]:
                 rule = f"ALL ({subgroup}) ON durable CAMO"
             else:
                 rule = f"ALL ({subgroup}) ON durable CAMO DEGRADE ON (timeout = {timeout}s, require_write_lead = true) TO {sra.upper()}"
@@ -296,8 +275,14 @@ class BDR4PGD5(Transmogrifier):
         if bdr_commit_scopes:
             cluster.vars["bdr_commit_scopes"] = bdr_commit_scopes
             for instance in cluster.instances:
-                self._remove_unwanted_nested_var(instance, "postgres_conf_settings", "synchronous_replication_availability")
-                self._remove_unwanted_nested_var(instance, "postgres_conf_settings", "bdr.global_commit_timeout")
+                self._remove_unwanted_nested_var(
+                    instance,
+                    "postgres_conf_settings",
+                    "synchronous_replication_availability",
+                )
+                self._remove_unwanted_nested_var(
+                    instance, "postgres_conf_settings", "bdr.global_commit_timeout"
+                )
 
     def _remove_unwanted_nested_var(self, instance, var_name, nested_var):
         for x in instance.effective_vars().maps:
@@ -312,7 +297,8 @@ class BDR4PGD5(Transmogrifier):
         """specific changes for BDR3 to PGD5 upgrade"""
 
         # merged all conditions for now since no other changes were needed
-        if (int(cluster.vars.get("bdr_version")) == 3
+        if (
+            int(cluster.vars.get("bdr_version")) == 3
             and cluster.vars.get("extra_postgres_extensions")
             and "pglogical" in cluster.vars["extra_postgres_extensions"]
         ):
