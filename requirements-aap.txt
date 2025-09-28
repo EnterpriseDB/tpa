@@ -6,9 +6,9 @@
 #
 ansible-core==2.16.14
     # via -r requirements.in
-boto3==1.39.3
+boto3==1.40.40
     # via -r requirements.in
-botocore==1.39.3
+botocore==1.40.40
     # via
     #   boto3
     #   s3transfer
@@ -77,7 +77,7 @@ requests==2.32.4
     # via docker
 resolvelib==1.0.1
     # via ansible-core
-s3transfer==0.13.0
+s3transfer==0.14.0
     # via boto3
 secretstorage==3.3.3
     # via keyring
