@@ -211,7 +211,7 @@ class PGD_Always_ON(BDR):
             group = {
                 "name": self._sub_group_name(loc),
                 "parent_group_name": top,
-                "options": {"location": loc, "enable_raft": False},
+                "options": {"location": loc},
             }
 
             # Local routing enables subgroup RAFT and proxy routing,
@@ -219,13 +219,16 @@ class PGD_Always_ON(BDR):
             if self._is_witness_only_location(loc):
                 group["options"].update({"enable_raft": False})
 
-            elif pgd_proxy_routing == "local":
+            else:
                 group["options"].update(
-                    {
-                        "enable_raft": True,
-                        "enable_proxy_routing": True,
-                    }
+                    {"enable_raft": True, "enable_proxy_routing": True}
                 )
+                if pgd_proxy_routing == "global":
+                    group["options"].update(
+                        {
+                            "enable_proxy_routing": False,
+                        }
+                    )
 
             bdr_node_groups.append(group)
 
