@@ -32,19 +32,26 @@ from using pgd-proxy to Connection Manager(PGD 5.9+)
 #      Manager. These are intentionally left untouched.
 #
 # The Migration Strategy:
-# - The transmogrifier uses a "trigger-based" approach. It iterates through ALL
-#   bdr_node_groups and uses the `enable_proxy_routing: true` setting as the
-#   trigger to perform the migration for that specific group. This allows it to
-#   robustly handle both Global and Local routing modes without needing to know
-#   which one is active.
-# - It migrates the global default settings only into the group(s) that have
-#   routing enabled.
-# - It infers user intent, by setting `enable_raft` when routing is enabled,
-#   and by making the state of the top-level group explicit in local routing
-#   configurations. Enabling routing without enabling raft does not make sense
-#   anyway.
-# - It detects per-instance overrides, prints a clear WARNING that these require
-#   manual intervention, and then safely removes the obsolete instance-level keys.
+# - The transmogrifier uses a "trigger-based" approach. It first determines
+#   the routing mode (Global or Local) and then applies settings based on
+#   that mode.
+# - It migrates global default settings (ports, etc.) only into the group(s)
+#   that have routing enabled.
+# - It differentiates its logic based on the detected routing mode:
+#   - In Global Routing mode, the top-level group is configured with both
+#     `enable_raft: true` and `enable_routing: true`. All of its subgroups are
+#     then explicitly set to `enable_routing: false`, while `enable_raft` is
+#     enabled (respecting any pre-existing `false` values).
+#   - In Local Routing mode, the state of the top-level group is made explicit
+#     (typically `enable_raft: true`, `enable_routing: false`).
+# - For backward compatibility, it preserves the original `enable_proxy_routing`
+#   key, copying its value to the new `enable_routing` key. The legacy key
+#   is removed in the subsequent upgrade to PGD-X.
+# - A final corrective pass is made to enforce a critical PGD 5.9+ rule:
+#   if any subgroup ends up with both `enable_routing: false` and
+#   `enable_raft: false`, it forces `enable_raft` to `true`.
+# - It detects per-instance overrides, prints a clear WARNING, and safely
+#   removes the obsolete instance-level keys.
 import sys
 
 from ..changedescription import ChangeDescription
@@ -175,17 +182,15 @@ class PgdproxyCM(Transmogrifier):
             "read_listen_port": "read_only_port",
         }
 
-        # The `enable_proxy_routing: true` setting is our trigger. We will iterate
-        # through ALL groups and apply changes to any group that has this key
-        # and its value is true. This robustly handles both 'global' and 'local'
-        # routing variations.
         all_node_groups = cluster.vars.get("bdr_node_groups", [])
         if not all_node_groups or not isinstance(all_node_groups, list):
             return warnings
 
-        # We need to detect if we're in "local routing" mode to correctly handle
-        # the state of the top-level group later.
+        # We need to detect the routing mode to correctly handle the state of
+        # the top-level group vs. the subgroups.
         local_routing_detected = False
+        global_routing_detected = False
+        top_level_group_name = cluster.vars.get("bdr_node_group")
 
         for group in all_node_groups:
             if not isinstance(group, dict):
@@ -197,18 +202,20 @@ class PgdproxyCM(Transmogrifier):
                     str(options.get("enable_proxy_routing")).lower() == "true"
                 )
 
-                options["enable_routing"] = options.pop("enable_proxy_routing")
+                # For backward compatibility, we copy the value to the new key
+                # but leave the original 'enable_proxy_routing' key intact for now.
+                options["enable_routing"] = options["enable_proxy_routing"]
 
-                # Only migrate the port and HTTP settings if routing was enabled.
                 if is_routing_enabled:
                     # If routing is enabled, we infer that raft must also be enabled.
-                    # The check() method has already prevented explicit conflicts,
-                    # so we can safely set it here if it's missing or correct it.
                     options["enable_raft"] = True
 
-                    # If this is a subgroup, we know we're in local routing mode.
+                    # Check if this is a subgroup or the top-level group to
+                    # determine the routing mode.
                     if "parent_group_name" in group:
                         local_routing_detected = True
+                    elif group.get("name") == top_level_group_name:
+                        global_routing_detected = True
 
                     # Move and rename the GLOBAL port settings into this group.
                     proxy_options = cluster.vars.get("default_pgd_proxy_options", {})
@@ -223,38 +230,49 @@ class PgdproxyCM(Transmogrifier):
                     if "secure" in http_options:
                         options["use_https"] = http_options["secure"]
 
-                # If both raft and routing are false, simplify the config
-                # by removing the redundant 'enable_routing' key.
-                enable_raft_val = str(options.get("enable_raft")).lower()
-                if not is_routing_enabled and enable_raft_val == "false":
-                    options.pop("enable_routing", None)
-
         # In local routing mode, the top-level group often has no options.
         # It's better to make its state explicit.
         if local_routing_detected:
-            top_level_group_name = cluster.vars.get("bdr_node_group")
             top_level_group = None
-            if top_level_group_name:
-                for group in all_node_groups:
-                    if (
-                        isinstance(group, dict)
-                        and group.get("name") == top_level_group_name
-                    ):
-                        top_level_group = group
-                        break
-
+            for group in all_node_groups:
+                if group.get("name") == top_level_group_name:
+                    top_level_group = group
+                    break
             if top_level_group:
                 top_level_options = top_level_group.setdefault("options", {})
-                # If 'enable_raft' is not defined, explicitly set it to true,
-                # as this is the implicit default for the top-level group.
                 if "enable_raft" not in top_level_options:
                     top_level_options["enable_raft"] = True
-                # If 'enable_routing' is not defined, explicitly set it to false.
                 if "enable_routing" not in top_level_options:
                     top_level_options["enable_routing"] = False
 
-        # Now, check for and collect warnings about any per-instance overrides,
-        # as these cannot be migrated automatically.
+        # In global routing mode, we must explicitly set the state for all subgroups.
+        if global_routing_detected:
+            for group in all_node_groups:
+                # We are only interested in subgroups, which must have a parent.
+                if isinstance(group, dict) and "parent_group_name" in group:
+                    sub_options = group.setdefault("options", {})
+                    # Subgroups need to manage their own Raft consensus for local HA,
+                    # so we enable it unless it was explicitly disabled (e.g. for a witness).
+                    if "enable_raft" not in sub_options:
+                        sub_options["enable_raft"] = True
+                    sub_options["enable_routing"] = False
+
+        # Corrective pass: PGD 5.9+ requires that a group cannot have both
+        # routing and raft disabled. We enforce this here as a final step.
+        for group in all_node_groups:
+            if not isinstance(group, dict) or "parent_group_name" not in group:
+                continue
+
+            options = group.get("options", {})
+            is_routing_false = (
+                str(options.get("enable_routing", "false")).lower() == "false"
+            )
+            is_raft_false = str(options.get("enable_raft", "false")).lower() == "false"
+
+            if is_routing_false and is_raft_false:
+                options["enable_raft"] = True
+
+        # Now, check for and collect warnings about any per-instance overrides
         for instance in cluster.instances:
             for section in ["pgd_proxy_options", "pgd_http_options"]:
                 if section in instance.host_vars:

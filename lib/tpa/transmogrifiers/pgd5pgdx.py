@@ -29,11 +29,10 @@ PGD-X cluster running PGD version 6.
 #   2.  Sets `pgd_flavour` to 'expanded'.
 #   3.  Changes the `architecture` to 'PGD-X'.
 #
-# - Key Remapping: As part of the cleanup, it remaps any deprecated keys
-#   to their new equivalents. Specifically, it renames `enable_proxy_routing`
-#   to `enable_routing` wherever it is found, ensuring a clean and valid
-#   configuration for PGD 6. This may not be required at this stage
-#   anyway. No harm in making sure
+# - Key Removal: As the final cleanup step, it removes the deprecated
+#   `enable_proxy_routing` key from all node groups. This key was
+#   intentionally preserved by the `pgdproxy_cm` transmogrifier for backward
+#   compatibility during the intermediate migration phase.
 
 import sys
 
@@ -49,7 +48,7 @@ class PGD5PGDX(Transmogrifier):
     Upgrades a PGD-Always-ON cluster (PGD 5) to the PGD-X architecture (PGD 6).
 
     This transmogrifier handles the configuration changes required for the
-    major version upgrade, such as updating version numbers and renaming
+    major version upgrade, such as updating version numbers and removing
     deprecated keys. It is activated by the --architecture PGD-X option.
     """
 
@@ -129,43 +128,24 @@ Please run the following command to migrate it first:
                 f"but it's set to '{cm_status}'.{suggestion}"
             )
 
-    def _remap_deprecated_options(self, cluster):
+    def _cleanup_deprecated_options(self, cluster):
         """
-        Iterates through the configuration and remaps any deprecated keys
-        to their new equivalents.
+        Iterates through the configuration and removes any deprecated keys.
         """
-        # In the new version, 'enable_proxy_routing' is renamed to 'enable_routing'.
-        # Let's safely try renaming it.
-
         bdr_node_groups = cluster.vars.get("bdr_node_groups")
 
-        # It is totally normal for the bdr_node_groups to contain as many
-        # groups as the number of locations (or maybe more?). Anyway, we
-        # iterate over the whole list and do the renaming where needed.
-
         if bdr_node_groups and isinstance(bdr_node_groups, list):
-
             for group in bdr_node_groups:
-                # As a safeguard, skip any item that isn't a dictionary. In PGD
-                # v5 the default config that TPA generates for
-                # `--pgd-proxy-routing local` results in the top level group
-                # being defined but it does not have `option` defined (unlike
-                # child groups)
-
-                # XXX Is this the right outcome? Or do we still add options to
-                # this group during transformation? I'll need to check with
-                # PGD6 but that's for later.
                 if not isinstance(group, dict):
                     continue
 
                 options = group.get("options")
 
-                # Is 'options' a dictionary and does it contain
-                # `enable_proxy_routing` we need to rename? Important because
-                # in some variations with local routing, the top level group
-                # may not have options defined at all
-                if isinstance(options, dict) and "enable_proxy_routing" in options:
-                    options["enable_routing"] = options.pop("enable_proxy_routing")
+                if isinstance(options, dict):
+                    # This key was preserved for backward compatibility by the
+                    # pgdproxy_cm transmogrifier. We now perform the final
+                    # cleanup by removing it altogether.
+                    options.pop("enable_proxy_routing", None)
 
     def check(self, cluster):
         res = CheckResult()
@@ -234,9 +214,9 @@ Please run the following command to migrate it first:
             cluster.vars["pgd_flavour"] = "expanded"
             cluster._architecture = self.args.target_architecture
 
-            # We can safely go through the configuration and remap any
-            # deprecated options to their new equivalents.
-            self._remap_deprecated_options(cluster)
+            # We can safely go through the configuration and remove any
+            # deprecated options.
+            self._cleanup_deprecated_options(cluster)
 
         except KeyError as e:
             raise ConfigureError(f"Configuration is missing a required key: {e}")
@@ -250,7 +230,7 @@ Please run the following command to migrate it first:
             "Change architecture to PGD-X",
             "Change bdr_version to 6",
             "Set pgd flavour to expanded",
-            "Rename deprecated pgd-proxy keys to their modern equivalents",
+            "Remove deprecated pgd-proxy keys",
         ]
 
         return ChangeDescription(
