@@ -15,7 +15,6 @@
           | packages_for(ansible_os_family, pgdcli_package_version),
           pgdcli_packages
           | packages_for(ansible_os_family, pgdcli_package_version)
-          | union(['bash-completion'])
         )
       }}"
   when: >
@@ -27,6 +26,16 @@
   vars:
     list_contents: "{{
         bdr_utilities_packages|packages_for(ansible_os_family, bdr_utilities_package_version)
+      }}"
+  when: >
+    'pgdcli' in role
+    or 'pgd-proxy' in role
+    or ('bdr' in role and bdr_version is version('4', '>='))
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{
+        pgdcli_extra_packages|packages_for(ansible_os_family)
       }}"
   when: >
     'pgdcli' in role
