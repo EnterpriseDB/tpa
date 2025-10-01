@@ -166,9 +166,6 @@ redhat-full-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-  include:
-    - tpa_os_image: "redhat:7"
-      runner: "ubuntu-20.04"
 # all ubuntu              2
 # all flavour             3
 # postgres version 17     1
