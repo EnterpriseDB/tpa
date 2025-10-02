@@ -54,7 +54,7 @@ PGD-S:
   tpa_os_image: *default_tpa_os_image
   tpa_postgres_flavour: *default_tpa_postgres_flavour
   cpu_architecture: *default_cpu_architecture
-  tpa_layout: ["standard", "near-far"]
+  tpa_pgds_layout: ["standard", "near-far"]
 
 PGD-X:
   tpa_architecture: ["PGD-X"]

@@ -63,7 +63,7 @@ jobs:
         key: ${{ inputs.tpa_architecture }}
 
   integration-test:
-    name: "${{ matrix.tpa_os_image }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_failover_manager }}${{ matrix.tpa_layout }}${{ matrix.tpa_harp_consensus_protocol }}"
+    name: "${{ matrix.tpa_os_image }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_failover_manager }}${{ matrix.tpa_pgds_layout }}${{ matrix.tpa_harp_consensus_protocol }}"
     needs: load-matrix
     strategy:
       fail-fast: false
@@ -88,7 +88,7 @@ jobs:
 
     - uses: ./.github/actions/integration-test
       with:
-        cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_harp_consensus_protocol || matrix.tpa_failover_manager || matrix.tpa_layout }}
+        cluster: ${{ matrix.tpa_os_image }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_harp_consensus_protocol || matrix.tpa_failover_manager || matrix.tpa_pgds_layout }}
         cpu_architecture: ${{ matrix.cpu_architecture }}
         source_directory: ${{ github.workspace }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
@@ -99,7 +99,7 @@ jobs:
         tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_harp_consensus_protocol: ${{ matrix.tpa_harp_consensus_protocol }}
-        tpa_layout: ${{ matrix.tpa_layout }}
+        tpa_pgds_layout: ${{ matrix.tpa_pgds_layout }}
         # we suppress the downloader for edb flavours with patroni: see
         # TPA-956
         tpa_package_cache: >-

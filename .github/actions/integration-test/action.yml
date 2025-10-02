@@ -71,6 +71,10 @@ inputs:
     default: false
   tpa_layout:
     required: false
+    description: "Layout (for BDR only)"
+    default: bronze
+  tpa_pgds_layout:
+    required: false
     description: "Layout (for PGD-S only)"
     default: standard
   cluster:
@@ -117,6 +121,7 @@ runs:
         tpa_witness_only_location: ${{ inputs.tpa_witness_only_location }}
         tpa_single_node_location: ${{ inputs.tpa_single_node_location }}
         tpa_layout: ${{ inputs.tpa_layout }}
+        tpa_pgds_layout: ${{ inputs.tpa_pgds_layout }}
         cluster: ${{ inputs.cluster }}
 
     - name: Provision the cluster

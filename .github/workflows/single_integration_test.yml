@@ -85,7 +85,7 @@ on:
         - "efm"
         - "repmgr"
         - "patroni"
-      tpa_layout:
+      tpa_pgds_layout:
         description: "Layout (for PGD-S only)"
         type: choice
         options:
@@ -150,4 +150,4 @@ jobs:
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
-          tpa_layout: ${{ github.event.inputs.tpa_layout }}
+          tpa_pgds_layout: ${{ github.event.inputs.tpa_pgds_layout }}

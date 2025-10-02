@@ -26,6 +26,10 @@ inputs:
     required: false
     description: "TPA BDR layout"
     default: bronze
+  tpa_pgds_layout:
+    required: false
+    description: "TPA PGD-S layout"
+    default: standard
   tpa_proxy_routing:
     required: false
     description: "pgd-proxy proxy routing"
@@ -147,8 +151,8 @@ runs:
             --add-witness-only-location c
           )
         elif [ $"{{ inputs.tpa_architecture }}" == "PGD-S" ]; then
-          if [ -n "${{ inputs.tpa_layout }}"]; then
-            CONFIGURE_OPTS+=(--layout "{{ inputs.tpa_layout }}")
+          if [ -n "${{ inputs.tpa_pgds_layout }}" ]; then
+            CONFIGURE_OPTS+=(--layout "{{ inputs.tpa_pgds_layout }}")
           fi
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
