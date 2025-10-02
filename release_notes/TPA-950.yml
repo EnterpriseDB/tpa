@@ -1,0 +1,11 @@
+- summary: Added support for upgrading EDB Postgres Distributed (PGD) v5 clusters to v6
+  description: |
+    TPA now provides a workflow for upgrading an existing PGD-Always-ON cluster to a PGD-X cluster.
+    Due to the significant differences between these architectures,
+    this is a multi-step process whereby you must first upgrade to PGD 5.9, then enable connection manager,
+    then finally upgrade to PGD 6.
+    This process will be further automated in a future TPA release.
+    Please refer to the TPA docs for full details.
+  type: notable_change
+  jira_tickets:
+    - TPA-950
