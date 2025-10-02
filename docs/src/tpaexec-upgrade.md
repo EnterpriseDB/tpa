@@ -135,8 +135,10 @@ update**. It is a _carefully orchestrated, multi-stage process_ that
 requires reconfiguring your cluster in distinct phases before the final
 software upgrade can take place. The procedure first modernizes your
 `PGD 5` cluster's connection handling by replacing `pgd-proxy` with the
-built-in `Connection Manager`, and then transitions the cluster to the
-new `PGD-X` architecture.
+built-in `Connection Manager`–a step that currently requires manual
+operations on the live cluster but is planned for automation in a future
+TPA release–and then transitions the cluster to the new `PGD-X`
+architecture.
 
 The upgrade process transitions the cluster through three distinct states:
 
