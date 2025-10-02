@@ -3,6 +3,6 @@
       When creating a new configuration for PGD 6, the barman nodes created wasn't used by any node.
       This change ensures that when running "tpaexec configure" for PGD6 based architectures, each barman node configured 
       will be used by a BDR node in the same location it is being defined in.
-  type: minor_change
+  type: bugfix
   jira_tickets:
   - TPA-1150
