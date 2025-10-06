@@ -1,0 +1,10 @@
+- summary: Enable standard repo when beacon agent is desirable
+  description: |
+    TPA can deploy the beacon agent to monitor the health of a system, however,
+    it needs access to a valid EDB repository. This change ensures that the standard
+    repository is enabled when the beacon agent is to be deployed.
+  type: minor_change
+  jira_tickets:
+  - TPA-1072
+  support_tickets:
+  - CP67890

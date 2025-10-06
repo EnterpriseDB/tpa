@@ -1333,7 +1333,7 @@ class Architecture(object):
             postgres_flavour == "postgresql"
             and self.args.get("failover_manager") != "efm"
             and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight")
-            and not self.args.get("enable_pem")
+            and not (self.args.get("enable_pem") or self.args.get("enable_beacon_agent"))
         ):
             repos = []
 
