@@ -57,7 +57,7 @@
     pgpassfile: ~barman/.pgpass
     pgpass_owner: "{{ barman_user }}"
     pgpass_group: "{{ barman_group }}"
-    pgpass_host: "{{ backup_name }}"
+    pgpass_host: "{{ inventory_hostname }}"
     pgpass_users:
     - barman
     - streaming_barman
