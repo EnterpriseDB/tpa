@@ -7,6 +7,16 @@ inputs:
   source_directory:
     description: "Directory where tpaexec source code is checked out on runner"
     required: true
+  upgrade_component_base_version:
+    required: true
+    description: "Initial version of the component to upgrade from"
+  upgrade_component_name:
+    required: true
+    description: "Component to upgrade"
+  tpa_architecture: # id of input
+    description: "TPA architecture"
+    required: false
+    default: "M1"
   tpa_platform: # id of input
     description: "TPA platform"
     required: false
@@ -29,10 +39,6 @@ inputs:
     required: true
     description: "Postgres version"
     default: ""
-  tpa_postgres_package_version:
-    required: true
-    description: "Postgres package version to upgrade from"
-    default: ""
   tpa_failover_manager:
     required: true
     description: "Failover manager"
@@ -51,10 +57,9 @@ runs:
   using: "composite"
 
   steps:
-
     - name: Set extra arguments for pre-upgrade package version
       run: |
-        CONFIGURE_EXTRA_ARGS+="--postgres-package-version ${{ inputs.tpa_postgres_package_version }}"
+        CONFIGURE_EXTRA_ARGS+="--${{ inputs.upgrade_component_name }}-package-version ${{ inputs.upgrade_component_base_version }}"
         echo CONFIGURE_EXTRA_ARGS="${CONFIGURE_EXTRA_ARGS}" >> $GITHUB_ENV
       shell: bash
 
@@ -62,7 +67,7 @@ runs:
       with:
         source_directory: ${{ inputs.source_directory }}
         tpa_platform: ${{ inputs.tpa_platform }}
-        tpa_architecture: "M1"
+        tpa_architecture: ${{ inputs.tpa_architecture }}
         tpa_os: ${{ inputs.tpa_os }}
         tpa_os_version: ${{ inputs.tpa_os_version }}
         tpa_os_image: ${{ inputs.tpa_os_image }}
@@ -85,7 +90,7 @@ runs:
     - name: Edit config.yml
       working-directory: ${{ inputs.source_directory }}
       run: |
-        sed -i '/postgres_package_version/d' $CLUSTER/config.yml
+        sed -i '/${{ inputs.upgrade_component_name }}_package_version/d' $CLUSTER/config.yml
       shell: bash
 
     - name: Provision the cluster with revised config.yml

@@ -3,17 +3,14 @@
 ---
 
 basic:
-  tpa_failover_manager:
+  tpa_failover_manager: &default_tpa_failover_manager
     - "repmgr"
     - "efm"
     - "patroni"
 
 all_os_images:
-  tpa_failover_manager:
-    - "repmgr"
-    - "efm"
-    - "patroni"
-  tpa_os_image:
+  tpa_failover_manager: *default_tpa_failover_manager
+  tpa_os_image: &default_tpa_os_image
     - "redhat:8"
     - "redhat:9"
     - "sles:15"
@@ -23,11 +20,8 @@ all_os_images:
     - "ubuntu:24.04"
 
 all_flavours:
-  tpa_failover_manager:
-    - "repmgr"
-    - "efm"
-    - "patroni"
-  tpa_postgres_flavour:
+  tpa_failover_manager: *default_tpa_failover_manager
+  tpa_postgres_flavour: &default_tpa_postgres_flavour
     - "postgresql"
     - "edbpge"
     - "epas"
@@ -36,21 +30,15 @@ all_flavours:
       tpa_postgres_flavour: epas
 
 all_pg_versions:
-  tpa_failover_manager:
-    - "repmgr"
-    - "efm"
-    - "patroni"
-  tpa_postgres_version:
+  tpa_failover_manager: *default_tpa_failover_manager
+  tpa_postgres_version: &default_tpa_postgres_version
     - "13"
     - "14"
     - "15"
     - "16"
     - "17"
     - "18"
-  tpa_failover_manager:
-    - "repmgr"
-    - "efm"
-    - "patroni"
+  tpa_failover_manager: *default_tpa_failover_manager
   include:
     - tpa_postgres_version: "13"
       tpa_postgres_package_version: "13.4*"
@@ -62,3 +50,16 @@ all_pg_versions:
       tpa_postgres_package_version: "16.0*"
     - tpa_postgres_version: "17"
       tpa_postgres_package_version: "17.0*"
+
+pgd6_versions:
+  tpa_architecture:
+    - "PGD-S"
+    - "PGD-X"
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  tpa_os_image:
+    - "redhat:9"
+    - "sles:15"
+    - "debian:12"
+    - "ubuntu:24.04"
+  tpa_postgres_version:
+    - "16" #TODO eventually we might need to start testing all versions?

@@ -1,0 +1,129 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+name: PGD6 various Upgrade tests
+run-name:
+  PGD6 various Upgrade tests using ${{ github.event.inputs.matrix_key }} matrix key
+on:
+  workflow_dispatch:
+    inputs:
+      bdr6_base_version:
+        description: "BDR 6 package version to upgrade from"
+        required: false
+        default: "*6.1.1*"
+      matrix_key:
+        description: "Set of inputs to use"
+        required: false
+        default: "pgd6_versions"
+        type: choice
+        options:
+          - all_flavours
+          - pgd6_versions
+      tpa_os_image:
+        description: "TPA OS image"
+        required: true
+        type: choice
+        default: "redhat:9"
+        options:
+        - debian:11
+        - debian:12
+        - ubuntu:22.04
+        - ubuntu:24.04
+        - redhat:8
+        - redhat:9
+        - sles:15
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: true
+        type: choice
+        default: "postgresql"
+        options:
+        - postgresql
+        - edbpge
+        - epas
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: 16
+        type: choice
+        options:
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+        - 18
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+
+jobs:
+  load-matrix:
+    name: Load Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      json: ${{ steps.load-yaml.outputs.json }}
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        token: ${{secrets.GH_SLONIK}}
+    - uses: ./.github/actions/load-yaml
+      id: load-yaml
+      with:
+        file: .github/config/general_upgrade_matrix.yml
+        key: ${{ github.event.inputs.matrix_key }}
+
+  integration-test:
+    name: >
+      ${{ matrix.tpa_architecture }}
+      ${{ matrix.tpa_os_image }}
+      ${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}
+      from ${{ github.event.inputs.bdr6_base_version }} to latest
+    needs: load-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.load-matrix.outputs.json) }}
+    runs-on: 'ubuntu-22.04'
+
+    steps:
+    - name: Checkout source repository
+      id: checkout-source
+      uses: actions/checkout@v5
+      with:
+        repository: EnterpriseDB/tpa-internal
+        token: ${{ secrets.GH_SLONIK }}
+
+    - name: Calculate test parameters
+      run: |
+        ARCHITECTURE=${{ matrix.tpa_architecture && matrix.tpa_architecture || 'PGD-X' }}
+        OS_IMAGE=${{ matrix.tpa_os_image && matrix.tpa_os_image || github.event.inputs.tpa_os_image }}
+        POSTGRES_FLAVOUR=${{ matrix.tpa_postgres_flavour && matrix.tpa_postgres_flavour || github.event.inputs.tpa_postgres_flavour }}
+        POSTGRES_VERSION=${{ matrix.tpa_postgres_version && matrix.tpa_postgres_version || github.event.inputs.tpa_postgres_version }}
+
+        USE_DOWNLOADER="true"
+        if [[ "$OS_IMAGE" == sles* ]]; then
+              USE_DOWNLOADER="false"
+        fi
+
+        echo ARCHITECTURE=$ARCHITECTURE >> $GITHUB_ENV
+        echo OS_IMAGE=$OS_IMAGE >> $GITHUB_ENV
+        echo POSTGRES_FLAVOUR=$POSTGRES_FLAVOUR >> $GITHUB_ENV
+        echo POSTGRES_VERSION=$POSTGRES_VERSION >> $GITHUB_ENV
+        echo USE_DOWNLOADER=$USE_DOWNLOADER >> $GITHUB_ENV
+      shell: bash
+
+    - uses: ./.github/actions/general-upgrade-test
+      with:
+        tpa_platform: "docker"
+        tpa_architecture: ${{ env.ARCHITECTURE }}
+        tpa_os_image: "tpa/${{ env.OS_IMAGE }}"
+        tpa_package_cache: ${{ env.USE_DOWNLOADER }}
+        tpa_postgres_flavour: ${{ env.POSTGRES_FLAVOUR }}
+        tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
+        upgrade_component_name: "bdr"
+        upgrade_component_base_version: ${{ github.event.inputs.bdr6_base_version }}
+        cluster: ${{ inputs.cluster }}

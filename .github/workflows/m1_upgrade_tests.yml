@@ -83,7 +83,7 @@ jobs:
       - uses: ./.github/actions/load-yaml
         id: load-yaml
         with:
-          file: .github/config/m1_upgrade_matrix.yml
+          file: .github/config/general_upgrade_matrix.yml
           key: ${{ github.event.inputs.matrix_key }}
 
   integration-test:
@@ -127,16 +127,17 @@ jobs:
           echo USE_DOWNLOADER=$USE_DOWNLOADER >> $GITHUB_ENV
         shell: bash
 
-      - uses: ./.github/actions/m1-upgrade-test
+      - uses: ./.github/actions/general-upgrade-test
         with:
           source_directory: ${{ github.workspace }}
           tpa_platform: docker
           tpa_os_image: "tpa/${{ env.OS_IMAGE }}"
           tpa_postgres_flavour: ${{ env.POSTGRES_FLAVOUR }}
           tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
-          tpa_postgres_package_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.tpa_postgres_package_version }}
           tpa_failover_manager: ${{ env.FAILOVER_MANAGER }}
           tpa_package_cache: ${{ env.USE_DOWNLOADER }}
+          tpa_upgrade_package_name: postgres
+          tpa_upgrade_package_base_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.tpa_postgres_package_base_version }}
           cluster: "${{ env.FAILOVER_MANAGER }}-\
             ${{ env.OS_IMAGE }}-\
             ${{ env.POSTGRES_FLAVOUR }}-\
