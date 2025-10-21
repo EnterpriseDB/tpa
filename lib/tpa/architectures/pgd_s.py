@@ -31,13 +31,10 @@ class PGDS(PGD):
 
     def num_instances(self):
         """
-        Should do a calculation here - temporarily, we just return a
-        big enough number
+        Both layouts need 4 instances, plus any subscriber-only nodes,
+        plus a pem server if requested.
         """
-        return 8
-
-    def default_location_names(self):
-        return ["first"]
+        return 4 + self.args["subscriber_only_nodes"] + ("enable_pem" in self.args)
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
         """PGD-S needs enterprise repo since essentials packages live there.
@@ -52,29 +49,33 @@ class PGDS(PGD):
         """
         base_repos = set(super().default_edb_repos(cluster_vars))
         base_repos.discard("standard")
-        return list(base_repos.union(["enterprise"]))
-
-    def upper_limit_of_data_nodes(self):
-        """
-        Returns the upper limit of data nodes that can be added to the cluster.
-        """
-        return 4
+        # eventually, PGD-S will be available in the "enterprise" repo, but for
+        # now we also need postgres_distributed
+        return list(base_repos.union(["enterprise", "postgres_distributed"]))
 
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
 
-        if not self.args["location_names"]:
-            self.args["location_names"] = self.default_location_names()
+        """
+        The layout has been determined either directly or by falling back to
+        the default of "standard". If the user has supplied location names
+        then we check they have supplied the right number; if they haven't,
+        then we fill in the right number of placeholder names.
+        """
+        layouts = {
+            'standard': [ 'first' ],
+            'near-far': [ 'first', 'second' ],
+        }
+        default_locations = layouts[args['layout']]
 
-        num_locations = len(self.args["location_names"])
-        data_nodes_per_location = self.args["data_nodes_per_location"]
-        upper_limit = self.upper_limit_of_data_nodes()
-        _total_datanodes_in_cluster =  num_locations * data_nodes_per_location
+        if self.args['location_names']:
+            if len(self.args['location_names']) != len(default_locations):
+                 raise PGDArchitectureError(
+                     f"{args['layout']} requires exactly {len(default_locations)} locations"
+                 )
+        else:
+            self.args["location_names"] = default_locations
 
-        if _total_datanodes_in_cluster > upper_limit:
-            raise PGDArchitectureError(
-                f"PGD-S is limited up to {upper_limit} data nodes in total across all locations"
-            )
 
     def update_cluster_vars(self, cluster_vars):
         super().update_cluster_vars(cluster_vars)
@@ -86,30 +87,78 @@ class PGDS(PGD):
         )
 
     def add_architecture_options(self, p, g):
-        def data_nodes_validator(value):
-            try:
-                value = int(value)
-            except ValueError:
-                raise PGDArchitectureError(
-                    f"Invalid value for --data-nodes-per-location: {value}"
-                )
-            if value < 1:
-                raise PGDArchitectureError(
-                    f"Invalid value for --data-nodes-per-location: {value}"
-                )
-            return value
-
         super().add_architecture_options(p, g)
+
         g.add_argument(
-            "--data-nodes-per-location",
-            type=data_nodes_validator,
-            dest="data_nodes_per_location",
-            default=3,
-            help="number of PGD data nodes per location",
+            "--layout",
+            dest="layout",
+            choices=["standard", "near-far"],
+            default="standard",
+            help="standard (1-location) or near-far (2-location) layout",
         )
         g.add_argument(
-            "--add-witness-node-per-location",
-            action="store_true",
-            help="not needed; witness nodes are added automatically when required",
-            dest="witness_node_per_location",
+            "--add-subscriber-only-nodes",
+            type=int,
+            choices=range(0, 11),
+            default=0,
+            dest="subscriber_only_nodes",
+            help="number of subscriber-only nodes (maximum 10)",
         )
+
+    def load_standard(self, args, cluster):
+        # 3 data nodes, 1 barman
+        for node in range(1, 4):
+            cluster.add_instance(
+                instance_name = args["hostnames"][node],
+                location_name = args["location_names"][0],
+                roles = ['bdr'],
+                settings = {
+                    "node": node,
+                }
+            )
+
+
+    def load_near_far(self, args, cluster):
+        for node in range(1, 3):
+            cluster.add_instance(
+                instance_name = args["hostnames"][node],
+                location_name = args["location_names"][0],
+                roles = ['bdr'],
+                settings = {
+                    "node": node,
+                }
+            )
+        cluster.add_instance(
+            instance_name = args["hostnames"][3],
+            location_name = args["location_names"][1],
+            roles = ['bdr'],
+            settings = {
+                "node": 3,
+            }
+        )
+
+    def load_topology(self, args, cluster):
+        if args["layout"] == "standard":
+            self.load_standard(args, cluster)
+
+        if args["layout"] == "near-far":
+            self.load_near_far(args, cluster)
+
+        # barman and subscriber-only nodes are the same for either layout
+        cluster.add_instance(
+            instance_name = args["hostnames"][4],
+            location_name = args["location_names"][0],
+            roles = ['barman'],
+            settings = {
+                "node": 4,
+            }
+        )
+        for n in range(5, 5 + args["subscriber_only_nodes"]):
+            cluster.add_instance(
+                instance_name = args["hostnames"][n],
+                location_name = args["location_names"][0],
+                roles = ['bdr', 'subscriber_only'],
+                settings = {
+                    "node": n,
+                }
+            )

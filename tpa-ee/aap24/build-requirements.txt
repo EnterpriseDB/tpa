@@ -8,15 +8,15 @@ ansible-builder==3.1.0
     # via
     #   -r tpa-ee/aap24/build-requirements.in
     #   ansible-navigator
-ansible-compat==25.6.0
+ansible-compat==25.8.1
     # via ansible-lint
-ansible-core==2.18.6
+ansible-core==2.19.2
     # via
     #   ansible-compat
     #   ansible-lint
-ansible-lint==25.6.1
+ansible-lint==25.8.2
     # via ansible-navigator
-ansible-navigator==25.5.0
+ansible-navigator==25.8.0
     # via -r tpa-ee/aap24/build-requirements.in
 ansible-runner==2.4.1
     # via ansible-navigator
@@ -30,17 +30,17 @@ black==25.1.0
     # via ansible-lint
 bracex==2.6
     # via wcmatch
-cffi==1.17.1
+cffi==2.0.0
     # via
     #   cryptography
     #   onigurumacffi
 click==8.2.1
     # via black
-cryptography==45.0.5
+cryptography==45.0.7
     # via ansible-core
 distro==1.9.0
     # via bindep
-filelock==3.18.0
+filelock==3.19.1
     # via ansible-lint
 importlib-metadata==8.7.0
     # via ansible-lint
@@ -48,13 +48,13 @@ jinja2==3.1.6
     # via
     #   ansible-core
     #   ansible-navigator
-jsonschema==4.24.0
+jsonschema==4.25.1
     # via
     #   ansible-builder
     #   ansible-compat
     #   ansible-lint
     #   ansible-navigator
-jsonschema-specifications==2025.4.1
+jsonschema-specifications==2025.9.1
     # via jsonschema
 lockfile==0.12.2
     # via python-daemon
@@ -80,15 +80,15 @@ pathspec==0.12.1
     #   ansible-lint
     #   black
     #   yamllint
-pbr==6.1.1
+pbr==7.0.1
     # via bindep
 pexpect==4.9.0
     # via ansible-runner
-platformdirs==4.3.8
+platformdirs==4.4.0
     # via black
 ptyprocess==0.7.0
     # via pexpect
-pycparser==2.22
+pycparser==2.23
     # via cffi
 python-daemon==3.1.2
     # via ansible-runner
@@ -106,13 +106,13 @@ referencing==0.36.2
     #   ansible-lint
     #   jsonschema
     #   jsonschema-specifications
-resolvelib==1.0.1
+resolvelib==1.2.0
     # via ansible-core
-rpds-py==0.26.0
+rpds-py==0.27.1
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.14
+ruamel-yaml==0.18.15
     # via ansible-lint
 ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
@@ -120,7 +120,7 @@ subprocess-tee==0.4.2
     # via
     #   ansible-compat
     #   ansible-lint
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via referencing
 tzdata==2025.2
     # via ansible-navigator

@@ -57,7 +57,7 @@
           |packages_for(ansible_distribution, bdr_package_version)
         }}"
 
-- when: "'postgres' in role and need_bdr_packages and bdr_version|int >= 6"
+- when: "'postgres' in role and need_bdr_packages and bdr_version|int == 6"
   block:
   - include_role: name=pkg/add_to_list
     vars:

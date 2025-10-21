@@ -36,7 +36,7 @@
 - name: Generate CA key and self-signed CA certificate
   shell: >
     umask 077 &&
-    openssl req -new -nodes -newkey rsa:4096 -x509 -out ca.crt -keyout ca.key
+    openssl req -new -nodes -newkey rsa:{{ openvpn_rsa_key_size }} -x509 -out ca.crt -keyout ca.key
     -subj '/C=GB/ST=Oxford/L=Oxford/O=2ndQuadrant/OU=2ndQuadrant TPA/CN={{ cluster_name }}'
     -days 3650
   args:
@@ -50,7 +50,7 @@
 - name: Generate host key and CSR for each instance
   shell: >
     umask 077 &&
-    openssl req -new -nodes -newkey rsa:4096
+    openssl req -new -nodes -newkey rsa:{{ openvpn_rsa_key_size }}
     -out "{{ inventory_hostname }}.csr" -keyout "{{ inventory_hostname }}.key"
     -subj '/C=GB/ST=Oxford/L=Oxford/O=2ndQuadrant/OU=2ndQuadrant TPA/CN={{ inventory_hostname }}'
     -days 3650
@@ -83,10 +83,10 @@
 - name: Generate DH parameters
   shell: >
     umask 077 &&
-    openssl dhparam -out "dh2048.pem" 2048
+    openssl dhparam -out "dh{{ openvpn_dhparams_numbits_size }}.pem" {{ openvpn_dhparams_numbits_size }}
   args:
     chdir: "{{ _local_cert_dir }}"
-    creates: "dh2048.pem"
+    creates: "dh{{ openvpn_dhparams_numbits_size }}.pem"
     executable: /bin/bash
   run_once: yes
   become: no

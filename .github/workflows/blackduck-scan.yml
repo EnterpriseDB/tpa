@@ -39,7 +39,7 @@ jobs:
       - name: Checkout source repository for dispatch runs
         id: checkout-source-dispatch
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
           ref: ${{ inputs.ref }}
@@ -56,7 +56,7 @@ jobs:
       - name: Checkout source repository for non-dispatch runs
         id: checkout-source
         if: github.event_name != 'workflow_dispatch'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
@@ -79,7 +79,7 @@ jobs:
 
       - name: Checkout foundation-security repository
         id: checkout-foundation-security
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/foundation-security
           ref: v2

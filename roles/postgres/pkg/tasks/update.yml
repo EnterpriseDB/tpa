@@ -93,6 +93,32 @@
   - upgrade_from|int == 4
   - target_bdr_version is version('4','>')
 
+- name: BDR5 package removal
+  block:
+  - name: Fetch pgdcli-related packages
+    include_role:
+      name: pgdcli/pkg
+      tasks_from: list-packages.yml
+    vars:
+      list_varname: _all_bdr5_packages
+      bdr_version: 5
+
+  - name: Fetch BDR5-related packages
+    include_tasks: list-bdr-packages.yml
+    vars:
+      list_varname: _all_bdr5_packages
+      bdr_version: 5
+
+  - name: Remove BDR5-related packages when running major version upgrade from bdr5
+    package:
+      name: "{{ _all_bdr5_packages|default([]) }}"
+      state: absent
+  when:
+  - "'bdr' in role"
+  - upgrade_from|int == 5
+  - target_bdr_version is version('5','>')
+
+
 - name: Install latest Postgres packages
   package:
     name: "{{ _all_postgres_packages }}"

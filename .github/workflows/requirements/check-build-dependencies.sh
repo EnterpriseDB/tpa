@@ -38,10 +38,7 @@ function create_venv_and_prep_stuff {
     # install and setup python venv
     $PYTHON -m venv $VENV
     mkdir -p "$PIP_DEST"
-    # TPA-1004: Temporary workaround for https://github.com/jazzband/pip-tools/issues/2176
-    # pin pip version to 25.0.1 due to pip-tools issue with latest pip (>=25.1)
-    # can be removed avfter upstream bug is resolved on pip-tools
-    $PIP install pip==25.0.1 pip-tools wheel
+    $PIP install --upgrade pip pip-tools wheel
     #$PIP download --dest "$PIP_DEST" pip wheel
     $PIP install --upgrade cloudsmith-cli --extra-index-url=https://dl.cloudsmith.io/public/cloudsmith/cli/python/index/
 }
@@ -76,9 +73,9 @@ while IFS= read -r requirement_line
 do
     echo "$requirement_line"
     target_module_name=$(echo -n "$requirement_line" | cut -d '=' -f1)
-    target_module_version=$(echo -n "$requirement_line" | cut -d '=' -f3)
+    target_module_version=$(echo -n "$requirement_line" | cut -d '=' -f3|xargs)
     # shellcheck disable=SC1003
-    requirement_module_version=$(grep ^"$target_module_name" requirements.txt | cut -d '=' -f3 | cut -d '\' -f1)
+    requirement_module_version=$(grep ^"$target_module_name" requirements.txt | cut -d '=' -f3 | cut -d '\' -f1|xargs)
 
     echo "Comparing version of base $requirement_module_version with target arch version $target_module_version"
 	if [ $FORCE_REBUILD_PYMODULES == "true" ] || [ "$requirement_module_version" != "$target_module_version" ]; then

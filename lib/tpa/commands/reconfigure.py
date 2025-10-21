@@ -46,7 +46,7 @@ def reconfigure(args: List[str]) -> None:
     parsed_args, remaining_args = p.parse_known_args(args)
 
     cluster_dir = parsed_args.cluster
-    cluster_name = os.path.basename(cluster_dir)
+    cluster_name = os.path.basename(os.path.abspath(cluster_dir))
 
     config_file = os.path.join(cluster_dir, "config.yml")
     if not os.path.exists(config_file):

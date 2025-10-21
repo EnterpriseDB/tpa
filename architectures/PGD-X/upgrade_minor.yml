@@ -1,0 +1,12 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+#
+# This is a placeholder
+
+- name: Placeholder
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Placeholder
+      ansible.builtin.meta: noop

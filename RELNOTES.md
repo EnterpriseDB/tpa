@@ -2,6 +2,176 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+## v23.40.0 (2025-10-02)
+
+### Notable changes
+
+- Added support for upgrading EDB Postgres Distributed (PGD) v5 clusters to v6
+
+  TPA now provides a workflow for upgrading an existing PGD-Always-ON cluster to a PGD-X cluster.
+  Due to the significant differences between these architectures,
+  this is a multi-step process whereby you must first upgrade to PGD 5.9, then enable connection manager,
+  then finally upgrade to PGD 6.
+  This process will be further automated in a future TPA release.
+  Please refer to the TPA docs for full details.
+
+  References: TPA-950.
+
+- Extended support for configuring PGD-S clusters
+
+  TPA now supports a full set of dedicated options for configuring a
+  PGD-S cluster.
+
+  The --layout option can be set to "standard" for a one-location or
+  "near-far" for a two-location layout.
+
+  The --add-subscriber-only-nodes option adds up to 10 subscriber-only
+  nodes.
+
+  The --read-write-port, --read-only-port, --http-port, and --use-https
+  options control Connection Manager's ports and http API.
+
+  References: TPA-1013.
+
+### Minor changes
+
+- Allow rsa key size to be set for certificates
+
+  Added a variable called 'postgres_rsa_key_size', (default value is 2048) that can 
+  configure the size of the RSA key size for self-signed TLS key and certificate later
+  used on the docker clusters.
+  Added a variable called 'pem_rsa_key_size', (default value is 4096) that can 
+  configure the size of the RSA key size for self-signed TLS key and certificate later
+  used on the PEM Server.
+  Added a variable called 'pem_db_ca_certificate_key_size', (default value is 4096) that can 
+  configure the size of the database CA RSA key size used on the PEM Server.
+  Added a variable called 'ha_proxy_dhparams_key_size', (default value is 2048) that can 
+  configure the size of the RSA key size used for ssl-dh-param-file within haproxy.
+  Added a variable called 'openvpn_rsa_key_size', (default value is 4096) that can 
+  configure the size of the RSA key size for self-signed TLS key and certificate later
+  used on OpenVPN.
+  Added a variable called 'openvpn_dhparams_numbits_size', (default value is 2048) that can 
+  configure the number of the DH 'numbits' in 'dh2048.pem'.
+
+  References: TPA-1143.
+
+- Global proxy routing not being setup correctly in PGD 5.9
+
+  When creating a new configuration file via 'tpaexec configure -a PGD-Always-ON --pgd-proxy-routing global (...)',
+  the configuration by default will create a top group node with enable_proxy_routing & enable_raft equal to true, 
+  and subgroups enable_proxy_routing & enable_raft equal to false.
+  When creating a new configuration file via 'tpaexec configure -a PGD-Always-ON --pgd-proxy-routing local (...)',
+  the configuration by default will create a top group node with enable_proxy_routing equal to false & enable_raft
+  equal to true, subgroups have enable_proxy_routing & enable_raft equal to true.
+  and subgroups enable_proxy_routing & enable_raft equal to false.
+
+  References: TPA-1168.
+
+- Support EPAS with repmgr as failover manager
+
+  Support for EPAS is now available when using RepMgr as failover manager.
+
+  This combination wasn't supported until now by EDB.
+
+  This support starts with EPAS 14 and is available as of now up to EPAS 17.
+
+  References: TPA-1151, TPA-1062.
+
+- Document
+
+  Previously, the TPA docs mentioned that TPA generates default certs but not their names or paths.
+  This change adds that information and also explains how to replace these files with your own.
+  We now document the previously undocumented `ssl_*` cluster vars for this purpose.
+  The new content is placed in `postgresql.conf.md` and linked from the original location `postgres_user.md`.
+
+  References: TPA-1162, CP52049.
+
+- Introduce pgd-proxy-config hook
+
+  Introduce a hook to run tasks from pgd-proxy-config.yml at the end of PGD
+  Proxy config, after core dirs/files are set but before the PGD Proxy
+  service starts. Developers of the hook must ensure task idempotency. This
+  hook will come in handy for various post-configuration tasks e.g. making
+  adjustments to PGD Proxy configuration not supported by TPA interface and
+  other relevant cluster-specific settings.
+
+  References: TPA-1083, CP49911.
+
+- Add three release.vip.* properties for EFM 5.1 and above
+
+  Starting with EFM 5.1, there will be three new properties that control
+  the timing of when the VIP is released by the primary agent (if
+  a VIP is used). This allows the user to avoid having the VIP released
+  at the same time new database connections are being made, which can
+  lead to connection failures and a failure of switchover in some environments.
+  The new properties are:
+  release.vip.background
+  release.vip.pre.wait
+  release.vip.post.wait
+
+  References: TPA-1163.
+
+### Bugfixes
+
+- Skip postgres/pgpass task on PEM-agent Barman nodes
+
+  The `postgres/pgpass` task runs on pem-agent nodes in order to add the
+  `postgres_user` to the `.pgpass` file in this user's home directory. 
+  However, this task fails on barman nodes that are also pem-agents, since 
+  the directory does not exist. 
+  This task is now excluded for barman nodes.
+
+  References: TPA-1171, TPA-158.
+
+- Add `pgaudit` package names for `edbpge`
+
+  Previously, adding `pgaudit` to the list of Postgres extensions with 
+  the `edbpge` Postgres flavour would fail because the dictionary for
+  handling recognized extensions was missing an entry for `edbpge` and
+  it's corresponding package names. This entry is added, and additional
+  logic is incorporated to handle naming change for `pgaudit` packages
+  from version 16 onwards.
+
+  References: TPA-997.
+
+- HAProxy health checks now correctly use HTTPS for SSL-enabled Patroni clusters
+
+  A bug has been fixed where HAProxy was incorrectly configured to use HTTP for health
+  checks against Patroni nodes, even when the Patroni REST API was secured with SSL
+  (`patroni_ssl_enabled: true`). This misconfiguration caused health checks to fail,
+  leading HAProxy to mark healthy Patroni nodes as down.
+
+  The HAProxy configuration logic has been updated to use `check-ssl verify none` when
+  `patroni_ssl_enabled` is true, ensuring that health checks are correctly performed
+  over HTTPS.
+
+  References: TPA-1126.
+
+- Fix support for update_host variable on PDG-Always-ON
+
+  TPA is now able to honor update_hosts variable for minor postgres and minor PGD5 upgrade
+  scenario when using PGD-Always-ON architecture.
+
+  By specifying update_hosts variable in the tpaexec upgrade command, TPA will now upgrade
+  this subset of nodes during postgres and PGD minor upgrade and let the remaining nodes
+  on the currently installed versions.
+
+  This should allow for more controlled upgrade that can be split into multiple runs
+  in order to better control and test the cluster along the upgrade process.
+
+  It is recommended to use this feature while still keeping best practices in mind
+  such as always updating write leaders last and testing in a dev/staging environment first.
+
+  References: TPA-917.
+
+- Barman nodes always point to a BDR node
+
+  When creating a new configuration for PGD 6, the barman nodes created wasn't used by any node.
+  This change ensures that when running "tpaexec configure" for PGD6 based architectures, each barman node configured 
+  will be used by a BDR node in the same location it is being defined in.
+
+  References: TPA-1150.
+
 ## v23.39 (2025-08-21)
 
 ### Notable changes

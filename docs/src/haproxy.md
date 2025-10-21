@@ -59,9 +59,15 @@ haproxy instance to add options to the `default-server` line; and set
 add options (which will override the defaults) to the individual server
 lines for each backend.
 
+The size of the RSA key size used for ssl-dh-param-file can be modified 
+by adding the variable `ha_proxy_dhparams_key_size` in the `cluster_vars`
+section.
+
 ## Example
 
 ```yaml
+cluster_vars:
+  ha_proxy_dhparams_key_size: 4096
 instances:
 - Name: one
   vars:

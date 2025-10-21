@@ -40,7 +40,6 @@ on:
         - tpa/redhat:8
         - tpa/redhat:7
         - tpa/ubuntu:22.04
-        - tpa/ubuntu:20.04
         - tpa/sles:15
       tpa_postgres_flavour:
         description: "Postgres flavour"
@@ -105,7 +104,7 @@ jobs:
     steps:
     - name: Checkout source repository
       id: checkout-source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: EnterpriseDB/tpa-internal
         token: ${{env.GITHUB_TOKEN}}

@@ -62,13 +62,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: ${{ env.SOURCE_REPO_PATH }}
           ref: ${{ inputs.base_branch }}
 
       - name: Checkout repo-actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/repo-actions
           path: .github/repo-actions
@@ -81,7 +81,7 @@ jobs:
           git switch -c ${{ env.RELEASE_NOTES_BRANCH }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 

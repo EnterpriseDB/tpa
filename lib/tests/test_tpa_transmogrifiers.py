@@ -14,6 +14,7 @@ from tpa.transmogrifiers import (
     Repositories,
     Replace2qRepositories,
     Common,
+    Architecture,
     transmogrifiers_from_args,
     add_all_transmogrifier_options,
 )
@@ -25,7 +26,7 @@ class TestTransmogrifiers:
     @pytest.mark.parametrize(
         "args, error, expected",
         [
-            (["--architecture", "PGD-Always-ON"], SystemExit, None),
+            (["--architecture", "PGD-Always-ON"], None, [Common, Architecture]),
             (["--edb-repositories", "dev"], None, [Common, Repositories]),
             (
                 [
@@ -37,7 +38,7 @@ class TestTransmogrifiers:
                     "dev",
                 ],
                 None,
-                [Common, BDR4PGD5],
+                [Common, Architecture, Repositories],
             ),
             ([], None, []),
         ],
@@ -47,7 +48,6 @@ class TestTransmogrifiers:
         if error:
             with pytest.raises(error):
                 assert transmogrifiers_from_args(args)
-                assert error.code == 2
         else:
             assert [type(x) for x in transmogrifiers_from_args(args)] == expected
 
@@ -165,14 +165,17 @@ class TestReplace2qRepositories:
             set(cls.vars.get("edb_repositories")) == set(expected)
         )
 
+class TestArchitecture:
+    """test suite for Architecture class"""
+
+    def test_architecture_options(self):
+        """test options function"""
+        assert "--architecture" in Architecture.options()
+        assert "--pgd-proxy-routing" in Architecture.options()
 
 class TestBDR4PGD5:
     """test suite for BDR4PGD5 class"""
 
-    def test_bdr4pgd5_options(self):
-        """test options function"""
-        assert "--architecture" in BDR4PGD5.options()
-        assert "--pgd-proxy-routing" in BDR4PGD5.options()
 
     @pytest.mark.parametrize(
         "input, error, expected",

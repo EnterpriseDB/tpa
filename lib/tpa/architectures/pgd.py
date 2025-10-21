@@ -37,22 +37,35 @@ class PGD(Architecture):
             default="bdrdb",
         )
         g.add_argument(
-            "--cluster_prefixed_hostnames",
-            help="Add the cluster name as a prefix to instance hostnames",
-            action="store_true",
+            "--use-https",
+            action="store_const",
+            const=True,
+            default=None,
+            help="enable https for Connection Manager's REST API",
         )
-        if self.name != "Lightweight":
-            g.add_argument(
-                "--enable-camo",
-                action="store_true",
-                help="assign instances pairwise as CAMO partners",
-            )
+        g.add_argument(
+            "--read-write-port",
+            type=int,
+            dest="read_write_port",
+            help="read-write port for Connection Manager",
+        )
+        g.add_argument(
+            "--read-only-port",
+            type=int,
+            dest="read_only_port",
+            help="read-only port for Connection Manager",
+        )
+        g.add_argument(
+            "--http-port",
+            type=int,
+            dest="http_port",
+            help="http port for Connection Manager",
+        )
 
     def cluster_vars_args(self):
         return super().cluster_vars_args() + [
             "bdr_version",
             "bdr_database",
-            "harp_consensus_protocol",
         ]
 
     def update_cluster_vars(self, cluster_vars):
@@ -70,7 +83,6 @@ class PGD(Architecture):
         postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
-        harp_enabled = self.args.get("failover_manager") == "harp"
 
         arch = self.args["architecture"]
         default_bdr_versions = {
@@ -124,6 +136,23 @@ class PGD(Architecture):
         self.args["bdr_node_group"] = self.bdr_safe_name(self.cluster_name())
         cluster_vars.update({"bdr_node_group": self.args["bdr_node_group"]})
 
+        bdr_node_group_options = {}
+        for opt in ["read_write_port", "read_only_port", "http_port", "use_https"]:
+            if self.args[opt] is not None:
+                bdr_node_group_options[opt] = self.args[opt]
+
+        # we only need to populate bdr_node_groups if there are any options
+        # to put in it
+        if bdr_node_group_options != {}:
+            cluster_vars.update(
+                {
+                    "bdr_node_groups": [{
+                        "name": self.bdr_safe_name(self.cluster_name()),
+                        "options": bdr_node_group_options,
+                    }]
+                }
+            )
+
     def bdr_safe_name(self, name):
         """
         Return a string containing the given name with all uppercase characters
@@ -145,6 +174,7 @@ class PGD(Architecture):
         self._update_instance_camo(cluster)
         self._update_instance_pem(cluster)
         self._update_instance_beacon(cluster)
+        self._update_instance_barman(cluster)
 
     def _instance_roles(self, instance):
         """
@@ -259,8 +289,6 @@ class PGD(Architecture):
             )
             pemserver.add_role("pem-server")
 
-
-
     def _update_instance_beacon(self, cluster):
         """
         Add beacon-agent to instance roles where applicable
@@ -269,6 +297,23 @@ class PGD(Architecture):
             for instance in cluster.instances:
                 if "bdr" in instance.roles:
                     instance.add_role("beacon-agent")
+
+    def _update_instance_barman(self, cluster):
+        """
+        Ensure that barman nodes always points to a 'non-backed-up' node
+        on their region.
+        """
+        for location in cluster.locations:
+
+            # Data nodes for the given location
+            data_nodes = cluster.instances.with_bdr_node_kind("data").in_location(location.name)
+            # Barman nodes for the given location
+            barman = cluster.instances.with_role("barman").in_location(location.name)
+
+            # If we have data_nodes and barman nodes in location
+            # add the 1st barman node of the location as backup of the 1 data node
+            if barman and data_nodes:
+                data_nodes[0].set_settings({"backup": barman[0].name})
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
         return super().default_edb_repos(cluster_vars)

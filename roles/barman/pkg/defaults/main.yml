@@ -8,6 +8,7 @@ barman_packages:
     - "{{ python_pkg_prefix }}-barman"
   RedHat: &redhat_barman_packages
     - barman
+    - file
     - "{{ python_pkg_prefix }}-barman"
   Ubuntu: *debian_barman_packages
   SUSE: *redhat_barman_packages

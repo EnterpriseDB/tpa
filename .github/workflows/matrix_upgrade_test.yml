@@ -47,7 +47,7 @@ jobs:
     outputs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           token: ${{secrets.GH_SLONIK}}
       - uses: ./.github/actions/load-yaml
@@ -65,11 +65,11 @@ jobs:
     runs-on: ${{ matrix.runner && matrix.runner || 'ubuntu-22.04' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Checkout source repository
         id: checkout-source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{secrets.GH_SLONIK}}

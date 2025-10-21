@@ -121,6 +121,22 @@ edb_pgaudit_version:
   "16": "16"
   "17": "17"
 
+# The EDB repos changed the naming convention for pgaudit packages
+# for version 16 and beyond. The PGDG repos remain consistent in
+# their naming convention. 'lt_16' really means any version is
+# coming from the PGDG repos OR specifically the EDB repos for 
+# versions less than 16.
+
+pgaudit_package_name:
+  Debian: &debian_package_name_convention
+    gte_16: edb-pg{{ postgres_versionNN }}-pgaudit-{{ edb_pgaudit_version[postgres_version] }}
+    lt_16: postgresql-{{ postgres_versionNN }}-pgaudit
+  RedHat: &redhat_package_name_convention
+    gte_16: edb-pg{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+    lt_16: pgaudit{{ pgdg_pgaudit_version[postgres_version] }}_{{ postgres_versionNN }}
+  Ubuntu: *debian_package_name_convention
+  SLES: *redhat_package_name_convention
+
 default_postgres_extensions_dictionary:
   edb_pg_tuner:
     packages:
@@ -273,7 +289,7 @@ default_postgres_extensions_dictionary:
     packages:
       epas:
         Debian: &as_sql_protect_packages
-        - edb-as{{ postgres_version }}-server-sqlprotect
+          - edb-as{{ postgres_version }}-server-sqlprotect
         RedHat: *as_sql_protect_packages
         Ubuntu: *as_sql_protect_packages
         SLES: *as_sql_protect_packages
@@ -351,14 +367,14 @@ default_postgres_extensions_dictionary:
     packages:
       postgresql:
         Debian: &debian_pg_postgis_packages
-        - postgresql-{{ postgres_versionNN }}-postgis-{{ postgis_version_maj_min[0] }}
+          - postgresql-{{ postgres_versionNN }}-postgis-{{ postgis_version_maj_min[0] }}
         RedHat: &redhat_pg_postgis_packages
-        - postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}_{{ postgres_versionNN }}
+          - postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}_{{ postgres_versionNN }}
         Ubuntu: *debian_pg_postgis_packages
         SLES: *redhat_pg_postgis_packages
       epas:
         Debian: &postgis_as_packages
-        - edb-as{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
+          - edb-as{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
         RedHat: *postgis_as_packages
         Ubuntu: *postgis_as_packages
         SLES: *postgis_as_packages
@@ -369,36 +385,44 @@ default_postgres_extensions_dictionary:
         SLES: *redhat_pg_postgis_packages
       edbpge:
         Debian: &postgis_pge_packages
-        - edb-postgresextended{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
+          - edb-postgresextended{{ postgres_versionNN }}-postgis{{ postgis_version_maj_min[0] + postgis_version_maj_min[1] }}
         RedHat: *postgis_pge_packages
         Ubuntu: *postgis_pge_packages
         SLES: *postgis_pge_packages
     repository_setup_commands:
       RedHat:
-      - crb enable
+        - crb enable
 
+  # As explained in the 'pgaudit_package_name' fact, we need to ensure the correct naming convention is used for the pgaudit package,
+  # as the EDB repos are not consistent with the PGDG repos for versions 16 and greater. If the PGDG repos are used, the 'lt_16' 
+  # key is ALWAYS used, as the naming convention for the package did not change. 
   pgaudit:
     packages:
       postgresql:
-        Debian: &debian_pg_pgaudit_packages
-        - postgresql-{{ postgres_versionNN }}-pgaudit
+        Debian: &debian_pg_pgaudit_packages 
+          - "{{ (postgres_versionNN is version('16', '>=') and edb_repositories|default([]) != []) | ternary(pgaudit_package_name[ansible_distribution]['gte_16'], pgaudit_package_name[ansible_distribution]['lt_16']) }}"
         RedHat: &redhat_pg_pgaudit_packages
-        - pgaudit{{ pgdg_pgaudit_version[postgres_version] }}_{{ postgres_versionNN }}
-      Ubuntu: *debian_pg_pgaudit_packages
-      SLES: *redhat_pg_pgaudit_packages
-
+          - "{{ (postgres_versionNN is version('16', '>=') and edb_repositories|default([]) != []) | ternary(pgaudit_package_name[ansible_distribution]['gte_16'], pgaudit_package_name[ansible_distribution]['lt_16']) }}"
+        Ubuntu: *debian_pg_pgaudit_packages
+        SLES: *redhat_pg_pgaudit_packages
       epas:
         Debian: &pgaudit_as_packages
-        - edb-pg{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+          - edb-pg{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
         RedHat: *pgaudit_as_packages
         Ubuntu: *pgaudit_as_packages
         SLES: *pgaudit_as_packages
       pgextended:
-        Debian: &pgaudit_pge_packages
-        - edb-postgresextended{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
-        RedHat: *pgaudit_pge_packages
-        Ubuntu: *pgaudit_pge_packages
-        SLES: *pgaudit_pge_packages
+        Debian: *debian_pg_pgaudit_packages
+        RedHat: *redhat_pg_pgaudit_packages
+        Ubuntu: *debian_pg_pgaudit_packages
+        SLES: *redhat_pg_pgaudit_packages
+      edbpge:
+        Debian: &debian_pge_pgaudit_packages
+          - edb-postgresextended{{ postgres_versionNN }}-pgaudit-{{ edb_pgaudit_version[postgres_version] }}
+        RedHat: &redhat_pge_pgaudit_packages
+          - edb-postgresextended{{ postgres_versionNN }}-pgaudit{{ edb_pgaudit_version[postgres_version] }}
+        Ubuntu: *debian_pge_pgaudit_packages
+        SLES: *redhat_pge_pgaudit_packages
     spl: pgaudit
 
   passwordcheck:
@@ -521,6 +545,7 @@ default_harp_http_options:
     timeout: 10s
 
 default_patroni_listen_port: 8008
+default_patroni_ssl_enabled: false
 
 default_build_path:
   - "{{ postgres_bin_dir }}"
@@ -556,3 +581,10 @@ default_pgd_proxy_group: pgdproxy
 default_primary_slot_name: "tpa_{{ inventory_hostname|regex_replace('[^a-zA-Z0-9_]', '_') }}"
 
 default_pgdcli_directory: /etc/edb/pgd-cli
+
+default_postgres_rsa_key_size: 2048
+default_pem_rsa_key_size: 4096
+default_pem_db_ca_certificate_key_size: 4096
+default_ha_proxy_dhparams_key_size: 2048
+default_openvpn_rsa_key_size: 4096
+default_openvpn_dhparams_numbits_size: 2048

@@ -18,7 +18,7 @@ class PGD_Always_ON(BDR):
             ("14", "5"),
             ("15", "5"),
             ("16", "5"),
-            ("17", "5")
+            ("17", "5"),
         ]
 
     def add_architecture_options(self, p, g):
@@ -77,14 +77,14 @@ class PGD_Always_ON(BDR):
             type=int,
             dest="listen_port",
             default=6432,
-            help="port on which proxy nodes will route traffic to the write leader"
+            help="port on which proxy nodes will route traffic to the write leader",
         )
         g.add_argument(
             "--proxy-read-only-port",
             type=int,
             dest="read_listen_port",
             default=6433,
-            help="port on which proxy nodes will route read-only traffic to shadow nodes"
+            help="port on which proxy nodes will route read-only traffic to shadow nodes",
         )
 
     def update_argument_defaults(self, defaults):
@@ -196,7 +196,15 @@ class PGD_Always_ON(BDR):
 
         pgd_proxy_routing = self.args["pgd_proxy_routing"]
         if pgd_proxy_routing == "global":
-            bdr_node_groups[0]["options"] = {"enable_proxy_routing": True}
+            bdr_node_groups[0]["options"] = {
+                "enable_proxy_routing": True,
+                "enable_raft": True,
+            }
+        else:
+            bdr_node_groups[0]["options"] = {
+                "enable_proxy_routing": False,
+                "enable_raft": True,
+            }
 
         location_names = self.args["location_names"]
         for loc in location_names:
@@ -209,20 +217,18 @@ class PGD_Always_ON(BDR):
             # Local routing enables subgroup RAFT and proxy routing,
             # and witness-only locations have both disabled.
             if self._is_witness_only_location(loc):
-                group["options"].update(
-                    {
-                        "enable_raft": False,
-                        "enable_proxy_routing": False,
-                    }
-                )
+                group["options"].update({"enable_raft": False})
 
-            elif pgd_proxy_routing == "local":
+            else:
                 group["options"].update(
-                    {
-                        "enable_raft": True,
-                        "enable_proxy_routing": True,
-                    }
+                    {"enable_raft": True, "enable_proxy_routing": True}
                 )
+                if pgd_proxy_routing == "global":
+                    group["options"].update(
+                        {
+                            "enable_proxy_routing": False,
+                        }
+                    )
 
             bdr_node_groups.append(group)
 
@@ -236,13 +242,17 @@ class PGD_Always_ON(BDR):
         )
 
         bdr_package_version = cluster_vars.get("bdr_package_version")
-        sanitized_version, includes_wildcard = self._sanitize_version(version_string=bdr_package_version)
-        if self._is_above_minimum(sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard):
+        sanitized_version, includes_wildcard = self._sanitize_version(
+            version_string=bdr_package_version
+        )
+        if self._is_above_minimum(
+            sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard
+        ):
             cluster_vars.update(
                 {
                     "default_pgd_proxy_options": {
                         "listen_port": self.args["listen_port"],
-                        "read_listen_port": self.args["read_listen_port"]
+                        "read_listen_port": self.args["read_listen_port"],
                     }
                 }
             )
@@ -381,9 +391,11 @@ class PGD_Always_ON(BDR):
         """
         return location == self.args.get("witness_only_location")
 
-    def _sanitize_version(self, version_string) -> Union[Tuple[Version, bool], Tuple[None, bool]]:
+    def _sanitize_version(
+        self, version_string
+    ) -> Union[Tuple[Version, bool], Tuple[None, bool]]:
         try:
-            version_parts = version_string.split(':', maxsplit=1)[-1].split('.')
+            version_parts = version_string.split(":", maxsplit=1)[-1].split(".")
             if version_parts[1] == "*":
                 return parse(version_parts[0]), True
             else:
@@ -391,7 +403,9 @@ class PGD_Always_ON(BDR):
         except (InvalidVersion, AttributeError) as e:
             return None, False
 
-    def _is_above_minimum(self, x: Union[Version, None], y: Version, includes_wildcard: bool) -> bool:
+    def _is_above_minimum(
+        self, x: Union[Version, None], y: Version, includes_wildcard: bool
+    ) -> bool:
         if x is None:
             return True
         elif includes_wildcard:

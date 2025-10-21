@@ -191,6 +191,7 @@
     max_connections: "{{ max_connections|default(default_max_connections) }}"
     harp_listen_port: "{{ harp_listen_port|default(default_harp_listen_port) }}"
     patroni_listen_port: "{{ patroni_listen_port|default(default_patroni_listen_port) }}"
+    patroni_ssl_enabled: "{{ patroni_ssl_enabled|default(default_patroni_ssl_enabled) }}"
     publications: "{{ publications|default([]) }}"
     subscriptions: "{{ subscriptions|default([]) }}"
     failover_manager: "{{ failover_manager|default(default_failover_manager[postgres_family]) }}"
@@ -216,6 +217,12 @@
     replication_guard_slot_name: "tpa_tmp_higgs_boson_slot"
     primary_slot_name: "{{ primary_slot_name|default(default_primary_slot_name) }}"
     pgdcli_directory: "{{ pgdcli_directory|default(default_pgdcli_directory) }}"
+    postgres_rsa_key_size: "{{ postgres_rsa_key_size|default(default_postgres_rsa_key_size) }}"
+    pem_rsa_key_size: "{{ pem_rsa_key_size|default(default_pem_rsa_key_size) }}"
+    pem_db_ca_certificate_key_size: "{{ pem_db_ca_certificate_key_size|default(default_pem_db_ca_certificate_key_size) }}"
+    ha_proxy_dhparams_key_size: "{{ ha_proxy_dhparams_key_size|default(default_ha_proxy_dhparams_key_size) }}"
+    openvpn_rsa_key_size: "{{ openvpn_rsa_key_size|default(default_openvpn_rsa_key_size) }}"
+    openvpn_dhparams_numbits_size: "{{ openvpn_dhparams_numbits_size|default(default_openvpn_dhparams_numbits_size) }}"
   vars:
     default_postgres_installation_method: >-
       {{ postgres_installation_source|default('pkg') }}

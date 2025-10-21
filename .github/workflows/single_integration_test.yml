@@ -45,7 +45,6 @@ on:
         required: true
         type: choice
         options:
-        - tpa/ubuntu:20.04
         - tpa/ubuntu:22.04
         - tpa/ubuntu:24.04
         - tpa/debian:9
@@ -86,6 +85,12 @@ on:
         - "efm"
         - "repmgr"
         - "patroni"
+      tpa_pgds_layout:
+        description: "Layout (for PGD-S only)"
+        type: choice
+        options:
+        - "standard"
+        - "near-far"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean
@@ -121,13 +126,13 @@ jobs:
     steps:
       - name: Checkout source repository
         id: checkout-source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{ env.GITHUB_TOKEN }}
 
       - name: Checkout foundation repository branch/tag ${{ env.FOUNDATION_VER }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: EnterpriseDB/foundation-packaging
           ref: ${{ env.FOUNDATION_VER }}
@@ -145,3 +150,4 @@ jobs:
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
+          tpa_pgds_layout: ${{ github.event.inputs.tpa_pgds_layout }}

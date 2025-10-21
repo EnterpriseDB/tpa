@@ -112,6 +112,24 @@ By default, the PEM server creates a self-signed certificate pair,
 `server-pem.crt` and `server-pem.key` and configures the webserver to use them
 for HTTPS access. 
 
+The size of `server-pem.key` can be modified adding the variable `pem_rsa_key_size`
+to the `cluster_vars` section:
+
+```yml
+  (...)
+  cluster_vars:
+    pem_rsa_key_size: 4096
+```
+
+The size of the CA certificate expedited by the PEM database can also be modified 
+adding the variable `pem_db_ca_certificate_key_size` to the `cluster_vars` section:
+
+```yml
+  (...)
+  cluster_vars:
+    pem_db_ca_certificate_key_size: 4096
+```
+
 To provide your own certificate pair, create a directory under the root of the 
 cluster directory named `ssl/pemserver` and place the certificate pair inside.
 ```

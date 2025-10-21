@@ -40,10 +40,32 @@ def bdr_node_versions(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, s
 
     return versions
 
+def bdr_node_version_nums(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, str]:
+    """Given hostvars, returns a list of BDR major numbers running on each of
+    the given hostnames, assumed to be BDR instances that have already run
+    cluster_discovery.
+
+    If it can't retrieve the version for any host, it just moves on to the next
+    one. So if the result has fewer keys than the number of hosts you passed in,
+    then you know something went wrong.
+    """
+    versions = {}
+    for h in hosts:
+        hv = hostvars[h]
+        try:
+            bdr_database = hv["bdr_database"]
+            bdr_database_facts = hv["cluster_facts"]["databases"][bdr_database]
+            versions[h] = bdr_database_facts["bdr"]["bdr_version_num"]
+        except KeyError:
+            continue
+
+    return versions
+
 
 class FilterModule(object):
     def filters(self):
         return {
             "bdr_node_kind": bdr_node_kind,
             "bdr_node_versions": bdr_node_versions,
+            "bdr_node_version_nums": bdr_node_version_nums,
         }

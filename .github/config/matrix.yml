@@ -11,7 +11,6 @@ default:
   tpa_platform:
     - "docker"
   tpa_os_image:
-    - "ubuntu:20.04"
     - "ubuntu:22.04"
     - "ubuntu:24.04"
     - "debian:12"
@@ -41,6 +40,8 @@ default:
       tpa_os_image: "debian:12"
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "pgextended"
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "edbpge"
     - tpa_architecture: "BDR-Always-ON"
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "BDR-Always-ON"
@@ -51,8 +52,6 @@ default:
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_flavour: "pgextended"
-    - tpa_architecture: "M1"
-      tpa_postgres_flavour: "edbpge"
     - tpa_os_image: "sles:15"
       tpa_architecture: "BDR-Always-ON"
     - tpa_harp_consensus_protocol: "etcd"
@@ -75,10 +74,6 @@ default:
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "PGD-S"
       tpa_postgres_flavour: "postgresql"
-    - tpa_os_image: "ubuntu:20.04"
-      tpa_architecture: "PGD-S"
-    - tpa_os_image: "ubuntu:20.04"
-      tpa_architecture: "PGD-X"
   include:
     - tpa_architecture: "M1"
       tpa_failover_manager: "repmgr"
@@ -107,6 +102,13 @@ default:
       tpa_os_image: "redhat:9"
       tpa_platform: "docker"
       tpa_postgres_flavour: "postgresql"
+      tpa_postgres_version: "15"
+    - cpu_architecture: "amd64"
+      tpa_architecture: "M1"
+      tpa_failover_manager: "repmgr"
+      tpa_os_image: "redhat:9"
+      tpa_platform: "docker"
+      tpa_postgres_flavour: "epas"
       tpa_postgres_version: "15"
 aws:
   tpa_postgres_flavour:
@@ -185,7 +187,6 @@ patroni:
   tpa_platform:
     - docker
   tpa_os_image:
-    - "ubuntu:20.04"
     - "debian:11"
     - "debian:12"
     - "redhat:8"

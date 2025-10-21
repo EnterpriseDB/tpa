@@ -1,0 +1,119 @@
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Single cluster upgrade from PGD5 to PGD6 (PGD-X)
+# on demand upgrade scenario with wide range of dimension.
+
+name: Single Upgrade PGD5 to PGD-X
+run-name: >
+  Single PGD5 to PGD-X upgrade with
+  ${{ github.event.inputs.tpa_architecture }},
+  ${{ github.event.inputs.tpa_os_image}},
+  ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tpa_architecture:
+        description: "TPA architecture for initial cluster"
+        required: true
+        default: "PGD-Always-ON"
+        type: choice
+        options:
+        - PGD-Always-ON
+      tpa_platform:
+        description: "TPA platform"
+        required: false
+        default: "docker"
+      tpa_os_image:
+        description: "TPA OS image"
+        required: true
+        type: choice
+        options:
+        - tpa/debian:11
+        - tpa/debian:12
+        - tpa/ubuntu:22.04
+        - tpa/ubuntu:24.04
+        - tpa/redhat:9
+        - tpa/redhat:8
+        - tpa/sles:15
+      tpa_postgres_flavour:
+        description: "Postgres flavour"
+        required: true
+        default: "postgresql"
+        type: choice
+        options:
+        - postgresql
+        - edbpge
+        - epas
+      tpa_postgres_version:
+        description: "Postgres version"
+        required: true
+        default: 17
+        type: choice
+        options:
+          - 16
+          - 17
+          - 18
+      tpa_proxy_routing:
+        required: false
+        description: "proxy routing mode for pgd5"
+        default: "local"
+        type: choice
+        options:
+        - local
+        - global
+      tpa_edb_repo_conf:
+        required: false
+        description: "PGD repos for reconfigure command"
+        default: ""
+      tpa_edb_repo_reconf:
+        required: false
+        description: "PGD repos for reconfigure command"
+        default: ""
+      runner:
+        description: "github runner"
+        required: false
+        default: "ubuntu-24.04"
+        type: choice
+        options:
+        - "ubuntu-24.04"
+        - "ubuntu-22.04"
+
+env:
+  LANG: "C.UTF-8"
+  TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
+  EDB_REPO_CREDENTIALS: ${{ secrets.EDB_REPO_CREDENTIALS }}
+  EDB_REPO_CREDENTIALS_FILE: /tmp/edb_repo.conf
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  SLES_REG_TOKEN: ${{ secrets.SLES_REG_TOKEN }}
+
+jobs:
+
+  integration-test:
+    name: Upgrade test
+
+    runs-on: ${{ github.event.inputs.runner }}
+
+    steps:
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v5
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{secrets.GH_SLONIK}}
+
+      - uses: ./.github/actions/5to6-integration-test
+        with:
+          source_directory: ${{ github.workspace }}
+          tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
+          tpa_platform: ${{ github.event.inputs.tpa_platform }}
+          tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
+          tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
+          tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
+          tpa_proxy_routing: ${{ github.event.inputs.tpa_proxy_routing }}
+          tpa_edb_repo_conf: ${{ github.event.inputs.tpa_edb_repo_conf }}
+          tpa_edb_repo_reconf: ${{ github.event.inputs.tpa_edb_repo_reconf }}
+          cluster: "${{ github.event.inputs.tpa_postgres_flavour }}-\
+            ${{ github.event.inputs.tpa_postgres_version }}-\
+            ${{ github.event.inputs.tpa_os_image }}-\
+            ${{ github.event.inputs.tpa_proxy_routing }}"

@@ -26,6 +26,18 @@ inputs:
     required: false
     description: "TPA BDR layout"
     default: bronze
+  tpa_pgds_layout:
+    required: false
+    description: "TPA PGD-S layout"
+    default: standard
+  tpa_proxy_routing:
+    required: false
+    description: "pgd-proxy proxy routing"
+    default: local
+  tpa_edb_repo:
+    required: false
+    description: edb-repositories to use for configure
+    default: ""
   tpa_harp_consensus_protocol:
     required: false
     description: "TPA HARP consensus protocol"
@@ -82,7 +94,6 @@ runs:
   using: "composite"
 
   steps:
-
     - name: Free up disk space
       run: |
         # Android libraries
@@ -125,6 +136,7 @@ runs:
         CONFIGURE_OPTS+=(--architecture "${{ inputs.tpa_architecture }}")
         CONFIGURE_OPTS+=(--platform "${{ inputs.tpa_platform }}")
         CONFIGURE_OPTS+=(--keyring-backend legacy)
+        CONFIGURE_OPTS+=(${{ inputs.tpa_edb_repo != '' && format('--edb-repositories {0}',inputs.tpa_edb_repo) || '' }})
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_OPTS+=(
             --layout "${{ inputs.tpa_layout }}"
@@ -135,9 +147,13 @@ runs:
             --location-names a b c
             --data-nodes-per-location 2
             --add-witness-node-per-location
-            --pgd-proxy-routing local
+            --pgd-proxy-routing ${{ inputs.tpa_proxy_routing }}
             --add-witness-only-location c
           )
+        elif [ $"{{ inputs.tpa_architecture }}" == "PGD-S" ]; then
+          if [ -n "${{ inputs.tpa_pgds_layout }}" ]; then
+            CONFIGURE_OPTS+=(--layout "{{ inputs.tpa_pgds_layout }}")
+          fi
         fi
         if [ -n "${{ inputs.tpa_os }}" ] ;then
           CONFIGURE_OPTS+=(--os "${{ inputs.tpa_os }}")

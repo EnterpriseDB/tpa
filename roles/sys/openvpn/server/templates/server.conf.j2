@@ -14,7 +14,7 @@ port 1194
 dev tun
 proto udp
 
-dh {{ openvpn_config }}/dh2048.pem
+dh {{ openvpn_config }}/dh{{ openvpn_dhparams_numbits_size }}.pem
 ca {{ openvpn_config }}/ca.crt
 key {{ openvpn_config }}/{{ inventory_hostname }}.key
 cert {{ openvpn_config }}/{{ inventory_hostname }}.crt

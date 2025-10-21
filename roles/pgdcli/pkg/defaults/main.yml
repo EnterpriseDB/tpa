@@ -29,3 +29,10 @@ bdr_utilities_packages:
   Ubuntu: *debian_bdrutilities_package
   SUSE:
     - edb-bdr-utilities
+
+pgdcli_extra_packages:
+  Debian: &debian_pgdcli_extra_packages
+    - bash-completion
+  RedHat: *debian_pgdcli_extra_packages
+  Ubuntu: *debian_pgdcli_extra_packages
+  SUSE: *debian_pgdcli_extra_packages

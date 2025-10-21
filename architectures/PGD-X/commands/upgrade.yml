@@ -1,0 +1,132 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  vars:
+    upgrade_in_progress: true
+  tags: always
+
+- name: Determine upgrade type for cluster {{ cluster_dir }}
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+  - assert:
+      that:
+        - cluster_facts is defined
+      fail_msg: >
+        Couldn't perform cluster discovery. Are all nodes running?
+
+  - set_fact:
+      bdrdb_major_version:
+        "{{ cluster_facts.databases[bdr_database].bdr.bdr_major_version }}"
+
+  - set_fact:
+      bdrdb_version:
+        "{{ cluster_facts.databases[bdr_database].bdr.bdr_version}}"
+
+  - name: Ensure that bdr_version in config.yml is 6, and the database has either v4, v5 or v6
+    assert:
+      that:
+        - bdr_version is version('6', '==')
+        - bdrdb_major_version is version('4', '==')
+          or bdrdb_major_version is version('5', '==')
+          or (bdrdb_major_version is version('6', '==') and 'Expanded' in bdrdb_version)
+      fail_msg: >-
+        This upgrade process supports upgrades from PGD4 or PGD5 to PGD6 or
+        minor version upgrades of PGD6 for PGD-X (Expanded) clusters
+
+  - name: Collect list of all unique BDR versions from all nodes
+    set_fact:
+      all_bdr_versions: "{{ _versions.values()|list }}"
+      all_bdr_major_versions:
+        "{{ _versions.values()
+            |map('regex_replace', '\\..*', '')
+            |map('regex_replace', 'PGD\\s', '')
+            |map('regex_replace', 'BDR\\s', '')
+            |unique|list }}"
+    vars:
+      _versions:
+        "{{ groups['role_bdr']|bdr_node_versions(hostvars) }}"
+
+  - name: Collect list of all unique BDR version numbers from all nodes
+    set_fact:
+      all_bdr_version_nums: "{{ _version_nums.values()|list }}"
+    vars:
+      _version_nums:
+        "{{ groups['role_bdr']|bdr_node_version_nums(hostvars) }}"
+
+  - name: "Check the cluster is not running mixed versions of BDR/PGD"
+    assert:
+      that:
+      - "{{ ['4', '5'] is not subset(all_bdr_major_versions) }}"
+      fail_msg: >
+        Upgrade to PGDD6 is not supported for clusters running a mix of BDR4 and PGD5 nodes.
+        Finish upgrading all nodes to PGD5 before upgrading to PGD6.
+
+  - name: "Record whether any nodes are currently running BDR version 4"
+    set_fact:
+      bdr4_major_version_upgrade:
+        "{{ all_bdr_major_versions | difference(['6']) == ['4'] }}"
+
+  - name: "Record whether any nodes are currently running BDR version 5"
+    set_fact:
+      bdr5_major_version_upgrade:
+        "{{ all_bdr_major_versions | difference(['6']) == ['5'] }}"
+
+  - name: "Record whether any nodes are currently running BDR version 6"
+    set_fact:
+      bdr6_minor_version_upgrade:
+        "{{ all_bdr_major_versions == ['6'] }}"
+
+- import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"
+  tags: always
+
+- name: Set upgrade facts for all hosts
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: all
+  tasks:
+  - name: Determine whether we're doing a major version upgrade from BDR 4/PGD 5 or a minor version upgrade
+    set_fact:
+      bdr4_major_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr4_major_version_upgrade')
+            |select('defined')
+            |first }}"
+      bdr5_major_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr5_major_version_upgrade')
+            |select('defined')
+            |first }}"
+      bdr6_minor_version_upgrade:
+        "{{ groups['role_bdr']
+            |map('extract', hostvars, 'bdr6_minor_version_upgrade')
+            |select('defined')
+            |first }}"
+    when: >
+      "bdr" not in role
+
+  - set_fact:
+      enable_proxy_monitoring:
+        "{{ enable_proxy_monitoring|default(false) }}"
+
+# We now are ready to fork to the correct upgrade workflow
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-X/upgrade_major_4to6.yml"
+  when: >
+    bdr4_major_version_upgrade
+
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-X/upgrade_major_5to6.yml"
+  when: >
+    bdr5_major_version_upgrade
+
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-X/upgrade_minor.yml"
+  when: >
+    bdr6_minor_version_upgrade

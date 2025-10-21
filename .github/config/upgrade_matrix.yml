@@ -10,7 +10,6 @@
 # total                   504
 full: # 500+ clusters do not use this option
   tpa_os_image: &full_tpa_os_image
-    - "ubuntu:20.04"
     - "ubuntu:22.04"
     - "debian:10"
     - "debian:11"
@@ -229,7 +228,6 @@ redhat-full-14:
 # total                   72
 ubuntu-full-14:
   tpa_os_image:
-    - "ubuntu:20.04"
     - "ubuntu:22.04"
   tpa_postgres_flavour: *full_tpa_postgres_flavour
   tpa_postgres_version:
