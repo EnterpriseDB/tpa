@@ -6,19 +6,30 @@ description: Which Linux distributions are supported by TPA.
 
 TPA detects and adapts to the distribution running on each target
 instance. This page lists platforms which are actively supported and
-'legacy distributions' which have previously been supported. Deploying to a
-legacy platform is likely to work as long as you have access to the
+'legacy distributions' which have previously been supported. Deploying
+to a legacy platform is likely to work as long as you have access to the
 necessary packages, but this is not considered a supported use of TPA
 and is not suitable for production use.
 
 Fully supported platforms are supported both as host systems for running
 TPA and target systems on which TPA deploys the Postgres cluster.
 
-## Debian ARM64
+## ARM64 (aarch64) distros
+
+### Debian
 
 * Debian 12/bookworm is fully supported
 
-## Debian x86
+### RedHat
+
+* RHEL/Rocky/AlmaLinux/Oracle Linux 10.x is fully supported 
+  (python3 only)
+* RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported 
+  (python3 only)
+
+## x86 (amd64) distros
+
+### Debian
 
 * Debian 12/bookworm is fully supported
 * Debian 11/bullseye is fully supported
@@ -26,7 +37,7 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 * Debian 9/stretch is a legacy distribution
 * Debian 8/jessie is a legacy distribution
 
-## Ubuntu x86
+### Ubuntu
 
 * Ubuntu 24.04/noble is fully supported
 * Ubuntu 22.04/jammy is fully supported
@@ -34,18 +45,14 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 * Ubuntu 18.04/bionic is a legacy distribution
 * Ubuntu 16.04/xenial is a legacy distribution
 
-## Oracle Linux x86
+### RedHat
 
-* Oracle Linux 9.x is fully supported
-* Oracle Linux 8.x is fully supported
-* Oracle Linux 7.x is a legacy distribution
-
-## RedHat x86
-
-* RHEL/Rocky/AlmaLinux/Oracle Linux 10.x is fully supported (python3
-  only)
-* RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported (python3 only)
-* RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
+* RHEL/Rocky/AlmaLinux/Oracle Linux 10.x is fully supported 
+  (python3 only)
+* RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported 
+  (python3 only)
+* RHEL/CentOS/Rocky/AlmaLinux/Oracle Linux 8.x is fully supported 
+  (python3 only)
 * RHEL/CentOS 7.x is a legacy distribution (python2 only)
 
 !!! Warning
@@ -56,23 +63,51 @@ than ansible-core 2.16, and therefore be incompatible with RHEL 8.x
 on the target instances.
 !!!
 
-## RedHat ppc64le
+### SLES
+
+* SLES 15 SP7 is fully supported
+
+!!! Note 
+M1 architecture using Repmgr in combination with EDBPGE or EPAS
+is not supported for SLES. Use community PostgreSQL in this situation.
+!!!
+
+## IBM Power (ppc64le) distros
+
+### RedHat
 
 * RHEL/Rocky/AlmaLinux 10.x is fully supported (python3 only)
 * RHEL/Rocky/AlmaLinux 9.x is fully supported (python3 only)
 * RHEL/AlmaLinux 8.x is fully supported (python3 only)
 
-## SLES x86
+## IBM Linux One (s390x) distros
 
-* SLES 15 SP7 is supported.
+### RedHat
 
-!!! Note
-M1 architecture using Repmgr in combination with EDBPGE or EPAS is not supported for SLES.
-Use community PostgreSQL in this situation. 
-!!!    
+* RHEL 10.x is fully supported (python3 only)
+* RHEL 9.x is fully supported (python3 only)
+* RHEL 8.x is fully supported (python3 only)
+
+### SLES
+
+* SLES 15 SP7 is fully supported
+
+!!! Note 
+M1 architecture using Repmgr in combination with EDBPGE or EPAS
+is not supported for SLES. Use community PostgreSQL in this situation.
+!!!
 
 ## Platform-specific considerations
 
-Some platforms may not work with the legacy distributions mentioned here.
-For example, Debian 8 and Ubuntu 16.04 are not available in [Docker
+When using the Docker platform, TPA will use the native architecture of
+the host for the containers. For example, containers created on an x86
+machine will use the x86 architecture.
+
+When using the [AWS platform](platform-aws.md), TPA creates x86 virtual
+machines by default. You can switch to ARM by selecting an ARM instance
+type and AMI.
+
+Legacy distributions may not be available in Docker or AWS depending on
+whether images are available and maintained. For example, Debian 8 and
+Ubuntu 16.04 are not available in [Docker
 containers](platform-docker.md).
