@@ -2,6 +2,62 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
+## v23.40.1 (2025-10-27)
+
+### Minor changes
+
+- Enable standard repo when beacon agent is desirable
+
+  TPA can deploy the beacon agent to monitor the health of a system, however,
+  it needs access to a valid EDB repository. This change ensures that the standard
+  repository is enabled when the beacon agent is to be deployed.
+
+  References: TPA-1072, CP67890.
+
+- Remove TPA post-deploy check for pgbouncer_auth_function in pg_catalog.
+
+  TPA recently relocated the pgbouncer_auth_function used to authenticate users when pgbouncer is in 
+  use. This was done in an effort to better follow the best practices and avoid issues during upgrade
+  where pg_catalog function would not be part of the dump of the database.
+  TPA introduced a post deploy check to help user still relying on the auth function defined in
+  pg_catalog to identify the problem and make sure that they are able to fix it before removing the
+  function from their systems.
+  This check was used as a transition mechanism and is now being removed.
+
+  References: TPA-1107, TPA-382.
+
+### Bugfixes
+
+- Barman not correctly configuring log_file parameter
+
+  When setting up a barman node, the variable 'barman_log_file' 
+  was not setting up an alternative directory to place the log 
+  file. Instead, it used the default location (/var/log/barman/barman.log).
+  Bug and fix reported by voxnyx (https://github.com/voxnyx).
+
+  References: TPA-1077.
+
+- Exclude BDR5 alter_node_option task for replicas
+
+  In a `BDR5` cluster with a BDR node that is also a physical replica, 
+  the upgrade process will fail during the `alter_node_option` task because 
+  a BDR node is expected to have `RAFT` enabled, but the physical replica 
+  BDR node does not. Skipping this task on any node with the replica role
+  avoids this issue and allows upgrade to complete successfuly.
+
+  References: TPA-1158, RT51997.
+
+- Misconfiguration when 'backup_name' is used
+
+  When using the 'backup_name' variable, barman has issues
+  when creating a .pgpass file as it uses that same 'backup_name'
+  variable for aiming to the backup host.
+  This has been fixed by defining the backed up instance's name
+  on the ansible workflow on the .pgpass file creation step and
+  updating the documentation for proper usage.
+
+  References: TPA-1052.
+
 ## v23.40.0 (2025-10-02)
 
 ### Notable changes

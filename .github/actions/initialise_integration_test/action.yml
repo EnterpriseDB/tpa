@@ -253,9 +253,9 @@ runs:
           declare -a repos_to_add
           repos_to_add+=(enterprise)
           if [ "${{ inputs.cpu_architecture }}" == "s390x" ]; then
-          #`cluster_prefixed_hostnames` is required for s390x as we use a single node cluster
+          #`--cluster-prefixed-hostnames` is required for s390x as we use a single node cluster
           #for the native executors
-            CONFIGURE_OPTS+=(--cluster_prefixed_hostnames)
+            CONFIGURE_OPTS+=(--cluster-prefixed-hostnames)
             repos_to_add+=(edb postgres_distributed)
           else
             repos_to_add+=(postgres_distributed)

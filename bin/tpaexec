@@ -1170,7 +1170,6 @@ case "$command" in
     deploy|upgrade)
         time $command "$@"
         real_exit_status=$?
-        playbook "${TPA_DIR}/architectures/lib/commands/check-pgbouncer-auth-function.yml" -v
         exit $real_exit_status
         ;;
     *)

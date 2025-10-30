@@ -80,8 +80,9 @@
     label: >
       {{ node_option.key }}:{{ node_option.value }}
   when: 
-    bdr_major_version >= 5 
+    bdr_major_version >= 5
     and groups['role_pgd-proxy']|default([]) is not empty
+    and 'replica' not in role
 
 - name: Perform pgd_proxy setup
   include_tasks:

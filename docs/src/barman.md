@@ -62,9 +62,21 @@ as `/etc/barman.conf`. This file contains default values for many Barman
 configuration variables. For each Postgres server being backed up,
 an additional Barman configuration file is created. For example, to back up the
 server `one`, the file is `/etc/barman.d/one.conf`, and the backups
-are stored in the subdirectory `one` in the Barman home directory. The
-configuration file and directory names are taken from the backed-up instance's
-`backup_name` setting. The default for this setting is the instance name.
+are stored in the subdirectory `one` in the Barman home directory. 
+The configuration file and directory names can be changed from the backed-up instance's
+`backup_name` setting defined on the `vars` section before the provisioning step.
+
+```yml
+    - Name: myPrimary
+      backup: myBarman
+      platform: bare
+      ip_address: x.x.x.x
+      node: 1
+      role:
+      - primary
+      vars:
+        backup_name: my_backup
+```
 
 The following variables can be set on the backed-up instance and are
 passed through into Barman's configuration with the prefix `barman_`
@@ -90,6 +102,7 @@ removed:
 | barman_post_backup_retry_script |                            |
 | barman_post_backup_script       |                            |
 | barman_streaming_wals_directory |                            |
+| backup_name                     | _backed up instance's name_|
 
 ## Backup scheduling
 
