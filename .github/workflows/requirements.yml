@@ -97,7 +97,7 @@ jobs:
           path: foundation
 
       - name: Download generated requirements.txt
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: new_requirements
           path: ${{ github.workspace }}
@@ -149,19 +149,19 @@ jobs:
           token: ${{ secrets.GH_SLONIK }}
 
       - name: Download generated main requirements.txt
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: new_requirements
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for ppc64le
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: requirements-ppc64le
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for s390x
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: requirements-s390x
           path: ${{ github.workspace }}
