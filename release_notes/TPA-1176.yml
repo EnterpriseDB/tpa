@@ -1,0 +1,20 @@
+- summary: tpaexec download-packages has refresh repository metadata option
+  description: |
+      In order to ensure a way of covering upgrades in an air-gapped environment, a
+      new option has been included on the `tpaexec download-packages` command 
+      (`--refresh-repository`, requires Docker & its corresponding Docker image to work).
+      Prior to this commit, we relied on the user to have the commands required to manually
+      recreate the local repository, depending on its cluster and OS.
+      This fix ensures a way of having an automated way of upgrading the repository with
+      `tpaexec upgrade` once the packages are being placed and the new version of said
+      packages is selected on the configuration file.
+      It also includes documentation covering the steps that need to be taken, given the
+      different air-gapped conditions that can be found, and minor fixes that were
+      discovered related to the DNF repository in an air-gapped scenario.
+  type: bugfix
+  jira_tickets:
+  - TPA-1176
+  - TPA-1186
+  - TPA-1187
+  - TPA-1220
+  - TPA-1272

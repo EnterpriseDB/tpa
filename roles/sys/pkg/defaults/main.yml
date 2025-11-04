@@ -52,6 +52,7 @@ default_packages:
     - openssh-client
     - "{{ python_pkg_prefix }}-apt"
     - cron
+    - "{{ ['dpkg-dev'] if ('downloader' in role) else [] }}"
   RedHat:
     - perf
     # Required for semanage, used in postgres/initdb
@@ -59,6 +60,8 @@ default_packages:
     - openssh
     - openssh-clients
     - cronie
+    - "{{ ['createrepo'] if ('downloader' in role and ansible_distribution_major_version <= '7') else [] }}"
+    - "{{ ['modulemd-tools'] if ('downloader' in role and ansible_distribution_major_version >= '8') else [] }}"
   Ubuntu:
     - linux-tools-generic
     - openssh-client

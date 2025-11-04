@@ -72,6 +72,28 @@ node. See [recommendations for installing to an air-gapped environment](
 air-gapped.md). A [local-repo](local-repo.md) will be detected and used
 automatically by TPA.
 
+## Regenerate local repository metadata
+
+You can use the `download-packages` command with the `--refresh-repository`
+option to regenerate the local repository metadata and acknowledge new packages
+or new version of existing packages, prior to an upgrade.
+After placing the new contents in the `local-repo` directory and updating the new
+version of the packages on its respective `config.yml` file, the command needs to
+be executed as it follows:
+
+```shell
+tpaexec download-packages cluster-dir --os <OS> --os-version <version> --refresh-repository
+```
+
+The `--refresh-repository` option will create a new docker container, regenerate
+the repository's metadata, and then remove itself.
+
+!!! Note
+When executing the command above, the local repository's cache on each of the 
+nodes is not automatically refreshed, this is performed on the upgrade stage
+automatically, or needs to be done manually using `tpaexec cmd`.
+!!!
+
 ## Cleaning up failed downloader container
 
 If there is an error during the download process, the command will leave

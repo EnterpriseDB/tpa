@@ -85,6 +85,12 @@
     notify: Repo contents changed
     when:
       platform in ['docker']
+  
+  - name: Clean cache of DNF repository (RHEL >=8)
+    raw: "yum clean all"
+    when:
+      - ansible_distribution == 'RedHat'
+      - ansible_distribution_major_version|int >= 8
 
   - include_tasks: define-repository.yml
     vars:

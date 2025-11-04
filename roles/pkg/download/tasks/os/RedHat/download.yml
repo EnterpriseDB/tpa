@@ -1,12 +1,12 @@
 ---
 
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
-
-- name: Install yumdownloader (yum-utils) and createrepo
+- name: Install createrepo
   package:
     name:
-      - yum-utils
       - createrepo
+  when: 
+    ansible_distribution_major_version|int <= 7
 
 - name: Install modulemd-tools to work with modular dnf/yum packages
   package:
@@ -15,23 +15,31 @@
   when:
     ansible_distribution_major_version|int >= 8
 
-- name: Download packages and dependencies with yumdownloader (for {{ ansible_distribution }} {{ ansible_distribution_major_version }})
-  command: >
-    yumdownloader
-      --destdir "{{ _download_dir }}"
-      --resolve
-      {{ (ansible_distribution_major_version|int > 7)|ternary(_opts_8_and_above, _opts_7) }}
-      {{ package_list|map('quote')|join(' ') }}
-  register: _yum_download
-  vars:
-    _opts_7: "--archlist {{ ansible_architecture }}, noarch"
-    _opts_8_and_above: "--alldeps --arch {{ ansible_architecture }} --arch noarch"
-  changed_when: >
-    _yum_download.stdout_lines
-    |reject('match', '^Last metadata')
-    |reject('match', '^[SKIPPED]')
-    |list|length > 0
+- name: Download packages and dependencies with yumdownloader (no refresh mode)
+  when: not refresh_repo
+  block:
+  - name: Install yumdownloader (yum-utils)
+    package:
+      name:
+        - yum-utils
 
+  - name: Download packages and dependencies with yumdownloader (for {{ ansible_distribution }} {{ ansible_distribution_major_version }})
+    command: >
+      yumdownloader
+        --destdir "{{ _download_dir }}"
+        --resolve
+        {{ (ansible_distribution_major_version|int > 7)|ternary(_opts_8_and_above, _opts_7) }}
+        {{ package_list|map('quote')|join(' ') }}
+    register: _yum_download
+    vars:
+      _opts_7: "--archlist {{ ansible_architecture }}, noarch"
+      _opts_8_and_above: "--alldeps --arch {{ ansible_architecture }} --arch noarch"
+    changed_when: >
+      _yum_download.stdout_lines
+      |reject('match', '^Last metadata')
+      |reject('match', '^[SKIPPED]')
+      |list|length > 0
+  
 - name: Generate repository metadata with createrepo for RH7
   command: createrepo .
   args:
@@ -46,6 +54,7 @@
 # And https://docs.fedoraproject.org/en-US/modularity/hosting-modules/
 
 - name: Generate repository metadata with createrepo_c/modifyrepo_c for RH8+
+  when: ansible_distribution_major_version|int >= 8
   block:
   - name: Generate repository metadata with createrepo_c for RH8+
     command: createrepo_c .
@@ -89,5 +98,3 @@
     command: modifyrepo_c --mdtype=modules modules.yaml repodata/
     args:
       chdir: "{{ _download_dir }}"
-  when:
-    ansible_distribution_major_version|int >= 8

@@ -39,6 +39,9 @@ _tpaexec_command() {
                 shift
                 OPTS+=('-e' "exclude_packages_str=$package_names")
                 ;;
+            --refresh-repository)
+                OPTS+=('-e' "refresh_repo=true")
+                ;;
             *)
                 REMAINDER+=("$opt")
                 ;;
