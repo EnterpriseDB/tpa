@@ -165,9 +165,29 @@ _install_pip_packages() {
     # either from the bundled package from tpaexec-deps if present, or
     # directly from github/PyPI
 
-    TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
+    REQUIREMENTS_FILE="requirements.txt"
+    if [[ -v requirements_file ]]; then
+        REQUIREMENTS_FILE="$requirements_file"
+    elif [ -f /etc/os-release ]; then
+        . /etc/os-release
+
+        # we use the alternative requirements.txt if we're on RH8
+        # and not installing from the -deps package, because the
+        # requirements file is always called requirements.txt in deps
+        # even if it is a non-standard one
+        if [[ ( "$ID_LIKE" == *"rhel"* || "$ID" == "rhel" ) && \
+              "$VERSION_ID" == 8* && \
+              ! -d "$PIP_DIR" ]]; then
+
+            REQUIREMENTS_FILE="requirements-rh8.txt"
+        fi
+    else
+        echo "Warning: /etc/os-release not found. Using default requirements."
+    fi
+
+    TPA_REQUIREMENTS="$TPA_DIR/$REQUIREMENTS_FILE"
     if [[ -d $PIP_DIR ]]; then
-        TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
+        TPA_REQUIREMENTS="$PIP_DIR/$REQUIREMENTS_FILE"
     fi
 
     # If we have ansible already installed and we're going to install a different
@@ -253,6 +273,10 @@ setup() {
                 ;;
             --pip-cache-dir)
                 pip_cache_dir=${1:?pip cache directory not specified}
+                shift
+                ;;
+            --requirements-file)
+                requirements_file=${1:?requirements file not specified}
                 shift
                 ;;
             *)

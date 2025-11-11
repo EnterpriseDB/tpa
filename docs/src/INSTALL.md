@@ -58,7 +58,7 @@ to the target instances.
 ## Installing TPA packages
 
 To install TPA, you must first [subscribe to an EDB repository](https://www.enterprisedb.com/docs/repos/getting_started/).
-TPA is available in all EDB repositories. 
+TPA is available in all EDB repositories.
 
 Install TPA as follows:
 
@@ -95,6 +95,15 @@ install the correct versions of all required modules.
 sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
+`tpaexec setup` will automatically use a suitable version of the
+requirements.txt file to install the correct modules for your system,
+but if you need to override it for testing you can use the
+`--requirements-file` option:
+
+```shell
+sudo /opt/EDB/TPA/bin/tpaexec setup --requirements-file requirements-rh8.txt
+```
+
 You must run this as root because it writes to `/opt/EDB/TPA`,
 but the process will not affect any system-wide Python modules you may
 have installed (including Ansible).
@@ -126,10 +135,10 @@ If your internet-connected machine uses the same operating system as the
 target, we recommend using `yumdownloader` (RHEL-like) or `apt download`
 (Debian-like) to download the packages.
 
-Alternatively, you can download packages for any platform from your 
+Alternatively, you can download packages for any platform from your
 browser by visiting [EDB Repos](https://www.enterprisedb.com/repos) and
-selecting either 'Enterprise', 'Standard' or 'Community 360' under the 
-heading 'Download EDB software packages from your browser'. 
+selecting either 'Enterprise', 'Standard' or 'Community 360' under the
+heading 'Download EDB software packages from your browser'.
 To install TPA you need these packages:
 
 * tpaexec
