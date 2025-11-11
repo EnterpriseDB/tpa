@@ -8,6 +8,8 @@ set -xe
 : "${DISTRO:?DISTRO environment variable is required}"
 # DISTRO_ARCHITECTURE is the architecture of the target system
 : "${DISTRO_ARCHITECTURE:?DISTRO_ARCHITECTURE environment variable is required}"
+# FILENAME_SUFFIX is usually empty or "-rh8"
+: "${FILENAME_SUFFIX?FILENAME_SUFFIX environment variable is required}"
 
 DEFAULT_EDBPYTHON="edb-python312"
 FORCE_REBUILD_PYMODULES="${FORCE_REBUILD_PYMODULES:-0}"
@@ -64,8 +66,8 @@ function generate_new_requirements_file {
 }
 
 # generate the new arch specific requirement files
-current_arch_file="requirements-${DISTRO_ARCHITECTURE}.in"
-output_requirements_include="/out/requirements-${DISTRO_ARCHITECTURE}.in"
+current_arch_file="requirements-${DISTRO_ARCHITECTURE}${FILENAME_SUFFIX}.in"
+output_requirements_include="/out/requirements-${DISTRO_ARCHITECTURE}${FILENAME_SUFFIX}.in"
 first_new_detected=0
 
 # read the .in file line by line
@@ -75,7 +77,7 @@ do
     target_module_name=$(echo -n "$requirement_line" | cut -d '=' -f1)
     target_module_version=$(echo -n "$requirement_line" | cut -d '=' -f3|xargs)
     # shellcheck disable=SC1003
-    requirement_module_version=$(grep ^"$target_module_name" requirements.txt | cut -d '=' -f3 | cut -d '\' -f1|xargs)
+    requirement_module_version=$(grep ^"$target_module_name" requirements${FILENAME_SUFFIX}.txt | cut -d '=' -f3 | cut -d '\' -f1|xargs)
 
     echo "Comparing version of base $requirement_module_version with target arch version $target_module_version"
 	if [ $FORCE_REBUILD_PYMODULES == "true" ] || [ "$requirement_module_version" != "$target_module_version" ]; then
