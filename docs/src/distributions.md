@@ -46,6 +46,14 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is a legacy distribution (python2 only)
 
+!!! Warning
+To deploy to instances running RHEL 8.x or equivalents, the TPA
+controller must also be running RHEL 8.x . This is because a TPA
+controller running another OS may be running a newer ansible version
+than ansible-core 2.16, and therefore be incompatible with RHEL 8.x
+on the target instances.
+!!!
+
 ## RedHat ppc64le
 
 * RHEL/Rocky/AlmaLinux 9.x is fully supported (python3 only)

@@ -96,13 +96,7 @@ sudo /opt/EDB/TPA/bin/tpaexec setup
 ```
 
 `tpaexec setup` will automatically use a suitable version of the
-requirements.txt file to install the correct modules for your system,
-but if you need to override it for testing you can use the
-`--requirements-file` option:
-
-```shell
-sudo /opt/EDB/TPA/bin/tpaexec setup --requirements-file requirements-rh8.txt
-```
+requirements.txt file to install the correct modules for your system.
 
 You must run this as root because it writes to `/opt/EDB/TPA`,
 but the process will not affect any system-wide Python modules you may
