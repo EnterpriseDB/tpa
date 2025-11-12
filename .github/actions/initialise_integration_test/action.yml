@@ -112,6 +112,9 @@ runs:
     - uses: ./.github/actions/tpaexec-setup
       with:
         source_directory: ${{ inputs.source_directory }}
+        # if we're going to deploy to RH8, override requirements file as if the
+        # controller was also RH8
+        requirements_options: ${{ inputs.tpa_os_image == 'tpa/redhat:8' && '--requirements-file requirements-rh8.txt' || '' }}
 
     - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
       run: |

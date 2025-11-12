@@ -3,6 +3,8 @@
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
 import pytest
+from pathlib import Path
+import shutil
 
 from tpa.commands.configure import configure
 from tpa.architecture import Architecture
@@ -11,6 +13,18 @@ from tpa.exceptions import ConfigureError, UnsupportedArchitectureError
 from tpa.cluster import Cluster
 from tpa.platform import Platform
 
+@pytest.fixture(scope='function')
+def cleanup_test_dir():
+    """Fixture to ensure that the 'tests' directory is cleaned up"""
+
+    test_path = Path("test")
+    if test_path.exists():
+        shutil.rmtree(test_path)
+
+    yield None
+
+    if test_path.exists():
+        shutil.rmtree(test_path)
 
 class BasicArchitecture(Architecture):
     """Basic architecture to test configure function"""
@@ -63,7 +77,7 @@ class TestConfigure:
             (["test", "-a", "Other"], UnsupportedArchitectureError, Cluster),
         ],
     )
-    def test_configure(self, argv, error, expected):
+    def test_configure(self, argv, error, expected, cleanup_test_dir):
         """test configure command"""
 
         if error:
