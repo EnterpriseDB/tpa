@@ -301,6 +301,28 @@
     notify:
       - Note Postgres reload required
 
+  # Detect the installed Barman version so we can choose the correct
+  # compression flag for barman-wal-restore. The -z option was deprecated
+  # in Barman 3.12 in favour of --keep-compression. Detection may fail
+  # on first deploy because barman is installed after postgres/config
+  # runs. When detection fails, the fallback is --keep-compression
+  # because TPA installs the latest barman by default (>= 3.12). Users
+  # running older barman versions MUST set barman_package_version
+  # explicitly, which bypasses detection entirely.
+  - name: Detect Barman version on the Barman server
+    command: barman --version
+    register: _barman_version_output
+    delegate_to: "{{ barman_server }}"
+    run_once: true
+    changed_when: false
+    failed_when: false
+    vars:
+      _backup: "{{ hostvars[upstream_backedup].backup }}"
+      barman_server:
+        "{{ ([_backup] if _backup is string else _backup)|list|first }}"
+    when:
+      - barman_package_version is not defined
+      - upstream_backedup != ''
 
   - name: Set restore_command to point to a Barman server, if available
     set_fact:
@@ -309,8 +331,11 @@
       _backup: "{{ hostvars[upstream_backedup].backup }}"
       barman_server:
         "{{ ([_backup] if _backup is string else _backup)|list|first }}"
+      _detected_version: "{{ (_barman_version_output|default({})).stdout | default('') | regex_replace('^.*?(\\d+\\.\\d+).*$', '\\1') }}"
+      _barman_version: "{{ (barman_package_version|default(_detected_version))|default('')|regex_replace('[^0-9.].*$', '') }}"
+      _compression_flag: "{{ (_barman_version and _barman_version is version('3.12', '<'))|ternary('-z', '--keep-compression') }}"
       barman_command: >-
-        /usr/bin/barman-wal-restore -U {{ barman_user }} -z -p 8 --port {{ cluster_ssh_port|default(22)|int }}
+        /usr/bin/barman-wal-restore -U {{ barman_user }} {{ _compression_flag }} -p 8 --port {{ cluster_ssh_port|default(22)|int }}
         {{ barman_server }} {{ hostvars[upstream_backedup].backup_name }} %f %p
     when:
       upstream_backedup != ''
