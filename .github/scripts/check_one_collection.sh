@@ -2,7 +2,12 @@
 #
 # © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 #
-# updates collections/requirements.yml with an updated version
+# takes two arguments:
+# - a name of an Ansible Galaxy collection
+# - a filename of a Galaxy requirements file, usually requirements.yml
+#   or a variant of this
+#
+# updates the file with an updated version
 # containing the latest version of the specified collection
 #
 # if a change is made:
@@ -11,10 +16,11 @@
 # else writes "false" to the file in $FLAG_FILE
 
 export COLLECTION_NAME=$1
+export COLLECTION_FILE=$2
 GALAXY_API_PATH="https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/index"
 CURRENT_VERSION=$(yq -r \
           '.collections[] | select(.name == env(COLLECTION_NAME)) | .version' \
-          collections/requirements.yml)
+          $COLLECTION_FILE)
 
 if [ -z "$CURRENT_VERSION" ]; then
   echo "::error::Could not find version for $COLLECTION_NAME"
@@ -40,7 +46,7 @@ if [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
   yq -i '(.collections[]
            | select(.name == env(COLLECTION_NAME)) |
            .version
-         ) = env(UPSTREAM_VERSION)' collections/requirements.yml
+         ) = env(UPSTREAM_VERSION)' $COLLECTION_FILE
   echo "Updated requirements.yml"
 
   # the standard location for a changelog is CHANGELOG.rst in main

@@ -146,6 +146,10 @@ jobs:
           name: requirements-${{ matrix.architecture }}${{ env.FILENAME_SUFFIX}}
           path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}${{ env.FILENAME_SUFFIX }}.*
 
+  # we update the main collections/requirements.yml but not the RH8-specific
+  # one, because we would always get unwanted updates. So the RH8-specific file
+  # is left to the collection update workflow, which creates separate PRs that
+  # can be filtered by human intervention
   list-collections:
     name: List ansible galaxy collections
     runs-on: ubuntu-latest
@@ -172,7 +176,7 @@ jobs:
           COLLECTIONS=$(yq -r '.collections[] | .name' collections/requirements.yml)
           for col in $COLLECTIONS; do
             chmod 755 ./.github/scripts/check_one_collection.sh
-            ./.github/scripts/check_one_collection.sh $col
+            ./.github/scripts/check_one_collection.sh $col collections/requirements.yml
             if [ "$(cat $FLAG_FILE)" == "true" ]; then
               COLLECTION_UPDATE_FLAG="true"
             fi

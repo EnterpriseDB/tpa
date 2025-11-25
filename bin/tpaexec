@@ -139,6 +139,41 @@ _install_tpaexec_pth() {
     fi
 }
 
+_set_requirements_file_names() {
+    # Set REQUIREMENTS_FILE and COLLECTIONS_FILE to filenames where
+    # we look for python requirements and ansible galaxy collections
+    # respectively
+    #
+    # The defaults include the suffix "-rh8" if we can detect we are
+    # running on an RH-8 like system; they can be overridden using the
+    # --requirements-file and --collections-file command-line options
+    REQUIREMENTS_FILE="requirements.txt"
+    COLLECTIONS_FILE="requirements.yml"
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+
+        # if we're on RH8 and not installing from the -deps package, we
+        # use the alternative names; if we are installing from -deps, the
+        # files always have the standard names, even if this is RH8
+        if [[ ( "$ID_LIKE" == *"rhel"* || "$ID" == "rhel" ) && \
+              "$VERSION_ID" == 8* && \
+              ! -d "$PIP_DIR" ]]; then
+
+            REQUIREMENTS_FILE="requirements-rh8.txt"
+            COLLECTIONS_FILE="collections-rh8.txt"
+        fi
+    else
+        echo "Warning: /etc/os-release not found. Using default requirements."
+    fi
+
+    if [[ -v requirements_file ]]; then
+        REQUIREMENTS_FILE="$requirements_file"
+    fi
+    if [[ -v collections_file ]]; then
+        COLLECTIONS_FILE="$collections_file"
+    fi
+}
+
 _install_pip_packages() {
     pip_args=(--upgrade)
 
@@ -161,29 +196,14 @@ _install_pip_packages() {
 
     pip3 install "${pip_args[@]}" "pip>=10.0.1" wheel
 
+    # now that we know PIP_DIR we can work out which requirements files
+    # we're going to use, populating REQUIREMENTS_FILE and COLLECTIONS_FILE
+    _set_requirements_file_names
+
     # We need to install Ansible and all dependencies into the venv,
     # either from the bundled package from tpaexec-deps if present, or
     # directly from github/PyPI
 
-    REQUIREMENTS_FILE="requirements.txt"
-    if [[ -v requirements_file ]]; then
-        REQUIREMENTS_FILE="$requirements_file"
-    elif [ -f /etc/os-release ]; then
-        . /etc/os-release
-
-        # we use the alternative requirements.txt if we're on RH8
-        # and not installing from the -deps package, because the
-        # requirements file is always called requirements.txt in deps
-        # even if it is a non-standard one
-        if [[ ( "$ID_LIKE" == *"rhel"* || "$ID" == "rhel" ) && \
-              "$VERSION_ID" == 8* && \
-              ! -d "$PIP_DIR" ]]; then
-
-            REQUIREMENTS_FILE="requirements-rh8.txt"
-        fi
-    else
-        echo "Warning: /etc/os-release not found. Using default requirements."
-    fi
 
     TPA_REQUIREMENTS="$TPA_DIR/$REQUIREMENTS_FILE"
     if [[ -d $PIP_DIR ]]; then
@@ -257,7 +277,7 @@ _install_ansible_collections() {
     fi
     (
         cd "$ANSIBLE_COLLECTIONS" && \
-        "${ansible}"-galaxy collection install -p "${TPA_VENV}/collections" -r requirements.yml
+        "${ansible}"-galaxy collection install -p "${TPA_VENV}/collections" -r $COLLECTIONS_FILE
     )
 }
 
@@ -277,6 +297,10 @@ setup() {
                 ;;
             --requirements-file)
                 requirements_file=${1:?requirements file not specified}
+                shift
+                ;;
+            --collections-file)
+                collections_file=${1:?collections file not specified}
                 shift
                 ;;
             *)
