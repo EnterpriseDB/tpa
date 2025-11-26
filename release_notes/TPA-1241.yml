@@ -1,0 +1,18 @@
+- summary: Corrected Patroni ignore_slots data structure to prevent DCS parsing errors
+  description: |
+    Previously, the ignore_slots parameter was generated as a dictionary
+    instead of the required list format. This caused an AttributeError during
+    DCS parsing, which not only prevented the ignore_slots configuration
+    from taking effect but also blocked the application of subsequent
+    dynamic and static configuration updates.
+    This change ensures that ignore_slots is correctly formatted as a list
+    of dictionaries, resolving the parsing error and ensuring all configuration
+    changes are applied successfully.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+    - TPA-1241
