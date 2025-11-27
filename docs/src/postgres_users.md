@@ -46,6 +46,7 @@ the cluster's inventory. You can retrieve the value later:
 ```shell
 tpaexec show-password ~/clusters/speedy example
 ```
+
 ```output
 beePh~iez6lie4thi5KaiG%eghaeT]ai
 ```
@@ -57,19 +58,25 @@ store a different `<username>_password` in the inventory instead:
 tpaexec store-password ~/clusters/speedy example --random
 tpaexec show-password ~/clusters/speedy example
 ```
+
 ```output
 )>tkc}}k1y4&epaJ?;NJ:l'uT{C7D*<p
 ```
+
 ```shell
 tpaexec store-password ~/clusters/speedy example
 ```
+
 (enter password at the prompt)
+
 ```output
 Password:
 ```
+
 ```shell
 tpaexec show-password ~/clusters/speedy example
 ```
+
 ```output
 terrible insecure password
 ```
