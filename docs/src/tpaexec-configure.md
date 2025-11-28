@@ -219,6 +219,9 @@ which one is used by default.
 In general, you should be able to use "Debian", "RedHat", "Ubuntu", and
 "SLES" to select the right images.
 
+Optionally, you can include the version of the distribution by passing
+`--os-version <version number>`.
+
 This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.
 
@@ -474,6 +477,7 @@ Let's see what happens when we run the following command:
 ```shell
 tpaexec configure ~/clusters/speedy --architecture M1 \
         --distribution Debian \
+        --os-version 12 \
         --platform aws --region us-east-1 --network 10.33.0.0/16 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \
