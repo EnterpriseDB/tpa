@@ -1,0 +1,7 @@
+- summary: Remove 'file' as a dependency for Barman
+  description: |
+    Barman is requiring 'file' as a dependency now, and hence, it's installed by
+    the package manager. There's no need to track it as a separate dependency any more.
+  type: bugfix
+  jira_tickets:
+  - TPA-1245
