@@ -21,7 +21,7 @@ log_destination = {{ log_destination }}
 syslog_facility = {{ syslog_facility|default('LOCAL6') }}
 syslog_ident = {{ syslog_ident|default('postgres') }}
 
-{% if log_destination == 'stderr' %}
+{% if log_destination != 'syslog' %}
 log_directory = '{{ postgres_log_file | dirname }}'
 log_filename = '{{ postgres_log_file | basename }}'
 log_file_mode = '{{ postgres_log_file_mode }}'

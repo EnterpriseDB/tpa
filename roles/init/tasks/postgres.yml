@@ -155,6 +155,7 @@
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
     postgres_log_file: "{{ postgres_log_file | default(default_postgres_log_file) }}"
     postgres_log_file_mode: "{{ postgres_log_file_mode | default(default_postgres_log_file_mode) }}"
+    postgres_log_directory_mode: "{{ postgres_log_directory_mode | default(default_postgres_log_directory_mode) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
@@ -237,6 +238,22 @@
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
+
+- name: Split extension from postgres_log_file
+  set_fact:
+    _postgres_log_file_last: "{{ postgres_log_file | splitext | last }}"
+    _postgres_log_file_first: "{{ postgres_log_file | splitext | first }}"
+  
+- name: Set full path to Postgres logs based on selected options
+  set_fact:
+    postgres_log_file_with_extension: "{{
+        postgres_log_file if log_destination in ['syslog', 'stderr']  else
+        _postgres_log_file_first + '.json' if log_destination == 'jsonlog' and _postgres_log_file_last == '.log' else
+        _postgres_log_file_first + '.csv' if log_destination == 'csvlog' and _postgres_log_file_last == '.log' else
+        postgres_log_file + '.json' if log_destination == 'jsonlog' else
+        postgres_log_file + '.csv' if log_destination == 'csvlog'  else
+        postgres_log_file    
+      }}"
 
 
 # Find and set right HARP manager user. The var from config.yml takes precendence,

@@ -109,4 +109,4 @@
       log_rotation_age: '0'
       log_rotation_size: '0'
   when:
-    log_destination == 'stderr'
+    log_destination != 'syslog'

@@ -92,6 +92,7 @@ default_postgres_lib_dir:
 
 default_postgres_log_file: "/var/log/postgres/postgres.log"
 default_postgres_log_file_mode: "0640"
+default_postgres_log_directory_mode: "0700"
 
 default_postgres_tablespaces: {}
 

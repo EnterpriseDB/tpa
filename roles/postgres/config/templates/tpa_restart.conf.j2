@@ -18,7 +18,7 @@ max_prepared_transactions = {{ max_prepared_transactions|default(0) }}
 
 max_worker_processes = {{ max_worker_processes }}
 
-logging_collector = {{ logging_collector|default((log_destination == 'stderr')|ternary('on', 'off')) }}
+logging_collector = {{ logging_collector|default((log_destination != 'syslog')|ternary('on', 'off')) }}
 
 {% if postgres_version is version('9.4', '>') %}
 cluster_name = '{{ postgres_cluster_name }}'

@@ -12,8 +12,4 @@
     mode: "0644"
   vars:
     logrotate_postgres: >-
-      {{
-        (log_destination == 'syslog')|ternary(
-          postgres_log_file, '/var/log/postgresql/postgres.log'
-        )
-      }}
+      {{ postgres_log_file_with_extension }}

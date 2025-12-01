@@ -21,14 +21,14 @@
     - log_file.stat.pw_name != postgres_user
     - log_file.stat.gr_name != postgres_group
 
-# Even if a stricter default umask is set, we want the permissions on the directory to always be 0700
-- name: Explicitly set permissions for {{ log_dir }} to 0700
+# Even if a stricter default umask is set, we want the permissions on the directory to be set explicitly
+- name: Explicitly set permissions for {{ log_dir }} to {{ postgres_log_directory_mode }}
   file:
     path: "{{ log_dir }}"
     state: directory
     owner: "{{ postgres_user }}"
     group: "{{ postgres_group }}"
-    mode: "0700"
+    mode: "{{ postgres_log_directory_mode }}"
   vars:
     log_dir: "{{ postgres_log_file | dirname }}"
 
