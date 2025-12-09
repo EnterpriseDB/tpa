@@ -1,0 +1,12 @@
+- summary: Fix undefined Patroni SSL facts during upgrade and test phases
+  description: |
+    SSL-related facts set during deployment were not persisted across playbook
+    runs, causing errors such as `'patroni_ssl_ca_file' is undefined` when
+    running `upgrade` or `test` against a Patroni cluster with SSL enabled.
+
+    These facts are now set by a dedicated `patroni/facts` role included at
+    the relevant points in the upgrade playbook and test tasks, ensuring they
+    are always available regardless of which phase is being executed.
+  type: bugfix
+  jira_tickets:
+  - TPA-1269

@@ -130,6 +130,10 @@
   tasks:
   - when: fo_manager == "patroni"
     block:
+    - include_role:
+        name: patroni/facts
+        tasks_from: ssl
+
     - name: Pause cluster management
       include_role:
         name: patroni/api
@@ -156,6 +160,10 @@
     - upgrade_selector|strict_selects('postgres') or upgrade_selector|strict_selects('all')
     - can_upgrade_postgres
     block:
+    - include_role:
+        name: patroni/facts
+        tasks_from: ssl
+
     - include_role: name=postgres/update
     - name: Issue a postgresql restart if required
       include_role:
@@ -175,17 +183,22 @@
   hosts: g_chosen_primary:&g_update_hosts
   tasks:
 
-  - name: Switch over to {{ chosen_replica }}
-    include_role:
-      name: patroni/api
-      tasks_from: switchover.yml
-    vars:
-      body:
-        leader: "{{ chosen_primary }}"
-        candidate: "{{ chosen_replica }}"
-    when:
+  - when:
     - upgrade_selector|strict_selects('postgres') or upgrade_selector|strict_selects('all')
     - can_upgrade_postgres
+    block:
+    - include_role:
+        name: patroni/facts
+        tasks_from: ssl
+
+    - name: Switch over to {{ chosen_replica }}
+      include_role:
+        name: patroni/api
+        tasks_from: switchover.yml
+      vars:
+        body:
+          leader: "{{ chosen_primary }}"
+          candidate: "{{ chosen_replica }}"
 
 - name: Upgrade postgres on chosen_primary
   any_errors_fatal: true
@@ -200,6 +213,10 @@
     - upgrade_selector|strict_selects('postgres') or upgrade_selector|strict_selects('all')
     - can_upgrade_postgres
     block:
+    - include_role:
+        name: patroni/facts
+        tasks_from: ssl
+
     - include_role: name=postgres/update
     - name: Issue a postgresql restart if required
       include_role:
@@ -217,17 +234,22 @@
   hosts: g_chosen_primary:&g_update_hosts
   tasks:
 
-  - name: Switch over to original primary {{ inventory_hostname }}
-    include_role:
-      name: patroni/api
-      tasks_from: switchover.yml
-    vars:
-      body:
-        leader: "{{ chosen_replica }}"
-        candidate: "{{ chosen_primary }}"
-    when:
+  - when:
     - upgrade_selector|strict_selects('postgres') or upgrade_selector|strict_selects('all')
     - can_upgrade_postgres
+    block:
+    - include_role:
+        name: patroni/facts
+        tasks_from: ssl
+
+    - name: Switch over to original primary {{ inventory_hostname }}
+      include_role:
+        name: patroni/api
+        tasks_from: switchover.yml
+      vars:
+        body:
+          leader: "{{ chosen_replica }}"
+          candidate: "{{ chosen_primary }}"
 
 - name: Upgrade etcd
   any_errors_fatal: true
@@ -253,7 +275,11 @@
   hosts: role_postgres:&g_update_hosts
   serial: 1
   tasks:
-  - include_role: name=patroni/update
+  - block:
+    - include_role:
+        name: patroni/facts
+        tasks_from: ssl
+    - include_role: name=patroni/update
     when: 
     - upgrade_selector|strict_selects('patroni') or upgrade_selector|strict_selects('all')
     - fo_manager == "patroni"
@@ -273,6 +299,10 @@
   environment: "{{ target_environment }}"
   hosts: g_chosen_primary
   tasks:
+  - include_role:
+      name: patroni/facts
+      tasks_from: ssl
+
   - name: Resume cluster management
     include_role:
       name: patroni/api
