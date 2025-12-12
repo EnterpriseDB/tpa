@@ -155,8 +155,9 @@ _set_requirements_file_names() {
         # if we're on RH8 and not installing from the -deps package, we
         # use the alternative names; if we are installing from -deps, the
         # files always have the standard names, even if this is RH8
-        if [[ ( "$ID_LIKE" == *"rhel"* || "$ID" == "rhel" ) && \
-              "$VERSION_ID" == 8* && \
+        if [[ ( ( -v ID_LIKE && "$ID_LIKE" == *"rhel"* ) || \
+                ( -v ID && "$ID" == "rhel" ) ) && \
+              ( -v VERSION_ID && "$VERSION_ID" == 8* ) && \
               ! -d "$PIP_DIR" ]]; then
 
             REQUIREMENTS_FILE="requirements-rh8.txt"
