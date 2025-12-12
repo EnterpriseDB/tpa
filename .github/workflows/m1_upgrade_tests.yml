@@ -55,7 +55,7 @@ on:
         - 16
         - 17
         - 18
-      tpa_postgres_package_version:
+      postgres_base_version:
         description: "package version to upgrade from"
         required: true
         default: "16.4*"
@@ -140,8 +140,8 @@ jobs:
           tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
           tpa_failover_manager: ${{ env.FAILOVER_MANAGER }}
           tpa_package_cache: ${{ env.USE_DOWNLOADER }}
-          tpa_upgrade_package_name: postgres
-          tpa_upgrade_package_base_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.tpa_postgres_package_base_version }}
+          upgrade_component_name: postgres
+          upgrade_component_base_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.postgres_base_version }}
           cluster: "${{ env.FAILOVER_MANAGER }}-\
             ${{ env.OS_IMAGE }}-\
             ${{ env.POSTGRES_FLAVOUR }}-\
