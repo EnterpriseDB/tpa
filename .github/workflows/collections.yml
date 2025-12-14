@@ -72,7 +72,7 @@ jobs:
       - name: Create pull request
         if: ${{ steps.update-check.outputs.changed == 'true' }}
         id: cpr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           base: main
           token: ${{ env.GITHUB_TOKEN }}
