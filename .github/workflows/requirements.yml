@@ -102,7 +102,7 @@ jobs:
           path: foundation
 
       - name: Download generated requirements.txt
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: new_requirements${{ env.FILENAME_SUFFIX }}
           path: ${{ github.workspace }}
@@ -205,42 +205,42 @@ jobs:
           token: ${{ secrets.GH_SLONIK }}
 
       - name: Download generated main requirements.txt
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: new_requirements
           path: ${{ github.workspace }}
 
       - name: Download generated main requirements.txt for rh8
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: new_requirements-rh8
           path: ${{ github.workspace }}
       - name: Download generated requirements.txt for ppc64le
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: requirements-ppc64le
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for ppc64le on rh8
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: requirements-ppc64le-rh8
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for s390x
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: requirements-s390x
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for s390x on rh8
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: requirements-s390x-rh8
           path: ${{ github.workspace }}
 
       - name: Download generated collections/requirements.yml
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: collection-requirements.yml
           path: ${{ github.workspace }}/collections
