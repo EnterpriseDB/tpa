@@ -1,0 +1,6 @@
+# pins for RH8
+# format: "namespace.collection": "version.prefix"
+community.docker: "4."
+# collections not listed here end up with an empty string in
+# the pin resolution logic, equivalent to no pin and therefore
+# get the latest available version
