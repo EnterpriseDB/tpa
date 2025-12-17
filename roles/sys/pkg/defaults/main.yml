@@ -44,7 +44,6 @@ default_packages:
     - lsof
     - "{{ python_pkg_prefix }}-cryptography"
     - ca-certificates
-    - rsync
     - logrotate
   Debian:
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
