@@ -19,6 +19,6 @@
     package_lists:
       - "{{ default_packages['common'] | difference(unwanted_packages['common']|default([])) }}"
       - "{{ packages['common']|default([]) }}"
-      - "{{ default_packages[ansible_distribution] }}"
+      - "{{ default_packages[ansible_distribution] | difference(unwanted_packages[ansible_distribution]|default([])) }}"
       - "{{ packages[ansible_distribution]|default([]) }}"
       - "{{ (needs_sudo.stdout.strip() == 'yes')|ternary(['sudo'], []) }}"
