@@ -1,0 +1,9 @@
+- summary: Retry efm's health check after an upgrade
+  description: |
+    In a busy system, the cluster can take a bit longer to recover making just
+    a single health check insufficient. This change introduces a retry mechanism
+    for efm's health check after an upgrade to give the cluster more time before
+    deciding that the upgrade has failed.
+  type: bugfix
+  jira_tickets:
+  - TPA-1268
