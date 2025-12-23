@@ -37,7 +37,8 @@
     etcd_endpoints: "{{
         groups['role_etcd']
         |select_by_hostvar(hostvars, 'etcd_location', etcd_location)
-        |map('pyformat_hostvars', '{etcd_protocol}://{inventory_hostname}:{etcd_client_port}', hostvars)
+        |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
+        |map('regex_replace', '^', etcd_protocol + '://')
         |list
         |join(',')
       }}"
