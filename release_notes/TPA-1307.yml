@@ -1,0 +1,9 @@
+- summary: Fix RHEL 8 deployment failures in Patroni clusters
+  description: |
+    Resolved a deployment failure on RHEL 8 by updating the
+    `patroni_compare_config.py` script for Python 3.6+ compatibility. This
+    fix ensures that Patroni configuration validation runs correctly in
+    modern Python environments while maintaining the script's core logic.
+  type: bugfix
+  jira_tickets:
+  - TPA-1307

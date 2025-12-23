@@ -100,10 +100,6 @@
   when: >
     'haproxy' in role
 
-- include_role: name=etcd/facts
-  when: >
-    'etcd' in role
-
 - include_role: name=patroni/facts
 
 - include_role: name=efm/facts
