@@ -8,6 +8,7 @@ nav:
   - Installation: INSTALL.md
   - Install from Source: INSTALL-repo.md
   - Open Source: opensourcetpa.md
+  - Known Issues: known_issues.md
   - Creating a cluster:
     - Tutorial: firstclusterdeployment.md
     - Configuration: tpaexec-configure.md
