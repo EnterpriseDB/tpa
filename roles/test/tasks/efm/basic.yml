@@ -32,16 +32,22 @@
     set_fact:
       efm_identity: "{{ (efm_bind_by_hostname|default(false))|ternary(inventory_hostname, ip_address) }}"
 
-  - name: Run efm cluster-status command
+  - name: Run efm cluster-status command and wait for nodes to sync
     command: >
       {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
     changed_when: false
     become: true
     become_user: efm
     register: efm_cluster_status_json
-    until: efm_cluster_status_json.rc == 0
     retries: "{{ efm_cluster_status_retries }}"
     delay: "{{ efm_cluster_status_retry_delay }}"
+    until: >
+      efm_cluster_status_json is success and
+      (sync_values|unique|length) == 1
+    vars:
+      efm_cluster_info: "{{ efm_cluster_status_json.stdout|from_json }}"
+      query: "{{ efm_version is version('5', '>=') | ternary('nodes.*.lsn', 'nodes.*.xlog') }}"
+      sync_values: "{{ efm_cluster_info|json_query(query) }}"
 
 
   - name: Format output
@@ -79,16 +85,3 @@
       success_msg: >
         {{ efm_identity }} ({{ inventory_hostname }}) is part of allowed nodes list.
 
-  - name: Ensure all nodes are in sync
-    assert:
-      that: >
-        (sync_values|unique|length) == 1
-      fail_msg: >
-        {{ sync }} value is not the same for all nodes, nodes are not in sync
-        {{ sync }}: {{ sync_values }}
-      success_msg: >
-        All nodes {{ sync }} values are in sync at: {{ sync_values|unique }}
-    vars:
-      sync_values: "{{ efm_cluster_info|json_query(query) }}"
-      query: "{{ efm_version is version('5', '>=') | ternary('nodes.*.lsn', 'nodes.*.xlog') }}"
-      sync: "{{ efm_version is version('5', '>=') | ternary('lsn', 'xlog') }}"

@@ -1,0 +1,21 @@
+- summary: Fix EFM switchover failures on busy systems with standby lag
+  description: |
+    Fixed an issue where EFM switchover operations could fail during upgrades
+    or maintenance operations on busy systems when the standby server was
+    lagging behind the primary.
+
+    Previously, TPA's pre-switchover health checks would immediately fail if
+    standby nodes were not fully synchronised with the primary, causing upgrade
+    procedures to abort even when the nodes would catch up within seconds.
+
+    TPA now implements a wait-and-retry mechanism in the EFM health check that
+    monitors cluster status and waits for all nodes to synchronise before
+    allowing the switchover to proceed. This ensures switchover operations only
+    begin when the cluster is in a safe state for promotion.
+
+    This resolves spurious failures on distributed systems where temporary
+    replication lag exists during upgrade workflows on production systems with
+    active workloads.
+  type: bugfix
+  jira_tickets:
+  - TPA-1315
