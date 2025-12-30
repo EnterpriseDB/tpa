@@ -67,6 +67,16 @@
 # enumeration, etc.
 
 - include_tasks: roles.yml
+
+# Detect that we have EDB repositories defined and a token in the
+# environment, if we need them for this cluster. We do this early
+# to fail fast before spending time on distribution detection and
+# other setup tasks.
+
+- include_tasks: repos.yml
+  when: >
+    task_selector|permits('repo')
+
 - include_tasks: hostvars.yml
 - include_tasks: volumes.yml
 - include_tasks: sys.yml

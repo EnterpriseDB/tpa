@@ -9,7 +9,9 @@
 #    includes PGDG, EPEL, and any extra user-defined repositories.
 #
 # 2. Repositories listed in edb_repositories, which may be empty. We
-#    always need an EDB_SUBSCRIPTION_TOKEN to access these repositories.
+#    need an EDB_SUBSCRIPTION_TOKEN to access these repositories unless
+#    use_local_repo_only is enabled (except when downloading packages,
+#    which always requires a token to download from EDB repositories).
 #
 # In principle, we want config.yml to spell out exactly which of these
 # sources to use in any given cluster. However, must maintain backwards
@@ -29,7 +31,10 @@
       You must set edb_repositories to use BDR/PGD
 
 - assert:
-    that: edb_repositories is empty or edb_repos_token != ''
+    that: >
+      edb_repositories is empty
+      or edb_repos_token != ''
+      or (use_local_repo_only|default(false) and 'downloader' not in role|default([]))
     fail_msg: >-
       You must obtain a token from
       https://www.enterprisedb.com/repos-downloads and

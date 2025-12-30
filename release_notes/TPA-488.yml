@@ -1,0 +1,11 @@
+- summary: Remove mandatory EDB token check for local-only deployments
+  description: |
+    Resolved an issue where `tpaexec deploy` incorrectly required an
+    EDB_SUBSCRIPTION_TOKEN even when the `--use-local-repo-only` option was
+    enabled. TPA now bypasses this validation when deploying from local
+    repositories, provided that all necessary packages are available locally.
+    Note that a token is still required to initially download packages and
+    populate the local repository.
+  type: minor_change
+  jira_tickets:
+  - TPA-488
