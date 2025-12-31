@@ -59,6 +59,12 @@ configure`, then TPA will set `harp_consensus_protocol` to `etcd`
 in config.yml and give the `etcd` role to a suitable subset of the
 instances, depending on your chosen layout.
 
+When using BDR 4 with HARP and `harp_consensus_protocol: etcd`, at
+least one instance must have the `etcd` role defined in config.yml.
+Typically, the `etcd` role is added to BDR primary instances. TPA will
+validate this requirement during provision and fail with a clear error
+message if no etcd roles are found.
+
 HARP v2 requires etcd v3.5.0 or above, which is available in the
 products/harp/release package repositories provided by EDB.
 

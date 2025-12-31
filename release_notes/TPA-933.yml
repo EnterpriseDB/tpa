@@ -1,0 +1,12 @@
+- summary: Added validation to catch missing etcd roles
+  description: |
+    When deploying a BDR 4 cluster with HARP using `harp_consensus_protocol: etcd`,
+    if no instances have the etcd role defined, deployment would fail late with
+    cryptic and obscure errors about missing etcd endpoints. Debugging such issues
+    is expensive but this validation now catches the issue early and provides some
+    clues to the user about what went wrong.
+  type: bugfix
+  jira_tickets:
+  - TPA-933
+  support_tickets:
+  - CP46041

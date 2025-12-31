@@ -84,6 +84,28 @@
   vars:
     camo_partner: "{{ item.get('vars', {}).get('bdr_node_camo_partner', '') }}"
 
+- name: Validate etcd role exists when using BDR 4 with HARP and etcd consensus
+  assert:
+    msg: >-
+      When using BDR 4 with HARP and harp_consensus_protocol='etcd',
+      at least one instance must have the 'etcd' role, but none were found.
+      Please add 'etcd' to the role list for one or more instances in
+      {{ config_file }}.
+    that:
+      instances_with_etcd is not empty
+  vars:
+    bdr_ver: "{{ cluster_vars.get('bdr_version', '') }}"
+    instances_with_etcd: "{{
+        instances|selectattr('role', 'defined')
+        |selectattr('role', 'contains', 'etcd')
+        |list
+      }}"
+  when: >
+    bdr_ver != ''
+    and bdr_ver|string is version('4', '==')
+    and cluster_vars.get('failover_manager', '') == 'harp'
+    and cluster_vars.get('harp_consensus_protocol', '') == 'etcd'
+
 - name: Convert cluster_network to cluster_networks
   set_fact:
     cluster_vars:
