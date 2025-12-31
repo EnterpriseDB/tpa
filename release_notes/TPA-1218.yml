@@ -1,0 +1,15 @@
+- summary: Fix barman_role privilege grants for BDR clusters
+  description: |
+    In BDR clusters, privileges required by barman were incorrectly granted
+    to the BDR database instead of the `postgres` database, which is where
+    barman actually connects. This caused the "no access to backup functions:
+    FAILED" error after upgrading to TPA 23.40.
+
+    After deploying this fix, the grants are correctly applied to the
+    `postgres` database. Existing affected clusters can be fixed by
+    re-running `tpaexec deploy`.
+  type: bugfix
+  jira_tickets:
+  - TPA-1218
+  support_tickets:
+  - CP54698
