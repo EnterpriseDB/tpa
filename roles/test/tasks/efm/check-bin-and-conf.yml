@@ -27,16 +27,16 @@
 
 - name: "Check state of EFM binary and configuration directories"
   vars:
-    fail_if_not_found: "{{ fail_if_found | default(true) | bool }}"
+    expect_to_exist: "{{ expect_to_exist | default(true) | bool }}"
+  when: not upgrade_in_progress|default(False)
   block:
-  - name: "Ensure EFM {{ target_efm_version }} configuration directory {{ fail_if_not_found|ternary('exists', 'does not already exist') }}"
-    fail: 
-      msg: "{{ fail_if_not_found|ternary('Failed to find', 'Already found')}} a configuration directory for EFM {{ target_efm_version }}"
-    when: existing_efm_configuration.stat.exists != fail_if_not_found
+  - name: "Ensure EFM {{ target_efm_version }} configuration directory {{ expect_to_exist|ternary('exists', 'does not already exist') }}"
+    fail:
+      msg: "{{ expect_to_exist|ternary('Failed to find', 'Already found')}} a configuration directory for EFM {{ target_efm_version }}"
+    when: existing_efm_configuration.stat.exists != expect_to_exist
 
-        
-  - name: "Ensure EFM {{ target_efm_version }} binary directory {{ fail_if_not_found|ternary('exists', 'does not already exist') }}"
-    fail: 
-      msg: "{{ fail_if_not_found|ternary('Failed to find', 'Already found')}} a binary directory for EFM {{ target_efm_version }}"
-    when: existing_efm_configuration.stat.exists != fail_if_not_found
+  - name: "Ensure EFM {{ target_efm_version }} binary directory {{ expect_to_exist|ternary('exists', 'does not already exist') }}"
+    fail:
+      msg: "{{ expect_to_exist|ternary('Failed to find', 'Already found')}} a binary directory for EFM {{ target_efm_version }}"
+    when: existing_efm_configuration.stat.exists != expect_to_exist
 

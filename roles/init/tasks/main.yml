@@ -96,6 +96,10 @@
 
 - include_role: name=patroni/facts
 
+- include_role: name=efm/facts
+  when: >
+    'efm' in role
+
 # Check that we have EDB repositories defined and a token in the
 # environment, if we need them for this cluster.
 

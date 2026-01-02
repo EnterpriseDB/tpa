@@ -448,7 +448,7 @@ upgrade() {
     fi
 
     provision
-    playbook commands/upgrade.yml "$@"
+    playbook commands/upgrade.yml -e upgrade_in_progress=true "$@"
 }
 
 switch2cm() {

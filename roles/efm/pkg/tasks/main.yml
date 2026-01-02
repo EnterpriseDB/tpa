@@ -2,6 +2,24 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+# Check if any EFM version is already installed to avoid installing
+# a different version alongside it (which causes service conflicts).
+# See TPA-1044 for details.
+
+- include_tasks: detect-installed.yml
+
+- name: Fail if a different EFM version is already installed
+  fail:
+    msg: >-
+      EFM version {{ installed_efm_versions | first }} is already installed,
+      but TPA is configured to install EFM {{ efm_version }}.
+      To avoid service conflicts, set 'efm_version: {{ installed_efm_versions | first }}'
+      in config.yml, or use 'tpaexec upgrade' to upgrade EFM.
+  when:
+    - not upgrade_in_progress|default(False)
+    - installed_efm_versions | default([]) | length > 0
+    - efm_version not in installed_efm_versions
+
 - include_tasks: list-packages.yml
   vars:
     list_varname: _all_efm_packages

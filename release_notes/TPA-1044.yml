@@ -1,0 +1,13 @@
+- summary: Prevent concurrent installation of multiple EFM versions
+  description: |
+    Updated `tpaexec` to prevent the installation of multiple EFM versions,
+    resolving service startup conflicts. The version check now correctly
+    detects the `upgrade_in_progress` state, allowing `tpaexec upgrade
+    --components=efm` to replace the existing version while continuing to
+    block accidental multi-version installations during normal deployment
+    operations.
+  type: notable_change
+  jira_tickets:
+  - TPA-1044
+  support_tickets:
+  - CP48997
