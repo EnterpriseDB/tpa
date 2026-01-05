@@ -1,0 +1,9 @@
+- summary: Allow Docker instance IP addresses to be set using `--hostnames-from`
+  description: |
+    Previous versions of TPA automatically generate `ip_address` even if it is supplied in a hostnames file.
+    This fix means TPA will only generate an IP address at configure time if one has not been specified already.
+    Note that TPA will not automatically select a cluster network that contains the provided IP addresses, 
+    so the `--network` option should be used to specify a matching CIDR.
+  type: bugfix
+  jira_tickets:
+  - TPA-407

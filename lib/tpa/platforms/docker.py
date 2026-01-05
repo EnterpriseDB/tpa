@@ -265,7 +265,12 @@ class docker(Platform):
             else:
                 i.remove_setting("volumes")
 
-            i.set_settings({'ip_address': str(next(host_ips))})
+            # If ip_address is not yet set, we take one from our iterator.
+            # We need this check because ip_address can be set already 
+            # if the user has provided IPs via `--hostnames-from`, 
+            # in which case we don't want to ignore them.
+            if not i.get_setting("ip_address", None):
+                i.set_settings({'ip_address': str(next(host_ips))})
 
     def process_arguments(self, args, cluster):
         s = args.get("platform_settings") or {}

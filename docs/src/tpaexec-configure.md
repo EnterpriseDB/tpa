@@ -139,7 +139,7 @@ When the "docker" platform is selected, TPA will always place the
 entire cluster in a single subnet regardless of the architecture. This
 subnet is generated according to the logic described here with the
 exception that if the `subnet-prefix` is not specified, TPA will
-automatically select a subnet size large enough to accomodate the number
+automatically select a subnet size large enough to accommodate the number
 of instances in
 `config.yaml`.
 !!!
@@ -186,6 +186,20 @@ an optional IP address after the name; if present, this address will be
 set as the `ip_address` for the corresponding instance in `config.yml`.
 If two ip addresses are present, the first will be set as `public_ip`
 and the second as `private_ip`.
+
+!!! Note
+When you explicitly specify IP addresses, whether through a hostnames 
+file or directly in `config.yml`, you must ensure that they fall within 
+the cluster network CIDR range. For Docker and AWS platform, this 
+means that you must [specify a cluster network](#network-configuration) 
+if you specify IP addresses.
+
+If you do not specify a cluster network CIDR range, TPA will select
+one randomly with no reference to the specified IP addresses.
+This will result in a failed deployment or a cluster with different IP
+addresses than you were expecting.
+!!!
+
 
 Use `--hostnames-pattern '…pattern…'` to limit the selection to
 lines matching an egrep pattern.

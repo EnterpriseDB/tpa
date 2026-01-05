@@ -262,7 +262,12 @@ class docker(Platform):
                 if not i["volumes"]:
                     del i["volumes"]
 
-            i['ip_address'] = str(next(host_ips))
+            # If ip_address is not yet set, we take one from our iterator.
+            # We need this check because ip_address can be set already 
+            # if the user has provided IPs via `--hostnames-from`, 
+            # in which case we don't want to ignore them.
+            if not i.get('ip_address', None):
+                i['ip_address'] = str(next(host_ips))
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
