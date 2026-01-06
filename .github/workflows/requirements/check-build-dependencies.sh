@@ -32,7 +32,7 @@ function install_edbpython_inside_container() {
 	;;
     esac
 
-    curl -1sLf "https://downloads.enterprisedb.com/${EDB_SUBSCRIPTION_TOKEN}/dev/setup.${SUFFIX}.sh" | sudo bash
+    curl --proto "=https" -1sLf "https://downloads.enterprisedb.com/${EDB_SUBSCRIPTION_TOKEN}/dev/setup.${SUFFIX}.sh" | sudo bash
     sudo "$CMD" install -y $DEFAULT_EDBPYTHON $DEPS
 }
 
