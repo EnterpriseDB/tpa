@@ -6,7 +6,7 @@ description: Which Linux distributions are supported by TPA.
 
 TPA detects and adapts to the distribution running on each target
 instance. This page lists platforms which are actively supported and
-'legacy distribution' which have previously been supported. Deploying to a
+'legacy distributions' which have previously been supported. Deploying to a
 legacy platform is likely to work as long as you have access to the
 necessary packages, but this is not considered a supported use of TPA
 and is not suitable for production use.
@@ -36,9 +36,9 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 ## Oracle Linux x86
 
-* Oracle Linux 9.x is fully supported (docker only)
-* Oracle Linux 8.x is fully supported (docker only)
-* Oracle Linux 7.x is a legacy distribution (docker only)
+* Oracle Linux 9.x is fully supported
+* Oracle Linux 8.x is fully supported
+* Oracle Linux 7.x is a legacy distribution
 
 ## RedHat x86
 
