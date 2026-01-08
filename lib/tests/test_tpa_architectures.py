@@ -2,78 +2,460 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-"""Tests for architecture object."""
+"""Tests for lib/tpa architecture module (PGD-X and PGD-S)."""
+import shutil
+import os
 
 import pytest
 
-from tpa.architecture import Architecture
+from tpa.architectures.pgd_x import PGDX
+from tpa.architectures.pgd_s import PGDS
+from tpa.commands.configure import configure
 
 
-class BasicArchitecture(Architecture):
-    """Basic Architecure class to test common functions inherited from Architecture class"""
-
-    pass
-
-
-@pytest.fixture
-def basic_architecture():
-    """generate a basic architecture"""
-
-    return Architecture("foo", "bar")
+CONFIG_PATH = {
+    "PGDX": "lib/tests/config/cluster-PGDX",
+    "PGDS": "lib/tests/config/cluster-PGDS",
+}
 
 
-class TestArchitecture:
-    """test suite for Architecture class"""
-
-    def test_architecture_basic(self, basic_architecture):
-        """test basic Architecture creation"""
-
+def cleanup(path):
+    try:
+        shutil.rmtree(path)
+    except FileNotFoundError:
         pass
 
 
+class ConfiguredArchitecture:
+    """Wrapper class that provides access to both the architecture object and config.yml."""
+
+    def __init__(self, arch_class, argv, cluster_path):
+        import yaml
+
+        self.cluster_path = cluster_path
+        self.argv = argv
+
+        # Run configure which creates the cluster
+        configure(argv, tpa_dir=".")
+
+        # Read the generated config.yml
+        config_file = os.path.join(cluster_path, "config.yml")
+        with open(config_file, 'r') as f:
+            self.config = yaml.safe_load(f)
+
+        # Create architecture instance for accessing methods like bdr_safe_name
+        arch_dir_name = "PGD-X" if arch_class == PGDX else "PGD-S"
+        self.arch = arch_class(
+            directory=f"architectures/{arch_dir_name}",
+            lib="architectures/lib",
+            argv=argv,
+        )
+
+    @property
+    def name(self):
+        return self.config.get("architecture")
+
+    @property
+    def args(self):
+        """Provides args-like access to configuration for compatibility."""
+        # Extract location names from location objects
+        locations = self.config.get("locations", [])
+        location_names = [loc.get("Name") for loc in locations if isinstance(loc, dict)]
+
+        return {
+            "architecture": self.config.get("architecture"),
+            "pgd_routing": self._extract_from_argv("--pgd-routing"),
+            "layout": self._extract_from_argv("--layout") or "standard",
+            "location_names": location_names,
+            "cluster_vars": self.config.get("cluster_vars", {}),
+        }
+
+    def _extract_from_argv(self, flag):
+        """Extract a flag value from argv."""
+        try:
+            idx = self.argv.index(flag)
+            if idx + 1 < len(self.argv):
+                return self.argv[idx + 1]
+        except ValueError:
+            pass
+        return None
+
+    def num_instances(self):
+        """Return number of instances in the cluster."""
+        return len(self.config.get("instances", []))
+
+    def bdr_safe_name(self, name):
+        """Delegate to the actual architecture instance."""
+        return self.arch.bdr_safe_name(name)
+
+    def supported_versions(self):
+        """Delegate to the actual architecture instance."""
+        return self.arch.supported_versions()
+
+
 @pytest.fixture
-def basic_m1():
-    """generate a basic M1 architecture"""
-
-    pass
-
-
-class TestM1:
-    """test suite for M1 Architecture class"""
-
-    def test_m1_basic(self, basic_m1):
-        """test basic M1 Architecture creation"""
-
-        pass
+def pgdx_architecture(argv):
+    """Fixture for PGD-X architecture testing."""
+    cluster_path = CONFIG_PATH["PGDX"]
+    configured = ConfiguredArchitecture(PGDX, argv, cluster_path)
+    yield configured
+    cleanup(cluster_path)
 
 
 @pytest.fixture
-def basic_bdrao():
-    """generate a basic BDRAlwaysON architecture"""
-
-    pass
-
-
-class TestBDRAO:
-    """test suite for BDRAlwaysON Architecture class"""
-
-    def test_bdrao_basic(self, basic_bdrao):
-        """test basic BDRAlwaysON Architecture creation"""
-
-        pass
+def pgds_architecture(argv):
+    """Fixture for PGD-S architecture testing."""
+    cluster_path = CONFIG_PATH["PGDS"]
+    configured = ConfiguredArchitecture(PGDS, argv, cluster_path)
+    yield configured
+    cleanup(cluster_path)
 
 
-@pytest.fixture
-def basic_pgdao():
-    """generate a basic PGDAlwaysON architecture"""
+# @patch.object(Architecture, "expand_template", expand_template)
+class TestPGDXArchitecture:
+    """Test suite for PGD-X Architecture class"""
 
-    pass
+    MINIMUM_PGDX_ARGV = [
+        CONFIG_PATH["PGDX"],
+        "--architecture",
+        "PGD-X",
+        "--no-git",
+        "--postgresql",
+        "16",
+        "--pgd-routing",
+        "local",
+    ]
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDX_ARGV,
+        ],
+    )
+    def test_pgdx_basic_configure(self, argv, pgdx_architecture):
+        """Test basic PGD-X configuration with minimal required args"""
+        assert pgdx_architecture.args["architecture"] == "PGD-X"
+        assert "pgd_routing" in pgdx_architecture.args
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDX_ARGV,
+        ],
+    )
+    def test_pgdx_name(self, argv, pgdx_architecture):
+        """Test that PGD-X architecture has correct name"""
+        assert pgdx_architecture.name == "PGD-X"
+
+    @pytest.mark.parametrize(
+        "argv, expected_flavour",
+        [
+            (MINIMUM_PGDX_ARGV, "expanded"),
+        ],
+    )
+    def test_pgdx_flavour(self, argv, expected_flavour, pgdx_architecture):
+        """Test that PGD-X sets pgd_flavour to 'expanded'"""
+        assert (
+            pgdx_architecture.args["cluster_vars"]["pgd_flavour"] == expected_flavour
+        )
+
+    @pytest.mark.parametrize(
+        "argv, routing, expected_top, expected_sub",
+        [
+            (
+                MINIMUM_PGDX_ARGV + ["--pgd-routing", "global"],
+                "global",
+                {"enable_routing": True},
+                {"enable_routing": False},
+            ),
+            (
+                MINIMUM_PGDX_ARGV + ["--pgd-routing", "local"],
+                "local",
+                {"enable_routing": False},
+                {"enable_routing": True},
+            ),
+        ],
+    )
+    def test_pgdx_routing_options(
+        self, argv, routing, expected_top, expected_sub, pgdx_architecture
+    ):
+        """Test PGD-X routing configuration (global vs local)"""
+        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        assert len(bdr_node_groups) > 0
+
+        # Check top-level group routing setting
+        top_group = bdr_node_groups[0]
+        assert top_group["options"]["enable_routing"] == expected_top["enable_routing"]
+
+        # Check subgroup routing setting (if subgroups exist)
+        if len(bdr_node_groups) > 1:
+            sub_group = bdr_node_groups[1]
+            assert sub_group["options"]["enable_routing"] == expected_sub["enable_routing"]
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"],
+        ],
+    )
+    def test_pgdx_multiple_locations(self, argv, pgdx_architecture):
+        """Test PGD-X with multiple locations"""
+        location_names = pgdx_architecture.args["location_names"]
+        assert len(location_names) == 3
+        assert location_names == ["dc1", "dc2", "dc3"]
+
+        # Check that subgroups were created for each location
+        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        # Should have 1 top group + 3 location subgroups
+        assert len(bdr_node_groups) == 4
+
+    @pytest.mark.parametrize(
+        "argv, error, expected",
+        [
+            (MINIMUM_PGDX_ARGV, KeyError, None),  # No probes by default
+            pytest.param(
+                MINIMUM_PGDX_ARGV + ["--enable-pgd-probes"],
+                None,
+                {"enable": True},
+                marks=pytest.mark.skip(reason="--enable-pgd-probes not yet implemented in lib/tpa"),
+            ),
+            pytest.param(
+                MINIMUM_PGDX_ARGV + ["--enable-pgd-probes", "http"],
+                None,
+                {"enable": True},
+                marks=pytest.mark.skip(reason="--enable-pgd-probes not yet implemented in lib/tpa"),
+            ),
+            pytest.param(
+                MINIMUM_PGDX_ARGV + ["--enable-pgd-probes", "https"],
+                None,
+                {"enable": True, "secure": True},
+                marks=pytest.mark.skip(reason="--enable-pgd-probes not yet implemented in lib/tpa"),
+            ),
+        ],
+    )
+    def test_pgdx_pgd_probes(self, argv, error, expected, pgdx_architecture):
+        """Test PGD-X probe configuration"""
+        if error is None:
+            assert (
+                pgdx_architecture.args["cluster_vars"]["pgd_http_options"] == expected
+            )
+        else:
+            with pytest.raises(error):
+                # Access the key to trigger KeyError if not present
+                pgdx_architecture.args["cluster_vars"]["pgd_http_options"]
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDX_ARGV,
+        ],
+    )
+    def test_pgdx_repositories(self, argv, pgdx_architecture):
+        """Test that PGD-X includes postgres_distributed repository"""
+        edb_repos = pgdx_architecture.args["cluster_vars"].get("edb_repositories", [])
+        assert "postgres_distributed" in edb_repos
 
 
-class TestPGDAO:
-    """test suite for PGDAlwaysON Architecture class"""
+# @patch.object(Architecture, "expand_template", expand_template)
+class TestPGDSArchitecture:
+    """Test suite for PGD-S Architecture class"""
 
-    def test_pgdao_basic(self, basic_pgdao):
-        """test basic PGDAlwaysON Architecture creation"""
+    MINIMUM_PGDS_ARGV = [
+        CONFIG_PATH["PGDS"],
+        "--architecture",
+        "PGD-S",
+        "--no-git",
+        "--postgresql",
+        "16",
+    ]
 
-        pass
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDS_ARGV,
+        ],
+    )
+    def test_pgds_name(self, argv, pgds_architecture):
+        """Test that PGD-S architecture has correct name"""
+        assert pgds_architecture.name == "PGD-S"
+
+    @pytest.mark.parametrize(
+        "argv, expected_flavour",
+        [
+            (MINIMUM_PGDS_ARGV, "essential"),
+        ],
+    )
+    def test_pgds_flavour(self, argv, expected_flavour, pgds_architecture):
+        """Test that PGD-S sets pgd_flavour to 'essential'"""
+        assert (
+            pgds_architecture.args["cluster_vars"]["pgd_flavour"] == expected_flavour
+        )
+
+    @pytest.mark.parametrize(
+        "argv, expected_layout",
+        [
+            (MINIMUM_PGDS_ARGV, "standard"),
+            (MINIMUM_PGDS_ARGV + ["--layout", "standard"], "standard"),
+            (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], "near-far"),
+        ],
+    )
+    def test_pgds_layouts(self, argv, expected_layout, pgds_architecture):
+        """Test PGD-S layout options"""
+        assert pgds_architecture.args["layout"] == expected_layout
+
+    @pytest.mark.parametrize(
+        "argv, expected_locations",
+        [
+            (MINIMUM_PGDS_ARGV, ["first"]),  # standard default
+            (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], ["first", "second"]),
+        ],
+    )
+    def test_pgds_default_locations(self, argv, expected_locations, pgds_architecture):
+        """Test PGD-S default location names for each layout"""
+        assert pgds_architecture.args["location_names"] == expected_locations
+
+    # Note: Location validation error tests are skipped because they require
+    # testing configure() failures, which doesn't work well with the fixture approach.
+    # These could be added as separate tests without fixtures if needed.
+
+    @pytest.mark.parametrize(
+        "argv, expected_instance_count",
+        [
+            (MINIMUM_PGDS_ARGV, 4),  # 3 data + 1 barman
+            (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], 4),  # 3 data + 1 barman
+            (MINIMUM_PGDS_ARGV + ["--add-subscriber-only-nodes", "2"], 6),  # 3 data + 1 barman + 2 subscriber
+        ],
+    )
+    def test_pgds_instances(self, argv, expected_instance_count, pgds_architecture):
+        """Test PGD-S instance count calculation"""
+        assert pgds_architecture.num_instances() == expected_instance_count
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDS_ARGV,
+        ],
+    )
+    def test_pgds_repositories(self, argv, pgds_architecture):
+        """Test that PGD-S includes enterprise repository and discards standard"""
+        edb_repos = pgds_architecture.args["cluster_vars"].get("edb_repositories", [])
+        assert "enterprise" in edb_repos
+        # Standard repo should be discarded (replaced with enterprise)
+        assert "standard" not in edb_repos
+
+
+# Shared tests for both PGD-X and PGD-S (testing common PGD functionality)
+# @patch.object(Architecture, "expand_template", expand_template)
+class TestPGDCommon:
+    """Test suite for common PGD functionality shared between PGD-X and PGD-S"""
+
+    @pytest.mark.parametrize(
+        "argv, architecture_class",
+        [
+            (
+                [
+                    CONFIG_PATH["PGDX"],
+                    "--architecture",
+                    "PGD-X",
+                    "--no-git",
+                    "--postgresql",
+                    "16",
+                    "--pgd-routing",
+                    "local",
+                ],
+                PGDX,
+            ),
+            (
+                [
+                    CONFIG_PATH["PGDS"],
+                    "--architecture",
+                    "PGD-S",
+                    "--no-git",
+                    "--postgresql",
+                    "16",
+                ],
+                PGDS,
+            ),
+        ],
+    )
+    def test_supported_versions(self, argv, architecture_class):
+        """Test that both architectures support Postgres 14-18 with BDR 6"""
+        arch = architecture_class(
+            directory=f"architectures/{architecture_class.__name__.replace('PGD', 'PGD-')}",
+            lib="architectures/lib",
+            argv=argv,
+        )
+
+        supported = arch.supported_versions()
+
+        # Should support at least Postgres 14-18 with BDR 6
+        # (architectures may report additional versions, but we only check for officially supported ones)
+        required_versions = [
+            ("14", "6"),
+            ("15", "6"),
+            ("16", "6"),
+            ("17", "6"),
+            ("18", "6"),
+        ]
+
+        for version in required_versions:
+            assert version in supported, f"Expected {version} to be in supported versions"
+
+    @pytest.mark.parametrize(
+        "postgres_version, expected_bdr",
+        [
+            ("14", "6"),
+            ("15", "6"),
+            ("16", "6"),
+            ("17", "6"),
+            ("18", "6"),
+        ],
+    )
+    def test_bdr_version_inference(self, postgres_version, expected_bdr):
+        """Test that BDR version is correctly inferred from Postgres version
+
+        This tests the shared logic in pgd.py that applies to both PGD-X and PGD-S.
+        """
+        argv = [
+            CONFIG_PATH["PGDS"],
+            "--architecture",
+            "PGD-S",
+            "--no-git",
+            "--postgresql",
+            postgres_version,
+        ]
+        configured = ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+
+        assert configured.args["cluster_vars"]["bdr_version"] == expected_bdr
+        assert configured.args["cluster_vars"]["postgres_version"] == postgres_version
+
+        cleanup(CONFIG_PATH["PGDS"])
+
+    @pytest.mark.parametrize(
+        "name, expected",
+        [
+            ("MyCluster", "mycluster"),
+            ("Test_Cluster", "test_cluster"),
+            ("test-cluster", "test-cluster"),
+            ("Test Cluster!", "test_cluster_"),
+            ("UPPERCASE", "uppercase"),
+        ],
+    )
+    def test_bdr_safe_name(self, name, expected):
+        """Test bdr_safe_name transformation"""
+        arch = PGDX(
+            directory="architectures/PGD-X",
+            lib="architectures/lib",
+            argv=[
+                CONFIG_PATH["PGDX"],
+                "--architecture",
+                "PGD-X",
+                "--no-git",
+                "--postgresql",
+                "16",
+                "--pgd-routing",
+                "local",
+            ],
+        )
+
+        assert arch.bdr_safe_name(name) == expected
