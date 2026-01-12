@@ -116,50 +116,40 @@ class PGDX(PGD):
         cluster_vars.update({"pgd_flavour": "expanded"})
 
         top_group = cluster_vars["bdr_node_group"]
-        bdr_node_groups = [{"name": top_group}]
-        if self.args["pgd_routing"] == "global":
 
-            bdr_node_groups[0].update(
-                {
-                    "options": {
-                        "enable_routing": True,
-                    }
-                }
-            )
-        else:
-            bdr_node_groups[0].update(
-                {
-                    "options": {
-                        "enable_routing": False,
-                    }
-                }
-            )
+        # Get or create the bdr_node_groups list
+        existing_groups = cluster_vars.setdefault("bdr_node_groups", [])
+
+        # Find the top-level group if it already exists (from parent class)
+        top_group_entry = None
+        for group in existing_groups:
+            if group["name"] == top_group:
+                top_group_entry = group
+                break
+
+        # If top-level group doesn't exist, create it
+        if top_group_entry is None:
+            top_group_entry = {"name": top_group}
+            existing_groups.append(top_group_entry)
+
+        # Merge routing options into the top-level group
+        routing_enabled = self.args["pgd_routing"] == "global"
+        if "options" not in top_group_entry:
+            top_group_entry["options"] = {}
+        top_group_entry["options"]["enable_routing"] = routing_enabled
+
+        # Add location subgroups
         location_names = self.args["location_names"]
         for _location in location_names:
             new_group = {
                 "name": self._sub_group_name(_location),
                 "parent_group_name": top_group,
-                "options": {"location": _location},
+                "options": {
+                    "location": _location,
+                    "enable_routing": not routing_enabled,  # Opposite of parent
+                },
             }
-            if self.args["pgd_routing"] == "global":
-                new_group.update(
-                    {
-                        "options": {
-                            "enable_routing": False,
-                        }
-                    }
-                )
-            else:
-                new_group.update(
-                    {
-                        "options": {
-                            "enable_routing": True,
-                        }
-                    }
-                )
-
-            bdr_node_groups.append(new_group)
-        cluster_vars.setdefault("bdr_node_groups", []).extend(bdr_node_groups)
+            existing_groups.append(new_group)
 
     def update_instances(self, cluster):
         instances = cluster.instances
