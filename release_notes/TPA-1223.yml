@@ -1,0 +1,17 @@
+- summary:  Fix downloader to ensure pgd-proxy and pgdcli package version matches  bdr_package_version when only bdr_package_version is set
+  description: |
+      Selecting a 'bdr_package_version' on an air-gapped environment, downloads
+      the selected version for BDR, but not for PGD CLI and PGD Proxy, which 
+      later results on an error in 'tpaexec deploy', since there's a package 
+      mismatch. 
+      This is not the case for non air-gapped environments, where choosing a 
+      specific version of 'bdr_package_version' will also select the according
+      versions for PGD CLI and PGD Proxy.
+      This fix ensures that when executing 'tpaexec download-packages', we first
+      check if 'pgd_proxy_package_version' or 'pgdcli_package_version' are 
+      defined, and if not, we will reuse the 'bdr_package_version' variable
+      to download the same version specified, since BDR package mismatching can 
+      lead to critical issues in a production environment.
+  type: bugfix
+  jira_tickets:
+  - TPA-1223

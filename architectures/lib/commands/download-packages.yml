@@ -119,6 +119,12 @@
         tasks_from: repositories.yml
       when: not refresh_repo
 
+    # Define PGD CLI package version
+    - import_tasks: "{{ tpa_dir }}/roles/pgdcli/pkg/tasks/define-bdr-version.yml"
+
+    # Define PGD Proxy package version
+    - import_tasks: "{{ tpa_dir }}/roles/pgd_proxy/pkg/tasks/define-bdr-version.yml"
+    
     - include_role:
         name: pkg/list_all_packages
 
