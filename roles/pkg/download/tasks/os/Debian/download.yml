@@ -12,6 +12,11 @@
 - name: Resolve and download packages
   when: not refresh_repo
   block:
+  
+  - name: Create package list copy
+    set_fact:
+      copy_package_list: "{{ package_list }}"
+
   - name: Resolve packages to specific versions
     include_tasks: resolve-package.yml
     loop: "{{ copy_package_list }}"
