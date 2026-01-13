@@ -6,7 +6,7 @@
 #
 ansible-builder==3.1.1
     # via
-    #   -r tpa-ee/aap24/build-requirements.in
+    #   -r build-requirements.in
     #   ansible-navigator
 ansible-compat==25.11.0
     # via ansible-lint
@@ -17,7 +17,7 @@ ansible-core==2.20.0
 ansible-lint==25.11.0
     # via ansible-navigator
 ansible-navigator==25.11.0
-    # via -r tpa-ee/aap24/build-requirements.in
+    # via -r build-requirements.in
 ansible-runner==2.4.2
     # via ansible-navigator
 attrs==25.4.0
@@ -45,7 +45,7 @@ distro==1.9.0
     # via
     #   ansible-lint
     #   bindep
-filelock==3.20.0
+filelock==3.20.3
     # via ansible-lint
 importlib-metadata==8.7.0
     # via ansible-lint
