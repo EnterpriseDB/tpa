@@ -49,7 +49,7 @@ More detail on the options is provided in the following section.
 | Options                                               | Description                                                                                 |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `PGD-X`                                                              |
-| Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
+| Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). Supports Postgres 14-18. |
 | `--pgd-routing`                                 | Must be either `global` or `local`.                                                         |
 
 <br/><br/>

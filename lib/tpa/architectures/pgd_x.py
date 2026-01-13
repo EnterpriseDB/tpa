@@ -21,7 +21,6 @@ class PGDX(PGD):
 
     def supported_versions(self) -> List[Tuple[str, str]]:
         return [
-            ("13", "6"),
             ("14", "6"),
             ("15", "6"),
             ("16", "6"),
