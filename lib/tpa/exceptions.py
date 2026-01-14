@@ -29,6 +29,9 @@ class NetError(Exception):
 class PGDArchitectureError(Exception):
     MSG = "Error"
 
+class PGDXArchitectureError(Exception):
+    MSG = "Error"
+
 class PlatformError(Exception):
     MSG = "Error"
 

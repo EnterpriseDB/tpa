@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+from tpa.exceptions import PGDXArchitectureError
 from ..architecture import Architecture
 from .pgd import PGD
 from typing import List, Tuple
@@ -47,9 +48,67 @@ class PGDX(PGD):
 
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
-
+        self._validate_camo(args)
         if not self.args["location_names"]:
             self.args["location_names"] = self.default_location_names()
+    
+    
+    def _validate_camo(self, args):
+        camo = args.get("enable_camo", False)
+        data_nodes = args.get("data_nodes_per_location")
+        if camo:
+            if self.args.get("postgres_flavour") not in ["edbpge", "epas"]:
+                raise PGDXArchitectureError(
+                    "You must use Postgres Extended or EPAS to --enable-camo"
+                )
+            if data_nodes != 2:
+                raise PGDXArchitectureError(
+                    "Cannot enable CAMO with --data-nodes-per-location " \
+                    "different than 2 data nodes"
+                )
+
+    def _update_instance_camo(self, cluster):
+        """
+        If --enable-camo is specified, we collect all the instances with role
+        [bdr,primary] and no partner already set and set them pairwise to be
+        each other's CAMO partners.
+
+        For each location, identifies BDR data nodes without existing CAMO
+        partners and pairs them. CAMO requires exactly 2 data nodes per location;
+        raises an error if this constraint is not met.
+
+        Requires postgres_flavour to be edbpge or epas.
+        """
+        cluster.set_var("bdr_commit_scopes", [])
+        subgroups = []
+        scope = "camo"
+
+        # Here we set all the BDR Primary nodes found per location, group them by pairs and then 
+        # define their own CAMO "bdr_commit_scope"
+        for location in cluster.locations:
+            bdr_primaries = cluster.instances.in_location(location.name).with_bdr_node_kind("data").select(lambda i: "bdr_node_camo_partner" not in i.host_vars)
+            if len(bdr_primaries) != 2:
+                continue
+            a, b = bdr_primaries[0], bdr_primaries[1]
+            a.set_hostvar("bdr_node_camo_partner", b.name)
+            b.set_hostvar("bdr_node_camo_partner", a.name)
+
+            subgroup = self._sub_group_name(location.name)
+            subgroups.append(subgroup)
+
+            cluster.group.group_vars["bdr_commit_scopes"].append(
+                {
+                    "name": scope,
+                    "origin": subgroup,
+                    "rule": f"ALL ({subgroup}) ON durable CAMO DEGRADE ON (timeout = 60s, require_write_lead = true) TO ASYNC",
+                }
+            )
+        
+        # Set the "default_commit_scope" option to "camo" inside "bdr_node_groups"
+        for node_group in cluster.group.group_vars["bdr_commit_scopes"]:
+            if node_group["name"] in subgroups:
+                node_group.setdefault("options", {})
+                node_group["options"]["default_commit_scope"] = scope
 
     def update_cluster_vars(self, cluster_vars):
         super().update_cluster_vars(cluster_vars)
@@ -104,6 +163,7 @@ class PGDX(PGD):
 
     def update_instances(self, cluster):
         instances = cluster.instances
+        self._update_instance_camo(cluster)
         super().update_instances(cluster)
 
         for instance in instances:
@@ -144,7 +204,6 @@ class PGDX(PGD):
             help="designate a location as a witness-only location (no data nodes)",
             default=None,
         )
-
         g.add_argument(
             "--cohost-proxies",
             action="store_const",
@@ -164,4 +223,10 @@ class PGDX(PGD):
             nargs="?",
             default=SUPPRESS,
             help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
+        )
+        g.add_argument(
+            "--enable-camo",
+            action="store_true",
+            dest="enable_camo",
+            help="Enable Commit At Most Once (CAMO) on the data nodes",
         )

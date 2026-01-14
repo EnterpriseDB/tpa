@@ -103,6 +103,10 @@ class Instance:
             self.settings, self._cluster.instance_defaults, self.location.settings or {}
         )
         return v.get(key, default)
+    
+    def set_hostvar(self, key, val):
+        """Sets the given key=val on the instance."""
+        self.host_vars[key] = val
 
     def set_settings(self, new_settings: dict):
         """Adds the items in the dict to the instance, overriding any existing

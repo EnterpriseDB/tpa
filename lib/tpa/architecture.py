@@ -92,7 +92,6 @@ class Architecture:
         # `--postgresql 14`.
         self._validate_flavour_version(args)
 
-
         # Validate arguments to --install-from-source
         self._validate_from_source(args)
 

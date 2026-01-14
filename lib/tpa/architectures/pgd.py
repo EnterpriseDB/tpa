@@ -172,10 +172,12 @@ class PGD(Architecture):
         return f"{loc}_subgroup"
 
     def update_instances(self, cluster):
-        self._update_instance_camo(cluster)
         self._update_instance_pem(cluster)
         self._update_instance_beacon(cluster)
         self._update_instance_barman(cluster)
+    
+    def validate_arguments(self, args, platform):
+        super().validate_arguments(args, platform)
 
     def _instance_roles(self, instance):
         """
@@ -218,51 +220,6 @@ class PGD(Architecture):
         """
         roles = self._instance_roles(instance)
         return "bdr" in roles and not roles & self._readonly_bdr_roles
-
-    def _update_instance_camo(self, instances):
-        """
-        If --enable-camo is specified, we collect all the instances with role
-        [bdr,primary] and no partner already set and set them pairwise to be
-        each other's CAMO partners. This is crude, but it's good enough to
-        experiment with CAMO.
-        """
-        if self.args.get("enable_camo", False):
-            postgres_flavour = self.args.get("postgres_flavour")
-            if postgres_flavour not in ["edbpge", "pgextended", "epas"]:
-                raise PGDArchitectureError(
-                    "You must use Postgres Extended or EPAS to --enable-camo"
-                )
-
-            bdr_primaries = []
-            for instance in instances:
-                _vars = instance.get("vars", {})
-                if (
-                    self._is_bdr_primary(instance)
-                    and "bdr_node_camo_partner" not in _vars
-                ):
-                    bdr_primaries.append(instance)
-
-            idx = 0
-            while idx + 1 < len(bdr_primaries):
-                a = bdr_primaries[idx]
-                b = bdr_primaries[idx + 1]
-
-                # Don't assign instances in different locations to be each
-                # other's partner, just skip this pair and see if there are
-                # other possible matches.
-                if self._instance_location(a) != self._instance_location(b):
-                    idx += 1
-                    continue
-
-                a_vars = a.get("vars", {})
-                a_vars["bdr_node_camo_partner"] = b.get("Name")
-                a["vars"] = a_vars
-
-                b_vars = b.get("vars", {})
-                b_vars["bdr_node_camo_partner"] = a.get("Name")
-                b["vars"] = b_vars
-
-                idx += 2
 
     def _update_instance_pem(self, cluster):
         """
