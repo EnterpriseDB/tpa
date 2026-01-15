@@ -157,12 +157,12 @@ class docker(Platform):
                 "os": "Debian",
             },
             "tpa/redhat": {
-                "versions": ["7", "8", "9"],
+                "versions": ["7", "8", "9", "10"],
                 "default_version": "9",
                 "os": "RedHat",
             },
             "tpa/rocky": {
-                "versions": ["8", "9"],
+                "versions": ["8", "9", "10"],
                 "default_version": "9",
                 "os": "Rocky",
                 "os_family": "RedHat",
@@ -208,7 +208,8 @@ class docker(Platform):
             image.setdefault("os_family", image.get("os"))
 
         # Cater for OS names, e.g. "Debian"
-        if name in self.supported_distributions():
+        supported_distros_lower = [d.lower() for d in self.supported_distributions()]
+        if name.lower() in supported_distros_lower:
             image_name = f"tpa/{name.lower()}"
             image = known_images[image_name]
             version = valid_version(image_name, version)

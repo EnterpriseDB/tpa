@@ -42,6 +42,8 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 ## RedHat x86
 
+* RHEL/Rocky/AlmaLinux/Oracle Linux 10.x is fully supported (python3
+  only)
 * RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported (python3 only)
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is a legacy distribution (python2 only)
@@ -56,6 +58,7 @@ on the target instances.
 
 ## RedHat ppc64le
 
+* RHEL/Rocky/AlmaLinux 10.x is fully supported (python3 only)
 * RHEL/Rocky/AlmaLinux 9.x is fully supported (python3 only)
 * RHEL/AlmaLinux 8.x is fully supported (python3 only)
 

@@ -33,8 +33,8 @@ on:
         - tpa/debian:12
         - tpa/ubuntu:22.04
         - tpa/ubuntu:24.04
-        - tpa/redhat:9
         - tpa/redhat:8
+        - tpa/redhat:9
         - tpa/sles:15
       tpa_postgres_flavour:
         description: "Postgres flavour"

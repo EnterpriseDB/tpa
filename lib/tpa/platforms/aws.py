@@ -107,10 +107,20 @@ class aws(CloudPlatform):
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
+                "RHEL-10.1.0_HVM-20260108-x86_64-0-Hourly2-GP3": {
+                    "versions": ["10"],
+                    "owner": "309956199498",
+                    "user": "ec2-user",
+                },
             },
             "redhat-arm": {
                 "RHEL-9.5.0_HVM-20250128-arm64-0-Hourly2-GP3": {
                     "versions": ["9", "default"],
+                    "owner": "309956199498",
+                    "user": "ec2-user",
+                },
+                "RHEL-10.1.0_HVM-20260108-arm64-0-Hourly2-GP3": {
+                    "versions": ["10"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
@@ -125,6 +135,13 @@ class aws(CloudPlatform):
                 },
                 "Rocky-9-EC2-Base-9.5-20241118.0.x86_64": {
                     "versions": ["9", "default"],
+                    "preferred_python_version": "python3",
+                    "owner": "792107900819",
+                    "user": "rocky",
+                    "os_family": "RedHat",
+                },
+                "Rocky-10-EC2-Base-10.1-20251116.0.x86_64": {
+                    "versions": ["10"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
                     "user": "rocky",

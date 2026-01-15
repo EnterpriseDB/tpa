@@ -56,12 +56,12 @@ default_packages:
   RedHat:
     - perf
     # Required for semanage, used in postgres/initdb
-    - "policycoreutils-python{% if ansible_distribution_major_version >= '8' %}-utils{% endif %}"
+    - "policycoreutils-python{% if ansible_distribution_major_version|int >= 8 %}-utils{% endif %}"
     - openssh
     - openssh-clients
     - cronie
-    - "{{ ['createrepo'] if ('downloader' in role and ansible_distribution_major_version <= '7') else [] }}"
-    - "{{ ['modulemd-tools'] if ('downloader' in role and ansible_distribution_major_version >= '8') else [] }}"
+    - "{{ ['createrepo'] if ('downloader' in role and ansible_distribution_major_version|int <= 7) else [] }}"
+    - "{{ ['modulemd-tools'] if ('downloader' in role and ansible_distribution_major_version|int >= 8) else [] }}"
   Ubuntu:
     - linux-tools-generic
     - openssh-client

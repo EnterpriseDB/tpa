@@ -61,6 +61,11 @@ case "${ID}:${VERSION_ID%.*}" in
         release=$VERSION_ID
         python=python3
         ;;
+    rhel:10|centos:10|ol:10|rocky:10|almalinux:10)
+        distribution=RedHat
+        release=$VERSION_ID
+        python=python3
+        ;;
     sles:15)
         distribution=SLES
         release=$VERSION_ID
