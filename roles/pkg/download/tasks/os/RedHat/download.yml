@@ -15,6 +15,13 @@
   when:
     ansible_distribution_major_version|int >= 8
 
+- name: Install python3-packaging for repo2module (RHEL 10+)
+  package:
+    name:
+      - python3-packaging
+  when:
+    ansible_distribution_major_version|int >= 10
+
 - name: Download packages and dependencies with yumdownloader (no refresh mode)
   when: not refresh_repo
   block:
