@@ -34,7 +34,8 @@ with a different entry for extension and library name.
 cluster_vars:
   [...]
   extra_postgres_packages:
-    - postgresql-17-my-extension
+    common:
+      - postgresql-17-my-extension
   extra_postgres_extensions:
     - my-extension
   preload_extensions:
