@@ -161,7 +161,7 @@ _set_requirements_file_names() {
               ! -d "$PIP_DIR" ]]; then
 
             REQUIREMENTS_FILE="requirements-rh8.txt"
-            COLLECTIONS_FILE="collections-rh8.txt"
+            COLLECTIONS_FILE="requirements-rh8.yml"
         fi
     else
         echo "Warning: /etc/os-release not found. Using default requirements."
