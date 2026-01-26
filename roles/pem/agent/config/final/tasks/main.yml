@@ -162,7 +162,7 @@
 # to update database password. Since we have no way to see if a password
 # change has occured, if agent config already exists, we always update
 # PEM dbuser password for the user that pem agents use to connect with
-# the monitoring server. It makes sure the password is always in sync
+# the PEM server. It makes sure the password is always in sync
 # with the config.
 
 - include_tasks: update-monitoring-server-password.yml

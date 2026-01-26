@@ -22,7 +22,6 @@
   - log-server
   - pem-server
   - openvpn-server
-  - monitoring-server
   changed_when: false
 
 # If an instance has 'log-server' in its role, we set it as the default
@@ -37,19 +36,6 @@
     and inventory_hostname != groups[ls][0]
   vars:
     ls: 'role_log-server'
-
-# If an instance has 'monitoring-server' in its role, we set it as the
-# default monitoring_server for every other instance.
-
-- name: Set common monitoring_server for the entire cluster
-  set_fact:
-    monitoring_server: "{{ groups[ms][0] }}"
-  when: >
-    monitoring_server is not defined
-    and groups[ms]|default([]) is not empty
-    and inventory_hostname != groups[ms][0]
-  vars:
-    ms: 'role_monitoring-server'
 
 # If an instance has 'openvpn-server' in its role, we set it as the
 # default openvpn_server for every other instance.
