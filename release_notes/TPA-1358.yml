@@ -1,0 +1,12 @@
+- summary: Remove documented dependency on patch
+  description: |
+    As TPA no longer requires the patch utility, remove mention of it from the
+    installation instructions, and remove unreachable code which called it.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1358
