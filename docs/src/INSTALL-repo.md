@@ -20,15 +20,15 @@ the source and [run TPA in a Docker container](INSTALL-docker.md).
 ## Quickstart
 
 First, you must install the various dependencies Python 3, Python
-venv, git, openvpn and patch. Installing from EDB repositories
+venv, git, and openvpn. Installing from EDB repositories
 would install these automatically along with the TPA
 packages.
 
 Before you install TPA, you must install the required packages:
 
-* **Debian/Ubuntu** <br/> `sudo apt-get install python3 python3-pip python3-venv git openvpn patch`
-* **Redhat, Rocky or AlmaLinux (RHEL7)** <br/> `sudo yum install python3 python3-pip epel-release git openvpn patch`
-* **Redhat, Rocky or AlmaLinux (RHEL8)** <br/>`sudo yum install python36 python3-pip epel-release git openvpn patch`
+* **Debian/Ubuntu** <br/> `sudo apt-get install python3 python3-pip python3-venv git openvpn`
+* **Redhat, Rocky or AlmaLinux (RHEL7)** <br/> `sudo yum install python3 python3-pip epel-release git openvpn`
+* **Redhat, Rocky or AlmaLinux (RHEL8)** <br/>`sudo yum install python36 python3-pip epel-release git openvpn`
 
 
 ## Clone and setup
