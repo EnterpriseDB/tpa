@@ -82,7 +82,7 @@ jobs:
           title: 'Update ${{ matrix.collection }}'
           labels:
             collections
-          reviewers: EnterpriseDB/tpaexec-dev-team
+          reviewers: EnterpriseDB/tpa-admin
           add-paths:
             collections/requirements.yml
           commit-message: |
@@ -170,7 +170,7 @@ jobs:
           title: '[RHEL8] Update ${{ matrix.collection }}'
           labels:
             collections
-          reviewers: EnterpriseDB/tpaexec-dev-team
+          reviewers: EnterpriseDB/tpa-admin
           add-paths:
             collections/requirements-rh8.yml
           commit-message: |
