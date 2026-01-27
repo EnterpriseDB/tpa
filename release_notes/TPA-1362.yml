@@ -1,0 +1,14 @@
+- summary: Ensure tpaexec deploy propagates extra variables to provisioning
+  description: |
+      Fixed a crash that occurred when running tpaexec deploy with external
+      variable files (e.g., tpaexec deploy --extra-vars "@./vars.yml").
+      Previously, the internal provisioning step triggered by the deploy
+      command did not inherit these extra variables, causing the execution
+      to fail.
+      This fix ensures that all specified variables are correctly passed to
+      tpaexec provision before the deployment begins.
+  type: bugfix
+  jira_tickets:
+  - TPA-1362
+  support_tickets:
+  - CP56864
