@@ -50,7 +50,6 @@ on:
         - tpa/debian:10
         - tpa/debian:11
         - tpa/debian:12
-        - tpa/redhat:7
         - tpa/redhat:8
         - tpa/redhat:9
         - tpa/sles:15
@@ -93,14 +92,6 @@ on:
         description: "Use the downloader"
         type: boolean
         default: true
-      runner:
-        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
-        required: false
-        default: "ubuntu-22.04"
-        type: choice
-        options:
-        - "ubuntu-20.04"
-        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -119,7 +110,7 @@ jobs:
   integration-test:
     name: Integration test
 
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout source repository
