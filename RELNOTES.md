@@ -1,6 +1,6 @@
 # TPA release notes
 
-© Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 ## v23.41.0 (2025-11-26)
 

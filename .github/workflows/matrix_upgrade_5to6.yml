@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # Matrix cluster upgrade from BDR4 to PGD5 with selection of the matrix key to use
 # Allow a wide range of test focused on a single dimension of the matrix such as

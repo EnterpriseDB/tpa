@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # We must check that 'tpaexec upgrade' is not run on a cluster 
 # that uses shared PEM or share Barman 

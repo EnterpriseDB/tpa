@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 #
 # takes three arguments:
 # - a name of an Ansible Galaxy collection
