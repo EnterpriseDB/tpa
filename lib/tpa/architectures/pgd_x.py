@@ -165,17 +165,3 @@ class PGDX(PGD):
             default=SUPPRESS,
             help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
         )
-        g.add_argument(
-            "--proxy-listen-port",
-            type=int,
-            dest="listen_port",
-            default=6432,
-            help="port on which proxy nodes will route traffic to the write leader",
-        )
-        g.add_argument(
-            "--proxy-read-only-port",
-            type=int,
-            dest="read_listen_port",
-            default=6433,
-            help="port on which proxy nodes will route read-only traffic to shadow nodes",
-        )
