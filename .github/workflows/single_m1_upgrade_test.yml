@@ -93,7 +93,7 @@ jobs:
           repository: EnterpriseDB/tpa-internal
           token: ${{secrets.GH_SLONIK}}
 
-      - uses: ./.github/actions/m1-upgrade-test
+      - uses: ./.github/actions/general-upgrade-test
         with:
           source_directory: ${{ github.workspace }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
@@ -103,6 +103,8 @@ jobs:
           tpa_postgres_package_version: ${{ github.event.inputs.tpa_postgres_package_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager }}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
+          upgrade_component_name: postgres
+          upgrade_component_base_version: ${{ github.event.inputs.tpa_postgres_package_version }}
           cluster: "${{ github.event.inputs.tpa_failover_manager }}-\
             ${{ github.event.inputs.tpa_os_image }}-\
             ${{ github.event.inputs.tpa_postgres_flavour }}-\
