@@ -30,10 +30,6 @@ on:
         - silver
         - gold
         - platinum
-      tpa_platform:
-        description: "TPA platform"
-        required: false
-        default: "docker"
       tpa_os_image:
         description: "TPA OS image"
         required: true
@@ -106,7 +102,6 @@ jobs:
         with:
           source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
-          tpa_platform: ${{ github.event.inputs.tpa_platform }}
           tpa_layout: ${{ github.event.inputs.tpa_layout }}
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
