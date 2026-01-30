@@ -24,7 +24,7 @@ runs:
     - name: Load YAML Data
       id: load-yaml
       shell: bash
-      run: ${{ github.action_path }}/load-yaml.py ${{ inputs.file }} ${{ inputs.key }}
+      run: ${{ github.action_path }}/load-yaml.py ${{ inputs.file }} "${{ inputs.key }}"
 
 outputs:
   json:
