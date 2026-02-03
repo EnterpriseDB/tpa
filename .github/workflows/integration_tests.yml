@@ -1,11 +1,46 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-# Matrix cluster deployment for fast generic test on a wide range of cluster
-# no customization possible, run with default matrix key as input.
+# Matrix cluster deployment for fast generic test on a range of clusters
+# defaults to simple tests (the different architectures and flavours all
+# running on the default OS image, currently RHEL 9)
 
-name: Integration Tests
+name: Matrix Integration Tests
+run-name: ${{ inputs.matrix }} matrix, pg version ${{ inputs.postgres_version }}
 on:
   workflow_dispatch:
+    inputs:
+      matrix:
+        description: "Matrix to test"
+        required: true
+        type: choice
+        default: "simple"
+        options:
+        - "simple"
+        - "full"
+        - "M1 layouts"
+        - "M1"
+        - "BDR-Always-ON"
+        - "PGD-Always-ON"
+        - "PGD-S"
+        - "PGD-X"
+      postgres_version:
+        description: "Postgres version"
+        required: true
+        default: "matrix default"
+        type: choice
+        options:
+        - "matrix default"
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+        - 18
+      skip_rh10:
+        description: "Exclude RHEL 10"
+        required: true
+        default: false
+        type: boolean
 
 env:
   LANG: "C.UTF-8"
@@ -25,7 +60,7 @@ jobs:
     name: Load Matrix
     runs-on: ubuntu-22.04
     outputs:
-      json: ${{ steps.load-yaml.outputs.json }}
+      json: ${{ steps.filter-matrix.outputs.json }}
     steps:
     - uses: actions/checkout@v6
       with:
@@ -34,8 +69,35 @@ jobs:
     - uses: ./.github/actions/load-yaml
       id: load-yaml
       with:
-        file: .github/config/matrix.yml
-        key: default
+        file: .github/config/integration_tests.yml
+        key: "${{ inputs.matrix }}"
+
+    - name: Remove RHEL 10 entries from matrix
+      id: filter-matrix
+      shell: bash
+      env:
+        MATRIX_JSON: ${{ steps.load-yaml.outputs.json }}
+      run: |
+        set -euo pipefail
+
+        if [[ "${{ inputs.skip_rh10 }}" == "true" ]]; then
+          json_out=$(jq -c '
+            if (.tpa_os_image? | type) == "array" then
+              .tpa_os_image |= map(select(. != "redhat:10"))
+            else
+              .
+            end
+          ' <<<"$MATRIX_JSON")
+        else
+          json_out=$(jq -c '.' <<<"$MATRIX_JSON")
+        fi
+
+        {
+          echo "json<<EOF"
+          echo "$json_out"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
 
   integration-test:
     name: ${{ matrix.tpa_architecture }} ${{ matrix.tpa_failover_manager }} ${{ matrix.tpa_postgres_flavour }} ${{ matrix.tpa_postgres_version }} ${{ matrix.tpa_os_image }} ${{ matrix.cpu_architecture }}
@@ -46,6 +108,7 @@ jobs:
     runs-on: ${{ matrix.runner && matrix.runner || 'ubuntu-22.04' }}
 
     steps:
+
     - name: Checkout source repository
       id: checkout-source
       uses: actions/checkout@v6
@@ -61,18 +124,56 @@ jobs:
         token: ${{ env.GITHUB_TOKEN }}
         path: foundation
 
+    - name: Choose postgres version
+      run: |
+        if [[ "${{ inputs.postgres_version }}" == "matrix default" ]]; then
+          POSTGRES_VERSION="${{ matrix.tpa_postgres_version }}"
+        else
+          POSTGRES_VERSION="${{ inputs.postgres_version }}"
+        fi
+        echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
+      shell: bash
+
+    - name: construct cluster identification string
+      run: |
+        ARCHITECTURE="${{ matrix.tpa_architecture }}"
+        POSTGRES_FLAVOUR="${{ matrix.tpa_postgres_flavour }}"
+        OS_IMAGE="${{ matrix.tpa_os_image }}"
+        HARP_CONSENSUS_PROTOCOL="${{ matrix.tpa_harp_consensus_protocol }}"
+        LAYOUT_NAME="${{ matrix.layout.tpa_layout_name }}"
+        FAILOVER_MANAGER="${{ matrix.tpa_failover_manager }}"
+        CPU_ARCHITECTURE="${{ matrix.cpu_architecture }}"
+
+        if [[ -n "$HARP_CONSENSUS_PROTOCOL" ]]; then
+          EXTRA_NAME="$HARP_CONSENSUS_PROTOCOL"
+        elif [[ -n "$LAYOUT_NAME" || -n "$FAILOVER_MANAGER" ]]; then
+          EXTRA_NAME="${LAYOUT_NAME}-${FAILOVER_MANAGER}"
+        else
+          EXTRA_NAME=""
+        fi
+
+        CLUSTER=${ARCHITECTURE}-${POSTGRES_FLAVOUR}-${POSTGRES_VERSION}-${OS_IMAGE}-${EXTRA_NAME}-${CPU_ARCHITECTURE}
+        CLUSTER="${CLUSTER// /}"
+        echo "Cluster name is $CLUSTER"
+        echo "CLUSTER=$CLUSTER" >> $GITHUB_ENV
+      shell: bash
+
     - uses: ./.github/actions/integration-test
       with:
-        cluster: ${{ matrix.tpa_architecture }}-${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}-${{ matrix.tpa_os_image }}-${{ matrix.tpa_harp_consensus_protocol }}-${{ matrix.cpu_architecture }}
+        cluster: ${{ env.CLUSTER }}
         cpu_architecture: ${{ matrix.cpu_architecture }}
         source_directory: ${{ github.workspace }}
         tpa_architecture: ${{ matrix.tpa_architecture }}
         tpa_enable_pgbouncer: ${{ matrix.tpa_enable_pgbouncer }}
-        tpa_platform: ${{ matrix.tpa_platform }}
         tpa_os_image: "tpa/${{ matrix.tpa_os_image }}"
         tpa_postgres_flavour: ${{ matrix.tpa_postgres_flavour }}
         tpa_failover_manager: ${{ matrix.tpa_failover_manager }}
-        tpa_postgres_version: ${{ matrix.tpa_postgres_version }}
-        tpa_harp_consensus_protocol: ${{ matrix.tpa_harp_consensus_protocol }}
+        tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
+        tpa_harp_consensus_protocol: ${{ matrix.tpa_harp_consensus_protocol != '' && matrix.tpa_harp_consensus_protocol || null }}
+        # m1 layout parameters
+        tpa_location_names: ${{ matrix.layout.tpa_location_names }}
+        tpa_data_nodes_per_location: ${{ matrix.layout.tpa_data_nodes_per_location }}
+        tpa_single_node_location: ${{ matrix.layout.tpa_single_node_location }}
+        tpa_witness_only_location: ${{ matrix.layout.tpa_witness_only_location }}
         tpa_package_cache: >-
           ${{ ! contains(matrix.tpa_os_image, 'sles') }}
