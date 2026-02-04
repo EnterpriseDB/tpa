@@ -72,11 +72,9 @@ inputs:
   tpa_location_names:
     required: false
     description: "Location names (for M1 only)"
-    default: "l1 l2"
   tpa_data_nodes_per_location:
     required: false
     description: "Data nodes per location (for M1 only)"
-    default: 2
   tpa_witness_only_location:
     required: false
     description: "Use a witness-only location (for M1 only)"
@@ -105,6 +103,32 @@ runs:
         sudo rm -rf /usr/local/.ghcup
       shell: bash
 
+    - name: Filter characters from cluster variable
+      run: |
+        CLUSTER="c-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
+        CLUSTER=${CLUSTER//[:\/.]/_}
+        echo CLUSTER=${CLUSTER:0:63} >>$GITHUB_ENV
+      shell: bash
+
+    - name: Bulk Initialize Inputs
+      shell: bash
+      run: |
+        # Define a helper to set a default and export to GITHUB_ENV
+        set_env() {
+          local NAME=$1
+          local VALUE=$2
+          local DEFAULT=$3
+          # If VALUE is empty, use DEFAULT
+          local FINAL_VAL="${VALUE:-$DEFAULT}"
+          echo "$NAME=$FINAL_VAL" >> $GITHUB_ENV
+          echo "Initialized $NAME to $FINAL_VAL"
+        }
+
+        # Usage: set_env "ENV_NAME" "INPUT_VALUE" "DEFAULT_VALUE"
+        set_env "HARP_CONSENSUS_PROTOCOL" "${{ inputs.tpa_harp_consensus_protocol }}" "bdr"
+        set_env "LOCATION_NAMES"          "${{ inputs.tpa_location_names }}"          "l1 l2"
+        set_env "DATA_NODES_PER_LOCATION" "${{ inputs.tpa_data_nodes_per_location }}" "2"
+
     - uses: ./.github/actions/install-requirements
       with:
         platform: ${{ inputs.tpa_platform }}
@@ -119,13 +143,6 @@ runs:
     - name: Export EDB_REPO_CREDENTIALS_FILE to use EDB repositories
       run: |
         umask 066 && echo $EDB_REPO_CREDENTIALS > $EDB_REPO_CREDENTIALS_FILE
-      shell: bash
-
-    - name: Filter characters from cluster variable
-      run: |
-        CLUSTER="c-${GITHUB_RUN_NUMBER:-1}-${GITHUB_RUN_ATTEMPT:-0}${{ inputs.cluster }}"
-        CLUSTER=${CLUSTER//[:\/.]/_}
-        echo CLUSTER=${CLUSTER:0:63} >>$GITHUB_ENV
       shell: bash
 
     - name: Generate an initial configuration for a simple cluster
@@ -144,7 +161,7 @@ runs:
         if [ "${{ inputs.tpa_architecture }}" == "BDR-Always-ON" ] ;then
           CONFIGURE_OPTS+=(
             --layout "${{ inputs.tpa_layout }}"
-            --harp-consensus-protocol "${{ inputs.tpa_harp_consensus_protocol }}"
+            --harp-consensus-protocol "${HARP_CONSENSUS_PROTOCOL}"
           )
         elif [ "${{ inputs.tpa_architecture }}" == "PGD-Always-ON" ]; then
           CONFIGURE_OPTS+=(
@@ -211,10 +228,10 @@ runs:
 
           if [ "${{ inputs.tpa_failover_manager }}" != "patroni" ] ;then
           #Architecture error: TPA does not support Patroni with multiple locations
-            CONFIGURE_OPTS+=(--location-names ${{ inputs.tpa_location_names }})
-            CONFIGURE_OPTS+=(--data-nodes-per-location "${{ inputs.tpa_data_nodes_per_location }}")
+            CONFIGURE_OPTS+=(--location-names ${LOCATION_NAMES})
+            CONFIGURE_OPTS+=(--data-nodes-per-location "${DATA_NODES_PER_LOCATION}")
             if [[ "${{ inputs.tpa_witness_only_location }}" == 'true' ]] ;then
-              WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
+              WITNESS_ONLY_LOCATION=$(awk '{print $NF}' <<< "${LOCATION_NAMES}")
               CONFIGURE_OPTS+=(--witness-only-location $WITNESS_ONLY_LOCATION)
           fi
 
@@ -224,7 +241,7 @@ runs:
         fi
 
           if [[ "${{ inputs.tpa_single_node_location}}" == 'true' ]] ;then
-            SINGLE_NODE_LOCATION=$(awk '{print $NF}' <<< "${{ inputs.tpa_location_names }}")
+            SINGLE_NODE_LOCATION=$(awk '{print $NF}' <<< "${LOCATION_NAMES}")
             CONFIGURE_OPTS+=(--single-node-location $SINGLE_NODE_LOCATION)
           fi
         fi
