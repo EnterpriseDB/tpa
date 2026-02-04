@@ -5,8 +5,19 @@
 # running on the default OS image, currently RHEL 9)
 
 name: Matrix Integration Tests
-run-name: ${{ inputs.matrix }} matrix, pg version ${{ inputs.postgres_version }}
+run-name: ${{ inputs.matrix || 'simple' }} matrix, pg version ${{ inputs.postgres_version || 'default' }}
 on:
+  push:
+    branches:
+      - 'testme/**'
+  pull_request:
+    types:
+      - review_requested
+    branches:
+      - main
+  pull_request_review:
+    types:
+      - submitted
   workflow_dispatch:
     inputs:
       matrix:
@@ -59,9 +70,41 @@ jobs:
   load-matrix:
     name: Load Matrix
     runs-on: ubuntu-22.04
+    # if the workflow has been dispatched manually, we proceed. If it's been triggered,
+    # we filter further:
+    # - a request for a review from tpa-admin
+    # - an approval of a PR targeting main
+    # - a push of a branch named specifically to trigger tests, for testing the tests
+    if: >
+      github.event_name == 'workflow_dispatch'
+      ||
+        ( github.event.requested_team && github.event.requested_team.name == 'tpa-admin')
+      || (
+        github.event.review
+        && github.event.review.state == 'approved'
+        && startsWith(github.event.pull_request.base.ref, 'main'))
+      || (
+        contains(github.event.ref, 'testme'))
+
     outputs:
       json: ${{ steps.filter-matrix.outputs.json }}
+      postgres_version: ${{ steps.set-inputs.outputs.postgres_version }}
     steps:
+    # the parameters which are inputs when the workflow is dispatched manually need to
+    # be set to suitable defaults if we're running because of a triggering event
+    - name: set inputs
+      id: set-inputs
+      shell: bash
+      run: |
+        MATRIX="${{ github.event.inputs.matrix || 'simple' }}"
+        INPUT_POSTGRES_VERSION="${{ github.event.inputs.postgres_version || 'matrix default' }}"
+        SKIP_RH10="${{ github.event.inputs.skip_rh10 || 'true' }}"
+
+        echo "MATRIX=$MATRIX" >> $GITHUB_ENV
+        echo "SKIP_RH10=$SKIP_RH10" >> $GITHUB_ENV
+
+        echo "postgres_version=$INPUT_POSTGRES_VERSION" >> $GITHUB_OUTPUT
+
     - uses: actions/checkout@v6
       with:
         token: ${{secrets.GH_SLONIK}}
@@ -70,7 +113,7 @@ jobs:
       id: load-yaml
       with:
         file: .github/config/integration_tests.yml
-        key: "${{ inputs.matrix }}"
+        key: "${{ env.MATRIX }}"
 
     - name: Remove RHEL 10 entries from matrix
       id: filter-matrix
@@ -80,7 +123,7 @@ jobs:
       run: |
         set -euo pipefail
 
-        if [[ "${{ inputs.skip_rh10 }}" == "true" ]]; then
+        if [[ "${{ env.SKIP_RH10 }}" == "true" ]]; then
           json_out=$(jq -c '
             if (.tpa_os_image? | type) == "array" then
               .tpa_os_image |= map(select(. != "redhat:10"))
@@ -126,10 +169,10 @@ jobs:
 
     - name: Choose postgres version
       run: |
-        if [[ "${{ inputs.postgres_version }}" == "matrix default" ]]; then
+        if [[ "${{ needs.load-matrix.outputs.postgres_version }}" == "matrix default" ]]; then
           POSTGRES_VERSION="${{ matrix.tpa_postgres_version }}"
         else
-          POSTGRES_VERSION="${{ inputs.postgres_version }}"
+          POSTGRES_VERSION="${{ needs.load-matrix.outputs.postgres_version }}"
         fi
         echo "POSTGRES_VERSION=$POSTGRES_VERSION" >> $GITHUB_ENV
       shell: bash
