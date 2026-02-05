@@ -611,3 +611,5 @@ default_ha_proxy_dhparams_key_size: 2048
 default_openvpn_rsa_key_size: 4096
 default_openvpn_dhparams_numbits_size: 2048
 default_openssl_certificate_validity: 3650
+
+default_privilege_escalation_command: sudo
