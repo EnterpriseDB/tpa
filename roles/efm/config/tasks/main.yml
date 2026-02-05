@@ -44,8 +44,9 @@
     user: efm
     runas: "{{ postgres_user }}"
     commands: "{{ efm_bin_dir }}/efm_db_functions"
-  when: >
-    failover_manager == "efm"
+  when:
+    - failover_manager == "efm"
+    - privilege_escalation_command == 'sudo'
 
 # EFM stores the secret but it does that in an encrypted format,
 # it uses a homebrew "encryption" scheme that feeds the cluster name to
