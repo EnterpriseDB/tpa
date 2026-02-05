@@ -202,7 +202,9 @@ full:
         tpa_location_names: "l1"
         tpa_data_nodes_per_location: 2
         tpa_layout_name: "1x2"
+
 s390x:
+  cpu_architecture: [ "s390x" ]
   tpa_architecture:
     - "PGD-S"
     - "PGD-X"
@@ -210,10 +212,7 @@ s390x:
     - "sles:15"
     - "almalinux:8"
     - "redhat:9"
-  tpa_postgres_flavour:
-    - "epas"
-    - "postgresql"
-    - "edbpge"
+  tpa_postgres_flavour: *all_flavours
   tpa_postgres_version:
     - 17
     - 16

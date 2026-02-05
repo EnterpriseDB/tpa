@@ -34,6 +34,7 @@ on:
         - "PGD-Always-ON"
         - "PGD-S"
         - "PGD-X"
+        - "s390x"
       postgres_version:
         description: "Postgres version"
         required: true
@@ -219,4 +220,4 @@ jobs:
         tpa_single_node_location: ${{ matrix.layout.tpa_single_node_location }}
         tpa_witness_only_location: ${{ matrix.layout.tpa_witness_only_location }}
         tpa_package_cache: >-
-          ${{ ! contains(matrix.tpa_os_image, 'sles') }}
+          ${{ ! ( contains(matrix.tpa_os_image, 'sles') || matrix.cpu_architecture == 's390x' ) }}
