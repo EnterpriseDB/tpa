@@ -13,9 +13,6 @@
     privilege_escalation_command:
       "{{ privilege_escalation_command|default(default_privilege_escalation_command) }}"
 
-- set_fact:
-    privilege_escalation_command: "{{ privilege_escalation_command }}"
-
 # We set the /etc/hosts lines for each host: one for the main IP
 # address and hostname, plus one for each hostname_aliases entry. Then
 # we aggregate them so that each host has its own lines as well as the

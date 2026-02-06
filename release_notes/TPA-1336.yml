@@ -17,7 +17,6 @@
     - Skip sudoers configuration for the Postgres user
     - Skip sudoers configuration for the EFM user
     - Use the configured command for all failover manager operations (repmgr, HARP, EFM)
-    - Use Ansible's become mechanism with the specified command for all privileged operations
 
     This feature is useful for environments that:
     - Use alternative privilege escalation commands
@@ -30,23 +29,18 @@
     3. The command allows the EFM user to run efm_db_functions (if using EFM)
     4. Ansible's become mechanism is properly configured (via ansible_become_method)
 
-    TPA validates the value of `privilege_escalation_command` during provision/deploy
-    and will fail with a clear error message if an invalid value is provided. This
-    validation runs before any provisioning or deployment work begins.
-
     **Component-specific changes:**
 
     - **Postgres user sudoers**: When using alternative commands, TPA skips configuring
-      sudoers for the postgres system user. Users must manually configure privilege
-      escalation for service management commands.
+      sudoers for the postgres system user. Users must configure privilege escalation for
+      service management commands.
 
     - **EFM sudoers**: When using alternative commands, TPA skips configuring sudoers
-      for the EFM user. Users must manually configure privilege escalation to allow
-      the EFM user to run efm_db_functions as the postgres user.
+      for the EFM user. Users must configure privilege escalation to allow the EFM user to
+      run efm_db_functions as the postgres user.
 
-    - **Failover managers**: repmgr and EFM now use the
-      configured privilege escalation command for service management commands instead of
-      hardcoding sudo.
+    - **Failover managers**: repmgr and EFM now use the configured privilege escalation
+      command for service management commands instead of hardcoding sudo.
 
     - **Barman SELinux**: Barman SELinux configuration tasks now use Ansible's become
       mechanism instead of explicit sudo commands, respecting the configured privilege

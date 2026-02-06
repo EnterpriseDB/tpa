@@ -160,8 +160,9 @@ environment-specific requirements.
 
 When using an alternative privilege escalation command (anything other than
 `"sudo"`), TPA will skip sudo package installation and sudoers configuration.
-You must manually install and configure the chosen privilege escalation command
-on all target systems before running `tpaexec deploy`.
+You must install and configure the chosen privilege escalation command
+on all target systems, either manually or with hooks, before running
+`tpaexec deploy`.
 
 **1. Service management permissions for the postgres user**
 

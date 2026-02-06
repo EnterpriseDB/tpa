@@ -114,17 +114,9 @@ cluster_vars:
   edb_repositories:
   - enterprise
   - postgres_distributed
-  privilege_escalation_command: sudo
   postgres_conf_settings:
     bdr.trace_replay: true
 ```
-
-The `privilege_escalation_command` setting controls which privilege escalation
-command TPA uses for deployment and cluster operations. The default is `"sudo"`.
-Set it to an alternative command if your environment uses a different privilege
-escalation mechanism. See
-[TPA, Ansible, and sudo](ansible-and-sudo.md#managing-privilege-escalation-configuration)
-for the list of supported commands and configuration details.
 
 !!! Warning
 Any variables used in templates must be defined at the top-level of `config.yml` (the same level as the `cluster_name` variable)
@@ -138,6 +130,7 @@ postgres_version: '14' # Defined at top-level
 cluster_vars:
   postgres_version: "{{ postgres version }}" # Templated with top-level variable 
   postgres_data_dir: "/data/{{ cluster_name }}/edb{{ postgres_version }}/data" # Templated with top-level variable
+  privilege_escalation_command: sudo
 ```
 
 In this case, `tpaexec provision` will write three variables (a
