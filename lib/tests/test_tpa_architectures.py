@@ -97,6 +97,7 @@ class ConfiguredArchitecture:
 def pgdx_architecture(argv):
     """Fixture for PGD-X architecture testing."""
     cluster_path = CONFIG_PATH["PGDX"]
+    cleanup(cluster_path)  # Ensure clean state before test
     configured = ConfiguredArchitecture(PGDX, argv, cluster_path)
     yield configured
     cleanup(cluster_path)
@@ -106,6 +107,7 @@ def pgdx_architecture(argv):
 def pgds_architecture(argv):
     """Fixture for PGD-S architecture testing."""
     cluster_path = CONFIG_PATH["PGDS"]
+    cleanup(cluster_path)  # Ensure clean state before test
     configured = ConfiguredArchitecture(PGDS, argv, cluster_path)
     yield configured
     cleanup(cluster_path)
@@ -665,34 +667,40 @@ class TestPGDSArchitecture:
         """Test that standard layout with wrong number of locations raises error"""
         from tpa.exceptions import PGDArchitectureError
 
+        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
         argv = self.MINIMUM_PGDS_ARGV + ["--layout", "standard", "--location-names", "first", "second"]
 
-        with pytest.raises(PGDArchitectureError, match="standard requires exactly 1 locations"):
-            ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
-
-        cleanup(CONFIG_PATH["PGDS"])
+        try:
+            with pytest.raises(PGDArchitectureError, match="standard requires exactly 1 locations"):
+                ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+        finally:
+            cleanup(CONFIG_PATH["PGDS"])
 
     def test_pgds_near_far_layout_one_location(self):
         """Test that near-far layout with one location raises error"""
         from tpa.exceptions import PGDArchitectureError
 
+        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
         argv = self.MINIMUM_PGDS_ARGV + ["--layout", "near-far", "--location-names", "first"]
 
-        with pytest.raises(PGDArchitectureError, match="near-far requires exactly 2 locations"):
-            ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
-
-        cleanup(CONFIG_PATH["PGDS"])
+        try:
+            with pytest.raises(PGDArchitectureError, match="near-far requires exactly 2 locations"):
+                ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+        finally:
+            cleanup(CONFIG_PATH["PGDS"])
 
     def test_pgds_near_far_layout_three_locations(self):
         """Test that near-far layout with three locations raises error"""
         from tpa.exceptions import PGDArchitectureError
 
+        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
         argv = self.MINIMUM_PGDS_ARGV + ["--layout", "near-far", "--location-names", "first", "second", "third"]
 
-        with pytest.raises(PGDArchitectureError, match="near-far requires exactly 2 locations"):
-            ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
-
-        cleanup(CONFIG_PATH["PGDS"])
+        try:
+            with pytest.raises(PGDArchitectureError, match="near-far requires exactly 2 locations"):
+                ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+        finally:
+            cleanup(CONFIG_PATH["PGDS"])
 
 
 # Shared tests for both PGD-X and PGD-S (testing common PGD functionality)
@@ -767,6 +775,7 @@ class TestPGDCommon:
 
         This tests the shared logic in pgd.py that applies to both PGD-X and PGD-S.
         """
+        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
         argv = [
             CONFIG_PATH["PGDS"],
             "--architecture",
@@ -775,12 +784,13 @@ class TestPGDCommon:
             "--postgresql",
             postgres_version,
         ]
-        configured = ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+        try:
+            configured = ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
 
-        assert configured.args["cluster_vars"]["bdr_version"] == expected_bdr
-        assert configured.args["cluster_vars"]["postgres_version"] == postgres_version
-
-        cleanup(CONFIG_PATH["PGDS"])
+            assert configured.args["cluster_vars"]["bdr_version"] == expected_bdr
+            assert configured.args["cluster_vars"]["postgres_version"] == postgres_version
+        finally:
+            cleanup(CONFIG_PATH["PGDS"])
 
     @pytest.mark.parametrize(
         "name, expected",
@@ -844,7 +854,9 @@ class TestPGDCommon:
         """Test that configuring with unsupported Postgres version raises error"""
         from tpa.exceptions import PGDArchitectureError
 
-        with pytest.raises(PGDArchitectureError, match="Postgres 13 with BDR .* is not supported"):
-            ConfiguredArchitecture(architecture_class, argv, argv[0])
-
-        cleanup(argv[0])
+        cleanup(argv[0])  # Ensure clean state before test
+        try:
+            with pytest.raises(PGDArchitectureError, match="Postgres 13 with BDR .* is not supported"):
+                ConfiguredArchitecture(architecture_class, argv, argv[0])
+        finally:
+            cleanup(argv[0])
