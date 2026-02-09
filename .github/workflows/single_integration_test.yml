@@ -111,7 +111,7 @@ jobs:
       ${{ github.event.inputs.cpu_architecture }}
       ${{ github.event.inputs.tpa_architecture == 'M1' && github.event.inputs.tpa_failover_manager || ''}}
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout source repository

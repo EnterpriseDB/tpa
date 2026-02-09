@@ -87,7 +87,7 @@ jobs:
       ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
       starting on version ${{ github.event.inputs.tpa_postgres_package_version }}
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout source repository
