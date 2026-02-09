@@ -7,9 +7,6 @@
 name: Matrix Integration Tests
 run-name: ${{ inputs.matrix || 'simple' }} matrix, pg version ${{ inputs.postgres_version || 'default' }}
 on:
-  push:
-    branches:
-      - 'testme/**'
   pull_request:
     types:
       - review_requested
@@ -75,7 +72,6 @@ jobs:
     # we filter further:
     # - a request for a review from tpa-admin
     # - an approval of a PR targeting main
-    # - a push of a branch named specifically to trigger tests, for testing the tests
     if: >
       github.event_name == 'workflow_dispatch'
       ||
@@ -84,8 +80,6 @@ jobs:
         github.event.review
         && github.event.review.state == 'approved'
         && startsWith(github.event.pull_request.base.ref, 'main'))
-      || (
-        contains(github.event.ref, 'testme'))
 
     outputs:
       json: ${{ steps.filter-matrix.outputs.json }}
