@@ -74,6 +74,8 @@
           wait_close|default('yes')|bool|ternary([_commands[1]], [])
         )
       }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
   vars:
     _dsn: "{{ hostvars[haproxy_instance].pgbouncer_node_dsn }}"
     _task_environment:
