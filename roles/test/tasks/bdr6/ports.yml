@@ -11,6 +11,8 @@
       SELECT ssl
       FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
       WHERE pid = pg_backend_pid()
+  become_user: "{{ postgres_user }}"
+  become: yes
   vars:
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -33,6 +35,8 @@
       SELECT ssl
       FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
       WHERE pid = pg_backend_pid()
+  become_user: "{{ postgres_user }}"
+  become: yes
   vars:
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -45,6 +49,8 @@
       SELECT ssl
       FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
       WHERE pid = pg_backend_pid()
+  become_user: "{{ postgres_user }}"
+  become: yes
   vars:
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"

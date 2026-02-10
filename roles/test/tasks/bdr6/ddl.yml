@@ -20,6 +20,8 @@
         tpa_bool BOOLEAN,
         tpa_text TEXT
         );
+    become_user: "{{ postgres_user }}"
+    become: yes
     register: create_tpa
     vars:
       _task_environment:
@@ -31,6 +33,8 @@
       query: >
         ALTER TABLE bdr.tpa
         REPLICA IDENTITY FULL;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -51,6 +55,8 @@
           random()::text
         )
         ;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -64,6 +70,8 @@
         SET tpa_bool = true
         WHERE tpa_bool = false
         ;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -76,6 +84,8 @@
         DELETE FROM bdr.tpa
         WHERE tpa_id > 500
         ;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -88,6 +98,8 @@
         ALTER TABLE bdr.tpa
         ADD PRIMARY KEY (tpa_id)
         ;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -100,6 +112,8 @@
         ALTER TABLE bdr.tpa
         DROP COLUMN tpa_bool
         ;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -110,6 +124,8 @@
       conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_tester) }}"
       query: >
         SELECT * FROM bdr.tpa;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -121,6 +137,8 @@
       conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         TRUNCATE TABLE bdr.tpa;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -131,6 +149,8 @@
       conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
       query: >
         DROP TABLE bdr.tpa;
+    become_user: "{{ postgres_user }}"
+    become: yes
     vars:
       _task_environment:
         PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
