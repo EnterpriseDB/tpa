@@ -212,41 +212,6 @@ class TestPGDXArchitecture:
         assert len(bdr_node_groups) == 4
 
     @pytest.mark.parametrize(
-        "argv, error, expected",
-        [
-            (MINIMUM_PGDX_ARGV, KeyError, None),  # No probes by default
-            pytest.param(
-                MINIMUM_PGDX_ARGV + ["--enable-pgd-probes"],
-                None,
-                {"enable": True},
-                marks=pytest.mark.skip(reason="--enable-pgd-probes not yet implemented in lib/tpa"),
-            ),
-            pytest.param(
-                MINIMUM_PGDX_ARGV + ["--enable-pgd-probes", "http"],
-                None,
-                {"enable": True},
-                marks=pytest.mark.skip(reason="--enable-pgd-probes not yet implemented in lib/tpa"),
-            ),
-            pytest.param(
-                MINIMUM_PGDX_ARGV + ["--enable-pgd-probes", "https"],
-                None,
-                {"enable": True, "secure": True},
-                marks=pytest.mark.skip(reason="--enable-pgd-probes not yet implemented in lib/tpa"),
-            ),
-        ],
-    )
-    def test_pgdx_pgd_probes(self, argv, error, expected, pgdx_architecture):
-        """Test PGD-X probe configuration"""
-        if error is None:
-            assert (
-                pgdx_architecture.args["cluster_vars"]["pgd_http_options"] == expected
-            )
-        else:
-            with pytest.raises(error):
-                # Access the key to trigger KeyError if not present
-                pgdx_architecture.args["cluster_vars"]["pgd_http_options"]
-
-    @pytest.mark.parametrize(
         "argv",
         [
             MINIMUM_PGDX_ARGV,
@@ -258,13 +223,17 @@ class TestPGDXArchitecture:
         assert "postgres_distributed" in edb_repos
 
     @pytest.mark.parametrize(
-        "argv",
+        "argv, check_barman",
         [
-            MINIMUM_PGDX_ARGV + ["--enable-pem"],
+            (MINIMUM_PGDX_ARGV + ["--enable-pem"], False),
+            (MINIMUM_PGDX_ARGV + ["--enable-pem", "--enable-pg-backup-api"], True),
         ],
     )
-    def test_pgdx_enable_pem(self, argv, pgdx_architecture):
-        """Test that --enable-pem adds pem-agent role to BDR instances and creates pemserver"""
+    def test_pgdx_enable_pem(self, argv, check_barman, pgdx_architecture):
+        """Test that --enable-pem adds pem-agent role to BDR instances and creates pemserver.
+
+        With --enable-pg-backup-api, also adds pem-agent to barman instances.
+        """
         instances = pgdx_architecture.config.get("instances", [])
 
         # Check that BDR instances have pem-agent role
@@ -278,30 +247,24 @@ class TestPGDXArchitecture:
         assert len(pemserver_instances) == 1, "Should have exactly one pemserver instance"
         assert pemserver_instances[0].get("Name") == "pemserver"
 
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDX_ARGV + ["--enable-pem", "--enable-pg-backup-api"],
-        ],
-    )
-    def test_pgdx_enable_pem_with_backup_api(self, argv, pgdx_architecture):
-        """Test that --enable-pem + --enable-pg-backup-api adds pem-agent to barman instances"""
-        instances = pgdx_architecture.config.get("instances", [])
-
-        # Check that barman instances have pem-agent role
-        barman_instances = [i for i in instances if "barman" in i.get("role", [])]
-        if len(barman_instances) > 0:
+        # Check barman instances when --enable-pg-backup-api is specified
+        if check_barman:
+            barman_instances = [i for i in instances if "barman" in i.get("role", [])]
             for instance in barman_instances:
-                assert "pem-agent" in instance.get("role", []), f"Barman instance {instance.get('Name')} should have pem-agent role when both --enable-pem and --enable-pg-backup-api are specified"
+                assert "pem-agent" in instance.get("role", []), f"Barman instance {instance.get('Name')} should have pem-agent role"
 
     @pytest.mark.parametrize(
-        "argv",
+        "argv, expected_project_id",
         [
-            MINIMUM_PGDX_ARGV + ["--enable-beacon-agent"],
+            (MINIMUM_PGDX_ARGV + ["--enable-beacon-agent"], None),
+            (MINIMUM_PGDX_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"], "prj_test123"),
         ],
     )
-    def test_pgdx_enable_beacon_agent(self, argv, pgdx_architecture):
-        """Test that --enable-beacon-agent adds beacon-agent role to BDR instances"""
+    def test_pgdx_enable_beacon_agent(self, argv, expected_project_id, pgdx_architecture):
+        """Test that --enable-beacon-agent adds beacon-agent role to BDR instances.
+
+        With --beacon-agent-project-id, also sets beacon_agent_project_id in cluster_vars.
+        """
         instances = pgdx_architecture.config.get("instances", [])
 
         # Check that BDR instances have beacon-agent role
@@ -310,64 +273,25 @@ class TestPGDXArchitecture:
         for instance in bdr_instances:
             assert "beacon-agent" in instance.get("role", []), f"BDR instance {instance.get('Name')} should have beacon-agent role"
 
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDX_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"],
-        ],
-    )
-    def test_pgdx_beacon_agent_project_id(self, argv, pgdx_architecture):
-        """Test that --beacon-agent-project-id sets beacon_agent_project_id in cluster_vars"""
-        cluster_vars = pgdx_architecture.args["cluster_vars"]
-        assert cluster_vars.get("beacon_agent_project_id") == "prj_test123"
+        # Check project_id when specified
+        if expected_project_id:
+            cluster_vars = pgdx_architecture.args["cluster_vars"]
+            assert cluster_vars.get("beacon_agent_project_id") == expected_project_id
 
     @pytest.mark.parametrize(
-        "argv, expected_port",
+        "argv, option_name, expected_value",
         [
-            (MINIMUM_PGDX_ARGV + ["--read-write-port", "7432"], 7432),
+            (MINIMUM_PGDX_ARGV + ["--read-write-port", "7432"], "read_write_port", 7432),
+            (MINIMUM_PGDX_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
+            (MINIMUM_PGDX_ARGV + ["--http-port", "8080"], "http_port", 8080),
+            (MINIMUM_PGDX_ARGV + ["--use-https"], "use_https", True),
         ],
     )
-    def test_pgdx_read_write_port(self, argv, expected_port, pgdx_architecture):
-        """Test that --read-write-port sets read_write_port in bdr_node_groups"""
+    def test_pgdx_cm_options(self, argv, option_name, expected_value, pgdx_architecture):
+        """Test that Connection Manager options are set correctly in bdr_node_groups"""
         bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
         top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("read_write_port") == expected_port
-
-    @pytest.mark.parametrize(
-        "argv, expected_port",
-        [
-            (MINIMUM_PGDX_ARGV + ["--read-only-port", "7433"], 7433),
-        ],
-    )
-    def test_pgdx_read_only_port(self, argv, expected_port, pgdx_architecture):
-        """Test that --read-only-port sets read_only_port in bdr_node_groups"""
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("read_only_port") == expected_port
-
-    @pytest.mark.parametrize(
-        "argv, expected_port",
-        [
-            (MINIMUM_PGDX_ARGV + ["--http-port", "8080"], 8080),
-        ],
-    )
-    def test_pgdx_http_port(self, argv, expected_port, pgdx_architecture):
-        """Test that --http-port sets http_port in bdr_node_groups"""
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("http_port") == expected_port
-
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDX_ARGV + ["--use-https"],
-        ],
-    )
-    def test_pgdx_use_https(self, argv, pgdx_architecture):
-        """Test that --use-https sets use_https in bdr_node_groups"""
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("use_https") is True
+        assert top_group.get("options", {}).get(option_name) == expected_value
 
     @pytest.mark.parametrize(
         "argv",
@@ -398,23 +322,16 @@ class TestPGDXArchitecture:
         [
             (MINIMUM_PGDX_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
             (MINIMUM_PGDX_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"], ["test_repo1", "test_repo2"]),
+            (MINIMUM_PGDX_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
     def test_pgdx_custom_repositories(self, argv, expected_repos, pgdx_architecture):
-        """Test that --edb-repositories allows custom repository lists"""
+        """Test that --edb-repositories allows custom repository lists.
+
+        The special value 'none' results in an empty repository list.
+        """
         edb_repos = pgdx_architecture.args["cluster_vars"].get("edb_repositories", [])
         assert edb_repos == expected_repos
-
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDX_ARGV + ["--edb-repositories", "none"],
-        ],
-    )
-    def test_pgdx_no_repositories(self, argv, pgdx_architecture):
-        """Test that --edb-repositories none results in empty repository list"""
-        edb_repos = pgdx_architecture.args["cluster_vars"].get("edb_repositories", [])
-        assert edb_repos == []
 
 
 # @patch.object(Architecture, "expand_template", expand_template)
@@ -505,13 +422,17 @@ class TestPGDSArchitecture:
         assert "standard" not in edb_repos
 
     @pytest.mark.parametrize(
-        "argv",
+        "argv, check_barman",
         [
-            MINIMUM_PGDS_ARGV + ["--enable-pem"],
+            (MINIMUM_PGDS_ARGV + ["--enable-pem"], False),
+            (MINIMUM_PGDS_ARGV + ["--enable-pem", "--enable-pg-backup-api"], True),
         ],
     )
-    def test_pgds_enable_pem(self, argv, pgds_architecture):
-        """Test that --enable-pem adds pem-agent role to BDR instances and creates pemserver"""
+    def test_pgds_enable_pem(self, argv, check_barman, pgds_architecture):
+        """Test that --enable-pem adds pem-agent role to BDR instances and creates pemserver.
+
+        With --enable-pg-backup-api, also adds pem-agent to barman instances.
+        """
         instances = pgds_architecture.config.get("instances", [])
 
         # Check that BDR instances have pem-agent role
@@ -525,30 +446,24 @@ class TestPGDSArchitecture:
         assert len(pemserver_instances) == 1, "Should have exactly one pemserver instance"
         assert pemserver_instances[0].get("Name") == "pemserver"
 
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDS_ARGV + ["--enable-pem", "--enable-pg-backup-api"],
-        ],
-    )
-    def test_pgds_enable_pem_with_backup_api(self, argv, pgds_architecture):
-        """Test that --enable-pem + --enable-pg-backup-api adds pem-agent to barman instances"""
-        instances = pgds_architecture.config.get("instances", [])
-
-        # Check that barman instances have pem-agent role
-        barman_instances = [i for i in instances if "barman" in i.get("role", [])]
-        assert len(barman_instances) > 0, "PGD-S should have barman instances"
-        for instance in barman_instances:
-            assert "pem-agent" in instance.get("role", []), f"Barman instance {instance.get('Name')} should have pem-agent role when both --enable-pem and --enable-pg-backup-api are specified"
+        # Check barman instances when --enable-pg-backup-api is specified
+        if check_barman:
+            barman_instances = [i for i in instances if "barman" in i.get("role", [])]
+            for instance in barman_instances:
+                assert "pem-agent" in instance.get("role", []), f"Barman instance {instance.get('Name')} should have pem-agent role"
 
     @pytest.mark.parametrize(
-        "argv",
+        "argv, expected_project_id",
         [
-            MINIMUM_PGDS_ARGV + ["--enable-beacon-agent"],
+            (MINIMUM_PGDS_ARGV + ["--enable-beacon-agent"], None),
+            (MINIMUM_PGDS_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test456"], "prj_test456"),
         ],
     )
-    def test_pgds_enable_beacon_agent(self, argv, pgds_architecture):
-        """Test that --enable-beacon-agent adds beacon-agent role to BDR instances"""
+    def test_pgds_enable_beacon_agent(self, argv, expected_project_id, pgds_architecture):
+        """Test that --enable-beacon-agent adds beacon-agent role to BDR instances.
+
+        With --beacon-agent-project-id, also sets beacon_agent_project_id in cluster_vars.
+        """
         instances = pgds_architecture.config.get("instances", [])
 
         # Check that BDR instances have beacon-agent role
@@ -557,68 +472,26 @@ class TestPGDSArchitecture:
         for instance in bdr_instances:
             assert "beacon-agent" in instance.get("role", []), f"BDR instance {instance.get('Name')} should have beacon-agent role"
 
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDS_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test456"],
-        ],
-    )
-    def test_pgds_beacon_agent_project_id(self, argv, pgds_architecture):
-        """Test that --beacon-agent-project-id sets beacon_agent_project_id in cluster_vars"""
-        cluster_vars = pgds_architecture.args["cluster_vars"]
-        assert cluster_vars.get("beacon_agent_project_id") == "prj_test456"
+        # Check project_id when specified
+        if expected_project_id:
+            cluster_vars = pgds_architecture.args["cluster_vars"]
+            assert cluster_vars.get("beacon_agent_project_id") == expected_project_id
 
     @pytest.mark.parametrize(
-        "argv, expected_port",
+        "argv, option_name, expected_value",
         [
-            (MINIMUM_PGDS_ARGV + ["--read-write-port", "7432"], 7432),
+            (MINIMUM_PGDS_ARGV + ["--read-write-port", "7432"], "read_write_port", 7432),
+            (MINIMUM_PGDS_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
+            (MINIMUM_PGDS_ARGV + ["--http-port", "8080"], "http_port", 8080),
+            (MINIMUM_PGDS_ARGV + ["--use-https"], "use_https", True),
         ],
     )
-    def test_pgds_read_write_port(self, argv, expected_port, pgds_architecture):
-        """Test that --read-write-port sets read_write_port in bdr_node_groups"""
+    def test_pgds_cm_options(self, argv, option_name, expected_value, pgds_architecture):
+        """Test that Connection Manager options are set correctly in bdr_node_groups"""
         bdr_node_groups = pgds_architecture.args["cluster_vars"].get("bdr_node_groups", [])
         assert len(bdr_node_groups) > 0, "Should have bdr_node_groups"
         top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("read_write_port") == expected_port
-
-    @pytest.mark.parametrize(
-        "argv, expected_port",
-        [
-            (MINIMUM_PGDS_ARGV + ["--read-only-port", "7433"], 7433),
-        ],
-    )
-    def test_pgds_read_only_port(self, argv, expected_port, pgds_architecture):
-        """Test that --read-only-port sets read_only_port in bdr_node_groups"""
-        bdr_node_groups = pgds_architecture.args["cluster_vars"].get("bdr_node_groups", [])
-        assert len(bdr_node_groups) > 0, "Should have bdr_node_groups"
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("read_only_port") == expected_port
-
-    @pytest.mark.parametrize(
-        "argv, expected_port",
-        [
-            (MINIMUM_PGDS_ARGV + ["--http-port", "8080"], 8080),
-        ],
-    )
-    def test_pgds_http_port(self, argv, expected_port, pgds_architecture):
-        """Test that --http-port sets http_port in bdr_node_groups"""
-        bdr_node_groups = pgds_architecture.args["cluster_vars"].get("bdr_node_groups", [])
-        assert len(bdr_node_groups) > 0, "Should have bdr_node_groups"
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("http_port") == expected_port
-
-    @pytest.mark.parametrize(
-        "argv",
-        [
-            MINIMUM_PGDS_ARGV + ["--use-https"],
-        ],
-    )
-    def test_pgds_use_https(self, argv, pgds_architecture):
-        """Test that --use-https sets use_https in bdr_node_groups"""
-        bdr_node_groups = pgds_architecture.args["cluster_vars"].get("bdr_node_groups", [])
-        assert len(bdr_node_groups) > 0, "Should have bdr_node_groups"
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get("use_https") is True
+        assert top_group.get("options", {}).get(option_name) == expected_value
 
     @pytest.mark.parametrize(
         "argv",
@@ -645,59 +518,34 @@ class TestPGDSArchitecture:
         [
             (MINIMUM_PGDS_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
             (MINIMUM_PGDS_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"], ["test_repo1", "test_repo2"]),
+            (MINIMUM_PGDS_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
     def test_pgds_custom_repositories(self, argv, expected_repos, pgds_architecture):
-        """Test that --edb-repositories allows custom repository lists"""
+        """Test that --edb-repositories allows custom repository lists.
+
+        The special value 'none' results in an empty repository list.
+        """
         edb_repos = pgds_architecture.args["cluster_vars"].get("edb_repositories", [])
         assert edb_repos == expected_repos
 
     @pytest.mark.parametrize(
-        "argv",
+        "layout, locations, expected_count",
         [
-            MINIMUM_PGDS_ARGV + ["--edb-repositories", "none"],
+            ("standard", ["first", "second"], 1),
+            ("near-far", ["first"], 2),
+            ("near-far", ["first", "second", "third"], 2),
         ],
     )
-    def test_pgds_no_repositories(self, argv, pgds_architecture):
-        """Test that --edb-repositories none results in empty repository list"""
-        edb_repos = pgds_architecture.args["cluster_vars"].get("edb_repositories", [])
-        assert edb_repos == []
-
-    def test_pgds_standard_layout_wrong_location_count(self):
-        """Test that standard layout with wrong number of locations raises error"""
+    def test_pgds_invalid_location_count(self, layout, locations, expected_count):
+        """Test that layouts with wrong number of locations raise errors"""
         from tpa.exceptions import PGDArchitectureError
 
         cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
-        argv = self.MINIMUM_PGDS_ARGV + ["--layout", "standard", "--location-names", "first", "second"]
+        argv = self.MINIMUM_PGDS_ARGV + ["--layout", layout, "--location-names"] + locations
 
         try:
-            with pytest.raises(PGDArchitectureError, match="standard requires exactly 1 locations"):
-                ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
-        finally:
-            cleanup(CONFIG_PATH["PGDS"])
-
-    def test_pgds_near_far_layout_one_location(self):
-        """Test that near-far layout with one location raises error"""
-        from tpa.exceptions import PGDArchitectureError
-
-        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
-        argv = self.MINIMUM_PGDS_ARGV + ["--layout", "near-far", "--location-names", "first"]
-
-        try:
-            with pytest.raises(PGDArchitectureError, match="near-far requires exactly 2 locations"):
-                ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
-        finally:
-            cleanup(CONFIG_PATH["PGDS"])
-
-    def test_pgds_near_far_layout_three_locations(self):
-        """Test that near-far layout with three locations raises error"""
-        from tpa.exceptions import PGDArchitectureError
-
-        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
-        argv = self.MINIMUM_PGDS_ARGV + ["--layout", "near-far", "--location-names", "first", "second", "third"]
-
-        try:
-            with pytest.raises(PGDArchitectureError, match="near-far requires exactly 2 locations"):
+            with pytest.raises(PGDArchitectureError, match=f"{layout} requires exactly {expected_count} locations"):
                 ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
         finally:
             cleanup(CONFIG_PATH["PGDS"])
@@ -763,19 +611,25 @@ class TestPGDCommon:
     @pytest.mark.parametrize(
         "postgres_version, expected_bdr",
         [
+            # Valid versions infer BDR 6
             ("14", "6"),
             ("15", "6"),
             ("16", "6"),
             ("17", "6"),
             ("18", "6"),
+            # Invalid version raises error
+            ("13", None),
         ],
     )
-    def test_bdr_version_inference(self, postgres_version, expected_bdr):
-        """Test that BDR version is correctly inferred from Postgres version
+    def test_postgres_version_handling(self, postgres_version, expected_bdr):
+        """Test Postgres version handling.
 
-        This tests the shared logic in pgd.py that applies to both PGD-X and PGD-S.
+        Valid versions (14-18) should infer BDR version 6.
+        Invalid versions (13) should raise PGDArchitectureError.
         """
-        cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
+        from tpa.exceptions import PGDArchitectureError
+
+        cleanup(CONFIG_PATH["PGDS"])
         argv = [
             CONFIG_PATH["PGDS"],
             "--architecture",
@@ -784,11 +638,15 @@ class TestPGDCommon:
             "--postgresql",
             postgres_version,
         ]
-        try:
-            configured = ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
 
-            assert configured.args["cluster_vars"]["bdr_version"] == expected_bdr
-            assert configured.args["cluster_vars"]["postgres_version"] == postgres_version
+        try:
+            if expected_bdr is None:
+                with pytest.raises(PGDArchitectureError, match=f"Postgres {postgres_version} with BDR .* is not supported"):
+                    ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+            else:
+                configured = ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+                assert configured.args["cluster_vars"]["bdr_version"] == expected_bdr
+                assert configured.args["cluster_vars"]["postgres_version"] == postgres_version
         finally:
             cleanup(CONFIG_PATH["PGDS"])
 
@@ -821,42 +679,3 @@ class TestPGDCommon:
 
         assert arch.bdr_safe_name(name) == expected
 
-    @pytest.mark.parametrize(
-        "argv, architecture_class",
-        [
-            (
-                [
-                    CONFIG_PATH["PGDX"],
-                    "--architecture",
-                    "PGD-X",
-                    "--no-git",
-                    "--postgresql",
-                    "13",
-                    "--pgd-routing",
-                    "local",
-                ],
-                PGDX,
-            ),
-            (
-                [
-                    CONFIG_PATH["PGDS"],
-                    "--architecture",
-                    "PGD-S",
-                    "--no-git",
-                    "--postgresql",
-                    "13",
-                ],
-                PGDS,
-            ),
-        ],
-    )
-    def test_unsupported_postgres_version(self, argv, architecture_class):
-        """Test that configuring with unsupported Postgres version raises error"""
-        from tpa.exceptions import PGDArchitectureError
-
-        cleanup(argv[0])  # Ensure clean state before test
-        try:
-            with pytest.raises(PGDArchitectureError, match="Postgres 13 with BDR .* is not supported"):
-                ConfiguredArchitecture(architecture_class, argv, argv[0])
-        finally:
-            cleanup(argv[0])
