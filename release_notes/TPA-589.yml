@@ -1,0 +1,15 @@
+- summary: Support running tests when ansible_user is not root
+  description: |
+    "tpaexec tests" runs database queries which must be run either as root or
+    as the correct user in order to be able to read SSL certificates. These
+    tests were previously run without specifying a user, and therefore failed
+    if the user was not root. They now run with the "become_user" attribute and
+    run as the postgres or pgd_proxy user according to the node type.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-589
