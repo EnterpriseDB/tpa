@@ -140,7 +140,7 @@ runs:
       working-directory: ${{ inputs.source_directory }}
       run: |
         echo "::group::Test upgraded cluster"
-        ./bin/tpaexec test "$CLUSTER" -vv --skip-tags pgbench
+        ./bin/tpaexec test "$CLUSTER" -vv --excluded-tasks=pgbench
         status=$?
         echo "::endgroup::"
         exit $status
