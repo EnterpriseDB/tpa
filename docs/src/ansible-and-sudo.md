@@ -127,14 +127,34 @@ in `cluster_vars`:
 
 ```yaml
 cluster_vars:
-  privilege_escalation_command: pbrun  # Use PowerBroker instead of sudo
+  privilege_escalation_command: other_tool  # replaces sudo; may include arguments
 ```
+
+The value is used as a direct in-place replacement for `sudo` in each
+privilege escalation command TPA generates for managed applications. It may
+include additional arguments if needed (e.g., `other_tool --flag`).
 
 The default value is `"sudo"`, which enables TPA to manage sudo installation
 and configuration. You can set it to any privilege escalation command supported
 by Ansible's become mechanism. Refer to the
 [Ansible privilege escalation documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html)
 for the complete list of supported methods.
+
+### Ansible's become method vs. `privilege_escalation_command`
+
+There are two separate privilege escalation settings to be aware of:
+
+- **`ansible_become_method`** controls how Ansible itself escalates privileges
+  when running deployment tasks on target instances. This is an Ansible variable
+  set in your inventory or `ansible.cfg`.
+- **`privilege_escalation_command`** controls the command that the managed
+  applications (EFM, repmgr, HARP) invoke at runtime to escalate privileges
+  for service management operations, independently of Ansible.
+
+Because they serve different purposes, both must be configured consistently.
+If your environment uses an alternative tool instead of sudo, you must set
+`privilege_escalation_command` in `cluster_vars` *and* configure
+`ansible_become_method` in your Ansible inventory or `ansible.cfg` to match.
 
 **Important:** `sudo` is the only privilege escalation command officially
 supported by EDB. When using alternative commands, you are responsible for

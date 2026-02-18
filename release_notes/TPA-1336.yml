@@ -1,15 +1,15 @@
 - summary: Add privilege_escalation_command configuration variable for alternative privilege escalation commands
   description: |
     Introduced a new cluster_vars variable `privilege_escalation_command` that allows
-    users to configure which privilege escalation command TPA uses for deployment and
-    cluster operations.
+    users to configure which privilege escalation command managed applications use for
+    cluster operations at runtime.
 
     The default value is `"sudo"`, which maintains the current behaviour where TPA
     automatically installs the sudo package if not present and configures sudoers
     files for various components (Postgres user, EFM user, failover managers).
 
-    Users can now specify alternative privilege escalation commands by setting
-    `privilege_escalation_command` to one of the valid Ansible become methods.
+    Users can now specify an alternative privilege escalation command by setting
+    `privilege_escalation_command`.
 
     When using an alternative privilege escalation command (anything other than "sudo"),
     TPA will:
