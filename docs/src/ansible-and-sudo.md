@@ -117,9 +117,16 @@ tasks to timeout if password-less sudo is incorrectly configured.
 
 ## Managing privilege escalation configuration
 
+### Default sudo configuration
+
 By default, TPA automatically manages sudo-related configuration on target
 instances, including installing the sudo package if not present and
 configuring sudoers files for various components.
+
+The default value of `privilege_escalation_command` is `"sudo"`, which enables
+TPA to manage sudo installation and configuration.
+
+### Using an alternative privilege escalation command
 
 If your environment uses a different privilege escalation command, you can
 configure TPA to use an alternative by setting `privilege_escalation_command`
@@ -134,13 +141,18 @@ The value is used as a direct in-place replacement for `sudo` in each
 privilege escalation command TPA generates for managed applications. It may
 include additional arguments if needed (e.g., `other_tool --flag`).
 
-The default value is `"sudo"`, which enables TPA to manage sudo installation
-and configuration. You can set it to any privilege escalation command supported
-by Ansible's become mechanism. Refer to the
+You can set it to any privilege escalation command supported by Ansible's
+become mechanism. Refer to the
 [Ansible privilege escalation documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html)
 for the complete list of supported methods.
 
-### Ansible's become method vs. `privilege_escalation_command`
+**Important:** `sudo` is the only privilege escalation command officially
+supported by EDB. When using alternative commands, you are responsible for
+ensuring compatibility and proper configuration. EDB Support may have limited
+ability to assist with issues related to alternative privilege escalation
+mechanisms.
+
+#### Ansible's become method vs. `privilege_escalation_command`
 
 There are two separate privilege escalation settings to be aware of:
 
@@ -156,13 +168,7 @@ If your environment uses an alternative tool instead of sudo, you must set
 `privilege_escalation_command` in `cluster_vars` *and* configure
 `ansible_become_method` in your Ansible inventory or `ansible.cfg` to match.
 
-**Important:** `sudo` is the only privilege escalation command officially
-supported by EDB. When using alternative commands, you are responsible for
-ensuring compatibility and proper configuration. EDB Support may have limited
-ability to assist with issues related to alternative privilege escalation
-mechanisms.
-
-### Recommended approach: Using hooks
+#### Recommended approach: Using hooks
 
 If you need to use an alternative privilege escalation command, we recommend
 using [TPA hooks](tpaexec-hooks.md) to configure your privilege escalation
@@ -176,7 +182,7 @@ hook to set up the necessary permissions before the main deployment begins.
 This approach provides better maintainability and makes it easier to manage
 environment-specific requirements.
 
-### Requirements for alternative privilege escalation commands
+#### Manual configuration requirements
 
 When using an alternative privilege escalation command (anything other than
 `"sudo"`), TPA will skip sudo package installation and sudoers configuration.
@@ -200,7 +206,7 @@ postgres ALL=(ALL) NOPASSWD: /bin/systemctl reload postgresql
 ```
 
 You must configure equivalent permissions in your chosen privilege escalation
-system (e.g., in PowerBroker's policy configuration, or in doas.conf for doas).
+system.
 
 **2. EFM database function permissions (EFM clusters only)**
 
