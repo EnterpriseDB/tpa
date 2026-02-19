@@ -378,16 +378,32 @@ class TestPGDSArchitecture:
     # These could be added as separate tests without fixtures if needed.
 
     @pytest.mark.parametrize(
-        "argv, expected_instance_count",
+        "argv, expected_total, expected_data, expected_barman, expected_subscriber",
         [
-            (MINIMUM_PGDS_ARGV, 4),  # 3 data + 1 barman
-            (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], 4),  # 3 data + 1 barman
-            (MINIMUM_PGDS_ARGV + ["--add-subscriber-only-nodes", "2"], 6),  # 3 data + 1 barman + 2 subscriber
+            (MINIMUM_PGDS_ARGV, 4, 3, 1, 0),  # 3 data + 1 barman
+            (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], 4, 3, 1, 0),  # 3 data + 1 barman
+            (MINIMUM_PGDS_ARGV + ["--add-subscriber-only-nodes", "2"], 6, 3, 1, 2),  # 3 data + 1 barman + 2 subscriber
         ],
     )
-    def test_pgds_instances(self, argv, expected_instance_count, pgds_cluster):
+    def test_pgds_instances(self, argv, expected_total, expected_data, expected_barman, expected_subscriber, pgds_cluster):
         """Test PGD-S instance count calculation"""
-        assert pgds_cluster.num_instances() == expected_instance_count
+        instances = pgds_cluster.instances
+
+        # Check total count
+        assert len(instances) == expected_total
+
+        # Check subscriber-only nodes
+        subscriber_nodes = instances.with_role("subscriber_only")
+        assert len(subscriber_nodes) == expected_subscriber
+
+        # Check data nodes (BDR nodes that are not subscriber-only)
+        bdr_nodes = instances.with_role("bdr")
+        data_nodes = bdr_nodes.without_role("subscriber_only")
+        assert len(data_nodes) == expected_data
+
+        # Check barman nodes
+        barman_nodes = instances.with_role("barman")
+        assert len(barman_nodes) == expected_barman
 
     @pytest.mark.parametrize(
         "argv",
