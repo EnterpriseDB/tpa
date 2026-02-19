@@ -108,3 +108,5 @@ def configure(argv, tpa_dir=None):
 
 
     arch.after_configuration(cluster)
+
+    return cluster

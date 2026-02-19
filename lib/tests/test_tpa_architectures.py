@@ -26,52 +26,44 @@ def cleanup(path):
         pass
 
 
-class ConfiguredArchitecture:
-    """Wrapper class that provides access to both the architecture object and config.yml."""
+class ConfiguredCluster:
+    """Wrapper that captures the Cluster object from configure() for testing."""
 
     def __init__(self, arch_class, argv, cluster_path):
-        import yaml
-
         self.cluster_path = cluster_path
         self.argv = argv
-
-        # Run configure which creates the cluster
-        configure(argv, tpa_dir=".")
-
-        # Read the generated config.yml
-        config_file = os.path.join(cluster_path, "config.yml")
-        with open(config_file, 'r') as f:
-            self.config = yaml.safe_load(f)
-
-        # Create architecture instance for accessing methods like bdr_safe_name
-        arch_dir_name = "PGD-X" if arch_class == PGDX else "PGD-S"
-        self.arch = arch_class(
-            directory=f"architectures/{arch_dir_name}",
-            lib="architectures/lib",
-            argv=argv,
-        )
+        self.cluster = configure(argv, tpa_dir=".")
 
     @property
     def name(self):
-        return self.config.get("architecture")
+        return self.cluster.architecture
 
     @property
-    def args(self):
-        """Provides args-like access to configuration for compatibility."""
-        # Extract location names from location objects
-        locations = self.config.get("locations", [])
-        location_names = [loc.get("Name") for loc in locations if isinstance(loc, dict)]
+    def instances(self):
+        """Returns the Instances collection with filtering methods like with_role()."""
+        return self.cluster.instances
 
-        return {
-            "architecture": self.config.get("architecture"),
-            "pgd_routing": self._extract_from_argv("--pgd-routing"),
-            "layout": self._extract_from_argv("--layout") or "standard",
-            "location_names": location_names,
-            "cluster_vars": self.config.get("cluster_vars", {}),
-        }
+    @property
+    def cluster_vars(self):
+        """Returns cluster_vars dict."""
+        return self.cluster.vars
+
+    @property
+    def locations(self):
+        """Returns the list of locations."""
+        return self.cluster.locations
+
+    @property
+    def location_names(self):
+        """Returns list of location names."""
+        return [loc.name for loc in self.cluster.locations]
+
+    def num_instances(self):
+        """Return number of instances in the cluster."""
+        return len(self.cluster.instances)
 
     def _extract_from_argv(self, flag):
-        """Extract a flag value from argv."""
+        """Extract a flag value from argv (for values not in cluster object)."""
         try:
             idx = self.argv.index(flag)
             if idx + 1 < len(self.argv):
@@ -80,35 +72,23 @@ class ConfiguredArchitecture:
             pass
         return None
 
-    def num_instances(self):
-        """Return number of instances in the cluster."""
-        return len(self.config.get("instances", []))
-
-    def bdr_safe_name(self, name):
-        """Delegate to the actual architecture instance."""
-        return self.arch.bdr_safe_name(name)
-
-    def supported_versions(self):
-        """Delegate to the actual architecture instance."""
-        return self.arch.supported_versions()
-
 
 @pytest.fixture
-def pgdx_architecture(argv):
+def pgdx_cluster(argv):
     """Fixture for PGD-X architecture testing."""
     cluster_path = CONFIG_PATH["PGDX"]
     cleanup(cluster_path)  # Ensure clean state before test
-    configured = ConfiguredArchitecture(PGDX, argv, cluster_path)
+    configured = ConfiguredCluster(PGDX, argv, cluster_path)
     yield configured
     cleanup(cluster_path)
 
 
 @pytest.fixture
-def pgds_architecture(argv):
+def pgds_cluster(argv):
     """Fixture for PGD-S architecture testing."""
     cluster_path = CONFIG_PATH["PGDS"]
     cleanup(cluster_path)  # Ensure clean state before test
-    configured = ConfiguredArchitecture(PGDS, argv, cluster_path)
+    configured = ConfiguredCluster(PGDS, argv, cluster_path)
     yield configured
     cleanup(cluster_path)
 
@@ -134,10 +114,10 @@ class TestPGDXArchitecture:
             MINIMUM_PGDX_ARGV,
         ],
     )
-    def test_pgdx_basic_configure(self, argv, pgdx_architecture):
+    def test_pgdx_basic_configure(self, argv, pgdx_cluster):
         """Test basic PGD-X configuration with minimal required args"""
-        assert pgdx_architecture.args["architecture"] == "PGD-X"
-        assert "pgd_routing" in pgdx_architecture.args
+        assert pgdx_cluster.name == "PGD-X"
+        assert len(pgdx_cluster.instances) > 0
 
     @pytest.mark.parametrize(
         "argv",
@@ -145,9 +125,9 @@ class TestPGDXArchitecture:
             MINIMUM_PGDX_ARGV,
         ],
     )
-    def test_pgdx_name(self, argv, pgdx_architecture):
+    def test_pgdx_name(self, argv, pgdx_cluster):
         """Test that PGD-X architecture has correct name"""
-        assert pgdx_architecture.name == "PGD-X"
+        assert pgdx_cluster.name == "PGD-X"
 
     @pytest.mark.parametrize(
         "argv, expected_flavour",
@@ -155,11 +135,9 @@ class TestPGDXArchitecture:
             (MINIMUM_PGDX_ARGV, "expanded"),
         ],
     )
-    def test_pgdx_flavour(self, argv, expected_flavour, pgdx_architecture):
+    def test_pgdx_flavour(self, argv, expected_flavour, pgdx_cluster):
         """Test that PGD-X sets pgd_flavour to 'expanded'"""
-        assert (
-            pgdx_architecture.args["cluster_vars"]["pgd_flavour"] == expected_flavour
-        )
+        assert pgdx_cluster.cluster_vars["pgd_flavour"] == expected_flavour
 
     @pytest.mark.parametrize(
         "argv, routing, expected_top, expected_sub",
@@ -179,10 +157,10 @@ class TestPGDXArchitecture:
         ],
     )
     def test_pgdx_routing_options(
-        self, argv, routing, expected_top, expected_sub, pgdx_architecture
+        self, argv, routing, expected_top, expected_sub, pgdx_cluster
     ):
         """Test PGD-X routing configuration (global vs local)"""
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
         assert len(bdr_node_groups) > 0
 
         # Check top-level group routing setting
@@ -200,14 +178,14 @@ class TestPGDXArchitecture:
             MINIMUM_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"],
         ],
     )
-    def test_pgdx_multiple_locations(self, argv, pgdx_architecture):
+    def test_pgdx_multiple_locations(self, argv, pgdx_cluster):
         """Test PGD-X with multiple locations"""
-        location_names = pgdx_architecture.args["location_names"]
+        location_names = pgdx_cluster.location_names
         assert len(location_names) == 3
         assert location_names == ["dc1", "dc2", "dc3"]
 
         # Check that subgroups were created for each location
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
         # Should have 1 top group + 3 location subgroups
         assert len(bdr_node_groups) == 4
 
@@ -217,9 +195,9 @@ class TestPGDXArchitecture:
             MINIMUM_PGDX_ARGV,
         ],
     )
-    def test_pgdx_repositories(self, argv, pgdx_architecture):
+    def test_pgdx_repositories(self, argv, pgdx_cluster):
         """Test that PGD-X includes postgres_distributed repository"""
-        edb_repos = pgdx_architecture.args["cluster_vars"].get("edb_repositories", [])
+        edb_repos = pgdx_cluster.cluster_vars.get("edb_repositories", [])
         assert "postgres_distributed" in edb_repos
 
     @pytest.mark.parametrize(
@@ -229,29 +207,29 @@ class TestPGDXArchitecture:
             (MINIMUM_PGDX_ARGV + ["--enable-pem", "--enable-pg-backup-api"], True),
         ],
     )
-    def test_pgdx_enable_pem(self, argv, check_barman, pgdx_architecture):
+    def test_pgdx_enable_pem(self, argv, check_barman, pgdx_cluster):
         """Test that --enable-pem adds pem-agent role to BDR instances and creates pemserver.
 
         With --enable-pg-backup-api, also adds pem-agent to barman instances.
         """
-        instances = pgdx_architecture.config.get("instances", [])
+        instances = pgdx_cluster.instances
 
         # Check that BDR instances have pem-agent role
-        bdr_instances = [i for i in instances if "bdr" in i.get("role", [])]
+        bdr_instances = instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "pem-agent" in instance.get("role", []), f"BDR instance {instance.get('Name')} should have pem-agent role"
+            assert "pem-agent" in instance.roles, f"BDR instance {instance.name} should have pem-agent role"
 
         # Check that pemserver instance was created
-        pemserver_instances = [i for i in instances if "pem-server" in i.get("role", [])]
+        pemserver_instances = instances.with_role("pem-server")
         assert len(pemserver_instances) == 1, "Should have exactly one pemserver instance"
-        assert pemserver_instances[0].get("Name") == "pemserver"
+        assert pemserver_instances[0].name == "pemserver"
 
         # Check barman instances when --enable-pg-backup-api is specified
         if check_barman:
-            barman_instances = [i for i in instances if "barman" in i.get("role", [])]
+            barman_instances = instances.with_role("barman")
             for instance in barman_instances:
-                assert "pem-agent" in instance.get("role", []), f"Barman instance {instance.get('Name')} should have pem-agent role"
+                assert "pem-agent" in instance.roles, f"Barman instance {instance.name} should have pem-agent role"
 
     @pytest.mark.parametrize(
         "argv, expected_project_id",
@@ -260,23 +238,20 @@ class TestPGDXArchitecture:
             (MINIMUM_PGDX_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"], "prj_test123"),
         ],
     )
-    def test_pgdx_enable_beacon_agent(self, argv, expected_project_id, pgdx_architecture):
+    def test_pgdx_enable_beacon_agent(self, argv, expected_project_id, pgdx_cluster):
         """Test that --enable-beacon-agent adds beacon-agent role to BDR instances.
 
         With --beacon-agent-project-id, also sets beacon_agent_project_id in cluster_vars.
         """
-        instances = pgdx_architecture.config.get("instances", [])
-
         # Check that BDR instances have beacon-agent role
-        bdr_instances = [i for i in instances if "bdr" in i.get("role", [])]
+        bdr_instances = pgdx_cluster.instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "beacon-agent" in instance.get("role", []), f"BDR instance {instance.get('Name')} should have beacon-agent role"
+            assert "beacon-agent" in instance.roles, f"BDR instance {instance.name} should have beacon-agent role"
 
         # Check project_id when specified
         if expected_project_id:
-            cluster_vars = pgdx_architecture.args["cluster_vars"]
-            assert cluster_vars.get("beacon_agent_project_id") == expected_project_id
+            assert pgdx_cluster.cluster_vars.get("beacon_agent_project_id") == expected_project_id
 
     @pytest.mark.parametrize(
         "argv, option_name, expected_value",
@@ -287,9 +262,9 @@ class TestPGDXArchitecture:
             (MINIMUM_PGDX_ARGV + ["--use-https"], "use_https", True),
         ],
     )
-    def test_pgdx_cm_options(self, argv, option_name, expected_value, pgdx_architecture):
+    def test_pgdx_cm_options(self, argv, option_name, expected_value, pgdx_cluster):
         """Test that Connection Manager options are set correctly in bdr_node_groups"""
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
         top_group = bdr_node_groups[0]
         assert top_group.get("options", {}).get(option_name) == expected_value
 
@@ -299,9 +274,9 @@ class TestPGDXArchitecture:
             MINIMUM_PGDX_ARGV + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
         ],
     )
-    def test_pgdx_combined_cm_ports(self, argv, pgdx_architecture):
+    def test_pgdx_combined_cm_ports(self, argv, pgdx_cluster):
         """Test that multiple CM port options are correctly combined"""
-        bdr_node_groups = pgdx_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
 
         # Should only have one top-level group (not duplicates)
         top_level_groups = [g for g in bdr_node_groups if not g.get("parent_group_name")]
@@ -325,12 +300,12 @@ class TestPGDXArchitecture:
             (MINIMUM_PGDX_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
-    def test_pgdx_custom_repositories(self, argv, expected_repos, pgdx_architecture):
+    def test_pgdx_custom_repositories(self, argv, expected_repos, pgdx_cluster):
         """Test that --edb-repositories allows custom repository lists.
 
         The special value 'none' results in an empty repository list.
         """
-        edb_repos = pgdx_architecture.args["cluster_vars"].get("edb_repositories", [])
+        edb_repos = pgdx_cluster.cluster_vars.get("edb_repositories", [])
         assert edb_repos == expected_repos
 
 
@@ -353,9 +328,9 @@ class TestPGDSArchitecture:
             MINIMUM_PGDS_ARGV,
         ],
     )
-    def test_pgds_name(self, argv, pgds_architecture):
+    def test_pgds_name(self, argv, pgds_cluster):
         """Test that PGD-S architecture has correct name"""
-        assert pgds_architecture.name == "PGD-S"
+        assert pgds_cluster.name == "PGD-S"
 
     @pytest.mark.parametrize(
         "argv, expected_flavour",
@@ -363,11 +338,9 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV, "essential"),
         ],
     )
-    def test_pgds_flavour(self, argv, expected_flavour, pgds_architecture):
+    def test_pgds_flavour(self, argv, expected_flavour, pgds_cluster):
         """Test that PGD-S sets pgd_flavour to 'essential'"""
-        assert (
-            pgds_architecture.args["cluster_vars"]["pgd_flavour"] == expected_flavour
-        )
+        assert pgds_cluster.cluster_vars["pgd_flavour"] == expected_flavour
 
     @pytest.mark.parametrize(
         "argv, expected_layout",
@@ -377,9 +350,11 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], "near-far"),
         ],
     )
-    def test_pgds_layouts(self, argv, expected_layout, pgds_architecture):
+    def test_pgds_layouts(self, argv, expected_layout, pgds_cluster):
         """Test PGD-S layout options"""
-        assert pgds_architecture.args["layout"] == expected_layout
+        # Layout is extracted from argv since it's not stored in cluster object
+        layout = pgds_cluster._extract_from_argv("--layout") or "standard"
+        assert layout == expected_layout
 
     @pytest.mark.parametrize(
         "argv, expected_locations",
@@ -388,9 +363,9 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], ["first", "second"]),
         ],
     )
-    def test_pgds_default_locations(self, argv, expected_locations, pgds_architecture):
+    def test_pgds_default_locations(self, argv, expected_locations, pgds_cluster):
         """Test PGD-S default location names for each layout"""
-        assert pgds_architecture.args["location_names"] == expected_locations
+        assert pgds_cluster.location_names == expected_locations
 
     # Note: Location validation error tests are skipped because they require
     # testing configure() failures, which doesn't work well with the fixture approach.
@@ -404,9 +379,9 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--add-subscriber-only-nodes", "2"], 6),  # 3 data + 1 barman + 2 subscriber
         ],
     )
-    def test_pgds_instances(self, argv, expected_instance_count, pgds_architecture):
+    def test_pgds_instances(self, argv, expected_instance_count, pgds_cluster):
         """Test PGD-S instance count calculation"""
-        assert pgds_architecture.num_instances() == expected_instance_count
+        assert pgds_cluster.num_instances() == expected_instance_count
 
     @pytest.mark.parametrize(
         "argv",
@@ -414,9 +389,9 @@ class TestPGDSArchitecture:
             MINIMUM_PGDS_ARGV,
         ],
     )
-    def test_pgds_repositories(self, argv, pgds_architecture):
+    def test_pgds_repositories(self, argv, pgds_cluster):
         """Test that PGD-S includes enterprise repository and discards standard"""
-        edb_repos = pgds_architecture.args["cluster_vars"].get("edb_repositories", [])
+        edb_repos = pgds_cluster.cluster_vars.get("edb_repositories", [])
         assert "enterprise" in edb_repos
         # Standard repo should be discarded (replaced with enterprise)
         assert "standard" not in edb_repos
@@ -428,29 +403,29 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--enable-pem", "--enable-pg-backup-api"], True),
         ],
     )
-    def test_pgds_enable_pem(self, argv, check_barman, pgds_architecture):
+    def test_pgds_enable_pem(self, argv, check_barman, pgds_cluster):
         """Test that --enable-pem adds pem-agent role to BDR instances and creates pemserver.
 
         With --enable-pg-backup-api, also adds pem-agent to barman instances.
         """
-        instances = pgds_architecture.config.get("instances", [])
+        instances = pgds_cluster.instances
 
         # Check that BDR instances have pem-agent role
-        bdr_instances = [i for i in instances if "bdr" in i.get("role", [])]
+        bdr_instances = instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "pem-agent" in instance.get("role", []), f"BDR instance {instance.get('Name')} should have pem-agent role"
+            assert "pem-agent" in instance.roles, f"BDR instance {instance.name} should have pem-agent role"
 
         # Check that pemserver instance was created
-        pemserver_instances = [i for i in instances if "pem-server" in i.get("role", [])]
+        pemserver_instances = instances.with_role("pem-server")
         assert len(pemserver_instances) == 1, "Should have exactly one pemserver instance"
-        assert pemserver_instances[0].get("Name") == "pemserver"
+        assert pemserver_instances[0].name == "pemserver"
 
         # Check barman instances when --enable-pg-backup-api is specified
         if check_barman:
-            barman_instances = [i for i in instances if "barman" in i.get("role", [])]
+            barman_instances = instances.with_role("barman")
             for instance in barman_instances:
-                assert "pem-agent" in instance.get("role", []), f"Barman instance {instance.get('Name')} should have pem-agent role"
+                assert "pem-agent" in instance.roles, f"Barman instance {instance.name} should have pem-agent role"
 
     @pytest.mark.parametrize(
         "argv, expected_project_id",
@@ -459,23 +434,20 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test456"], "prj_test456"),
         ],
     )
-    def test_pgds_enable_beacon_agent(self, argv, expected_project_id, pgds_architecture):
+    def test_pgds_enable_beacon_agent(self, argv, expected_project_id, pgds_cluster):
         """Test that --enable-beacon-agent adds beacon-agent role to BDR instances.
 
         With --beacon-agent-project-id, also sets beacon_agent_project_id in cluster_vars.
         """
-        instances = pgds_architecture.config.get("instances", [])
-
         # Check that BDR instances have beacon-agent role
-        bdr_instances = [i for i in instances if "bdr" in i.get("role", [])]
+        bdr_instances = pgds_cluster.instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "beacon-agent" in instance.get("role", []), f"BDR instance {instance.get('Name')} should have beacon-agent role"
+            assert "beacon-agent" in instance.roles, f"BDR instance {instance.name} should have beacon-agent role"
 
         # Check project_id when specified
         if expected_project_id:
-            cluster_vars = pgds_architecture.args["cluster_vars"]
-            assert cluster_vars.get("beacon_agent_project_id") == expected_project_id
+            assert pgds_cluster.cluster_vars.get("beacon_agent_project_id") == expected_project_id
 
     @pytest.mark.parametrize(
         "argv, option_name, expected_value",
@@ -486,9 +458,9 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--use-https"], "use_https", True),
         ],
     )
-    def test_pgds_cm_options(self, argv, option_name, expected_value, pgds_architecture):
+    def test_pgds_cm_options(self, argv, option_name, expected_value, pgds_cluster):
         """Test that Connection Manager options are set correctly in bdr_node_groups"""
-        bdr_node_groups = pgds_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        bdr_node_groups = pgds_cluster.cluster_vars.get("bdr_node_groups", [])
         assert len(bdr_node_groups) > 0, "Should have bdr_node_groups"
         top_group = bdr_node_groups[0]
         assert top_group.get("options", {}).get(option_name) == expected_value
@@ -499,9 +471,9 @@ class TestPGDSArchitecture:
             MINIMUM_PGDS_ARGV + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
         ],
     )
-    def test_pgds_combined_cm_ports(self, argv, pgds_architecture):
+    def test_pgds_combined_cm_ports(self, argv, pgds_cluster):
         """Test that multiple CM port options are correctly combined"""
-        bdr_node_groups = pgds_architecture.args["cluster_vars"].get("bdr_node_groups", [])
+        bdr_node_groups = pgds_cluster.cluster_vars.get("bdr_node_groups", [])
 
         # PGD-S doesn't have subgroups, so all entries are top-level or subscriber-only
         # Just verify the options are set correctly
@@ -521,12 +493,12 @@ class TestPGDSArchitecture:
             (MINIMUM_PGDS_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
-    def test_pgds_custom_repositories(self, argv, expected_repos, pgds_architecture):
+    def test_pgds_custom_repositories(self, argv, expected_repos, pgds_cluster):
         """Test that --edb-repositories allows custom repository lists.
 
         The special value 'none' results in an empty repository list.
         """
-        edb_repos = pgds_architecture.args["cluster_vars"].get("edb_repositories", [])
+        edb_repos = pgds_cluster.cluster_vars.get("edb_repositories", [])
         assert edb_repos == expected_repos
 
     @pytest.mark.parametrize(
@@ -546,7 +518,7 @@ class TestPGDSArchitecture:
 
         try:
             with pytest.raises(PGDArchitectureError, match=f"{layout} requires exactly {expected_count} locations"):
-                ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+                ConfiguredCluster(PGDS, argv, CONFIG_PATH["PGDS"])
         finally:
             cleanup(CONFIG_PATH["PGDS"])
 
@@ -642,11 +614,11 @@ class TestPGDCommon:
         try:
             if expected_bdr is None:
                 with pytest.raises(PGDArchitectureError, match=f"Postgres {postgres_version} with BDR .* is not supported"):
-                    ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
+                    ConfiguredCluster(PGDS, argv, CONFIG_PATH["PGDS"])
             else:
-                configured = ConfiguredArchitecture(PGDS, argv, CONFIG_PATH["PGDS"])
-                assert configured.args["cluster_vars"]["bdr_version"] == expected_bdr
-                assert configured.args["cluster_vars"]["postgres_version"] == postgres_version
+                configured = ConfiguredCluster(PGDS, argv, CONFIG_PATH["PGDS"])
+                assert configured.cluster_vars["bdr_version"] == expected_bdr
+                assert configured.cluster_vars["postgres_version"] == postgres_version
         finally:
             cleanup(CONFIG_PATH["PGDS"])
 
