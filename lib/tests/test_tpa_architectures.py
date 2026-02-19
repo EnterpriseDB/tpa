@@ -102,16 +102,16 @@ class TestPGDXArchitecture:
         "--architecture",
         "PGD-X",
         "--no-git",
-        "--postgresql",
-        "16",
         "--pgd-routing",
         "local",
     ]
 
+    STANDARD_PGDX_ARGV = MINIMUM_PGDX_ARGV + ["--postgresql", "16"]
+
     @pytest.mark.parametrize(
         "argv",
         [
-            MINIMUM_PGDX_ARGV,
+            STANDARD_PGDX_ARGV,
         ],
     )
     def test_pgdx_basic_configure(self, argv, pgdx_cluster):
@@ -122,7 +122,7 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv",
         [
-            MINIMUM_PGDX_ARGV,
+            STANDARD_PGDX_ARGV,
         ],
     )
     def test_pgdx_name(self, argv, pgdx_cluster):
@@ -132,7 +132,7 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv, expected_flavour",
         [
-            (MINIMUM_PGDX_ARGV, "expanded"),
+            (STANDARD_PGDX_ARGV, "expanded"),
         ],
     )
     def test_pgdx_flavour(self, argv, expected_flavour, pgdx_cluster):
@@ -143,13 +143,13 @@ class TestPGDXArchitecture:
         "argv, routing, expected_top, expected_sub",
         [
             (
-                MINIMUM_PGDX_ARGV + ["--pgd-routing", "global"],
+                STANDARD_PGDX_ARGV + ["--pgd-routing", "global"],
                 "global",
                 {"enable_routing": True},
                 {"enable_routing": False},
             ),
             (
-                MINIMUM_PGDX_ARGV + ["--pgd-routing", "local"],
+                STANDARD_PGDX_ARGV + ["--pgd-routing", "local"],
                 "local",
                 {"enable_routing": False},
                 {"enable_routing": True},
@@ -175,7 +175,7 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv",
         [
-            MINIMUM_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"],
+            STANDARD_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"],
         ],
     )
     def test_pgdx_multiple_locations(self, argv, pgdx_cluster):
@@ -190,21 +190,27 @@ class TestPGDXArchitecture:
         assert len(bdr_node_groups) == 4
 
     @pytest.mark.parametrize(
-        "argv",
+        "argv, expected_repos",
         [
-            MINIMUM_PGDX_ARGV,
+            (MINIMUM_PGDX_ARGV + ["--postgresql", "16"], ["standard", "postgres_distributed"]),
+            (MINIMUM_PGDX_ARGV + ["--edbpge", "16"], ["standard", "postgres_distributed"]),
+            (MINIMUM_PGDX_ARGV + ["--epas", "16", "--no-redwood"], ["enterprise", "postgres_distributed"]),
         ],
     )
-    def test_pgdx_repositories(self, argv, pgdx_cluster):
-        """Test that PGD-X includes postgres_distributed repository"""
+    def test_pgdx_repositories(self, argv, expected_repos, pgdx_cluster):
+        """Test that PGD-X includes correct default repositories based on flavour.
+
+        postgresql and edbpge flavours get standard + postgres_distributed.
+        epas flavour gets enterprise + postgres_distributed.
+        """
         edb_repos = pgdx_cluster.cluster_vars.get("edb_repositories", [])
-        assert "postgres_distributed" in edb_repos
+        assert edb_repos == expected_repos
 
     @pytest.mark.parametrize(
         "argv, check_barman",
         [
-            (MINIMUM_PGDX_ARGV + ["--enable-pem"], False),
-            (MINIMUM_PGDX_ARGV + ["--enable-pem", "--enable-pg-backup-api"], True),
+            (STANDARD_PGDX_ARGV + ["--enable-pem"], False),
+            (STANDARD_PGDX_ARGV + ["--enable-pem", "--enable-pg-backup-api"], True),
         ],
     )
     def test_pgdx_enable_pem(self, argv, check_barman, pgdx_cluster):
@@ -234,8 +240,8 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv, expected_project_id",
         [
-            (MINIMUM_PGDX_ARGV + ["--enable-beacon-agent"], None),
-            (MINIMUM_PGDX_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"], "prj_test123"),
+            (STANDARD_PGDX_ARGV + ["--enable-beacon-agent"], None),
+            (STANDARD_PGDX_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"], "prj_test123"),
         ],
     )
     def test_pgdx_enable_beacon_agent(self, argv, expected_project_id, pgdx_cluster):
@@ -256,10 +262,10 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv, option_name, expected_value",
         [
-            (MINIMUM_PGDX_ARGV + ["--read-write-port", "7432"], "read_write_port", 7432),
-            (MINIMUM_PGDX_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
-            (MINIMUM_PGDX_ARGV + ["--http-port", "8080"], "http_port", 8080),
-            (MINIMUM_PGDX_ARGV + ["--use-https"], "use_https", True),
+            (STANDARD_PGDX_ARGV + ["--read-write-port", "7432"], "read_write_port", 7432),
+            (STANDARD_PGDX_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
+            (STANDARD_PGDX_ARGV + ["--http-port", "8080"], "http_port", 8080),
+            (STANDARD_PGDX_ARGV + ["--use-https"], "use_https", True),
         ],
     )
     def test_pgdx_cm_options(self, argv, option_name, expected_value, pgdx_cluster):
@@ -271,7 +277,7 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv",
         [
-            MINIMUM_PGDX_ARGV + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
+            STANDARD_PGDX_ARGV + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
         ],
     )
     def test_pgdx_combined_cm_ports(self, argv, pgdx_cluster):
@@ -295,9 +301,9 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv, expected_repos",
         [
-            (MINIMUM_PGDX_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
-            (MINIMUM_PGDX_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"], ["test_repo1", "test_repo2"]),
-            (MINIMUM_PGDX_ARGV + ["--edb-repositories", "none"], []),
+            (STANDARD_PGDX_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
+            (STANDARD_PGDX_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"], ["test_repo1", "test_repo2"]),
+            (STANDARD_PGDX_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
     def test_pgdx_custom_repositories(self, argv, expected_repos, pgdx_cluster):
