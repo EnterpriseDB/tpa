@@ -394,7 +394,19 @@ playbook() {
 deploy() {
     NO_PROVISION_OPTIONS="(--help)|(--list-hosts)|(--list-tasks)|(--list-tags)"
     if [[ ! $@ =~ $NO_PROVISION_OPTIONS ]] ; then
-        provision "$@"
+        # Filter out deploy-specific arguments before passing to provision
+        PROVISION_ARGS=()
+        for arg in "$@"; do
+            case "$arg" in
+                --included?tasks=*|--excluded?tasks=*|--components=*)
+                    # Skip deploy-specific arguments
+                    ;;
+                *)
+                    PROVISION_ARGS+=("$arg")
+                    ;;
+            esac
+        done
+        provision "${PROVISION_ARGS[@]:+${PROVISION_ARGS[@]}}"
     fi
     playbook deploy.yml "$@"
 }
