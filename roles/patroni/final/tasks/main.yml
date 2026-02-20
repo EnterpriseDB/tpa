@@ -10,7 +10,6 @@
     etcd_authentication_mode == 'basic'
   run_once: true
   delegate_to: "{{ groups['role_etcd'][0] }}"
-  delegate_facts: true
   block:
     - name: "Create the etcd patroni role"
       include_role:

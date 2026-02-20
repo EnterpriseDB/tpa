@@ -1,0 +1,12 @@
+- summary: Fix for 'basic' authentication in 'etcd_authentication_mode'
+  description: |
+      When selecting 'basic' authentication for 'etcd_authentication_mode', the execution of the deployment
+      would fail on the task that grants permissions to the 'patroni' role in etcd, responsible for making
+      calls to the etcd cluster. 
+      This was due to a fact variable not being properly defined in the scope of the task, causing the 
+      task's condition to fail and thus the permission not being granted. 
+      The fix involved ensuring that the fact variable is correctly set and accessible, allowing the 
+      permission granting task to execute as intended when 'basic' authentication is selected.
+  type: bugfix
+  jira_tickets:
+  - TPA-1266
