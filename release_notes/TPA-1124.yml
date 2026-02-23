@@ -1,0 +1,23 @@
+- summary: Account for Parallel Apply in `max_replication_slots` calculation
+  description: |
+    Updated the formula for `max_replication_slots` to support PGD 5 Parallel
+    Apply. Since Parallel Apply requires an additional replication origin per
+    writer, TPA now incorporates the `bdr.writers_per_subscription` setting
+    into its automated calculations to prevent slot exhaustion in PGD 5
+    clusters.
+
+    IMPORTANT: This change will result in postgres cluster restart on the next deploy 
+    when using PGD version 5 and above, as TPA will apply the updated calculation results.
+    To avoid downtime, verify and define the current value for `max_replication_slots` and
+    `max_wal_senders` in your `cluster_vars`.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1124
+  support_tickets:
+  - CP51548
+  - CP57005

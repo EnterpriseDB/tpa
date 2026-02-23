@@ -129,7 +129,7 @@ edb_pgaudit_version:
 # The EDB repos changed the naming convention for pgaudit packages
 # for version 16 and beyond. The PGDG repos remain consistent in
 # their naming convention. 'lt_16' really means any version is
-# coming from the PGDG repos OR specifically the EDB repos for 
+# coming from the PGDG repos OR specifically the EDB repos for
 # versions less than 16.
 
 pgaudit_package_name:
@@ -399,12 +399,12 @@ default_postgres_extensions_dictionary:
         - crb enable
 
   # As explained in the 'pgaudit_package_name' fact, we need to ensure the correct naming convention is used for the pgaudit package,
-  # as the EDB repos are not consistent with the PGDG repos for versions 16 and greater. If the PGDG repos are used, the 'lt_16' 
-  # key is ALWAYS used, as the naming convention for the package did not change. 
+  # as the EDB repos are not consistent with the PGDG repos for versions 16 and greater. If the PGDG repos are used, the 'lt_16'
+  # key is ALWAYS used, as the naming convention for the package did not change.
   pgaudit:
     packages:
       postgresql:
-        Debian: &debian_pg_pgaudit_packages 
+        Debian: &debian_pg_pgaudit_packages
           - "{{ (postgres_versionNN is version('16', '>=') and edb_repositories|default([]) != []) | ternary(pgaudit_package_name[ansible_distribution]['gte_16'], pgaudit_package_name[ansible_distribution]['lt_16']) }}"
         RedHat: &redhat_pg_pgaudit_packages
           - "{{ (postgres_versionNN is version('16', '>=') and edb_repositories|default([]) != []) | ternary(pgaudit_package_name[ansible_distribution]['gte_16'], pgaudit_package_name[ansible_distribution]['lt_16']) }}"
@@ -496,6 +496,7 @@ default_repmgr_conf_dir: "/etc/repmgr/{{ postgres_version }}"
 default_bdr_version: 3
 default_bdr_database: bdrdb
 default_bdr_node_group: bdrgroup
+default_writers_per_subscription: "{{ (bdr_version|default(default_bdr_version) is version('5', '>='))|ternary(2,1) }}"
 
 default_postgres_install_dir: "/opt/postgres/{{ postgres_version }}"
 
