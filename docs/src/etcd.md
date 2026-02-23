@@ -93,8 +93,11 @@ cluster remains stable. Configuration validation checks are performed early to
 prevent invalid combinations (e.g., `mtls` requires `etcd_ssl_enabled: true`).
 However, it's currently not able to handle transition of values for
 `etcd_ssl_enabled` (i.e. from `false` to `true` or vice-versa).
-This limitation also makes it impossible to switch from any `etcd_authentication_mode` that requires a different `etcd_ssl_enabled` value such as `basic` to `mtls` (or `mtls` to `basic`).
-Clusters deployed using TPA version below 23.41.0 defaulted to `etcd_ssl_enabled: false` and won't be able to modify `etcd_ssl_enabled`. 
+This limitation also makes it impossible to switch between any `etcd_authentication_mode`
+values that require different values of `etcd_ssl_enabled`. For example, `basic` to `mtls`, or
+`mtls` to `basic`.
+Clusters deployed using a version of TPA below 23.41.0 defaulted to
+`etcd_ssl_enabled: false`, and so it's not possible to modify `etcd_ssl_enabled`.
 !!!
 
 ## Configuration Variables
