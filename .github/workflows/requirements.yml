@@ -118,15 +118,11 @@ jobs:
           name: new_requirements${{ env.FILENAME_SUFFIX }}
           path: ${{ github.workspace }}
 
-      - name: Connect to a Native Executor
-        uses: ./foundation/actions/linux/native/executor/connect
-        with:
-          architecture: ${{ matrix.architecture }}
-          tunnel-login: ${{ env.FOUNDATION_TUNNEL_LOGIN }}
 
       - name: Setup container
         uses: ./foundation/actions/linux/container/setup
         with:
+          force-qemu: ${{ case(matrix.architecture == 's390x', 'true', 'false') }}
           architecture: ${{ matrix.architecture }}
           distro: ${{ matrix.distro }}
           distro-version: ${{ matrix.distro-version }}
