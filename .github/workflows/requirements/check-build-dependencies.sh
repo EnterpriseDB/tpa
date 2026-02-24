@@ -28,12 +28,19 @@ function install_edbpython_inside_container() {
         "el")
             SUFFIX="rpm"
             CMD="yum"
-	    DEPS="$DEFAULT_EDBPYTHON-devel rust cargo openssl-devel"
+	    DEPS="$DEFAULT_EDBPYTHON-devel openssl-devel"
 	;;
     esac
 
     curl --proto "=https" -1sLf "https://downloads.enterprisedb.com/${EDB_SUBSCRIPTION_TOKEN}/dev/setup.${SUFFIX}.sh" | sudo bash
     sudo "$CMD" install -y $DEFAULT_EDBPYTHON $DEPS
+
+    # Install Rust using the installation script to ensure newer version than
+    # the one available in package manager's repositories
+    if [[ $DISTRO = "el" ]] ; then
+        sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    fi
+
 }
 
 function create_venv_and_prep_stuff {
@@ -42,7 +49,12 @@ function create_venv_and_prep_stuff {
     mkdir -p "$PIP_DEST"
     $PIP install --upgrade pip pip-tools wheel
     #$PIP download --dest "$PIP_DEST" pip wheel
-    $PIP install --upgrade cloudsmith-cli --extra-index-url=https://dl.cloudsmith.io/public/cloudsmith/cli/python/index/
+    # Add EDB repositories as index to ensure the already generated wheels for
+    # this specific architecture are available as dependencies for the base
+    # environment such as cloudsmith cli (needs cryptography)
+    $PIP install --upgrade cloudsmith-cli \
+        --extra-index-url=https://dl.cloudsmith.io/public/cloudsmith/cli/python/index/ \
+        --extra-index-url="https://downloads.enterprisedb.com/$TPA_PIP_CS_API/build-dependencies/python/simple/"
 }
 
 function check_any_wheel_created_and_upload {
@@ -94,7 +106,12 @@ do
 	    fi
         #Asume that we we found is new hence, doesn't exist in our private repo and a new build
 	    #if required
-        $PIP wheel -w $PIP_DEST --no-deps "$target_module_name==$requirement_module_version"
+        # Adding EDB cloudsmith repo as index here to, ensure that we won't try
+        # to build already generated wheel file for a dependency, allowing to
+        # cut execution time.
+        $PIP wheel -w $PIP_DEST --no-deps \
+            --extra-index-url="https://downloads.enterprisedb.com/$TPA_PIP_CS_API/build-dependencies/python/simple/" \
+            "$target_module_name==$requirement_module_version"
     else
         # dep is unchanged, add it back to the new file
         echo "$requirement_line" >> $output_requirements_include
