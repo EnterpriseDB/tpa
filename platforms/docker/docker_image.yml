@@ -85,7 +85,7 @@
       rocky-9: rockylinux/rockylinux:9
       rocky-10: rockylinux/rockylinux:10
       rocky-latest: rockylinux/rockylinux:9
-      sles-15: registry.suse.com/bci/bci-base:15.6
+      sles-15: registry.suse.com/bci/bci-base:15.7
       ubuntu-20.04: ubuntu:focal
       ubuntu-focal: ubuntu:focal
       ubuntu-22.04: ubuntu:jammy
