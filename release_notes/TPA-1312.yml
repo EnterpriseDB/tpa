@@ -1,9 +1,0 @@
-- summary: Fix KeyError on etcd_protocol whilst upgrading Patroni
-  description: |
-    This is a race condition when the first etcd node tried to build endpoints
-    for all etcd nodes using pyformat_hostvars, it looked for etcd_protocol in
-    each host's hostvars, however, only the current host had set this fact
-    during an upgrade. This caused a KeyError when accessing other hosts.
-  type: bugfix
-  jira_tickets:
-  - TPA-1312
