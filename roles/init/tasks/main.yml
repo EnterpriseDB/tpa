@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 - name: Set tpa_dir
   set_fact:
@@ -67,6 +67,16 @@
 # enumeration, etc.
 
 - include_tasks: roles.yml
+
+# Detect that we have EDB repositories defined and a token in the
+# environment, if we need them for this cluster. We do this early
+# to fail fast before spending time on distribution detection and
+# other setup tasks.
+
+- include_tasks: repos.yml
+  when: >
+    task_selector|permits('repo')
+
 - include_tasks: hostvars.yml
 - include_tasks: volumes.yml
 - include_tasks: sys.yml
@@ -89,10 +99,6 @@
 - include_role: name=haproxy/facts
   when: >
     'haproxy' in role
-
-- include_role: name=etcd/facts
-  when: >
-    'etcd' in role
 
 - include_role: name=patroni/facts
 

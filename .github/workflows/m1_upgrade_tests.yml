@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # M1 upgarde tests using a selected matrix key
 name: M1 Upgrade tests
@@ -55,7 +55,7 @@ on:
         - 16
         - 17
         - 18
-      tpa_postgres_package_version:
+      postgres_base_version:
         description: "package version to upgrade from"
         required: true
         default: "16.4*"
@@ -83,11 +83,15 @@ jobs:
       - uses: ./.github/actions/load-yaml
         id: load-yaml
         with:
-          file: .github/config/m1_upgrade_matrix.yml
+          file: .github/config/general_upgrade_matrix.yml
           key: ${{ github.event.inputs.matrix_key }}
 
   integration-test:
-    name: Matrix Upgrade test
+    name: >
+      ${{ matrix.tpa_os_image && matrix.tpa_os_image || github.event.inputs.tpa_os_image }}
+      ${{ matrix.tpa_failover_manager }}
+      ${{ matrix.tpa_postgres_flavour && matrix.tpa_postgres_flavour || github.event.inputs.tpa_postgres_flavour }}
+      ${{ matrix.tpa_postgres_version && matrix.tpa_postgres_version || github.event.inputs.tpa_postgres_version }}
     needs: load-matrix
     strategy:
       fail-fast: false
@@ -127,16 +131,17 @@ jobs:
           echo USE_DOWNLOADER=$USE_DOWNLOADER >> $GITHUB_ENV
         shell: bash
 
-      - uses: ./.github/actions/m1-upgrade-test
+      - uses: ./.github/actions/general-upgrade-test
         with:
           source_directory: ${{ github.workspace }}
           tpa_platform: docker
           tpa_os_image: "tpa/${{ env.OS_IMAGE }}"
           tpa_postgres_flavour: ${{ env.POSTGRES_FLAVOUR }}
           tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
-          tpa_postgres_package_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.tpa_postgres_package_version }}
           tpa_failover_manager: ${{ env.FAILOVER_MANAGER }}
           tpa_package_cache: ${{ env.USE_DOWNLOADER }}
+          upgrade_component_name: postgres
+          upgrade_component_base_version: ${{ matrix.tpa_postgres_package_version && matrix.tpa_postgres_package_version || github.event.inputs.postgres_base_version }}
           cluster: "${{ env.FAILOVER_MANAGER }}-\
             ${{ env.OS_IMAGE }}-\
             ${{ env.POSTGRES_FLAVOUR }}-\

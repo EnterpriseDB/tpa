@@ -1,0 +1,17 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+# Detect installed EFM package versions and set installed_efm_versions fact.
+# This file is included by both main.yml and check-installed.yml.
+
+- package_facts:
+    manager: auto
+
+- name: Collect EFM package versions from list of installed packages
+  set_fact:
+    installed_efm_versions: "{{ installed_efm_versions | default([]) | union([_version]) }}"
+  loop: "{{ ansible_facts.packages | dict2items | selectattr('key', 'match', '^edb-efm?[0-9]+') }}"
+  vars:
+    _full_version: "{{ item['value'][0]['version'] }}"
+    _version: "{{ _full_version | regex_replace('^[0-9]+:', '') | regex_replace('-.*', '') }}"

@@ -1,6 +1,467 @@
 # TPA release notes
 
-© Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+© Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+## 23.42.0 (2026-02-24)
+
+### Notable changes
+
+- Support running TPA on RHEL 10
+
+  The TPA controller can now be a system running RHEL 10 or an equivalent
+  OS (Rocky Linux, AlmaLinux, or Oracle Linux 10). On these systems, the
+  system python packages (python 3.12) can be used.
+
+  References: TPA-1324.
+
+- Experimental deployment to RHEL10 nodes
+
+  TPA can now deploy to nodes running RHEL10 or distributions based on RHEL10
+  (Rocky Linux, AlmaLinux, or Oracle Linux). Suitable docker images or ec2 AMIs
+  are selected if the docker or aws platforms are being used.
+
+  This feature is considered experimental because deployment depends on the
+  availability of the various packages for RHEL10, so not all architectures or
+  software options will work until packages are uploaded to upstream
+  repositories.
+
+  References: TPA-1323.
+
+- Add privilege_escalation_command configuration variable for alternative privilege escalation commands
+
+  Introduced a new cluster_vars variable `privilege_escalation_command` that allows
+  users to configure which privilege escalation command managed applications use for
+  cluster operations at runtime.
+
+  The default value is `"sudo"`, which maintains the current behaviour where TPA
+  automatically installs the sudo package if not present and configures sudoers
+  files for various components (Postgres user, EFM user, failover managers).
+
+  Users can now specify an alternative privilege escalation command by setting
+  `privilege_escalation_command`.
+
+  When using an alternative privilege escalation command (anything other than "sudo"),
+  TPA will:
+  - Skip sudo package installation
+  - Skip sudoers configuration for the Postgres user
+  - Skip sudoers configuration for the EFM user
+  - Use the configured command for all failover manager operations (repmgr, HARP, EFM)
+
+  This feature is useful for environments that:
+  - Use alternative privilege escalation commands
+  - Require manual management of sudo configuration
+  - Have strict policies around privilege escalation commands
+
+  **Important:** When using alternative privilege escalation commands, users must ensure:
+  1. The chosen command is pre-installed and configured on all target systems
+  2. The command allows the postgres user to run systemctl commands for service management
+  3. The command allows the EFM user to run efm_db_functions (if using EFM)
+  4. Ansible's become mechanism is properly configured (via ansible_become_method)
+
+  **Component-specific changes:**
+
+  - **Postgres user sudoers**: When using alternative commands, TPA skips configuring
+    sudoers for the postgres system user. Users must configure privilege escalation for
+    service management commands.
+
+  - **EFM sudoers**: When using alternative commands, TPA skips configuring sudoers
+    for the EFM user. Users must configure privilege escalation to allow the EFM user to
+    run efm_db_functions as the postgres user.
+
+  - **Failover managers**: repmgr and EFM now use the configured privilege escalation
+    command for service management commands instead of hardcoding sudo.
+
+  - **Barman SELinux**: Barman SELinux configuration tasks now use Ansible's become
+    mechanism instead of explicit sudo commands, respecting the configured privilege
+    escalation command.
+
+  Refer to the documentation in ansible-and-sudo.md and configure-cluster.md for
+  detailed usage examples and configuration guidelines.
+
+  References: TPA-1334, TPA-1336, TPA-1337, TPA-1338, TPA-1084.
+
+- Prevent concurrent installation of multiple EFM versions
+
+  Updated `tpaexec` to prevent the installation of multiple EFM versions,
+  resolving service startup conflicts. The version check now correctly
+  detects the `upgrade_in_progress` state, allowing `tpaexec upgrade
+  --components=efm` to replace the existing version while continuing to
+  block accidental multi-version installations during normal deployment
+  operations.
+
+  References: TPA-1044, CP48997.
+
+### Minor changes
+
+- Reject unsupported Postgres 13 for PGD 6 clusters
+
+  Updated `tpaexec configure` to explicitly reject configurations combining
+  Postgres 13 with PGD 6. As Postgres 13 is not supported by PGD 6, this
+  check prevents users from proceeding with incompatible setups that would
+  otherwise fail later during the deployment phase.
+
+  References: TPA-1332.
+
+- Remove unused monitoring-server role
+
+  The monitoring-server role was previously used to set up a centralised
+  monitoring server for clusters, but this functionality is no longer used
+  or supported. This change removes all references to the monitoring-server
+  role from the codebase, including:
+
+  - Removal of monitoring-server role from group creation in roles/init
+  - Removal of the task that sets the monitoring_server variable
+  - Removal of monitoring-server from test fixtures
+
+  This cleanup removes dead code and prevents confusion about supported
+  roles in TPA deployments.
+
+  References: TPA-714.
+
+- Remove documented dependency on patch
+
+  As TPA no longer requires the patch utility, remove mention of it from the
+  installation instructions, and remove unreachable code which called it.
+
+  References: TPA-1358.
+
+- Separate requirements files for RH8
+
+  TPA now uses separate requirements files when installing python
+  packages, depending on whether it is running on RH8. In addition,
+  it checks at deploy-time that the ansible version in use is <=2.16
+  if any of the instances in the cluster is running RH8.
+
+  This will enable TPA to continue to support deployments to RH8
+  while using the latest version of ansible-core for other
+  distributions.
+
+  References: TPA-931.
+
+- Default to "enterprise" repository for PGD-S architecture
+
+  A cluster configured to use the PGD-S architecture now defaults to
+  the "enterprise" repository not the "postgres_distributed" repository.
+  Thus the default repositories now match the required subscription levels.
+
+  References: TPA-1333.
+
+- Remove mandatory EDB token check for local-only deployments
+
+  Resolved an issue where `tpaexec deploy` incorrectly required an
+  EDB_SUBSCRIPTION_TOKEN even when the `--use-local-repo-only` option was
+  enabled. TPA now bypasses this validation when deploying from local
+  repositories, provided that all necessary packages are available locally.
+  Note that a token is still required to initially download packages and
+  populate the local repository.
+
+  References: TPA-488.
+
+- Improve and document handling of log destination and log directory
+
+  By default, TPA configures Postgres to log to `syslog`. The log
+  location for `rsyslog` can be set with `postgres_log_file`. If the
+  user selects a destination other than `syslog`, TPA will enable the
+  Postgres logging collector configure it to log to
+  `postgres_log_file` Previously this behavior was only implemented if
+  the user selected `stderr`. Now it will work for any setting other
+  than syslog, including `jsonlog` and `csvlog`.
+
+  This change adds a new cluster variable
+  `postgres_log_directory_mode` which can be used to set the directory
+  permissions. It also adds new documentation for all logging-related
+  cluster variables. Logrotate will also be configured to target the
+  log file regardless of how logging is collected.
+
+  References: TPA-1258, TPA-1110.
+
+### Bugfixes
+
+- Ensure tpaexec deploy propagates extra variables to provisioning
+
+  Fixed a crash that occurred when running tpaexec deploy with external
+  variable files (e.g., tpaexec deploy --extra-vars "@./vars.yml").
+  Previously, the internal provisioning step triggered by the deploy
+  command did not inherit these extra variables, causing the execution
+  to fail.
+  This fix ensures that all specified variables are correctly passed to
+  tpaexec provision before the deployment begins.
+
+  References: TPA-1362, CP56864.
+
+- Corrected Patroni ignore_slots data structure to prevent DCS parsing errors
+
+  Previously, the ignore_slots parameter was generated as a dictionary
+  instead of the required list format. This caused an AttributeError during
+  DCS parsing, which not only prevented the ignore_slots configuration
+  from taking effect but also blocked the application of subsequent
+  dynamic and static configuration updates.
+  This change ensures that ignore_slots is correctly formatted as a list
+  of dictionaries, resolving the parsing error and ensuring all configuration
+  changes are applied successfully.
+
+  References: TPA-1241.
+
+- Added validation to catch missing etcd roles
+
+  When deploying a BDR 4 cluster with HARP using `harp_consensus_protocol: etcd`,
+  if no instances have the etcd role defined, deployment would fail late with
+  cryptic and obscure errors about missing etcd endpoints. Debugging such issues
+  is expensive but this validation now catches the issue early and provides some
+  clues to the user about what went wrong.
+
+  References: TPA-933, CP46041.
+
+- Fix PGD-X deployment failing when selecting a commit scope
+
+  PGD-X by default creates a series of immutable commit scopes,
+  which interferes with the current workflow in place.
+  This commit avoids the attempt of deleting these commit scopes
+  for PGD-X when adding commit scopes not defined previously in
+  the configuration file (e.g. CAMO).
+
+  References: TPA-1259.
+
+- Bypass "Record PEM server credentials" task during shared PEM deployment
+
+  Previously, when deploying a shared PEM server, the task "Record PEM server credentials" 
+  would fail because it required the 'postgres_password' attribute. This attribute is 
+  only defined when a node with the 'postgres' role is deployed alongside the shared 
+  PEM node. 
+
+  This caused failures in specific scenarios, such as deploying an independent Barman 
+  node with shared PEM where no 'postgres' role exists, leading to a missing attribute 
+  error. The fix skips this task when shared PEM is in use, as the 'postgres_password' 
+  is instead derived from the 'EDB_PEM_CREDENTIALS_FILE' in a subsequent step.
+
+  References: TPA-1392.
+
+- Prevent duplicate `bdr_node_groups` in PGD-X configuration
+
+  Resolved an issue where specifying Connection Manager port options during
+  `tpaexec configure` for PGD-X clusters resulted in duplicate
+  `bdr_node_groups` entries in `config.yml`. The configuration logic now
+  correctly handles these options to ensure a clean and valid cluster
+  definition.
+
+  References: TPA-1331.
+
+- tpaexec download-packages has refresh repository metadata option
+
+  In order to ensure a way of covering upgrades in an air-gapped environment, a
+  new option has been included on the `tpaexec download-packages` command 
+  (`--refresh-repository`, requires Docker & its corresponding Docker image to work).
+  Prior to this commit, we relied on the user to have the commands required to manually
+  recreate the local repository, depending on its cluster and OS.
+  This fix ensures a way of having an automated way of upgrading the repository with
+  `tpaexec upgrade` once the packages are being placed and the new version of said
+  packages is selected on the configuration file.
+  It also includes documentation covering the steps that need to be taken, given the
+  different air-gapped conditions that can be found, and minor fixes that were
+  discovered related to the DNF repository in an air-gapped scenario.
+
+  References: TPA-1176, TPA-1186, TPA-1187, TPA-1220, TPA-1272.
+
+- Fix barman_role privilege grants for BDR clusters
+
+  In BDR clusters, privileges required by barman were incorrectly granted
+  to the BDR database instead of the `postgres` database, which is where
+  barman actually connects. This caused the "no access to backup functions:
+  FAILED" error after upgrading to TPA 23.40.
+
+  After deploying this fix, the grants are correctly applied to the
+  `postgres` database. Existing affected clusters can be fixed by
+  re-running `tpaexec deploy`.
+
+  References: TPA-1218, CP54698.
+
+- Fix KeyError on etcd_protocol whilst upgrading Patroni
+
+  This is a race condition when the first etcd node tried to build endpoints
+  for all etcd nodes using pyformat_hostvars, it looked for etcd_protocol in
+  each host's hostvars, however, only the current host had set this fact
+  during an upgrade. This caused a KeyError when accessing other hosts.
+
+  References: TPA-1312.
+
+- Standardize PGD-X port flags in `tpaexec configure`
+
+  Updated `tpaexec configure` to remove `--proxy-listen-port` and
+  `--proxy-read-only-port` as valid options for PGD-X. Documentation was
+  adjusted to reflect these removals and to add coverage for the supported
+  `--read-write-port` and `--read-only-port` flags, ensuring alignment
+  between the CLI and the manual.
+
+  References: TPA-1364, CP57408.
+
+- Validate that instance roles list doesn't contain empty entries
+
+  Fix a bug whereby either adding an empty entry or forgetting to remove
+  the dash when manually editing the instance's roles list in `config.yml`
+  would result in a failed deployment. An empty entry in the instance roles
+  list is invalid and should be caught early in the deployment process.
+  This adds a task that validate the content of the role list for each nodes
+  as soon as possible during deployment.
+
+  References: TPA-932, CP46041.
+
+- Fix undefined Patroni SSL facts during upgrade and test phases
+
+  SSL-related facts set during deployment were not persisted across playbook
+  runs, causing errors such as `'patroni_ssl_ca_file' is undefined` when
+  running `upgrade` or `test` against a Patroni cluster with SSL enabled.
+
+  These facts are now set by a dedicated `patroni/facts` role included at
+  the relevant points in the upgrade playbook and test tasks, ensuring they
+  are always available regardless of which phase is being executed.
+
+  References: TPA-1269.
+
+- Allow Docker instance IP addresses to be set using `--hostnames-from`
+
+  Previous versions of TPA automatically generate `ip_address` even if it is supplied in a hostnames file.
+  This fix means TPA will only generate an IP address at configure time if one has not been specified already.
+  Note that TPA will not automatically select a cluster network that contains the provided IP addresses, 
+  so the `--network` option should be used to specify a matching CIDR.
+
+  References: TPA-407.
+
+- Fix downloader to ensure pgd-proxy and pgdcli package version matches  bdr_package_version when only bdr_package_version is set
+
+  Selecting a 'bdr_package_version' on an air-gapped environment, downloads
+  the selected version for BDR, but not for PGD CLI and PGD Proxy, which 
+  later results on an error in 'tpaexec deploy', since there's a package 
+  mismatch. 
+  This is not the case for non air-gapped environments, where choosing a 
+  specific version of 'bdr_package_version' will also select the according
+  versions for PGD CLI and PGD Proxy.
+  This fix ensures that when executing 'tpaexec download-packages', we first
+  check if 'pgd_proxy_package_version' or 'pgdcli_package_version' are 
+  defined, and if not, we will reuse the 'bdr_package_version' variable
+  to download the same version specified, since BDR package mismatching can 
+  lead to critical issues in a production environment.
+
+  References: TPA-1223.
+
+- Fix `--edb-repositories` in `tpaexec configure` command to correctly handle PGDG repositories
+
+  Using the `--edb-repositories` option in `tpaexec configure`, 
+  makes the code responsible for defining the `{apt,yum,suse}_repository_list` 
+  variables to be wrongfully skipped. This generates incorrect configurations with
+  both EDB and PGDG repositories defined, generating conflicts in packages
+  resolution.
+  A fix has been introduced to ensure the correct configuration is generated in
+  every situations.
+
+  References: TPA-1246.
+
+- Add `--enable-camo` support for PGD-X in `tpaexec configure`
+
+  Introduced the `--enable-camo` flag for PGD-X architectures within
+  `tpaexec configure`. This update enables Commit At Most Once (CAMO)
+  support for the cluster, including automated compatibility checks and the
+  necessary configuration adjustments required for a successful deployment.
+
+  References: TPA-1232.
+
+- Fix package conflicts during PGD upgrade on RHEL-based systems
+
+  Resolved a dependency resolution (depsolve) issue encountered when
+  upgrading from PGD 5 to PGD 6 on RHEL-based operating systems. The
+  upgrade process now conditionally utilizes the `allowerasing` option,
+  permitting the necessary replacement of conflicting PGD 5 packages
+  during dry run check before upgrade to ensure a successful transition
+  to PGD 6.
+
+  References: TPA-1317.
+
+- Fix for 'basic' authentication in 'etcd_authentication_mode'
+
+  When selecting 'basic' authentication for 'etcd_authentication_mode', the execution of the deployment
+  would fail on the task that grants permissions to the 'patroni' role in etcd, responsible for making
+  calls to the etcd cluster. 
+  This was due to a fact variable not being properly defined in the scope of the task, causing the 
+  task's condition to fail and thus the permission not being granted. 
+  The fix involved ensuring that the fact variable is correctly set and accessible, allowing the 
+  permission granting task to execute as intended when 'basic' authentication is selected.
+
+  References: TPA-1266.
+
+- Remove 'file' as a dependency for Barman
+
+  Barman is requiring 'file' as a dependency now, and hence, it's installed by
+  the package manager. There's no need to track it as a separate dependency any more.
+
+  References: TPA-1245.
+
+- Support running tests when ansible_user is not root
+
+  "tpaexec tests" runs database queries which must be run either as root or
+  as the correct user in order to be able to read SSL certificates. These
+  tests were previously run without specifying a user, and therefore failed
+  if the user was not root. They now run with the "become_user" attribute and
+  run as the postgres or pgd_proxy user according to the node type.
+
+  References: TPA-589.
+
+- Fix Barman deployment failures when using version pinning
+
+  Resolved a dependency conflict on Debian/Ubuntu systems that occurred
+  when pinning the Barman version via `barman_package_version`. TPA now
+  correctly pins both `barman-cli` and its `python3-barman` dependency to
+  the same version, preventing the package manager from rejecting the
+  installation due to mismatched version requirements.
+
+  References: TPA-1314.
+
+- Ignore PEM server instances in slot default calculations
+
+  Modified the logic for `num_postgres_instances` to ignore instances
+  dedicated to the PEM server backend. Since this variable determines
+  default values for `max_replication_slots`, excluding PEM nodes
+  prevents over-allocation.
+
+  IMPORTANT: Deployments on clusters with a PEM server will trigger a
+  restart on the next deploy if `max_replication_slots` is not explicitly defined in
+  `config.yml`, as TPA will apply the updated calculation results. To avoid
+  downtime, verify and define the current value in your `cluster_vars`.
+
+  References: TPA-1407.
+
+- Fix upgrade failures for clusters using mTLS
+
+  Resolved an issue where `tpaexec upgrade` failed on clusters with mTLS
+  enabled. Previously, required TLS variables were missing during the
+  upgrade phase, causing "certificate required" errors on etcd and
+  undefined variable errors on Patroni. This fix ensures that all mTLS
+  configuration is correctly propagated during upgrades to maintain secure
+  connectivity.
+
+  References: TPA-1279.
+
+- Account for Parallel Apply in `max_replication_slots` calculation
+
+  Updated the formula for `max_replication_slots` to support PGD 5 Parallel
+  Apply. Since Parallel Apply requires an additional replication origin per
+  writer, TPA now incorporates the `bdr.writers_per_subscription` setting
+  into its automated calculations to prevent slot exhaustion in PGD 5
+  clusters.
+
+  IMPORTANT: This change will result in postgres cluster restart on the next deploy 
+  when using PGD version 5 and above, as TPA will apply the updated calculation results.
+  To avoid downtime, verify and define the current value for `max_replication_slots` and
+  `max_wal_senders` in your `cluster_vars`.
+
+  References: TPA-1124, CP51548, CP57005.
+
+- Fix RHEL 8 deployment failures in Patroni clusters
+
+  Resolved a deployment failure on RHEL 8 by updating the
+  `patroni_compare_config.py` script for Python 3.6+ compatibility. This
+  fix ensures that Patroni configuration validation runs correctly in
+  modern Python environments while maintaining the script's core logic.
+
+  References: TPA-1307.
 
 ## v23.41.0 (2025-11-26)
 

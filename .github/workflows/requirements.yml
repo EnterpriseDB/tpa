@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # watch for changes in .in files and call pip-compile to update the associated .txt
 # runs dep check to ensure everything is fine after update.
@@ -44,6 +44,9 @@ jobs:
   main:
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
+    strategy:
+      matrix:
+        variant: ['-rh8', '']
     steps:
       - name: Checkout source repository
         id: checkout-source
@@ -62,13 +65,13 @@ jobs:
       - name: Run pip-compile on requirements.in
         shell: bash
         run: |
-          pip-compile -U --generate-hashes --reuse-hashes requirements.in -o requirements.txt
+          pip-compile -U --generate-hashes --reuse-hashes requirements${{ matrix.variant }}.in -o requirements${{ matrix.variant }}.txt
 
       - name: Share new requirements.txt file with next steps
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
-          name: new_requirements
-          path: requirements.txt
+          name: new_requirements${{ matrix.variant }}
+          path: requirements${{ matrix.variant }}.txt
 
   compile:
     needs: [main]
@@ -77,9 +80,11 @@ jobs:
       matrix:
         architecture: [ppc64le, s390x]
         distro: [el]
-        distro-version: [9]
+        distro-version: [8, 9]
     outputs:
       changed: ${{ steps.dependencies.outputs.changed }}
+    env:
+      FILENAME_SUFFIX: ${{ matrix.distro-version == '8' && '-rh8' || '' }}
     steps:
       - name: Checkout source TPA repository
         id: checkout-source
@@ -97,9 +102,9 @@ jobs:
           path: foundation
 
       - name: Download generated requirements.txt
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
-          name: new_requirements
+          name: new_requirements${{ env.FILENAME_SUFFIX }}
           path: ${{ github.workspace }}
 
       - name: Connect to a Native Executor
@@ -120,6 +125,8 @@ jobs:
 
       - name: Execute script in container
         uses: ./foundation/actions/linux/container/execute
+        env:
+          FILENAME_SUFFIX: ${{ matrix.distro-version == '8' && '-rh8' || '' }}
         with:
           script: |
             cd tpa
@@ -134,11 +141,15 @@ jobs:
         uses: ./foundation/actions/linux/container/destroy
 
       - name: Share generated arch specific requirement files
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
-          name: requirements-${{ matrix.architecture }}
-          path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}.*
+          name: requirements-${{ matrix.architecture }}${{ env.FILENAME_SUFFIX}}
+          path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}${{ env.FILENAME_SUFFIX }}.*
 
+  # we update the main collections/requirements.yml but not the RH8-specific
+  # one, because we would always get unwanted updates. So the RH8-specific file
+  # is left to the collection update workflow, which creates separate PRs that
+  # can be filtered by human intervention
   list-collections:
     name: List ansible galaxy collections
     runs-on: ubuntu-latest
@@ -165,7 +176,7 @@ jobs:
           COLLECTIONS=$(yq -r '.collections[] | .name' collections/requirements.yml)
           for col in $COLLECTIONS; do
             chmod 755 ./.github/scripts/check_one_collection.sh
-            ./.github/scripts/check_one_collection.sh $col
+            ./.github/scripts/check_one_collection.sh $col collections/requirements.yml
             if [ "$(cat $FLAG_FILE)" == "true" ]; then
               COLLECTION_UPDATE_FLAG="true"
             fi
@@ -182,7 +193,7 @@ jobs:
 
       - name: Upload modified requirements.yml
         if: steps.list-collections.outputs.changed == 'true'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: collection-requirements.yml
           path: ${{ github.workspace }}/collections/requirements.yml
@@ -198,25 +209,42 @@ jobs:
           token: ${{ secrets.GH_SLONIK }}
 
       - name: Download generated main requirements.txt
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: new_requirements
           path: ${{ github.workspace }}
 
+      - name: Download generated main requirements.txt for rh8
+        uses: actions/download-artifact@v7
+        with:
+          name: new_requirements-rh8
+          path: ${{ github.workspace }}
       - name: Download generated requirements.txt for ppc64le
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: requirements-ppc64le
           path: ${{ github.workspace }}
 
+      - name: Download generated requirements.txt for ppc64le on rh8
+        uses: actions/download-artifact@v7
+        with:
+          name: requirements-ppc64le-rh8
+          path: ${{ github.workspace }}
+
       - name: Download generated requirements.txt for s390x
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: requirements-s390x
           path: ${{ github.workspace }}
 
+      - name: Download generated requirements.txt for s390x on rh8
+        uses: actions/download-artifact@v7
+        with:
+          name: requirements-s390x-rh8
+          path: ${{ github.workspace }}
+
       - name: Download generated collections/requirements.yml
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: collection-requirements.yml
           path: ${{ github.workspace }}/collections

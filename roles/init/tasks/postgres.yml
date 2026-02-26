@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # First, we identify a flavour of Postgres that we want to install, but
 # then group some flavours together for the purpose of deriving common
@@ -155,6 +155,7 @@
     postgres_hba_local_auth_method: "{{ postgres_hba_local_auth_method|default(default_postgres_hba_local_auth_method) }}"
     postgres_log_file: "{{ postgres_log_file | default(default_postgres_log_file) }}"
     postgres_log_file_mode: "{{ postgres_log_file_mode | default(default_postgres_log_file_mode) }}"
+    postgres_log_directory_mode: "{{ postgres_log_directory_mode | default(default_postgres_log_directory_mode) }}"
     log_destination: "{{ log_destination|default(default_log_destination) }}"
     install_from_source: "{{ install_from_source|default([]) }}"
     barman_user: "{{ barman_user|default(default_barman_user) }}"
@@ -237,6 +238,22 @@
       {%- if postgres_version is version('10', '>=') -%}wal
       {%- else -%}xlog
       {%- endif -%}
+
+- name: Split extension from postgres_log_file
+  set_fact:
+    _postgres_log_file_last: "{{ postgres_log_file | splitext | last }}"
+    _postgres_log_file_first: "{{ postgres_log_file | splitext | first }}"
+
+- name: Set full path to Postgres logs based on selected options
+  set_fact:
+    postgres_log_file_with_extension: "{{
+        postgres_log_file if log_destination in ['syslog', 'stderr']  else
+        _postgres_log_file_first + '.json' if log_destination == 'jsonlog' and _postgres_log_file_last == '.log' else
+        _postgres_log_file_first + '.csv' if log_destination == 'csvlog' and _postgres_log_file_last == '.log' else
+        postgres_log_file + '.json' if log_destination == 'jsonlog' else
+        postgres_log_file + '.csv' if log_destination == 'csvlog'  else
+        postgres_log_file
+      }}"
 
 
 # Find and set right HARP manager user. The var from config.yml takes precendence,
@@ -714,7 +731,7 @@
 - name: Count the number of postgres instances
   action: set_fact
   args: >
-    {{ ('{"num_postgres_instances": ' ~ groups['role_postgres']|default([])|count ~ '}')|from_json }}
+    {{ ('{"num_postgres_instances": ' ~ (groups['role_postgres']|default([])|difference(groups['role_pem-server']|default([])))|default([])|count ~ '}')|from_json }}
 
 # This coerces the type of twice_postgres_instances to an int
 
@@ -725,10 +742,13 @@
 
 - name: Set default values for max_wal_senders and max_replication_slots
   set_fact:
-    max_wal_senders: >-
-      {{ max_wal_senders|default(twice_postgres_instances) }}
-    max_replication_slots: >-
-      {{ max_replication_slots|default(twice_postgres_instances + 3) }}
+    max_wal_senders: "{{ [_max_wal_senders|int, _max_replication_slots|int]| max }}"
+    max_replication_slots: "{{ _max_replication_slots }}"
+  vars:
+    writers_per_subscription: "{{ (postgres_conf_settings|default({})).get('bdr.writers_per_subscription', default_writers_per_subscription) }}"
+    multiplier: "{{ ('bdr' in role)|ternary(writers_per_subscription, 1) }}"
+    _max_replication_slots: "{{ max_replication_slots|default(twice_postgres_instances * multiplier|int + 3|int) }}"
+    _max_wal_senders: "{{ max_wal_senders|default(_max_replication_slots) }}"
 
 # “The formula for the correct minimal number of workers is: one per
 # PostgreSQL instance + one per database on that instance + two per BDR

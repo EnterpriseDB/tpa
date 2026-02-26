@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-#  © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+#  © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 #
 from __future__ import absolute_import, division, print_function
 
-from typing import Any
+from typing import Any, Dict, Set
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -81,7 +81,7 @@ changed:
 """
 
 # Configuration options which require a restart of the Patroni agent upon changes
-RESTART_KEYS: set[str] = {
+RESTART_KEYS: Set[str] = {
     "etcd3.cacert",
     "etcd3.cert",
     "etcd3.key",
@@ -91,8 +91,8 @@ RESTART_KEYS: set[str] = {
 
 
 def flatten_dict(
-    d: dict[str, Any], parent_key: str = "", sep: str = "."
-) -> dict[str, str]:
+    d: Dict[str, Any], parent_key: str = "", sep: str = "."
+) -> Dict[str, str]:
     """
     Flatten a nested dictionary into dot-separated keys.
 
@@ -113,8 +113,8 @@ def flatten_dict(
 
 
 def compare_dicts(
-    old_flat: dict[str, Any], new_flat: dict[str, Any]
-) -> dict[str, dict[str, Any]]:
+    old_flat: Dict[str, Any], new_flat: Dict[str, Any]
+) -> Dict[str, Dict[str, Any]]:
     """
     Compare two flattened dictionaries and return the differences.
 
@@ -146,8 +146,8 @@ def run_module() -> None:
         supports_check_mode=True,
     )
 
-    old_config: dict[str, Any] = module.params["old_config"]  # type: ignore
-    new_config: dict[str, Any] = module.params["new_config"]  # type: ignore
+    old_config: Dict[str, Any] = module.params["old_config"]  # type: ignore
+    new_config: Dict[str, Any] = module.params["new_config"]  # type: ignore
 
     # Handle the case where the old configuration is empty (first run).
     if not old_config:

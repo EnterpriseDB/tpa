@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from ..platform import Platform
 from .. import net
@@ -158,12 +158,12 @@ class docker(Platform):
                 "os": "Debian",
             },
             "tpa/redhat": {
-                "versions": ["7", "8", "9"],
+                "versions": ["7", "8", "9", "10"],
                 "default_version": "9",
                 "os": "RedHat",
             },
             "tpa/rocky": {
-                "versions": ["8", "9"],
+                "versions": ["8", "9", "10"],
                 "default_version": "9",
                 "os": "Rocky",
                 "os_family": "RedHat",
@@ -209,7 +209,8 @@ class docker(Platform):
             image.setdefault("os_family", image.get("os"))
 
         # Cater for OS names, e.g. "Debian"
-        if name in self.supported_distributions():
+        supported_distros_lower = [d.lower() for d in self.supported_distributions()]
+        if name.lower() in supported_distros_lower:
             image_name = f"tpa/{name.lower()}"
             image = known_images[image_name]
             version = valid_version(image_name, version)
@@ -265,7 +266,12 @@ class docker(Platform):
             else:
                 i.remove_setting("volumes")
 
-            i.set_settings({'ip_address': str(next(host_ips))})
+            # If ip_address is not yet set, we take one from our iterator.
+            # We need this check because ip_address can be set already 
+            # if the user has provided IPs via `--hostnames-from`, 
+            # in which case we don't want to ignore them.
+            if not i.get_setting("ip_address", None):
+                i.set_settings({'ip_address': str(next(host_ips))})
 
     def process_arguments(self, args, cluster):
         s = args.get("platform_settings") or {}

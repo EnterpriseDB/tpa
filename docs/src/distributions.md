@@ -6,7 +6,7 @@ description: Which Linux distributions are supported by TPA.
 
 TPA detects and adapts to the distribution running on each target
 instance. This page lists platforms which are actively supported and
-'legacy distribution' which have previously been supported. Deploying to a
+'legacy distributions' which have previously been supported. Deploying to a
 legacy platform is likely to work as long as you have access to the
 necessary packages, but this is not considered a supported use of TPA
 and is not suitable for production use.
@@ -36,18 +36,29 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 ## Oracle Linux x86
 
-* Oracle Linux 9.x is fully supported (docker only)
-* Oracle Linux 8.x is fully supported (docker only)
-* Oracle Linux 7.x is a legacy distribution (docker only)
+* Oracle Linux 9.x is fully supported
+* Oracle Linux 8.x is fully supported
+* Oracle Linux 7.x is a legacy distribution
 
 ## RedHat x86
 
+* RHEL/Rocky/AlmaLinux/Oracle Linux 10.x is fully supported (python3
+  only)
 * RHEL/Rocky/AlmaLinux/Oracle Linux 9.x is fully supported (python3 only)
 * RHEL/CentOS/Rocky/AlmaLinux 8.x is fully supported (python3 only)
 * RHEL/CentOS 7.x is a legacy distribution (python2 only)
 
+!!! Warning
+To deploy to instances running RHEL 8.x or equivalents, the TPA
+controller must also be running RHEL 8.x . This is because a TPA
+controller running another OS may be running a newer ansible version
+than ansible-core 2.16, and therefore be incompatible with RHEL 8.x
+on the target instances.
+!!!
+
 ## RedHat ppc64le
 
+* RHEL/Rocky/AlmaLinux 10.x is fully supported (python3 only)
 * RHEL/Rocky/AlmaLinux 9.x is fully supported (python3 only)
 * RHEL/AlmaLinux 8.x is fully supported (python3 only)
 

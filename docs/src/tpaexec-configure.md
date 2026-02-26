@@ -139,7 +139,7 @@ When the "docker" platform is selected, TPA will always place the
 entire cluster in a single subnet regardless of the architecture. This
 subnet is generated according to the logic described here with the
 exception that if the `subnet-prefix` is not specified, TPA will
-automatically select a subnet size large enough to accomodate the number
+automatically select a subnet size large enough to accommodate the number
 of instances in
 `config.yaml`.
 !!!
@@ -187,6 +187,20 @@ set as the `ip_address` for the corresponding instance in `config.yml`.
 If two ip addresses are present, the first will be set as `public_ip`
 and the second as `private_ip`.
 
+!!! Note
+When you explicitly specify IP addresses, whether through a hostnames 
+file or directly in `config.yml`, you must ensure that they fall within 
+the cluster network CIDR range. For Docker and AWS platform, this 
+means that you must [specify a cluster network](#network-configuration) 
+if you specify IP addresses.
+
+If you do not specify a cluster network CIDR range, TPA will select
+one randomly with no reference to the specified IP addresses.
+This will result in a failed deployment or a cluster with different IP
+addresses than you were expecting.
+!!!
+
+
 Use `--hostnames-pattern '…pattern…'` to limit the selection to
 lines matching an egrep pattern.
 
@@ -218,6 +232,9 @@ which one is used by default.
 
 In general, you should be able to use "Debian", "RedHat", "Ubuntu", and
 "SLES" to select the right images.
+
+Optionally, you can include the version of the distribution by passing
+`--os-version <version number>`.
 
 This option is not meaningful for the "bare" platform, where TPA has
 no control over which distribution is installed.
@@ -260,7 +277,7 @@ details.
 #### Postgres flavour and version
 
 TPA supports PostgreSQL, EDB Postgres Extended, and EDB Postgres
-Advanced Server (EPAS) versions 11 through 17.
+Advanced Server (EPAS) versions 13 through 18.
 
 You must specify both the flavour (or distribution) and major version of
 Postgres to install, for example:
@@ -412,12 +429,11 @@ Use the `--use-ansible-tower` and `--tower-git-repository` options to
 create a cluster adapted for deployment with Ansible Tower. See [Ansible
 Tower](tower.md) for details.
 
-## Beacon agent
+## PGAI agent
 
 Use the `--enable-beacon-agent` and `--beacon-agent-project-id` options
-to install the beacon agent, which enables you to view your cluster in
-the EDB Postgres AI Console. See [Configuring the beacon
-agent](beacon-agent.md) for details.
+to install the PGAI agent (packaged as `beacon-agent`), which enables you to view your cluster in
+the EDB Postgres AI Console. See [Configuring the PGAI agent](beacon-agent.md) for details.
 
 ## Git repository
 
@@ -474,6 +490,7 @@ Let's see what happens when we run the following command:
 ```shell
 tpaexec configure ~/clusters/speedy --architecture M1 \
         --distribution Debian \
+        --os-version 12 \
         --platform aws --region us-east-1 --network 10.33.0.0/16 \
         --instance-type t2.medium --root-volume-size 32 \
         --postgres-volume-size 64 --barman-volume-size 128 \

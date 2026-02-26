@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # Single cluster upgrade from BDR4 to PGD5
 # on demand upgrade scenario with wide range of dimension.
@@ -30,10 +30,6 @@ on:
         - silver
         - gold
         - platinum
-      tpa_platform:
-        description: "TPA platform"
-        required: false
-        default: "docker"
       tpa_os_image:
         description: "TPA OS image"
         required: true
@@ -42,7 +38,6 @@ on:
         - tpa/debian:10
         - tpa/debian:11
         - tpa/ubuntu:24.04
-        - tpa/redhat:7
         - tpa/redhat:8
         - tpa/sles:15
       tpa_postgres_flavour:
@@ -79,14 +74,6 @@ on:
         required: false
         description: "PGD repos for reconfigure command"
         default: ""
-      runner:
-        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
-        required: false
-        default: "ubuntu-22.04"
-        type: choice
-        options:
-        - "ubuntu-20.04"
-        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -101,7 +88,7 @@ jobs:
   integration-test:
     name: Upgrade test
 
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout source repository
@@ -115,7 +102,6 @@ jobs:
         with:
           source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
-          tpa_platform: ${{ github.event.inputs.tpa_platform }}
           tpa_layout: ${{ github.event.inputs.tpa_layout }}
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}

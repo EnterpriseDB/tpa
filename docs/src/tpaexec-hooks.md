@@ -45,8 +45,8 @@ unconditionally executed for all hosts in the deployment.
 
 ### pre-deploy
 
-TPA invokes `hooks/pre-deploy.yml` immediately after bootstrapping
-Python—but before doing anything else like configuring repositories and
+TPA invokes `hooks/pre-deploy.yml` after bootstrapping Python and
+configuring locale, but before configuring repositories and
 installing packages. This is the earliest stage at which you can execute
 your own code.
 

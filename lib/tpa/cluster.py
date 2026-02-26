@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from typing import List, Dict, Any, Optional
 import yaml
@@ -136,6 +136,30 @@ class Cluster:
         for k, v in settings.items():
             if k not in self._settings:
                 self._settings[k] = v
+
+    def set_var(self, key: str, value):
+        """Sets a single cluster variable (cluster_vars entry).
+
+        This is a convenience method that delegates to the underlying group's
+        add_to_group_vars method for setting a single key-value pair.
+
+        Args:
+            key: The variable name to set
+            value: The value to assign to the variable
+        """
+        self._group.add_to_group_vars({key: value})
+
+    def append_var(self, key: str, value):
+        """Sets a single cluster variable (cluster_vars entry).
+
+        This is a convenience method that delegates to the underlying group's
+        add_to_group_vars method for setting a single key-value pair.
+
+        Args:
+            key: The variable name to set
+            value: The value to assign to the variable
+        """
+        self._group.add_to_group_vars({key: value})
 
     def to_yaml(self):
         """Returns a YAML representation of this cluster (WIP)

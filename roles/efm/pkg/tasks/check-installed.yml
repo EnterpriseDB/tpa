@@ -1,28 +1,21 @@
 ---
 
-- package_facts:
-    manager: auto
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
 
-- name: Collect EFM package versions from list of installed packages
-  set_fact:
-    installed_efm_versions: "{{ installed_efm_versions | default([]) | union([_version]) }}"
-  loop: "{{ ansible_facts.packages | dict2items | selectattr('key', 'match', '^edb-efm?[0-9]+') }}"
-  vars:
-    _full_version: "{{ item['value'][0]['version'] }}"
-    _version: "{{ _full_version | regex_replace('^[0-9]+:', '') | regex_replace('-.*', '') }}"
+- include_tasks: detect-installed.yml
 
 - name: Ensure EFM is currently installed
-  assert: 
-    that: 
+  assert:
+    that:
     - installed_efm_versions is defined and installed_efm_versions != []
     fail_msg: >
       No version of EFM is installed, nothing to update.
 
 - name: Ensure only one version of EFM is currently installed
-  assert: 
-    that: 
+  assert:
+    that:
     - installed_efm_versions | difference([efm_version]) | length < 2
     fail_msg: >
-      More than one version of EFM is installed. 
+      More than one version of EFM is installed.
       Found versions: {{ installed_efm_versions | join(', ') }}"
       Please uninstall any currently unused EFM package versions before running 'tpaexec upgrade' again.

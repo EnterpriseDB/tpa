@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 - include_tasks: validate.yml
 
@@ -8,12 +8,37 @@
   set_fact:
     etcd_protocol: "{{ 'https' if etcd_ssl_enabled else 'http' }}"
 
+- block:
+    # Include etcd/config defaults to get SSL directory paths
+    - name: Include etcd/config defaults for SSL paths
+      include_vars:
+        file: "{{ tpa_dir }}/roles/etcd/config/defaults/main.yml"
+
+    # Check if etcd SSL certificate already exists (to distinguish fresh deployment from upgrade)
+    - name: Check if etcd SSL certificate exists
+      stat:
+        path: "{{ etcd_ssl_dir }}/{{ etcd_ssl_service }}.crt"
+      register: etcd_cert_check
+
+    # Include SSL configuration to set etcd_ssl_*_file variables if they're not already defined
+    # This is needed during upgrades when etcd/config hasn't run but certificates already exist
+    - name: Include etcd SSL configuration
+      include_role:
+        name: etcd/config
+        tasks_from: ssl.yml
+      when:
+        - etcd_cert_check.stat.exists
+        - etcd_ssl_cert_file is not defined or etcd_ssl_key_file is not defined or etcd_ssl_ca_file is not defined
+
+  when: etcd_ssl_enabled
+
 - name: Set etcd endpoints
   set_fact:
     etcd_endpoints: "{{
         groups['role_etcd']
         |select_by_hostvar(hostvars, 'etcd_location', etcd_location)
-        |map('pyformat_hostvars', '{etcd_protocol}://{inventory_hostname}:{etcd_client_port}', hostvars)
+        |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
+        |map('regex_replace', '^', etcd_protocol + '://')
         |list
         |join(',')
       }}"

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # https://www.enterprisedb.com/docs/pgd/latest/bdr/group-commit/
 
@@ -68,7 +68,9 @@
 # configuration.
 #
 # XXX This will fail if any of the commit scopes are used as the default
-# commit scope for a group.
+# commit scope for a group if it uses a BDR version inferior than 6. 
+# For BDR version 6 and above, we keep the default scopes created by 
+# default.
 
 - name: Remove unwanted BDR commit scopes
   postgresql_query:
@@ -84,6 +86,10 @@
   loop_control:
     label: >-
       {{ item.commit_scope_name }}
-  when:
-    item.commit_scope_name not in bdr_commit_scopes|json_query('[*].name')
+  vars:
+    default_bdr_6_scopes: ['local protect', 'lag protect', 'majority protect', 'adaptive protect']
+  when: >
+    item.commit_scope_name not in bdr_commit_scopes|json_query('[*].name') and (
+    item.commit_scope_name not in default_bdr_6_scopes if (bdr_version_num >= 60000) else true
+    )
   changed_when: true

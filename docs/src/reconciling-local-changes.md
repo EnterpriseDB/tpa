@@ -32,7 +32,7 @@ so it is something we have chosen not to support.
 TPA does not yet provide an automated mechanism for performing major
 version upgrades of Postgres. Therefore if you need to perform an
 in-place upgrade on an existing cluster this must be performed using
-other tools such as pg_upgrade or [bdr_pg_upgrade](https://www.enterprisedb.com/docs/pgd/latest/upgrades/bdr_pg_upgrade/#bdr_pg_upgrade-command-line).
+other tools such as pg_upgrade or [bdr_pg_upgrade](https://www.enterprisedb.com/docs/pgd/latest/upgrades/bdr_pg_upgrade/#pgd-node-upgrade-command-line).
 
 ## What can happen if changes are not reconciled?
 A general issue with unreconciled changes is that if you deploy a new

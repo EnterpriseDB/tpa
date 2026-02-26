@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # PGD cli only makes sense as a separate package for BDR4 and PGD5
 # PGD6 merges it with the core bdr extension package.

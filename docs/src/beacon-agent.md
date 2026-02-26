@@ -1,15 +1,19 @@
 ---
-description: Integrating TPA deployments with EDB Postgres AI using the agent
+description: Integrating TPA deployments with EDB Postgres AI using the PGAI agent
 ---
 
-# Configuring the beacon agent
+!!!Note
+TPA currently only supports using the PGAI Agent to integrate clusters with EDB Postgres AI Cloud Service. Using the agent to integrate with EDB Postgres AI Hybrid Manager, or for usage reporting, will be supported in a future release of TPA.
+!!!
 
-TPA installs and configures the beacon agent on nodes which have
+# Configuring the PGAI agent
+
+TPA installs and configures the PGAI agent (packaged as `beacon-agent`) on nodes which have
 the role `beacon-agent` in `config.yml`. If `--enable-beacon-agent` is
 passed to `tpaexec configure`, then all of the postgres nodes in the
 cluster have this role.
 
-## Beacon agent package version
+## PGAI agent package version
 
 By default, TPA installs the latest available version of `beacon-agent`.
 
@@ -31,9 +35,9 @@ is often necessary when the package version has an epoch qualifier
 like `2:...`.
 
 
-## Beacon agent configuration
+## PGAI agent configuration
 
-The beacon agent configuration contains two parameters which must be set
+The PGAI agent configuration contains two parameters which must be set
 per-cluster, the access key and the project id.
 
 The access key is kept encrypted in the cluster directory and can be
@@ -58,14 +62,14 @@ The project id is stored in `config.yml` under the
 `--beacon_agent_project_id` argument is passed to `tpaexec configure`
 then its value is written to `config.yml` appropriately.
 
-## Installing the beacon agent
+## Installing the PGAI agent
 
-TPA installs the beacon agent from EDB's repositories and creates an
+TPA installs the PGAI agent from EDB's repositories and creates an
 operating system user called `beacon` and a database user called
 `beacon`. A configuration file for the agent is written to
 `.beacon/beacon_agent.yaml` in the beacon user's home directory.
 
-## Running the beacon agent
+## Running the PGAI agent
 
 TPA installs a systemd service unit file to start the agent at
 boot-time, running as the beacon user.

@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 name: Build TPA Execution Environment image for AAP
 run-name: Build TPA EE image with tag ghcr.io/enterprisedb/tpa/${{ github.event.inputs.base-image == 'RHEL' && 'tpa-ee' || 'tpa-ee-alpine' }}:${{ github.event.inputs.tag }}
@@ -99,7 +99,7 @@ jobs:
         --squash new
 
     - name: Archive build folder
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: build_artifact
         path: ./tpa-ee/aap24/${{ github.event.inputs.base-image == 'RHEL' && 'rhel' || 'alpine' }}

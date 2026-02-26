@@ -27,26 +27,26 @@ Instead, you must use `tpaexec upgrade` to perform software upgrades.
 The following components are able to be upgraded for **any** architecture:
 
 - Postgres
-- [PgBouncer](pgbouncer.md#updating-pgbouncer-package-version-using-tpaexec-upgrade)
-- [Barman](barman.md#updating-barman-package-version-using-tpaexec-upgrade)
-- [PG Backup API](pg-backup-api.md#updating-pg-backup-api-package-version-using-tpaexec-upgrade)
-- [PEM](pem.md#updating-pem-component-package-version-using-tpaexec-upgrade)
+- [PgBouncer](pgbouncer.md#minor-update-for-pgbouncer-using-tpaexec-upgrade)
+- [Barman](barman.md#minor-update-using-tpaexec-upgrade)
+- [PG Backup API](pg-backup-api.md#minor-update-for-pg-backup-api-using-tpaexec-upgrade)
+- [PEM](pem.md#minor-update-for-pem-using-tpaexec-upgrade)
 (both server and agent)
 
 The following components are able to be upgraded on **M1** architectures and
 depend on the failover manager used:
 
-- [EFM](efm.md#updating-efm-version-using-tpaexec-upgrade)
-- [Patroni](patroni.md#updating-patroni-package-version-using-tpaexec-upgrade)
-- [etcd](etcd.md#updating-etcd-package-version-using-tpaexec-upgrade) (for Patroni)
-- [repmgr](repmgr.md#updating-repmgr-package-version-using-tpaexec-upgrade)
+- [EFM](efm.md#minor-update-for-efm-using-tpaexec-upgrade)
+- [Patroni](patroni.md#minor-update-for-patroni-using-tpaexec-upgrade)
+- [etcd](etcd.md#minor-update-for-etcd-using-tpaexec-upgrade) (for Patroni)
+- [repmgr](repmgr.md#minor-update-for-repmgr-using-tpaexec-upgrade)
 
 The following components are able to be upgraded on **BDR-Always-ON**/**PGD-Always-ON**
 architectures, depending on the BDR version used:
 
-- [pgdcli](pgd-cli.md#updating-pgd-cli-package-version-using-tpaexec-upgrade) (v1 for BDR 4,
+- [pgdcli](pgd-cli.md#updating-pgd-cli-using-tpaexec-upgrade) (v1 for BDR 4,
 v5 for PGD5)
-- [pgd-proxy](pgd-proxy.md#updating-pgd-proxy-package-version-using-tpaexec-upgrade) (only for PGD5)
+- [pgd-proxy](pgd-proxy.md#updating-pgd-proxy-using-tpaexec-upgrade) (only for PGD5)
 
 !!! Note Minor version upgrades only
 **`tpaexec upgrade` does NOT support MAJOR version upgrades of Postgres and most cluster components**

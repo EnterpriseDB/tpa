@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # before running this playbook we have to run the init playbook on all
 # hosts and the dynamic_groups playbook, so the group g_update_hosts

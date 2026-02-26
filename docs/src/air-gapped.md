@@ -85,5 +85,22 @@ would normally.
 
 You can use the [upgrade](tpaexec-upgrade.md) command to
 perform updates in an air-gapped environment. Prior to running this
-command you must run `download-packages` on the connected controller and
-copy the updated repository to the disconnected controller.
+command you must follow the steps below.
+
+### Updating local repository content with direct access to internet on TPA node
+
+If the air-gapped environment has internet access, we can safely rely on `tpaexec download-packages`
+to download the new packages, check the [download section](air-gapped.md#Downloading-packages) to
+know its usage.
+
+### Updating local repository content without direct access to internet on TPA node
+
+There are two ways of performing the updating an internet-disconnected local repository:
+Recreate the local repository manually following the correct [steps](local-repo.md#Populating-the-repository-and-generating-metadata)
+depending on the distribution of your choice; or use `--refresh-repository` option in 
+`tpaexec download-packages` after placing the new packages on the local repository.
+Check the [documentation](tpaexec-download-packages.md#regenerate-local-repository-metadata) for more information
+(Docker must be available, alongside the corresponding Docker image to the TPA nodes cluster).
+
+Once the changes are saved, we can execute `tpaexec upgrade cluster-dir` and
+the packages will be updated.

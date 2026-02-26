@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 import argparse
 
@@ -366,8 +366,7 @@ class M1(Architecture):
         """
         Set the value of ``efm_version``.
 
-        Use value configured by the user, if any, otherwise get a default value based on
-        the configured repositories.
+        Use value configured by the user, if any, otherwise get the default
 
         :param cluster_vars: cluster variables to be inspected.
         """
@@ -386,6 +385,7 @@ class M1(Architecture):
         )
 
         if failover_manager == "efm":
+            cluster_vars["efm_version"] = self._set_efm_version(cluster_vars,)
             cluster_vars.update(
                 {
                     "efm_user_password_encryption": "scram-sha-256",
@@ -405,8 +405,6 @@ class M1(Architecture):
             cluster_vars["patroni_package_flavour"] = self._get_patroni_flavour(
                 cluster_vars,
             )
-            if failover_manager == "efm":
-                cluster_vars["efm_version"] = self.args.get("efm_version")
             # Ensure secure defaults in the DCS and in Patroni itself
             cluster_vars["etcd_ssl_enabled"] = True
             cluster_vars["etcd_authentication_mode"] = "mtls"

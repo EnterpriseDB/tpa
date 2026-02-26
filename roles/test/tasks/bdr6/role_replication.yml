@@ -3,6 +3,8 @@
   postgresql_query:
     conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host=bdr_host) }}"
     query:  "{{ bdr_query }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
   register: bdr_query_result
   vars:
     _task_environment:

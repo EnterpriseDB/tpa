@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 import sys
 import os
 import io
@@ -1387,35 +1387,46 @@ class Architecture(object):
         # that wins over everything else.
 
         edb_repositories = self.args.get("edb_repositories")
-        if edb_repositories and edb_repositories != ["none"]:
-            cluster_vars.update({"edb_repositories": edb_repositories})
-            return
 
         # If --edb-repositories is specified, we use the list to override the
         # defaults based on postgres_flavour. We translate `none` to [], but do
         # not make any other changes to the given list (no automagic additions
         # to the list, unlike BDR.update_cluster_vars).
 
-        if not edb_repositories:
-            edb_repositories = self.default_edb_repos(cluster_vars)
-        elif edb_repositories == ["none"]:
-            edb_repositories = []
+        if edb_repositories:
+            if edb_repositories == ["none"]:
+                cluster_vars.update({"edb_repositories": []})
+            else:
+                cluster_vars.update({"edb_repositories": edb_repositories})
+            
+            # In general, if we're using EDB repositories at all, we don't want
+            # packages from PGDG, unless we're using community360 as explained
+            # above.
 
-        if edb_repositories is not None:
-            cluster_vars.update({"edb_repositories": edb_repositories})
-
-        # In general, if we're using EDB repositories at all, we don't want
-        # packages from PGDG, unless we're using community360 as explained
-        # above. Note that `--edb-repositories none` means we do want PGDG.
-
-        if edb_repositories and "community360" not in edb_repositories:
+            if "community360" not in edb_repositories:
+                cluster_vars.update(
+                    {
+                        "apt_repository_list": [],
+                        "yum_repository_list": ["EPEL"],
+                        "suse_repository_list": [],
+                    }
+                )
+        else:
             cluster_vars.update(
-                {
-                    "apt_repository_list": [],
-                    "yum_repository_list": ["EPEL"],
-                    "suse_repository_list": [],
-                }
-            )
+                    {
+                        "edb_repositories": self.default_edb_repos(cluster_vars)
+                    }
+                )
+            # We double-check if we don't need EDB repositories, since we might 
+            # be having a setup that involves PGDG repositories
+            if cluster_vars["edb_repositories"] != []:
+                cluster_vars.update(
+                        {
+                            "apt_repository_list": [],
+                            "yum_repository_list": ["EPEL"],
+                            "suse_repository_list": [],
+                        }
+                    )
 
     def cluster_vars_args(self):
         """

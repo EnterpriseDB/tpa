@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 #
 # The dispatcher for all TPA functionality, including initial setup,
 # and the configuration, provision, deployment, and testing of clusters.
@@ -139,6 +139,42 @@ _install_tpaexec_pth() {
     fi
 }
 
+_set_requirements_file_names() {
+    # Set REQUIREMENTS_FILE and COLLECTIONS_FILE to filenames where
+    # we look for python requirements and ansible galaxy collections
+    # respectively
+    #
+    # The defaults include the suffix "-rh8" if we can detect we are
+    # running on an RH-8 like system; they can be overridden using the
+    # --requirements-file and --collections-file command-line options
+    REQUIREMENTS_FILE="requirements.txt"
+    COLLECTIONS_FILE="requirements.yml"
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+
+        # if we're on RH8 and not installing from the -deps package, we
+        # use the alternative names; if we are installing from -deps, the
+        # files always have the standard names, even if this is RH8
+        if [[ ( ( -v ID_LIKE && "$ID_LIKE" == *"rhel"* ) || \
+                ( -v ID && "$ID" == "rhel" ) ) && \
+              ( -v VERSION_ID && "$VERSION_ID" == 8* ) && \
+              ! -d "$PIP_DIR" ]]; then
+
+            REQUIREMENTS_FILE="requirements-rh8.txt"
+            COLLECTIONS_FILE="requirements-rh8.yml"
+        fi
+    else
+        echo "Warning: /etc/os-release not found. Using default requirements."
+    fi
+
+    if [[ -v requirements_file ]]; then
+        REQUIREMENTS_FILE="$requirements_file"
+    fi
+    if [[ -v collections_file ]]; then
+        COLLECTIONS_FILE="$collections_file"
+    fi
+}
+
 _install_pip_packages() {
     pip_args=(--upgrade)
 
@@ -161,13 +197,18 @@ _install_pip_packages() {
 
     pip3 install "${pip_args[@]}" "pip>=10.0.1" wheel
 
+    # now that we know PIP_DIR we can work out which requirements files
+    # we're going to use, populating REQUIREMENTS_FILE and COLLECTIONS_FILE
+    _set_requirements_file_names
+
     # We need to install Ansible and all dependencies into the venv,
     # either from the bundled package from tpaexec-deps if present, or
     # directly from github/PyPI
 
-    TPA_REQUIREMENTS="$TPA_DIR"/requirements.txt
+
+    TPA_REQUIREMENTS="$TPA_DIR/$REQUIREMENTS_FILE"
     if [[ -d $PIP_DIR ]]; then
-        TPA_REQUIREMENTS="$PIP_DIR/requirements.txt"
+        TPA_REQUIREMENTS="$PIP_DIR/$REQUIREMENTS_FILE"
     fi
 
     # If we have ansible already installed and we're going to install a different
@@ -190,40 +231,6 @@ _install_pip_packages() {
 
 }
 
-_apply_patch_if_not_applied() {
-    local file=$1
-    local patch=$2
-
-    # We want to apply $patch to $file and display the output from
-    # patch(1) if it either successfully applies or fails to apply the
-    # patch. If the patch has already been applied, we don't want any
-    # output (certainly not the confusingly error-like message patch
-    # sees fit to issue in this case).
-    #
-    # Unfortunately, we cannot rely on the exit code, because patch will
-    # return 1 if it detects a patch that has already been applied, but
-    # also if it fails to apply a patch with a single hunk. Exit code 2
-    # or above is always an error.
-    #
-    # Here we run patch in a subshell that translates exit code 1 to 0
-    # and disables translation/localisation so that we can examine the
-    # output afterwards to determine if the patch was already applied.
-
-    (
-        set +eE;
-        trap '' ERR;
-        LC_ALL=C LANG=C patch --forward -r - -sp1 "$file" < "$patch" 2>&1;
-        if [[ $? -ge 2 ]]; then
-            exit 2;
-        fi
-        exit 0;
-    ) | awk '
-        /FAILED/                { print "'"$(basename "$patch")"': " $0; exit 2; }
-        /Reversed.*Skipping/    { exit 0; }
-        //                      { print; }
-    '
-}
-
 _install_ansible_collections() {
 
     # If ansible collections are bundled (i.e. the tpaexec-deps package has
@@ -237,7 +244,7 @@ _install_ansible_collections() {
     fi
     (
         cd "$ANSIBLE_COLLECTIONS" && \
-        "${ansible}"-galaxy collection install -p "${TPA_VENV}/collections" -r requirements.yml
+        "${ansible}"-galaxy collection install -p "${TPA_VENV}/collections" -r $COLLECTIONS_FILE
     )
 }
 
@@ -253,6 +260,14 @@ setup() {
                 ;;
             --pip-cache-dir)
                 pip_cache_dir=${1:?pip cache directory not specified}
+                shift
+                ;;
+            --requirements-file)
+                requirements_file=${1:?requirements file not specified}
+                shift
+                ;;
+            --collections-file)
+                collections_file=${1:?collections file not specified}
                 shift
                 ;;
             *)
@@ -379,7 +394,19 @@ playbook() {
 deploy() {
     NO_PROVISION_OPTIONS="(--help)|(--list-hosts)|(--list-tasks)|(--list-tags)"
     if [[ ! $@ =~ $NO_PROVISION_OPTIONS ]] ; then
-        provision
+        # Filter out deploy-specific arguments before passing to provision
+        PROVISION_ARGS=()
+        for arg in "$@"; do
+            case "$arg" in
+                --included?tasks=*|--excluded?tasks=*|--components=*)
+                    # Skip deploy-specific arguments
+                    ;;
+                *)
+                    PROVISION_ARGS+=("$arg")
+                    ;;
+            esac
+        done
+        provision "${PROVISION_ARGS[@]:+${PROVISION_ARGS[@]}}"
     fi
     playbook deploy.yml "$@"
 }
@@ -399,7 +426,7 @@ upgrade() {
     fi
 
     provision
-    playbook commands/upgrade.yml "$@"
+    playbook commands/upgrade.yml -e upgrade_in_progress=true "$@"
 }
 
 switch2cm() {

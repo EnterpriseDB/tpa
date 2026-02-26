@@ -60,7 +60,6 @@ instances:
   - barman
   - log-server
   - openvpn-server
-  - monitoring-server
   volumes:
   - device_name: /dev/xvdf
     encrypted: true

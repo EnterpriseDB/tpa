@@ -4,20 +4,21 @@ cffi==2.0.0 \
     # via
     #   -r /out/requirements-ppc64le.in
     #   cryptography
-cryptography==46.0.3 \
-    --hash=sha256:16558bafdc41633eb9d50fb066d387305206dc8b3a45988472d1eaf6f0a33614 \
-    --hash=sha256:c0a7bb1a68a5d3471880e264621346c48665b3bf1c3759d682fc0864c540bd9e
+cryptography==46.0.5 \
+    --hash=sha256:2f87615311a25fcaec3b9114da07fdc79cb5dc6389a828b1a335440278c77297 \
+    --hash=sha256:47fb8a66058b80e509c47118ef8a75d14c455e81ac369050f20ba0d23e77fee0 \
+    --hash=sha256:803812e111e75d1aa73690d2facc295eaefd4439be1023fefc4995eaea2af90d
     # via -r /out/requirements-ppc64le.in
 markupsafe==3.0.3 \
     --hash=sha256:2a8bcea224a7a20b839f3a792ef54a8378a807453b10004389c58ce2aa111da0 \
     --hash=sha256:c8902784d302c1a441f17f8b61d1487f3cd5ed3dd25053f985b84ee48cf577c5
     # via -r /out/requirements-ppc64le.in
-psutil==7.1.3 \
-    --hash=sha256:b4179bf3b0445808427bca969c39ba94c8b67b867107da8b9fb442f1f81e2a65 \
-    --hash=sha256:f55d5f5904fe0a37ca91837cf725d647fe493d3cce1177b2e1a0faf621140ab9
+psutil==7.2.2 \
+    --hash=sha256:1179eeb5cadd05d37a1fcde6f8189f5555d8b5fd780c535aeb78f5816e96a962 \
+    --hash=sha256:78b472d0f0d45d7532263db9cfb414511250689bbe61054f4fc55d968d3f5336
     # via -r /out/requirements-ppc64le.in
-pycparser==2.23 \
-    --hash=sha256:e5c6e8d3fbad53479cab09ac03729e0a9faf2bee3db8208a550daf5af81a5934
+pycparser==3.0 \
+    --hash=sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992
     # via
     #   -r /out/requirements-ppc64le.in
     #   cffi

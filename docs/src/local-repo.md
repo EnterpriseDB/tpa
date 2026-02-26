@@ -131,6 +131,13 @@ cd local-repo/RedHat/8
 # download/copy .rpm package files
 createrepo .
 ```
+In RHEL 8+ repositories, we also need to run these additional steps:
+
+```shell
+repo2module --module-name tpa --module-stream local --module-version 1 --module-context f32 . modules.yaml
+modifyrepo_c --mdtype=modules modules.yaml repodata/
+dnf clean all
+```
 
 ## How TPA uses the local repository
 

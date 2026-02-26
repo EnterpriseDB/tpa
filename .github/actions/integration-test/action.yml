@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 name: Integration Test
 description: Run an integration test for the given architecture and platform
@@ -95,15 +95,22 @@ runs:
         token: ${{ env.GITHUB_TOKEN }}
         path: foundation
 
+    - name: Set defaults for empty inputs
+      run: |
+        CPU_ARCHITECTURE="${{ inputs.cpu_architecture }}"
+        echo CPU_ARCHITECTURE=${CPU_ARCHITECTURE:-amd64} >> $GITHUB_ENV
+      shell: bash
+
+
     - name: Connect to a Native Executor
       uses: ./foundation/actions/linux/native/executor/connect
       with:
-        architecture: ${{ inputs.cpu_architecture }}
+        architecture: ${{ env.CPU_ARCHITECTURE }}
         tunnel-login: ${{ env.FOUNDATION_TUNNEL_LOGIN }}
 
     - uses: ./.github/actions/initialise_integration_test
       with:
-        cpu_architecture: ${{ inputs.cpu_architecture }}
+        cpu_architecture: ${{ env.CPU_ARCHITECTURE}}
         source_directory: ${{ inputs.source_directory }}
         tpa_platform: ${{ inputs.tpa_platform }}
         tpa_architecture: ${{ inputs.tpa_architecture }}

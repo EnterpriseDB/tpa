@@ -1,12 +1,12 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 - name: Grant required privileges to barman_role
   community.postgresql.postgresql_privs:
     port: "{{ postgres_port }}"
     login_user: "{{ postgres_user }}"
-    database: "{{ login_db }}"
+    database: postgres
     privs: "{{ item.privs|default(omit) }}"
     schema: "{{ item.schema|default(omit) }}"
     type: "{{ item.type }}"
@@ -58,6 +58,3 @@
         objs: pg_read_all_settings
   become_user: "{{ postgres_user }}"
   become: yes
-  when: >
-    (inventory_hostname == first_bdr_primary|default('') and login_db == bdr_database)
-    or login_db == 'postgres'

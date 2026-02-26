@@ -142,9 +142,10 @@ cannot handle dynamic secret names in its inventory. To avoid this issue,
 you must manually generate the password locally and push it to your
 configuration repository after provisioning and before deploying:
 
-    ```shell
-    tpaexec store-password <your_custom_username> .
-    ```
+```shell
+tpaexec store-password <your_custom_username> .
+```
+
 !!!
 
 ## Patroni configuration file settings

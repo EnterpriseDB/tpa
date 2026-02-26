@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 name: "Install Requirements"
 description: "Install Python and other TPAexec dependencies"
@@ -30,7 +30,7 @@ runs:
         python3 /usr/libexec/edb-python312/bin/python3 1 \
         && python3 -m pip install --upgrade pip
 
-    - uses: actions/cache@v4
+    - uses: actions/cache@v5
       if: >
         !env.ACT
       with:

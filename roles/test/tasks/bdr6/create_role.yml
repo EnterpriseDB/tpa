@@ -7,6 +7,8 @@
   postgresql_query:
     conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
     query: "CREATE ROLE {{ bdr_check_statment_role_name }};"
+  become_user: "{{ postgres_user }}"
+  become: yes
   vars:
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
@@ -26,6 +28,8 @@
   postgresql_query:
     conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
     query:  "DROP ROLE {{ bdr_check_statment_role_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
   vars:
     _task_environment:
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"

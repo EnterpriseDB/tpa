@@ -3,4 +3,4 @@ PyYAML>=6.0
 prospector~=1.17.1
 pylint~=3.3.7
 pylint-django~=2.6.1
-pyfakefs~=5.10.0
+pyfakefs~=6.1.1

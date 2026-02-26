@@ -49,7 +49,7 @@ More detail on the options is provided in the following section.
 | Options                                               | Description                                                                                 |
 |-------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `--architecture` (`-a`)                               | Must be set to `PGD-X`                                                              |
-| Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). |
+| Postgres flavour and version (e.g. `--postgresql 15`) | A valid [flavour and version specifier](tpaexec-configure.md#postgres-flavour-and-version). Supports Postgres 14-18. |
 | `--pgd-routing`                                 | Must be either `global` or `local`.                                                         |
 
 <br/><br/>
@@ -66,8 +66,8 @@ More detail on the options is provided in the following section.
 | `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
 | `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
 | `--enable-pgd-probes`            | Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health.       | Disabled by default.                                        |
-| `--proxy-listen-port`            | The port on which proxy nodes will route traffic to the write leader.                                       | Defaults to 6432                                            |
-| `--proxy-read-only-port`         | The port on which proxy nodes will route read-only traffic to shadow nodes.                                 | Defaults to 6433
+| `--read-write-port`              | The port for Connection Manager to listen on for read-write connections.                                    | Left empty in config.yml, allowing default of the postgres port + 1000 |
+| `--read-only-port`               | The port for Connection Manager to listen on for read-only connections.                                     | Left empty in config.yml, allowing default of the read-write port + 1  |
 
 <br/><br/>
 

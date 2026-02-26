@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # Single M1 Minor postgres upgrade
 # with generic dimensions (os, flavor, version and failover_manager)
@@ -69,14 +69,6 @@ on:
         description: "Use the downloader"
         type: boolean
         default: true
-      runner:
-        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
-        required: false
-        default: "ubuntu-22.04"
-        type: choice
-        options:
-        - "ubuntu-20.04"
-        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -89,9 +81,13 @@ env:
 jobs:
 
   integration-test:
-    name: Upgrade test
+    name: >
+      ${{ github.event.inputs.tpa_failover_manager }}
+      ${{ github.event.inputs.tpa_os_image}}
+      ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
+      starting on version ${{ github.event.inputs.tpa_postgres_package_version }}
 
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout source repository
@@ -101,7 +97,7 @@ jobs:
           repository: EnterpriseDB/tpa-internal
           token: ${{secrets.GH_SLONIK}}
 
-      - uses: ./.github/actions/m1-upgrade-test
+      - uses: ./.github/actions/general-upgrade-test
         with:
           source_directory: ${{ github.workspace }}
           tpa_platform: ${{ github.event.inputs.tpa_platform }}
@@ -111,6 +107,8 @@ jobs:
           tpa_postgres_package_version: ${{ github.event.inputs.tpa_postgres_package_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager }}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
+          upgrade_component_name: postgres
+          upgrade_component_base_version: ${{ github.event.inputs.tpa_postgres_package_version }}
           cluster: "${{ github.event.inputs.tpa_failover_manager }}-\
             ${{ github.event.inputs.tpa_os_image }}-\
             ${{ github.event.inputs.tpa_postgres_flavour }}-\

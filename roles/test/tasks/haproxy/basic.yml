@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # NOTE: This test is special, because upgrade uses it directly
 # as a pre-update health check of the cluster. It should test only the
@@ -22,6 +22,8 @@
       SELECT ssl
       FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
       WHERE pid = pg_backend_pid()
+  become_user: "{{ postgres_user }}"
+  become: yes
   register: q
   failed_when:
     q is not successful or not q.ssl

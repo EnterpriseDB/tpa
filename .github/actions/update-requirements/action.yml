@@ -1,5 +1,5 @@
 ---
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # this action runs pip-compile on the one that changed on latest push making
 # changes in one of the requirements .in files paths.
@@ -99,7 +99,7 @@ runs:
     - name: Create Pull Request
       if: ${{ !cancelled() }}
       id: cpr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         base: main
         token: ${{ env.GITHUB_TOKEN }}

@@ -53,11 +53,18 @@ and launch Docker from the application menu.
 
 ### Cgroups
 
-TPA supports Docker containers on hosts running cgroups version 1 or 2.
-On a host running cgroups2, instances running RHEL 7 are not supported.
+All [currently-supported operating systems](distributions.md) provide support cgroups
+version 2. You should always use cgroups version 2 on the host machine
+when deploying to Docker unless you are using a legacy operating system.
 
-If you need to use RHEL 7 instances but your host is running cgroups
-version 2, you can switch to cgroups version 1 as follows.
+!!! Important 
+Instructions for using legacy systems are provided purely for
+testing or to support migrating away from those platforms.
+!!!
+
+For some legacy platforms, in particular RHEL 7, you will need to
+configure your host to use version 1. You can switch to cgroups version
+1 as follows.
 
 On Debian-family Linux distributions:
 ```shell

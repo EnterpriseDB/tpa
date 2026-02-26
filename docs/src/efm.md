@@ -74,7 +74,8 @@ restart EFM to activate the changes.
 ### EFM witness
 
 TPA will install and configure EFM as witness on instances whose `role`
-contains `efm-witness`. For such instances the `upstream` property must be specified to point
+contains `efm-witness` (when using EFM, you can also use the role `witness`, as it gets implicitly converted to `efm-witness`). 
+For such instances the `upstream` property must be specified to point
 to the designated primary database instance.
 
 ### Repmgr
@@ -93,7 +94,7 @@ TPA determines whether a node is eligible for promotion by EFM during
 failover based on the node's role and replication topology. The following
 rules are applied when generating the EFM configuration:
 
-- **Witness nodes** (`witness` role) are never promotable.
+- **Witness nodes** (`efm-witness` role) are never promotable.
 - **Nodes with the `efm-not-promotable` role** are not eligible for
   promotion. This can be used to prevent specific standbys, such as DR or
   reporting nodes, from being promoted to primary.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from ..architecture import Architecture
 from ..exceptions import PGDArchitectureError
@@ -22,7 +22,6 @@ class PGDS(PGD):
 
     def supported_versions(self) -> List[Tuple[str, str]]:
         return [
-            ("13", "6"),
             ("14", "6"),
             ("15", "6"),
             ("16", "6"),
@@ -38,9 +37,12 @@ class PGDS(PGD):
         return 4 + self.args["subscriber_only_nodes"] + ("enable_pem" in self.args)
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
-        """PGD-S needs enterprise repo since essentials packages live there.
-        any occurence of standard repo would be redondant with enterprise,
-        that's why standard is discarded (removed only if exists).
+        """PGD-S requires the enterprise repository.
+
+        If the parent class has already determined that 'standard' should be
+        used (e.g., for postgresql flavour), we remove it and replace with
+        'enterprise', since enterprise is a superset of standard and PGD-S
+        packages are only available in enterprise.
 
         Args:
             cluster_vars (dict): cluster vars for the cluster being created
@@ -50,9 +52,8 @@ class PGDS(PGD):
         """
         base_repos = set(super().default_edb_repos(cluster_vars))
         base_repos.discard("standard")
-        # eventually, PGD-S will be available in the "enterprise" repo, but for
-        # now we also need postgres_distributed
-        return list(base_repos.union(["enterprise", "postgres_distributed"]))
+        base_repos.add("enterprise")
+        return list(base_repos)
 
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)

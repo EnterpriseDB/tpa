@@ -20,12 +20,13 @@ Debian 10/buster|✓|✓ (3.7)
 Ubuntu 24.04/jammy|✗|✓ (3.12)
 Ubuntu 22.04/jammy|✗|✓ (3.10)
 Ubuntu 20.04/focal|✗|✓ (3.8)
+RHEL 10.x|✗|✓ (3.12)
 RHEL 9.x|✗|✓ (3.9)
 RHEL 8.x|✗|✓ (3.6)
 RHEL 7.x|✓|✗ (3.6)
 
 
-Ubuntu 20.04, 22.04 and RHEL 8.x can be used only with Python 3.
+Ubuntu 20.04, 22.04, 24.04 and RHEL 8.x, 9.x, 10.x can be used only with Python 3.
 
 RHEL 7.x ships with Python 3.6, but the librpm bindings for system Python 3 are
 not available.

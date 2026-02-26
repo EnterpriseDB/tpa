@@ -65,11 +65,11 @@ default values. Some of the configuration options may be exposed for user
 configuration at some point in future.
 
 !!! Note PEM components are upgraded independently.
-    Passing `pem-server` to `--components` upgrades ONLY the PEM server, whereas passing `pem-agent` upgrades ONLY the PEM agents.
-    If upgrading separately, it is recommended to upgrade the agents before the server. When both are upgraded together, TPA
-    upgrades the agents before the server.
+Passing `pem-server` to `--components` upgrades ONLY the PEM server, whereas passing `pem-agent` upgrades ONLY the PEM agents.
+If upgrading separately, it is recommended to upgrade the agents before the server. When both are upgraded together, TPA upgrades the agents before the server.
 !!!
-password for the web interface by running
+
+Obtain the password for the web interface by running
 `tpaexec show-password $clusterdir $user`.
 
 ## Passing additional options when registering PEM agents

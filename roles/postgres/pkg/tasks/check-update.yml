@@ -1,10 +1,13 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 - include_tasks: list-packages.yml
   vars:
     list_varname: _all_postgres_packages
+
+# Since new RPM PGD packages might conflict with the existing ones in place in RHEL,
+# they need to have the 'allowerasing' flag on place so we don't receive a "Depsolve Error". 
 
 - name: Check if we can install the latest Postgres packages
   include_role:
@@ -12,6 +15,9 @@
   vars:
     package_list_name: "postgres packages"
     package_list: "{{ _all_postgres_packages }}"
+    allowerasing: "{{
+        ansible_os_family == 'RedHat' 
+        }}"
     check_install_only: yes
     result_varname: postgres_pkg_check
 

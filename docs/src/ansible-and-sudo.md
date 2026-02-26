@@ -115,6 +115,114 @@ the sudo options only if there is a specific need to do so. The defaults
 were chosen for good reasons. For example, removing `-S -n` will cause
 tasks to timeout if password-less sudo is incorrectly configured.
 
+## Managing privilege escalation configuration
+
+### Default sudo configuration
+
+By default, TPA automatically manages sudo-related configuration on target
+instances, including installing the sudo package if not present and
+configuring sudoers files for various components.
+
+The default value of `privilege_escalation_command` is `"sudo"`, which enables
+TPA to manage sudo installation and configuration.
+
+### Using an alternative privilege escalation command
+
+If your environment uses a different privilege escalation command, you can
+configure TPA to use an alternative by setting `privilege_escalation_command`
+in `cluster_vars`:
+
+```yaml
+cluster_vars:
+  privilege_escalation_command: other_tool  # replaces sudo; may include arguments
+```
+
+The value is used as a direct in-place replacement for `sudo` in each
+privilege escalation command TPA generates for managed applications. It may
+include additional arguments if needed (e.g., `other_tool --flag`).
+
+You can set it to any privilege escalation command supported by Ansible's
+become mechanism. Refer to the
+[Ansible privilege escalation documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html)
+for the complete list of supported methods.
+
+**Important:** `sudo` is the only privilege escalation command officially
+supported by EDB. When using alternative commands, you are responsible for
+ensuring compatibility and proper configuration. EDB Support may have limited
+ability to assist with issues related to alternative privilege escalation
+mechanisms.
+
+#### Ansible's become method vs. `privilege_escalation_command`
+
+There are two separate privilege escalation settings to be aware of:
+
+- **`ansible_become_method`** controls how Ansible itself escalates privileges
+  when running deployment tasks on target instances. This is an Ansible variable
+  set in your inventory or `ansible.cfg`.
+- **`privilege_escalation_command`** controls the command that the managed
+  applications (EFM, repmgr, HARP) invoke at runtime to escalate privileges
+  for service management operations, independently of Ansible.
+
+Because they serve different purposes, both must be configured consistently.
+If your environment uses an alternative tool instead of sudo, you must set
+`privilege_escalation_command` in `cluster_vars` *and* configure
+`ansible_become_method` in your Ansible inventory or `ansible.cfg` to match.
+
+#### Recommended approach: Using hooks
+
+If you need to use an alternative privilege escalation command, we recommend
+using [TPA hooks](tpaexec-hooks.md) to configure your privilege escalation
+mechanism. Hooks allow you to run custom tasks at specific points during
+deployment, giving you full control over how privilege escalation is configured
+whilst keeping your customisations separate from TPA's core deployment logic.
+
+For example, you can use a `post-repo` hook to install and configure your
+privilege escalation command after repositories are configured, or a `pre-deploy`
+hook to set up the necessary permissions before the main deployment begins.
+This approach provides better maintainability and makes it easier to manage
+environment-specific requirements.
+
+#### Manual configuration requirements
+
+When using an alternative privilege escalation command (anything other than
+`"sudo"`), TPA will skip sudo package installation and sudoers configuration.
+You must install and configure the chosen privilege escalation command
+on all target systems, either manually or with hooks, before running
+`tpaexec deploy`.
+
+**1. Service management permissions for the postgres user**
+
+Your privilege escalation mechanism must allow the postgres system user to
+execute systemctl commands for starting, stopping, restarting, and reloading
+PostgreSQL and related services. This is required for failover managers
+(repmgr, HARP, EFM) to function correctly during automatic failover operations.
+
+For example, with sudo, TPA would configure the following permissions:
+```
+postgres ALL=(ALL) NOPASSWD: /bin/systemctl start postgresql
+postgres ALL=(ALL) NOPASSWD: /bin/systemctl stop postgresql
+postgres ALL=(ALL) NOPASSWD: /bin/systemctl restart postgresql
+postgres ALL=(ALL) NOPASSWD: /bin/systemctl reload postgresql
+```
+
+You must configure equivalent permissions in your chosen privilege escalation
+system.
+
+**2. EFM database function permissions (EFM clusters only)**
+
+If your cluster uses EFM as the failover manager, your privilege escalation
+mechanism must allow the EFM system user to execute the `efm_db_functions`
+script as the postgres user. This is required for EFM to perform health checks
+and failover operations.
+
+For example, with sudo, TPA would configure:
+```
+efm ALL=(postgres) NOPASSWD: /usr/edb/efm-X.Y/bin/efm_db_functions
+```
+
+Configure equivalent permissions in your privilege escalation system to allow
+the efm user to run this script as the postgres user.
+
 ## Logging
 
 For playbook executions, the sudo logs will show mostly invocations of

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from typing import Any
 from collections import ChainMap
@@ -103,6 +103,10 @@ class Instance:
             self.settings, self._cluster.instance_defaults, self.location.settings or {}
         )
         return v.get(key, default)
+    
+    def set_hostvar(self, key, val):
+        """Sets the given key=val on the instance."""
+        self.host_vars[key] = val
 
     def set_settings(self, new_settings: dict):
         """Adds the items in the dict to the instance, overriding any existing

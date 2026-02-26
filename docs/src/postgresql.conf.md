@@ -133,10 +133,31 @@ you can set a fully-quoted value under
 [`postgres_conf_settings`](#postgres_conf_settings). In this case, the
 value is set in `conf.d/9900-tpa_postgres_conf_settings.conf`.
 
-## Postgres log
+## Postgres logging
 
-The default log file is defined as `/var/log/postgres/postgres.log`. If you
-need to change that, you can now set postgres_log_file in your config.yml:
+By default, TPA configures the Postgres `log_destination` GUC as
+`syslog` and configures rsyslog to write Postgres logs to
+`/var/log/postgres/postgres.log`. 
+
+You can change these defaults using the following cluster variables.
+
+- `postgres_log_file` is the path to the log file. Defaults to
+  `/var/log/postgres/postgres.log`.      
+- `postgres_log_file_mode` is the mode of the log file. Defaults to
+  `0640`.
+- `postgres_log_directory_mode` is the mode of the log directory.
+  Defaults to `0700`.
+- `log_destination` sets the Postgres GUC of the same name. 
+  Defaults to `syslog`.
+- `logging_collector` sets the Postgres GUC of the same name. Defaults
+  to `off` if `log_destination` is `syslog`, otherwise `on`.
+
+If you select a `log_destination` other than `syslog` TPA will set up
+the Postgres logging collector to write the logs. In all cases, TPA will
+take care of creating the directories and configuring log rotation.
+
+The following example tells TPA to log to the selected location using
+`rsyslog`.
 
 ```yaml
 cluster_vars:
@@ -144,7 +165,33 @@ cluster_vars:
   postgres_log_file: '/srv/fantastic_logs/pg_server.log'
 ```
 
-TPA will take care of creating the directories and rotate the log when needed.
+This example, logs to the same location, but using the Postgres logging
+collector to write JSON logs, and permitting read and execute on the log
+directory for group members.
+
+```yaml
+cluster_vars:
+  [...]
+  postgres_log_file: '/srv/fantastic_logs/pg_server.log'
+  postgres_log_directory_mode: '0750'
+  log_destination: 'jsonlog'
+```
+
+!!!Note File extensions for log files
+When `log_destination` is `syslog` or `stderr`, the exact value of
+`postgres_log_file` will be used for the current log file, including any
+extension. When `log_destination` is `jsonlog` or `csvlog`, the
+specified `postgres_log_file` will have `.json` or `.csv` appended. If
+`.log` was included in the specified `postgres_log_file`, it will be
+removed. This behaviour comes from
+[Postgres](https://www.postgresql.org/docs/current/runtime-config-logging.html#GUC-LOG-FILENAME)
+rather than from TPA.
+
+If you need to access the exact path of the log file, including the
+final extension—for example as part of a hook—this is stored in the
+Ansible fact `postgres_log_file_with_extension`. This cannot be set
+directly.
+!!!
 
 ## SSL configuration
 

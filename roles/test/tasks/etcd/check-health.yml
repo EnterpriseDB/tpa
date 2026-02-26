@@ -1,19 +1,17 @@
 ---
 
+# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+
+- name: Include etcd/facts to ensure etcdctl_options is defined
+  include_role:
+    name: etcd/facts
+
 - name: Check etcd cluster health
   command:
-    etcdctl endpoint health --endpoints="{{ etcd_endpoints }}"
+    etcdctl {{ etcdctl_options }} endpoint health
   environment:
     ETCDCTL_API: 3
   register: etcd_health_check
-  vars:
-    etcd_endpoints: "{{
-      groups['role_etcd']
-      |select_by_hostvar(hostvars, 'etcd_location', etcd_location)
-      |map('pyformat_hostvars', '{inventory_hostname}:{etcd_client_port}', hostvars)
-      |list
-      |join(',')
-    }}"
 
 - assert:
     msg: >

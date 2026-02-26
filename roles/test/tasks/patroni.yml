@@ -1,19 +1,10 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-# Set SSL certificate facts for Patroni API calls
-# These facts were set during deploy but are not persisted across playbook runs
-- name: Include patroni/config defaults to get SSL directory paths
-  include_vars:
-    file: "{{ tpa_dir }}/roles/patroni/config/defaults/main.yml"
-
-- name: Set Patroni SSL certificate facts
-  set_fact:
-    patroni_ssl_ca_file: "{{ patroni_ssl_dir }}/root.crt"
-    patroni_ssl_cert_file: "{{ patroni_ssl_dir }}/{{ patroni_ssl_service }}.crt"
-    patroni_ssl_key_file: "{{ patroni_ssl_dir }}/{{ patroni_ssl_service }}.key"
-  when: patroni_ssl_enabled or patroni_authentication_mode == 'mtls'
+- include_role:
+    name: patroni/facts
+    tasks_from: ssl
 
 - name: Get current patroni cluster health
   include_role:

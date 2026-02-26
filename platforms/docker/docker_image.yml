@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # Given `image`, the name of an image referenced by instances[] that
 # does not exist locally, we must now do whatever is required to provide
@@ -79,9 +79,11 @@
       redhat-7: centos:7
       redhat-8: rockylinux/rockylinux:8
       redhat-9: almalinux:9
+      redhat-10: almalinux:10
       redhat-latest: almalinux:9
       rocky-8: rockylinux/rockylinux:8
       rocky-9: rockylinux/rockylinux:9
+      rocky-10: rockylinux/rockylinux:10
       rocky-latest: rockylinux/rockylinux:9
       sles-15: registry.suse.com/bci/bci-base:15.6
       ubuntu-20.04: ubuntu:focal

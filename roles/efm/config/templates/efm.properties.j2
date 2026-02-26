@@ -1,4 +1,4 @@
-{# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved. #}
+{# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved. #}
 db.user=efm
 db.password.encrypted={{ efm_encrypted_pass }}
 db.port={{ postgres_port }}
@@ -112,8 +112,14 @@ script.custom.monitor={{ efm_conf_settings['script.custom.monitor']|default('') 
 custom.monitor.interval={{ efm_conf_settings['custom.monitor.interval']|default('') }}
 custom.monitor.timeout={{ efm_conf_settings['custom.monitor.timeout']|default('') }}
 custom.monitor.safe.mode={{ efm_conf_settings['custom.monitor.safe.mode']|default('') }}
-sudo.command={{ efm_conf_settings['sudo.command']|default('sudo') }}
-sudo.user.command={{ efm_conf_settings['sudo.user.command']|default('sudo -u %u') }}
+sudo.command={{ efm_conf_settings['sudo.command']|default(privilege_escalation_command) }}
+{% if efm_conf_settings['sudo.user.command'] is defined %}
+sudo.user.command={{ efm_conf_settings['sudo.user.command'] }}
+{% elif privilege_escalation_command == 'sudo' %}
+sudo.user.command=sudo -u %u
+{% else %}
+sudo.user.command={{ privilege_escalation_command }}
+{% endif %}
 lock.dir={{ efm_conf_settings['lock.dir']|default('') }}
 pid.dir={{ efm_conf_settings['pid.dir']|default('') }}
 log.dir={{ efm_conf_settings['log.dir']|default('') }}

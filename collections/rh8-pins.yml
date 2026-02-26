@@ -1,0 +1,10 @@
+# pins for RH8
+# format: "namespace.collection": "version.prefix"
+community.aws: "9."
+community.crypto: "2."
+community.docker: "4."
+community.general: "11."
+amazon.aws: "9."
+# collections not listed here end up with an empty string in
+# the pin resolution logic, equivalent to no pin and therefore
+# get the latest available version

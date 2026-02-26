@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 ## Packages
 #
@@ -44,7 +44,6 @@ default_packages:
     - lsof
     - "{{ python_pkg_prefix }}-cryptography"
     - ca-certificates
-    - rsync
     - logrotate
   Debian:
     - "{{ (ansible_distribution_release == 'jessie')|ternary('linux-tools', 'linux-perf') }}"
@@ -53,13 +52,16 @@ default_packages:
     - openssh-client
     - "{{ python_pkg_prefix }}-apt"
     - cron
+    - "{{ ['dpkg-dev'] if ('downloader' in role) else [] }}"
   RedHat:
     - perf
     # Required for semanage, used in postgres/initdb
-    - "policycoreutils-python{% if ansible_distribution_major_version >= '8' %}-utils{% endif %}"
+    - "policycoreutils-python{% if ansible_distribution_major_version|int >= 8 %}-utils{% endif %}"
     - openssh
     - openssh-clients
     - cronie
+    - "{{ ['createrepo'] if ('downloader' in role and ansible_distribution_major_version|int <= 7) else [] }}"
+    - "{{ ['modulemd-tools'] if ('downloader' in role and ansible_distribution_major_version|int >= 8) else [] }}"
   Ubuntu:
     - linux-tools-generic
     - openssh-client

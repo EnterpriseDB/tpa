@@ -1,8 +1,10 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/init.yml"
+  vars:
+    upgrade_in_progress: true
   tags: always
 
 - import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"

@@ -130,6 +130,7 @@ postgres_version: '14' # Defined at top-level
 cluster_vars:
   postgres_version: "{{ postgres version }}" # Templated with top-level variable 
   postgres_data_dir: "/data/{{ cluster_name }}/edb{{ postgres_version }}/data" # Templated with top-level variable
+  privilege_escalation_command: sudo
 ```
 
 In this case, `tpaexec provision` will write three variables (a

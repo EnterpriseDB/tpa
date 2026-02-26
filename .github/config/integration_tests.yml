@@ -1,0 +1,277 @@
+---
+defaults:
+  cpu_architecture: &default_cpu_architecture "amd64"
+  tpa_architecture: &default_tpa_architectures
+    - "M1"
+    - "BDR-Always-ON"
+    - "PGD-Always-ON"
+    - "PGD-X"
+    - "PGD-S"
+  tpa_os_image_list: &all_supported_images
+    - "ubuntu:22.04"
+    - "ubuntu:24.04"
+    - "debian:12"
+    - "redhat:8"
+    - "redhat:9"
+    - "redhat:10"
+    - "sles:15"
+  tpa_os_image: &default_os_image "redhat:9"
+  tpa_postgres_flavour: &all_flavours
+    - "postgresql"
+    - "epas"
+    - "edbpge"
+  tpa_postgres_version: &default_postgres_version 17
+
+simple:
+  # for each arch, two or three flavours
+  cpu_architecture: [ *default_cpu_architecture ]
+  tpa_architecture: *default_tpa_architectures
+  tpa_postgres_flavour: *all_flavours
+    #tpa_postgres_version: *default_postgres_version
+  tpa_os_image:
+    - *default_os_image
+  exclude:
+    # M1 only postgresql or epas
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "edbpge"
+    # BDR-Always-ON only edbpge or epas
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_flavour: "postgresql"
+    # PGD-Always-ON only edbpge or epas
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_flavour: "postgresql"
+    # PGD 6 architectures all flavours
+  include:
+    # for BDR-Always-ON, go back to pg14
+    - tpa_architecture: "BDR-Always-ON"
+      tpa_postgres_version: "14"
+    # for other architectures, default version
+    - tpa_architecture: "M1"
+      tpa_postgres_version: *default_postgres_version
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_version: *default_postgres_version
+    - tpa_architecture: "PGD-S"
+      tpa_postgres_version: *default_postgres_version
+    - tpa_architecture: "PGD-X"
+      tpa_postgres_version: *default_postgres_version
+
+    # for M1, test different failover managers
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "postgresql"
+      tpa_failover_manager: "repmgr"
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "epas"
+      tpa_failover_manager: "efm"
+
+
+full:
+  # matrix for M1, PGD-Always-ON, PGD-S, PGD-X
+  cpu_architecture: [ *default_cpu_architecture ]
+  tpa_architecture: *default_tpa_architectures
+  tpa_os_image: *all_supported_images
+  tpa_postgres_flavour: *all_flavours
+  tpa_postgres_version: [ *default_postgres_version ]
+  exclude:
+    # M1 only postgresql or epas
+    - tpa_architecture: "M1"
+      tpa_postgres_flavour: "edbpge"
+    # No BDR always on; we add some in the includes later
+    - tpa_architecture: "BDR-Always-ON"
+    # PGD-Always-ON only edbpge or epas
+    - tpa_architecture: "PGD-Always-ON"
+      tpa_postgres_flavour: "postgresql"
+    # PGD6 architectures only edbpge or epas
+    - tpa_architecture: "PGD-X"
+      tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "PGD-S"
+      tpa_postgres_flavour: "postgresql"
+
+  include:
+    # BDR-Always-ON requires older pgd and only works on selected
+    # operating systems: we test RHEL 9 and Ubuntu 22.04, each
+    # with both bdr and etcd consensus protocols
+    - tpa_architecture: "BDR-Always-ON"
+      cpu_architecture: *default_cpu_architecture
+      tpa_postgres_version: 14
+      tpa_postgres_flavour: "epas"
+      tpa_os_image: "redhat:9"
+      tpa_harp_consensus_protocol: "bdr"
+    - tpa_architecture: "BDR-Always-ON"
+      cpu_architecture: *default_cpu_architecture
+      tpa_postgres_version: 14
+      tpa_postgres_flavour: "epas"
+      tpa_os_image: "ubuntu:22.04"
+      tpa_harp_consensus_protocol: "bdr"
+    - tpa_architecture: "BDR-Always-ON"
+      cpu_architecture: *default_cpu_architecture
+      tpa_postgres_version: 14
+      tpa_postgres_flavour: "epas"
+      tpa_os_image: "redhat:9"
+      tpa_harp_consensus_protocol: "etcd"
+    - tpa_architecture: "BDR-Always-ON"
+      cpu_architecture: *default_cpu_architecture
+      tpa_postgres_version: 14
+      tpa_postgres_flavour: "epas"
+      tpa_os_image: "ubuntu:22.04"
+      tpa_harp_consensus_protocol: "etcd"
+
+    # test both failover managers, each with a different flavour
+    # this means that M1/postgresql/repmgr tests will use PGDG repos
+    # and M1/epas/efm will use Cloudsmith
+    - tpa_architecture: "M1"
+      tpa_failover_manager: "repmgr"
+      tpa_postgres_flavour: "postgresql"
+    - tpa_architecture: "M1"
+      tpa_failover_manager: "efm"
+      tpa_postgres_flavour: "epas"
+
+    # one cluster each for ppc64le and arm64
+    - cpu_architecture: "ppc64le"
+      tpa_architecture: "M1"
+      tpa_failover_manager: "efm"
+      tpa_os_image: "redhat:9"
+      tpa_platform: "docker"
+      tpa_postgres_flavour: "postgresql"
+      tpa_postgres_version: "17"
+    - cpu_architecture: "arm64"
+      tpa_architecture: "M1"
+      tpa_failover_manager: "efm"
+      tpa_os_image: "debian:12"
+      tpa_platform: "docker"
+      tpa_postgres_flavour: "epas"
+      tpa_postgres_version: "17"
+
+    # additional test for pg 15?
+#    - cpu_architecture: "amd64"
+#      tpa_architecture: "M1"
+#      tpa_enable_pgbouncer: true
+#      tpa_failover_manager: "repmgr"
+#      tpa_os_image: "redhat:9"
+#      tpa_platform: "docker"
+#      tpa_postgres_flavour: "postgresql"
+#      tpa_postgres_version: "15"
+#    - cpu_architecture: "amd64"
+#      tpa_architecture: "M1"
+#      tpa_failover_manager: "repmgr"
+#      tpa_os_image: "redhat:9"
+#      tpa_platform: "docker"
+#      tpa_postgres_flavour: "epas"
+#      tpa_postgres_version: "15"
+"M1 layouts":
+  cpu_architecture: [ *default_cpu_architecture ]
+  tpa_os_image:
+    - *default_os_image
+  tpa_architecture:
+    - "M1"
+  tpa_postgres_flavour:
+    - "postgresql"
+  tpa_postgres_version:
+    - *default_postgres_version
+  tpa_failover_manager:
+    - "efm"
+    - "repmgr"
+  layout:
+    - tpa_location_names: "l1"
+      tpa_data_nodes_per_location: 2
+      tpa_layout_name: "1x2"
+    - tpa_location_names: "l1 l2"
+      tpa_data_nodes_per_location: 2
+      tpa_single_node_location: true
+      tpa_layout_name: "1x2plus1"
+    - tpa_location_names: "l1 l2"
+      tpa_data_nodes_per_location: 2
+      tpa_layout_name: "2x2"
+    - tpa_location_names: "l1 l2 l3"
+      tpa_data_nodes_per_location: 3
+      tpa_witness_only_location: true
+      tpa_layout_name: "2x3plus1"
+    - tpa_location_names: "l1 l2 l3"
+      tpa_data_nodes_per_location: 1
+      tpa_layout_name: "3x1"
+    - tpa_location_names: "l1 l2 l3"
+      tpa_data_nodes_per_location: 3
+      tpa_layout_name: "3x3"
+  include:
+    - cpu_architecture: *default_cpu_architecture
+      tpa_os_image: *default_os_image
+      tpa_architecture: "M1"
+      tpa_postgres_flavour: "postgresql"
+      tpa_postgres_version: *default_postgres_version
+      tpa_failover_manager: "patroni"
+      layout:
+        tpa_location_names: "l1"
+        tpa_data_nodes_per_location: 2
+        tpa_layout_name: "1x2"
+
+s390x:
+  cpu_architecture: [ "s390x" ]
+  tpa_architecture:
+    - "PGD-S"
+    - "PGD-X"
+  tpa_os_image:
+    - "sles:15"
+    - "almalinux:8"
+    - "redhat:9"
+  tpa_postgres_flavour: *all_flavours
+  tpa_postgres_version:
+    - 17
+    - 16
+  exclude:
+    - tpa_architecture: "PGD-S"
+      tpa_postgres_flavour: "postgresql"
+
+# for each architecture, a matrix which tests it across OS images and
+# pg flavours
+
+M1:
+  tpa_architecture: ["M1"]
+  tpa_os_image: *all_supported_images
+  tpa_postgres_flavour: *all_flavours
+  tpa_postgres_version: [ *default_postgres_version ]
+  cpu_architecture: [ *default_cpu_architecture ]
+  include:
+    - tpa_postgres_flavour: "postgresql"
+      tpa_failover_manager: "repmgr"
+    - tpa_postgres_flavour: "edbpge"
+      tpa_failover_manager: "patroni"
+    - tpa_postgres_flavour: "epas"
+      tpa_failover_manager: "efm"
+
+BDR-Always-ON:
+  tpa_architecture: ["BDR-Always-ON"]
+  tpa_os_image: *all_supported_images
+  tpa_postgres_flavour:
+    - "edbpge"
+    - "epas"
+  tpa_postgres_version: [ 14 ]
+  cpu_architecture: [ *default_cpu_architecture ]
+  tpa_harp_consensus_protocol:
+    - "bdr"
+    - "etcd"
+  exclude:
+    - tpa_os_image: "debian:12"
+    - tpa_os_image: "sles:15"
+
+PGD-Always-ON:
+  tpa_architecture: ["PGD-Always-ON"]
+  tpa_os_image: *all_supported_images
+  tpa_postgres_flavour: *all_flavours
+  tpa_postgres_version: [ *default_postgres_version ]
+  cpu_architecture: [ *default_cpu_architecture ]
+  exclude:
+    - tpa_postgres_flavour: "postgresql"
+
+PGD-S:
+  tpa_architecture: ["PGD-S"]
+  tpa_os_image: *all_supported_images
+  tpa_postgres_flavour: *all_flavours
+  tpa_postgres_version: [ *default_postgres_version ]
+  cpu_architecture: [ *default_cpu_architecture ]
+  tpa_pgds_layout: ["standard", "near-far"]
+
+PGD-X:
+  tpa_architecture: ["PGD-X"]
+  tpa_os_image: *all_supported_images
+  tpa_postgres_flavour: *all_flavours
+  tpa_postgres_version: [ *default_postgres_version ]
+  cpu_architecture: [ *default_cpu_architecture ]

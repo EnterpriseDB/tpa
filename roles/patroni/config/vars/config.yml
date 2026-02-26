@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # The block `_patroni_conf` forms the default configuration for patroni cluster
 # YAML file.
@@ -212,14 +212,11 @@ _patroni_conf_watchdog:
 _patroni_conf_backup:
   bootstrap:
     dcs:
-      ignore_slots: >-
-        {%- set _slots = {} -%}
-        {%- if 'role_barman' in groups and groups['role_barman']|length > 0 -%}
-        {%-   for h in groups['role_barman']|sort -%}
-        {%-     set slot_name = h|backup_slot_name -%}
-        {%-     set _ = _slots.update({slot_name: {'type': 'physical'}}) -%}
-        {%-   endfor -%}
-        {%- endif -%}
+     ignore_slots: >-
+        {%- set _slots = [] -%}
+        {%- for item in groups['role_barman'] | default([]) | map('backup_slot_name') -%}
+        {%-   set _ = _slots.append({'name': item, 'type': 'physical'}) -%}
+        {%- endfor -%}
         {{ _slots }}
 
 # permanent physical replication slots for members, so they don't get dropped

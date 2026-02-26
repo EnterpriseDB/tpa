@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 - set_fact:
     pgdcli_bin: >-
@@ -120,6 +120,8 @@
     conninfo: "{{ bdr_connection_manager_route_dsn|dbname(bdr_database, user=postgres_user, host='127.0.0.1') }}"
     query: >
       SHOW synchronous_standby_names;
+  become_user: "{{ postgres_user }}"
+  become: yes
   register: sync_standby
   changed_when: false
   vars:

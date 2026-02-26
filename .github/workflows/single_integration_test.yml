@@ -1,4 +1,4 @@
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # Single integration test
 # Run a specific cluster deployment
@@ -36,10 +36,6 @@ on:
         - PGD-Always-ON
         - PGD-X
         - PGD-S
-      tpa_platform:
-        description: "TPA platform"
-        required: false
-        default: "docker"
       tpa_os_image:
         description: "TPA OS image"
         required: true
@@ -50,7 +46,6 @@ on:
         - tpa/debian:10
         - tpa/debian:11
         - tpa/debian:12
-        - tpa/redhat:7
         - tpa/redhat:8
         - tpa/redhat:9
         - tpa/sles:15
@@ -93,14 +88,6 @@ on:
         description: "Use the downloader"
         type: boolean
         default: true
-      runner:
-        description: "github runner (ubuntu20.04 required when using tpa_os_image: 'tpa/redhat:7')"
-        required: false
-        default: "ubuntu-22.04"
-        type: choice
-        options:
-        - "ubuntu-20.04"
-        - "ubuntu-22.04"
 
 env:
   LANG: "C.UTF-8"
@@ -117,9 +104,14 @@ env:
 jobs:
 
   integration-test:
-    name: Integration test
+    name: >
+      ${{ github.event.inputs.tpa_architecture }}
+      ${{ github.event.inputs.tpa_os_image}}
+      ${{ github.event.inputs.tpa_postgres_flavour }}-${{ github.event.inputs.tpa_postgres_version }}
+      ${{ github.event.inputs.cpu_architecture }}
+      ${{ github.event.inputs.tpa_architecture == 'M1' && github.event.inputs.tpa_failover_manager || ''}}
 
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout source repository
@@ -142,7 +134,6 @@ jobs:
           cpu_architecture: ${{ github.event.inputs.cpu_architecture }}
           source_directory: ${{ github.workspace }}
           tpa_architecture: ${{ github.event.inputs.tpa_architecture }}
-          tpa_platform: ${{ github.event.inputs.tpa_platform }}
           tpa_os_image: ${{ github.event.inputs.tpa_os_image }}
           tpa_postgres_flavour: ${{ github.event.inputs.tpa_postgres_flavour }}
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}

@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # First, postgres_packages and postgres_debug_packages are the packages
 # for Postgres itself. These lists should contain only those packages to
@@ -293,6 +293,7 @@ psycopg2_packages:
 barman_client_packages:
   common: &common_barman_client_packages
     - barman-cli
+    - "{{ python_pkg_prefix }}-barman"
   Debian: *common_barman_client_packages
   RedHat: *common_barman_client_packages
   Ubuntu: *common_barman_client_packages
@@ -312,8 +313,10 @@ additional_postgres_packages:
 src_extra_packages:
   Debian: &debian_src_extra_packages
     - barman-cli
+    - "{{ python_pkg_prefix }}-barman"
   RedHat: &redhat_src_extra_packages
     - barman-cli
+    - "{{ python_pkg_prefix }}-barman"
   Ubuntu: *debian_src_extra_packages
   SLES: *redhat_src_extra_packages
 

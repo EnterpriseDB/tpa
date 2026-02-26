@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # We ask pemagent to report its version number, so that we can generate
 # an appropriate configuration. (The pem_agent_package_version setting
@@ -58,6 +58,8 @@
     pem_postgres_password: "{{vars['%s_password' % postgres_user]}}"
     pem_postgres_user: "{{hostvars[pem_server].postgres_user}}"
   no_log: true
+  when: >
+    not (hostvars[pem_server].pem_shared | default(false))
 
 # If pemserver is a shared pemserver instance, pick pemserver's backend
 # credentials from EDB_PEM_CREDENTIALS_FILE file instead.
@@ -162,7 +164,7 @@
 # to update database password. Since we have no way to see if a password
 # change has occured, if agent config already exists, we always update
 # PEM dbuser password for the user that pem agents use to connect with
-# the monitoring server. It makes sure the password is always in sync
+# the PEM server. It makes sure the password is always in sync
 # with the config.
 
 - include_tasks: update-monitoring-server-password.yml

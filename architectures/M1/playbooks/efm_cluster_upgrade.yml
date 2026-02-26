@@ -1,14 +1,14 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-# We must check that 'tpaexec upgrade' is not run on a cluster 
-# that uses shared PEM or share Barman 
+# We must check that 'tpaexec upgrade' is not run on a cluster
+# that uses shared PEM or share Barman
 # ('pem_shared' or 'barman_shared' are 'true') in the 'config.yml'
 - name: Import upgrade precondition checks
   import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/upgrade_preconditions.yml"
 
-# It probably does not matter the order this runs (before or after 
+# It probably does not matter the order this runs (before or after
 # common-component health-checks) but it is here to be consistent
 # with failover-manager specific checks running first.
 #
@@ -31,7 +31,7 @@
   tasks:
   - name: Run EFM checks
     when: fo_manager == "efm"
-    block: 
+    block:
     - name: Check if EFM is currently installed
       include_role:
         name: efm/pkg
@@ -45,7 +45,7 @@
         efm_bin_dir: "{{ current_efm_bin_dir | default(_efm_bin_dir) }}"
     vars:
       # The check-installed task invoked above ensures the installed_efm_versions list is non-empty
-      # and contains only a single installed version, so we can safely use the 'first' filter. 
+      # and contains only a single installed version, so we can safely use the 'first' filter.
       _efm_version: "{{ current_efm_version | default(installed_efm_versions | first) }}"
       _efm_bin_dir: "/usr/edb/efm-{{ _efm_version }}/bin"
       _efm_conf_dir: "/etc/edb/efm-{{ _efm_version }}"
@@ -68,12 +68,12 @@
   import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/check_upgrade_components.yml"
 
 # As explained earlier, EFM installations are all separate packages
-# and each maintains it's own configuration files, we check to ensure 
+# and each maintains it's own configuration files, we check to ensure
 # the TARGET version ('efm_version' in the 'config.yml') is not
 # already installed ('target_efm_bin_dir') or configured ('target_efm_conf_dir').
 # Since part of the EFM upgrade involves copying configuration files from the
 # CURRENT EFM installation, we also ensure the SOURCE (old) EFM version
-# is installed ('current_efm_bin_dir', as 'efm upgrade' commands are executed from here) 
+# is installed ('current_efm_bin_dir', as 'efm upgrade' commands are executed from here)
 # as well as configured ('current_efm_conf_dir' as 'efm upgrade' copies these configurations to the target).
 # If this is NOT the case, the upgrade will fail and bail out.
 # If instead the current_efm_version matches the target_efm_version and all the above exist,
@@ -90,14 +90,14 @@
     - upgrade_selector|strict_selects('efm') or upgrade_selector|strict_selects('all')
     - efm_version is defined
     vars:
-      # The check-installed task invoked on EFM nodes in the previous play ensures the 
-      # installed_efm_versions list is non-empty and contains only a single installed version, 
-      # so we can safely use the 'first' filter. 
+      # The check-installed task invoked on EFM nodes in the previous play ensures the
+      # installed_efm_versions list is non-empty and contains only a single installed version,
+      # so we can safely use the 'first' filter.
       _efm_version: "{{ current_efm_version | default(installed_efm_versions | first) }}"
       _efm_bin_dir: "/usr/edb/efm-{{ _efm_version }}/bin"
       _efm_conf_dir: "/etc/edb/efm-{{ _efm_version }}"
     block:
-    - name: Check if EFM can be updated to specified version  
+    - name: Check if EFM can be updated to specified version
       include_role:
         name: efm/pkg
         tasks_from: check-update.yml
@@ -107,7 +107,7 @@
         name: test
         tasks_from: efm/check-bin-and-conf
       vars:
-        fail_if_not_found: true
+        expect_to_exist: true
         target_efm_version: "{{ _efm_version }}"
         target_efm_bin_dir: "{{ current_efm_bin_dir | default(_efm_bin_dir) }}"
         target_efm_conf_dir: "{{ current_efm_conf_dir | default(_efm_conf_dir) }}"
@@ -117,7 +117,7 @@
         name: test
         tasks_from: efm/check-bin-and-conf
       vars:
-        fail_if_not_found: false
+        expect_to_exist: false
         target_efm_version: "{{ efm_version }}"
         target_efm_bin_dir: "{{ efm_bin_dir | default(_efm_bin_dir) }}"
         target_efm_conf_dir: "{{ efm_conf_dir | default(_efm_conf_dir) }}"
@@ -149,7 +149,7 @@
 # We do not run this play on the intersection of g_update_hosts, as we do not
 # want to "mix" EFM versions running in a cluster by only upgrading a subset
 # of data nodes. This is because each EFM version maintains it's own binaries
-# and configurations and we cannot guarantee disparate versions running across 
+# and configurations and we cannot guarantee disparate versions running across
 # data nodes will operate together. EFM upgrade is an all-or-nothing operation.
 - name: Upgrade EFM
   any_errors_fatal: true
@@ -266,8 +266,8 @@
     when:
       chosen_primary in groups['g_update_hosts']
 
-# This will update PgBouncer, pg-backup-api, Barman, PEM server and PEM agent 
-# if they are selected components and their packages are able to be upgraded. 
+# This will update PgBouncer, pg-backup-api, Barman, PEM server and PEM agent
+# if they are selected components and their packages are able to be upgraded.
 # Otherwise, their respective upgrade plays are skipped.
 - name: Update all desired common cluster components that are able to be upgraded
   import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/components_upgrade.yml"

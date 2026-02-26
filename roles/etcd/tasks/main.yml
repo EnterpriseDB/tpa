@@ -1,6 +1,15 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Set up etcd facts (SSL paths, endpoints, etcdctl options) before configuration.
+# This was moved here from roles/init/tasks/main.yml (commit 10e27e1e83c7) because
+# it requires Python (uses stat module) which is installed by sys/bootstrap before
+# this role runs.
+- include_role:
+    name: etcd/facts
+  when: >
+    'etcd' in role
 
 # The etcd-server package supplied on debian installs and starts a
 # default systemd service and data storage location which conflicts

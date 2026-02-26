@@ -1,6 +1,6 @@
 ---
 
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 ## Platform-independent validation
 #
@@ -80,6 +80,27 @@
   when:
     valid_keys_result is not defined
     or valid_keys_result is not failed
+
+- name: Validate that instance roles do not contain empty entries
+  assert:
+    msg: >-
+      Instance '{{ item.Name }}' has empty or invalid role entries.
+      Please remove empty role lines (entries with just '-' and no value)
+      from your config.yml. All roles must have non-empty values.
+    that:
+      - item.role is not none
+      - item.role|length > 0
+      - item.role|length == valid_roles|length
+  with_items: "{{ instances }}"
+  loop_control:
+    label: >-
+      {{ item.Name }}
+  vars:
+    # Filter out None and empty/whitespace-only strings
+    valid_roles: >-
+      {{ item.role|reject('none')|reject('match', '^\\s*$')|list }}
+  when:
+    - item.role is defined
 
 ## Final topology validation
 #

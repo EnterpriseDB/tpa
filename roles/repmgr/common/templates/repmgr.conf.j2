@@ -1,4 +1,4 @@
-{# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved. #}
+{# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved. #}
 node_id = {{ node }}
 node_name = '{{ inventory_hostname }}'
 conninfo = '{{ repmgr_node_dsn }} application_name={{ inventory_hostname }} connect_timeout=2'
@@ -34,10 +34,10 @@ follow_command = '{{ repmgr_conf_dir }}/follow_command.sh'
 restore_command = '/usr/bin/barman-wal-restore -U {{ barman_user }} -z -p 8 --port {{ cluster_ssh_port|default(22)|int }} {{ barman_server }} {{ hostvars[upstream_backedup].backup_name }} %f %p'
 {% endif %}
 
-service_start_command = 'sudo systemctl start {{ postgres_service_name }}'
-service_stop_command = 'sudo systemctl stop {{ postgres_service_name }}'
-service_restart_command = 'sudo systemctl restart {{ postgres_service_name }}'
-service_reload_command = 'sudo systemctl reload {{ postgres_service_name }}'
+service_start_command = '{{ privilege_escalation_command }} systemctl start {{ postgres_service_name }}'
+service_stop_command = '{{ privilege_escalation_command }} systemctl stop {{ postgres_service_name }}'
+service_restart_command = '{{ privilege_escalation_command }} systemctl restart {{ postgres_service_name }}'
+service_reload_command = '{{ privilege_escalation_command }} systemctl reload {{ postgres_service_name }}'
 
 {% if event_notifications is defined %}
 event_notifications = '{{ event_notifications }}'

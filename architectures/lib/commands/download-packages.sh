@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# © Copyright EnterpriseDB UK Limited 2015-2025 - All rights reserved.
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 set -eu
 
@@ -38,6 +38,9 @@ _tpaexec_command() {
                 package_names=${1:?"package name not specified"}
                 shift
                 OPTS+=('-e' "exclude_packages_str=$package_names")
+                ;;
+            --refresh-repository)
+                OPTS+=('-e' "refresh_repo=true")
                 ;;
             *)
                 REMAINDER+=("$opt")
