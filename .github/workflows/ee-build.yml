@@ -99,7 +99,7 @@ jobs:
         --squash new
 
     - name: Archive build folder
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: build_artifact
         path: ./tpa-ee/aap24/${{ github.event.inputs.base-image == 'RHEL' && 'rhel' || 'alpine' }}
