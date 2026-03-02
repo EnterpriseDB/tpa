@@ -5,6 +5,9 @@
 pem_server_packages:
   RedHat: &pem_server_package
     - edb-pem
+    - edb-pem-agent
+    - edb-pem-cli
+    - edb-pem-server
   Debian: *pem_server_package
   Ubuntu: *pem_server_package
   SUSE: *pem_server_package

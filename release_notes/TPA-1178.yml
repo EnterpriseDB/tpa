@@ -1,0 +1,11 @@
+- summary: Fix PEM version pinning issues on Debian/Ubuntu
+  description: |
+    Resolved a dependency conflict on Debian/Ubuntu systems that occurred
+    when pinning the PEM version. TPA now correctly pins both `edb-pem-cli`
+    and `edb-pem-agent` dependencies to the same version, preventing the
+    package manager from rejecting the installation due to mismatched
+    version requirements.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: bugfix
+  jira_tickets:
+  - TPA-1178
