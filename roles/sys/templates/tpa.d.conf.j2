@@ -1,0 +1,14 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved. #}
+# This is the daemon configuration file for TPA's initial tasks. It's placed
+# when rc-local is not present on the system.
+[Unit]
+Description=EnterpriseDB Startup Tasks
+ConditionFileIsExecutable=/etc/rc.local
+After=network.target
+
+[Service]
+Type=forking
+TimeoutSec=0
+ExecStart=/etc/rc.local start
+RemainAfterExit=yes
+GuessMainPID=no
