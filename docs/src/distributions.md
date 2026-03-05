@@ -64,7 +64,7 @@ on the target instances.
 
 ## SLES x86
 
-* SLES 15.x is fully supported
+* SLES 15 SP7 is fully supported
 
 ## Platform-specific considerations
 
