@@ -1,0 +1,12 @@
+- summary: Update EFM-dependency OpenJDK in RHEL, Debian and Ubuntu
+  description: |
+    This change ensures that EFM uses the latest available version of OpenJDK
+    in the supported distributions:
+    * RHEL 8 and 9, from version 11 to 21.
+    * Debian 11, from version 11 to 17.
+    * Ubuntu 22.04 and 24.04, from version 11 to 21.
+    as part of being able to receive all up-to-date software dependencies from public
+    repositories.
+  type: minor_change
+  jira_tickets:
+  - TPA-1370
