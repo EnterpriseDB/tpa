@@ -73,14 +73,14 @@ jobs:
     # login to redhat registry to pull minimal EE image on redhat9
     - name: Login to RedHat Container Registry
       if: ${{ github.event.inputs.base-image == 'RHEL' }}
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         registry: registry.redhat.io
         username: ${{ secrets.RH_TPA_USERNAME }}
         password: ${{ secrets.RH_TPA_TOKEN }}
 
     - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
