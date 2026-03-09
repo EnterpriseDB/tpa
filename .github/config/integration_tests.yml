@@ -40,7 +40,14 @@ simple:
     # PGD-Always-ON only edbpge or epas
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_flavour: "postgresql"
-    # PGD 6 architectures all flavours
+    # SLES 15 with edbpge and repmgr is not supported
+    - tpa_os_image_list: "sles:15"
+      tpa_postgres_flavour: "edbpge"
+      tpa_failover_manager: "repmgr"
+    # SLES 15 with epas and repmgr is not supported
+    - tpa_os_image_list: "sles:15"
+      tpa_postgres_flavour: "epas"
+      tpa_failover_manager: "repmgr"
   include:
     # for BDR-Always-ON, go back to pg14
     - tpa_architecture: "BDR-Always-ON"
@@ -85,6 +92,14 @@ full:
       tpa_postgres_flavour: "postgresql"
     - tpa_architecture: "PGD-S"
       tpa_postgres_flavour: "postgresql"
+    # SLES 15 with edbpge and repmgr is not supported
+    - tpa_os_image_list: "sles:15"
+      tpa_postgres_flavour: "edbpge"
+      tpa_failover_manager: "repmgr"
+    # SLES 15 with epas and repmgr is not supported
+    - tpa_os_image_list: "sles:15"
+      tpa_postgres_flavour: "epas"
+      tpa_failover_manager: "repmgr"
 
   include:
     # BDR-Always-ON requires older pgd and only works on selected
