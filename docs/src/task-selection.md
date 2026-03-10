@@ -326,6 +326,13 @@ The following selectors are supported only for exclusion:
 
     Tasks related to setting up ssh between instances.
 
+- ssh-cluster-key-config
+
+    Tasks which add the cluster SSH public key to the `ansible_user`'s
+    (default: root) authorized_keys file. This can be excluded on
+    platforms where authorized_keys is managed externally or is
+    read-only.
+
 - sysctl
 
     Tasks which set and reload sysctl settings.
