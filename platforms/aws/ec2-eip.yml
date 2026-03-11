@@ -19,3 +19,26 @@
   loop_control:
     label: >-
       {{ item.1.invocation.module_args.region }}:{{ item.1.instances[0].instance_id }}
+  register: eip_associations
+
+# When a looping task registers a variable, each entry in .results
+# preserves the original loop variable under .item. So item.item.0 is
+# the aws_instances entry and item.item.1 is the ec2_jobs.results entry
+# from the with_together loop above.
+
+- name: Ensure elastic IP association succeeded
+  assert:
+    msg: >-
+      Failed to associate elastic IP with instance {{ item.item.0.Name }} ({{ item.item.1.instances[0].instance_id }}).
+      Check AWS permissions, elastic IP availability, and that the instance is running.
+    that:
+      - item is not failed
+      - item.public_ip is defined
+  with_items: "{{ eip_associations.results }}"
+  loop_control:
+    # Name should always be defined here since we skip items that were
+    # skipped in the original loop, but default defensively regardless.
+    label: "{{ item.item.0.Name|default('unknown') }}"
+  when:
+    - eip_associations is defined
+    - not item is skipped
