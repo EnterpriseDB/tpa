@@ -31,6 +31,25 @@
     label: >-
       {{ item.item.key }}
 
+# Validate that all user-specified security groups were actually found.
+# If ec2_groups specifies a security group that doesn't exist (e.g., typo in
+# the name), we must fail here rather than silently using no security group
+# (which would cause instances to use the VPC's default security group).
+
+- name: Ensure all specified security groups were found
+  assert:
+    msg: >-
+      Security group not found in {{ item.key }}.
+      Filters: {{ item.value }}
+      Found {{ ec2_region_groups[item.key]|length }} groups, expected at least 1.
+      Check the group name and ensure it exists in the VPC for this region.
+    that:
+      - ec2_region_groups[item.key] is defined
+      - ec2_region_groups[item.key]|length > 0
+  with_dict: "{{ ec2_groups|default({}) }}"
+  loop_control:
+    label: "{{ item.key }}"
+
 # If there are any regions without security groups, create them.
 
 - name: Create security groups for each VPC
