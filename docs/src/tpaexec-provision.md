@@ -110,6 +110,19 @@ Host kinsman
 To login to a host, use the command `ssh -F ssh_config` followed by the
 hostname. For example `ssh -F ssh_config uproar`.
 
+If you need to connect to the instances through a jump host, specify
+its details in the `jumphost` top-level section of `config_yml`:
+
+```output
+jumphost:
+    name: myjumphost
+    user: my_username
+    identity_file: ~/.ssh/id_ed25519
+```
+
+TPA will then create a `Host` section in the generated ssh config for
+the jump host, and add the `ProxyJump` directive to each host.
+
 You can run [`tpaexec deploy`](tpaexec-deploy.md) immediately after
 provisioning. It will wait as long as required for the instances to come
 up. You do not need to wait for the instances to come up, or ssh in to
