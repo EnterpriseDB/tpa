@@ -1,0 +1,8 @@
+- summary: Forbid pgextended flavour with PGD 4 or later
+  description: |
+    Deploy now fails with a clear error if postgres_flavour is set to
+    pgextended with bdr_version 4 or later. The pgextended flavour is
+    only supported with BDR 3. Use edbpge instead for PGD 4 and newer.
+  type: minor_change
+  jira_tickets:
+  - TPA-1113
