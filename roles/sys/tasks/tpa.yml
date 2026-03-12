@@ -54,15 +54,15 @@
     state: present
     insertbefore: "exit 0"
 
-- block:
-  - name: Install TPA rc-local configuration file
-    template:
-      src: tpa.d.conf.j2
-      dest: /usr/lib/systemd/system/rc-local.service
-      owner: root
-      group: root
-      mode: "0600"
-  when: "'rc-local.service' not in ansible_facts.services"
+- name: Install TPA rc-local configuration file
+  template:
+    src: tpa.d.conf.j2
+    dest: /usr/lib/systemd/system/rc-local.service
+    owner: root
+    group: root
+    mode: "0600"
+  when: ("'rc-local.service' not in ansible_facts.services") or 
+        (ansible_facts.services['rc-local.service'].state == 'not-found')
 
 - name: Enable rc-local service
   systemd:
