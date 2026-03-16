@@ -60,7 +60,7 @@ pem_server_webserver_packages:
     - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"
   SUSE:
     - apache2
-    - "{{'apache2-utils' if ansible_distribution_version == '15.6' else [] }}"
+    - "{{'apache2-utils' if ansible_distribution_version >= '15.6' }}"
     - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"
 
 pem_server_v10_required_packages:

@@ -73,14 +73,38 @@
   vars:
     repo: "{{ item.path|basename|split('.')|first|split('-')|last }}"
 
+- set_fact:
+    repos_to_install: "{{ edb_repositories|difference(resulting_edb_repos|default([])) }}"
+
 - name: Set up new EDB repositories
   include_tasks: add-edb-repository.yml
   loop: "{{ repos_to_install }}"
   when: repos_to_install != []
   vars:
-    repos_to_install: "{{ edb_repositories|difference(resulting_edb_repos|default([])) }}"
     repository: "{{ item }}"
     package_format: rpm
+
+# Changing priorities of EDB repositories to ensure they are preferred over any other repositories
+# that may contain community PostgreSQL packages, and conflict with the EDB ones.
+
+- when: repos_to_install | length > 0
+  block:
+
+  - name: Find EDB repositories that have been set up
+    find:
+      paths: /etc/zypp/repos.d/
+      patterns: 'enterprisedb-*.repo'
+      file_type: "file"
+    register: setup_edb_repos
+
+  - name: Updating priority number for EDB repositories
+    lineinfile:
+      path: "{{ item.path }}"
+      regexp: '^priority='
+      line: "priority=98"
+      insertafter: '^enabled='
+      state: present
+    loop: "{{ setup_edb_repos.files }}"
 
   # Some extension packages require extra repositories to be set up to install dependencies
 
@@ -110,14 +134,16 @@
       command:
         cmd: SUSEConnect -r {{ lookup('env', 'SLES_REG_TOKEN') }}
 
-
-  - name: Install extra repositories from PackageHub
-    command:
-      cmd: SUSEConnect -p {{ repo }}
-    vars:
-      repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
-    when:
-      repo not in registration_status.stdout
+# This step is required to install dependencies for PEM, or EPAS, as some of the dependencies are only available in PackageHub
+- name: Install extra repositories from PackageHub
+  command:
+    cmd: SUSEConnect -p {{ repo }}
+  vars:
+    repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
+  when:
+    (groups['role_pem-server']|default([]) is not empty
+      or groups['role_pem-agent']|default([]) is not empty)
+      or (repo is defined and repo not in registration_status.stdout|default(''))
 
 # PGDG extras repository provides packages like etcd
 - name: Enable PGDG extras
