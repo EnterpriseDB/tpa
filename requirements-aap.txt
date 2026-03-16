@@ -4,21 +4,21 @@
 #
 #    pip-compile --output-file=requirements-aap.txt requirements.in
 #
-ansible-core==2.16.16
+ansible-core==2.16.17
     # via -r requirements.in
-boto3==1.42.52
+boto3==1.42.69
     # via -r requirements.in
-botocore==1.42.52
+botocore==1.42.69
     # via
     #   boto3
     #   s3transfer
-certifi==2026.1.4
+certifi==2026.2.25
     # via
     #   -r requirements.in
     #   requests
 cffi==2.0.0
     # via cryptography
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
     # via requests
 cryptography==46.0.5
     # via
@@ -31,7 +31,7 @@ idna==3.11
     # via requests
 jaraco-classes==3.4.0
     # via keyring
-jaraco-context==6.1.0
+jaraco-context==6.1.1
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
