@@ -126,10 +126,3 @@ on `Waiting for PostgreSQL to accept connections...`, the logs will show a fatal
 ### Workaround
 You can manually remove this incorrect setting from each Postgres node in your cluster by deleting the file `/opt/postgres/data/conf.d/8901-primary_slot_name.conf` and reloading Postgres.
 As long as you are now using TPA 23.35 or later, it will not be reinstated.
-
-## Upgrade from PGD 5 to PGD 6 does not work for SLES 15 SP7 (TPA-1437)
-
-### Details
-PGD 6 comes bundled with PGD CLI, therefore when TPA tries to run the upgrade from PGD 5 to PGD 6, `zypper` will throw an error stating that PGD CLI version 5.X needs to be removed
-before proceeding with the installation of the new software, and it will exit the execution of the upgrade.
-

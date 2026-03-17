@@ -20,6 +20,7 @@
   package:
     name: "{{ _versioned_packages }}"
     state: present
+    force_resolution: "{{ force_resolution|default(false)|ternary(true, omit) }}"
     allowerasing: "{{ allowerasing|default(false)|ternary(true, omit) }}"
     use: "{{ allowerasing|default(false)|ternary('dnf', 'auto') }}"
   vars:
@@ -34,6 +35,7 @@
   package:
     name: "{{ _unversioned_packages }}"
     state: latest
+    force_resolution: "{{ force_resolution|default(false)|ternary(true, omit) }}"
     allowerasing: "{{ allowerasing|default(false)|ternary(true, omit) }}"
     use: "{{ allowerasing|default(false)|ternary('dnf', 'auto') }}"
   vars:
