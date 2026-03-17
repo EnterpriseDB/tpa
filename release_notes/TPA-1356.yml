@@ -1,9 +1,0 @@
-- summary: Update OpenJDK version used in EFM SLES 15 deployments
-  description: |
-    The OpenJDK version used in EFM for SLES 15 deployments has been updated 
-    to a newer version (from version 11 to 21). 
-    The reason behind is to ensure the availability of an OpenJDK version in
-    the SLES 15 repositories used on the docker images.
-  type: minor_change
-  jira_tickets:
-  - TPA-1356
