@@ -110,7 +110,9 @@
 
 - include_tasks: extension-repositories.yml
 
-- when: postgres_flavour == 'epas'
+- when: > 
+    postgres_flavour == 'epas' or 
+    'pem-agent' in role or 'pem-server' in role
   block:
   - name: Install SUSEConnect
     zypper:
@@ -133,17 +135,14 @@
     - name: Register system with SUSEConnect
       command:
         cmd: SUSEConnect -r {{ lookup('env', 'SLES_REG_TOKEN') }}
-
-# This step is required to install dependencies for PEM, or EPAS, as some of the dependencies are only available in PackageHub
-- name: Install extra repositories from PackageHub
-  command:
-    cmd: SUSEConnect -p {{ repo }}
-  vars:
-    repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
-  when:
-    (groups['role_pem-server']|default([]) is not empty
-      or groups['role_pem-agent']|default([]) is not empty)
-      or (repo is defined and repo not in registration_status.stdout|default(''))
+  
+  # This step is required to install dependencies for PEM, or EPAS, as some of the dependencies are only available in PackageHub
+  - name: Install extra repositories from PackageHub
+    command:
+      cmd: SUSEConnect -p {{ package_hub_repo }}
+    vars:
+      package_hub_repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
+    when: package_hub_repo not in registration_status.stdout
 
 # PGDG extras repository provides packages like etcd
 - name: Enable PGDG extras
