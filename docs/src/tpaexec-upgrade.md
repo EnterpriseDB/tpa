@@ -88,6 +88,12 @@ and write monitoring data to it while the upgrade takes place. The
 performance impact of enabling monitoring is very small and it is
 recommended that it is enabled.
 
+!!! Note
+   The `enable_proxy_monitoring` option is specifically designed for upgrades involving HARP proxies (typically when moving from PGD 4 to PGD 5). 
+
+   Because PGD 6 replaces PGD Proxy with Connection Manager, attempting to use this option during a PGD 5 to PGD 6 upgrade will cause the process to fail.
+!!!
+
 ## Component selection
 
 !!! Note
