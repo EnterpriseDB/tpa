@@ -5,7 +5,11 @@
 # All our startup tasks will go into /etc/tpa/rc.local, which will be
 # invoked from the system-wide /etc/rc.local (whose contents we have
 # less control over, especially because sysadmins are likely to edit
-# that file in unpredictable ways).
+# that file in unpredictable ways). If rc.local does not exist, we will
+# create a custom daemon that will run the /etc/tpa/rc.local script at startup.
+
+- name: Discover the state of systemd services
+  service_facts:
 
 - name: Create /etc/tpa/rc.local
   copy:
@@ -49,6 +53,16 @@
       test -x /etc/tpa/rc.local && /etc/tpa/rc.local
     state: present
     insertbefore: "exit 0"
+
+- name: Install TPA rc-local configuration file
+  template:
+    src: tpa.d.conf.j2
+    dest: /usr/lib/systemd/system/rc-local.service
+    owner: root
+    group: root
+    mode: "0600"
+  when: ("'rc-local.service' not in ansible_facts.services") or 
+        (ansible_facts.services['rc-local.service'].state == 'not-found')
 
 - name: Enable rc-local service
   systemd:

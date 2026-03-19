@@ -246,6 +246,25 @@
       region in igws
     - ec2_region_vpcs is not defined or
       ec2_vpc != ec2_cached_vpc|default(None)
+  register: new_igws
+  tags: [aws, vpc, igw]
+
+- name: Ensure internet gateway creation succeeded when required
+  assert:
+    msg: >-
+      Failed to create internet gateway in {{ item.region }}.
+      This is required for public instance reachability.
+      Check AWS permissions and VPC limits.
+    that:
+      - item is not failed
+      - item.gateway_id is defined
+  with_items: "{{ new_igws.results }}"
+  loop_control:
+    label: "{{ item.region|default('skipped') }}"
+  when:
+    - new_igws is defined
+    - not item is skipped
+    - ec2_instance_reachability|default('private') == 'public'
   tags: [aws, vpc, igw]
 
 # We require internet access for all of the subnets in the cluster,
@@ -275,6 +294,25 @@
       ec2_subnets != ec2_cached_subnets|default(None)
   loop_control:
     loop_var: region
+  register: route_tables
+  tags: [aws, vpc, route]
+
+- name: Ensure route table creation succeeded when required
+  assert:
+    msg: >-
+      Failed to create route table in {{ item.region }}.
+      Route tables are required for public instance connectivity.
+      Check that an internet gateway exists in the VPC and that AWS permissions allow route table creation.
+    that:
+      - item is not failed
+      - item.route_table.id is defined
+  with_items: "{{ route_tables.results }}"
+  loop_control:
+    label: "{{ item.region|default('skipped') }}"
+  when:
+    - route_tables is defined
+    - not item is skipped
+    - ec2_instance_reachability|default('private') == 'public'
   tags: [aws, vpc, route]
 
 # Each instance may be associated with one or more security groups

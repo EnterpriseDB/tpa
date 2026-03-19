@@ -131,8 +131,8 @@ target, we recommend using `yumdownloader` (RHEL-like) or `apt download`
 
 Alternatively, you can download packages for any platform from your
 browser by visiting [EDB Repos](https://www.enterprisedb.com/repos) and
-selecting either 'Enterprise', 'Standard' or 'Community 360' under the
-heading 'Download EDB software packages from your browser'.
+selecting either **Enterprise**, **Standard** or **Community 360** under the
+heading **Download EDB software packages from your browser**.
 To install TPA you need these packages:
 
 * tpaexec

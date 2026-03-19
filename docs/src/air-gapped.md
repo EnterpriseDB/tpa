@@ -90,13 +90,13 @@ command you must follow the steps below.
 ### Updating local repository content with direct access to internet on TPA node
 
 If the air-gapped environment has internet access, we can safely rely on `tpaexec download-packages`
-to download the new packages, check the [download section](air-gapped.md#Downloading-packages) to
+to download the new packages, check the [download section](air-gapped.md#downloading-packages) to
 know its usage.
 
 ### Updating local repository content without direct access to internet on TPA node
 
 There are two ways of performing the updating an internet-disconnected local repository:
-Recreate the local repository manually following the correct [steps](local-repo.md#Populating-the-repository-and-generating-metadata)
+Recreate the local repository manually following the correct [steps](local-repo.md#populating-the-repository-and-generating-metadata)
 depending on the distribution of your choice; or use `--refresh-repository` option in 
 `tpaexec download-packages` after placing the new packages on the local repository.
 Check the [documentation](tpaexec-download-packages.md#regenerate-local-repository-metadata) for more information

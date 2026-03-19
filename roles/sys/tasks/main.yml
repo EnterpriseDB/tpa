@@ -77,7 +77,9 @@
   authorized_key:
     user: "{{ ansible_user|default('root') }}"
     key: "{{ lookup('file', cluster_dir|abspath_to(ssh_key_file + '.pub')) }}"
-  when: ssh_key_file is defined
+  when: >
+    ssh_key_file is defined and ssh_key_file
+    and task_selector|permits('ssh-cluster-key-config')
 
 - include_tasks:
     file: tpa.yml

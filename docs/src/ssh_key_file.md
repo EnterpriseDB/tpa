@@ -19,3 +19,28 @@ ssh_key_file: ~/.ssh/id_rsa
 
 (If this file does not already exist, it will be created by `ssh-keygen`
 during provisioning.)
+
+## Skipping authorized_keys management
+
+During deployment, TPA adds the cluster's public key to the admin
+user's `authorized_keys` file on each instance. In some environments,
+like Oracle Cloud Infrastructure, this file may be read-only or
+managed externally.
+
+To skip this step, use the `ssh-cluster-key-config` task selector:
+
+```shell
+tpaexec deploy <clustername> --excluded_tasks=ssh-cluster-key-config
+```
+
+Or in `config.yml`:
+
+```yaml
+cluster_vars:
+  excluded_tasks:
+  - ssh-cluster-key-config
+```
+
+When this task is excluded, you must ensure that SSH access to the
+instances is already configured through other means before running
+`tpaexec deploy`.

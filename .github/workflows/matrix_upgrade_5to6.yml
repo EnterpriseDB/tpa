@@ -27,7 +27,13 @@ on:
           - debian-full-17
           - redhat-full-17
           - ubuntu-full-17
+          - sles-full-17
           - latest-pg
+      tpa_package_cache:
+        description: "Use the downloader"
+        type: boolean
+        default: true
+
 env:
   LANG: "C.UTF-8"
   TPA_2Q_SUBSCRIPTION_TOKEN: ${{ secrets.TPA_2Q_SUBSCRIPTION_TOKEN }}
@@ -91,3 +97,4 @@ jobs:
             ${{ matrix.tpa_postgres_version }}-\
             ${{ matrix.tpa_os_image }}-\
             ${{ matrix.tpa_proxy_routing }}"
+          tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}

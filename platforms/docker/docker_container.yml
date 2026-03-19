@@ -19,6 +19,7 @@
 #
 # The image names appear in this list as they do in config.yml, and
 # correspond to a subset of the ones listed in docker_image.yml
+
 - name: Set list of images with support for cgroups2 scopes
   set_fact:
     scoped_support_images:
@@ -151,15 +152,24 @@
       and c.NetworkSettings.Networks[docker_networks[0].name]['IPAddress'] is not empty
       }}"
 
+# Recent versions of Docker no longer populate NetworkSettings.IPAddress
+# at the top level - the IP is now only in Networks[name].IPAddress. We
+# check IPAddress first for compatibility with older Docker versions,
+# then look up the IP from the configured docker_networks entry if one
+# exists, and fall back to the first available network IP otherwise.
+
 - set_fact:
     docker_container_results: "{{
       docker_container_results|default([])|union([
-      container_info.container|combine({
-      'item': item|combine({
-      'private_ip': (n.IPAddress | default(None)) or n.Networks[docker_networks[0].name]['IPAddress']
-      })
-      })
+        container_info.container|combine({
+          'item': item|combine({
+            'private_ip': n.IPAddress if (n.IPAddress | default('')) != ''
+              else n.Networks[docker_networks[0].name]['IPAddress']
+                if (docker_networks | default([]) | length > 0)
+              else (n.Networks.values() | first).IPAddress
+          })
+        })
       ])
-      }}"
+    }}"
   vars:
     n: "{{ container_info.container.NetworkSettings }}"

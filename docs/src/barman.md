@@ -52,6 +52,23 @@ If your version does not match, try appending a `*` wildcard. This
 is often necessary when the package version has an epoch qualifier
 like `2:...`.
 
+## WAL restore compression flag
+
+TPA automatically detects the installed Barman version and selects
+the correct compression flag for `barman-wal-restore` in the
+`restore_command` setting:
+
+- Barman **>= 3.12**: uses `--keep-compression` (the `-z` option was
+  deprecated in this release)
+- Barman **< 3.12**: uses `-z`
+
+On first deploy, detection may not be possible because Barman is
+installed after the `restore_command` is configured. In this case TPA
+defaults to `--keep-compression`, which matches the latest Barman
+version installed by default. If you are deploying an older Barman
+version, set `barman_package_version` explicitly to ensure the correct
+flag is selected.
+
 ## Barman configuration
 
 The Barman home directory on the Barman server can be set using the

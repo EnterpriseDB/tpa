@@ -48,9 +48,9 @@ pep8-naming==0.10.0 \
     --hash=sha256:5d9f1056cb9427ce344e98d1a7f5665710e2f20f748438e308995852cfa24164 \
     --hash=sha256:f3b4a5f9dd72b991bf7d8e2a341d2e1aa3a884a769b5aaac4f56825c1763bf3a
     # via prospector
-platformdirs==4.9.2 \
-    --hash=sha256:9170634f126f8efdae22fb58ae8a0eaa86f38365bc57897a6c4f781d1f5875bd \
-    --hash=sha256:9a33809944b9db043ad67ca0db94b14bf452cc6aeaac46a88ea55b26e2e9d291
+platformdirs==4.9.4 \
+    --hash=sha256:1ec356301b7dc906d83f371c8f487070e99d3ccf9e501686456394622a01a934 \
+    --hash=sha256:68a9a4619a666ea6439f2ff250c12a853cd1cbd5158d258bd824a7df6be2f868
     # via pylint
 prospector==1.17.3 \
     --hash=sha256:c4df723012c45fc70f5b71f5eee318dbccaf903c2012c8ecf3ec89f60e5cb822 \
@@ -66,9 +66,9 @@ pydocstyle==6.3.0 \
     --hash=sha256:118762d452a49d6b05e194ef344a55822987a462831ade91ec5c06fd2169d019 \
     --hash=sha256:7ce43f0c0ac87b07494eb9c0b462c0b73e6ff276807f204d6b53edc72b7e44e1
     # via prospector
-pyfakefs==6.1.1 \
-    --hash=sha256:1c166fdba85f3f288f89b2a410e05712914d1f7ea77b920e960fe0cbbea1294d \
-    --hash=sha256:e2c30fd0b7736ba03785bbc20b86de2312623cf7a11a7de334042ab0de23d46f
+pyfakefs==6.1.5 \
+    --hash=sha256:2c482f36bad7d1f7516d58d17818fb0dbe397a3372ec5274869386a9b7cd4883 \
+    --hash=sha256:d70fb1c622a1d5c729462d31bb58eead99c1830986bc049bf8975c480a49d19b
     # via -r requirements/lint.in
 pyflakes==3.4.0 \
     --hash=sha256:b24f96fafb7d2ab0ec5075b7350b3d2d2218eab42003821c06344973d3ea2f58 \
@@ -88,9 +88,8 @@ pylint==3.3.9 \
 pylint-celery==0.3 \
     --hash=sha256:41e32094e7408d15c044178ea828dd524beedbdbe6f83f712c5e35bde1de4beb
     # via prospector
-pylint-django==2.6.1 \
-    --hash=sha256:19e8c85a8573a04e3de7be2ba91e9a7c818ebf05e1b617be2bbae67a906b725f \
-    --hash=sha256:359f68fe8c810ee6bc8e1ab4c83c19b15a43b234a24b08978f47a23462b5ce28
+pylint-django==2.7.0 \
+    --hash=sha256:76ef7e7bbbcf7ee86adbb2beac0ffaa7232509a17bf4a488d81467a1bbaa215b
     # via
     #   -r requirements/lint.in
     #   prospector

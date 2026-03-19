@@ -4,3 +4,7 @@
 
 efm_conf_settings: {}
 efm_bind_by_hostname: false
+
+# Retry settings for efm cluster-status command. The default is 5 minutes.
+efm_cluster_status_retries: 60
+efm_cluster_status_retry_delay: 5

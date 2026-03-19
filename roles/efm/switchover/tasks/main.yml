@@ -2,6 +2,10 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+- name: Include EFM config defaults
+  include_vars:
+    file: "{{ tpa_dir }}/roles/efm/config/defaults/main.yml"
+
 - name: Check that required argument `target` was supplied
   assert:
     that:
@@ -53,6 +57,27 @@
   - command: >
       {{ efm_bin_dir }}/efm set-priority {{ cluster_name }} {{ efm_identity }} 1
 
+  - name: Wait for target to catch up with replication
+    command: >
+      {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
+    register: pre_switchover_status
+    retries: "{{ efm_cluster_status_retries }}"
+    delay: "{{ efm_cluster_status_retry_delay }}"
+    until: >
+      pre_switchover_status is success and
+      efm_lsn == primary_lsn
+    vars:
+      efm_status: "{{ pre_switchover_status.stdout|from_json }}"
+      efm_node: "{{ efm_status.nodes[efm_identity] }}"
+      # EFM 5 renamed xlog/xlogReceive to lsn/lsnReceive in cluster-status-json output.
+      lsn_key: "{{ efm_version is version('5', '>=') | ternary('lsn', 'xlog') }}"
+      efm_lsn: "{{ efm_node[lsn_key] }}"
+      primary_node: "{{ (efm_status.nodes | dict2items | selectattr('value.type', 'equalto', 'Primary') | list | first).value }}"
+      primary_lsn: "{{ primary_node[lsn_key] }}"
+    changed_when: false
+    become_user: "{{ postgres_user }}"
+    become: yes
+
   - name: Perform switchover with EFM to {{ target }}
     command: >
       {{ efm_bin_dir }}/efm promote {{ cluster_name }} -switchover
@@ -61,9 +86,11 @@
     command: >
       {{ efm_bin_dir }}/efm cluster-status-json {{ cluster_name }}
     register: cluster_status
-    retries: 10
-    delay: 5
-    until: cluster_status is success
+    retries: "{{ efm_cluster_status_retries }}"
+    delay: "{{ efm_cluster_status_retry_delay }}"
+    until: >
+      cluster_status is success and
+      (cluster_status.stdout|from_json).nodes[efm_identity].type == 'Primary'
     changed_when: false
     become_user: "{{ postgres_user }}"
     become: yes

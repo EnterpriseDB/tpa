@@ -1,0 +1,214 @@
+name: Automation for GitHub -> Jira (internal)
+
+on:
+  create:
+
+  pull_request:
+    types:
+      - opened # If a PR was already opened in "ready for review" state
+      - ready_for_review # If a draft PR was marked as "ready for review"
+      - review_requested # If a review was requested again on a PR
+      - closed # If a PR was closed/merged
+
+  pull_request_review:
+    types:
+      - submitted
+
+  pull_request_review_comment:
+    types:
+      - created
+
+  # issue_comment:
+  #   types:
+  #     - created
+
+jobs:
+  # When a branch which name starts with 'dev/TPA-*' is created in GitHub, send
+  # a webhook to Jira to move the status of the corresponding ticket to 'In
+  # Progress'.
+  on-github-branch-create-move-jira-ticket:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'create' &&
+      github.event.ref_type == 'branch' &&
+      startsWith(github.event.ref, 'dev/TPA-')
+    steps:
+      - name: Send webhook to Jira
+        run: |
+          curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -H "X-Automation-Webhook-Token: ${WEBHOOK_SECRET}" \
+            -d "${WEBHOOK_PAYLOAD}"
+        env:
+          WEBHOOK_URL: ${{ secrets.JIRA_BRANCH_CREATED_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.JIRA_BRANCH_CREATED_WEBHOOK_SECRET }}
+          WEBHOOK_PAYLOAD: ${{ toJSON(github.event) }}
+
+  # When a PR from a dev branch is "ready for review" in GitHub, send a webhook
+  # to Jira to move the status of the corresponding ticket to 'Ready for
+  # Review'.
+  on-github-pr-ready-for-review-move-jira-ticket:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-ready-for-review
+      cancel-in-progress: false
+    if: >
+      github.event_name == 'pull_request' &&
+      startsWith(github.event.pull_request.head.ref, 'dev/TPA-') &&
+      github.event.action != 'closed' &&
+      github.event.pull_request.draft == false
+    steps:
+      - name: Send webhook to Jira
+        run: |
+          curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -H "X-Automation-Webhook-Token: ${WEBHOOK_SECRET}" \
+            -d "${WEBHOOK_PAYLOAD}"
+        env:
+          WEBHOOK_URL: ${{ secrets.JIRA_PR_READY_FOR_REVIEW_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.JIRA_PR_READY_FOR_REVIEW_WEBHOOK_SECRET }}
+          WEBHOOK_PAYLOAD: ${{ toJSON(github.event) }}
+
+  # When a review requesting changes is submitted to a PR from a dev branch in
+  # GitHub, send a webhook to Jira to move the status of the corresponding
+  # ticket to 'Required Changes'.
+  on-github-pr-review-request-changes-move-jira-ticket:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request_review' &&
+      startsWith(github.event.pull_request.head.ref, 'dev/TPA-') &&
+      github.event.pull_request.draft == false &&
+      github.event.review.state == 'changes_requested'
+    steps:
+      - name: Send webhook to Jira
+        run: |
+          curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -H "X-Automation-Webhook-Token: ${WEBHOOK_SECRET}" \
+            -d "${WEBHOOK_PAYLOAD}"
+        env:
+          WEBHOOK_URL: ${{ secrets.JIRA_PR_REVIEW_REQUEST_CHANGES_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.JIRA_PR_REVIEW_REQUEST_CHANGES_WEBHOOK_SECRET }}
+          WEBHOOK_PAYLOAD: ${{ toJSON(github.event) }}
+
+  # When a PR from a dev branch is merged in GitHub, send a webhook to Jira
+  # to move the status of the corresponding ticket to 'Ready for Release'.
+  on-github-pr-merge-move-jira-ticket:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' &&
+      startsWith(github.event.pull_request.head.ref, 'dev/TPA-') &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true
+    steps:
+      - name: Send webhook to Jira
+        run: |
+          curl -X POST "${WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -H "X-Automation-Webhook-Token: ${WEBHOOK_SECRET}" \
+            -d "${WEBHOOK_PAYLOAD}"
+        env:
+          WEBHOOK_URL: ${{ secrets.JIRA_PR_MERGED_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.JIRA_PR_MERGED_WEBHOOK_SECRET }}
+          WEBHOOK_PAYLOAD: ${{ toJSON(github.event) }}
+
+
+# Leaving this part out for TPA for now. we don't need the comments to be added
+# to the Jira tickets.
+
+#   # When a comment is sent to a PR, either as a regular comment or as a review comment,
+#   # if the comment contains the text '#Sync-To-Jira', then send a webhook to Jira to
+#   # copy the comment to the corresponding ticket.
+#   # Different from the other jobs, in this case we cannot simply forward the GitHub event
+#   # payload, as the 'issue_comment' event does not contain PR details. Therefore, we
+#   # need to build a custom payload with the relevant information.
+#   on-github-pr-comment-sync-to-jira:
+#     runs-on: ubuntu-latest
+#     if: (github.event_name == 'issue_comment' && github.event.action == 'created' && github.event.issue.pull_request) || (github.event_name == 'pull_request_review_comment' && github.event.action == 'created') || (github.event_name == 'pull_request_review' && github.event.action == 'submitted')
+#     steps:
+#       - name: Get PR details for issue_comment
+#         if: github.event_name == 'issue_comment'
+#         id: get-pr
+#         run: |
+#           set -exu
+
+#           PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GH_SLONIK }}" \
+#             "${{ github.event.issue.pull_request.url }}")
+#           PR_HEAD_REF=$(echo "${PR_DATA}" | jq -r '.head.ref')
+#           echo "head_ref=${PR_HEAD_REF}" >> "${GITHUB_OUTPUT}"
+
+#       - name: Normalize PR data
+#         id: normalize
+#         env:
+#           EVENT_NAME: ${{ github.event_name }}
+#           GET_PR_HEAD_REF: ${{ steps.get-pr.outputs.head_ref }}
+#           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+#           REVIEW_USER_LOGIN: ${{ github.event.review.user.login }}
+#           REVIEW_BODY: ${{ github.event.review.body }}
+#           COMMENT_USER_LOGIN: ${{ github.event.comment.user.login }}
+#           COMMENT_BODY: ${{ github.event.comment.body }}
+#         run: |
+#           set -exu
+
+#           # Set head_ref based on event type
+#           if [ "${EVENT_NAME}" == "issue_comment" ]; then
+#             HEAD_REF="${GET_PR_HEAD_REF}"
+#           else
+#             # pull_request_review and pull_request_review_comment both have this
+#             HEAD_REF="${PR_HEAD_REF}"
+#           fi
+
+#           # Set user_login and comment_body based on event type
+#           if [ "${EVENT_NAME}" == "pull_request_review" ]; then
+#             # For pull_request_review, the content is in review.body
+#             USER_LOGIN="${REVIEW_USER_LOGIN}"
+#             COMMENT_BODY_VAR="${REVIEW_BODY}"
+#           else
+#             # For issue_comment and pull_request_review_comment, it's in comment
+#             USER_LOGIN="${COMMENT_USER_LOGIN}"
+#             COMMENT_BODY_VAR="${COMMENT_BODY}"
+#           fi
+
+#           # Store outputs using grouped redirects
+#           {
+#             echo "head_ref=${HEAD_REF}"
+#             echo "user_login=${USER_LOGIN}"
+#             echo 'comment_body<<EOF'
+#             echo "${COMMENT_BODY_VAR}"
+#             echo EOF
+#           } >> "${GITHUB_OUTPUT}"
+
+#       - name: Build custom webhook payload
+#         id: build-payload
+#         run: |
+#           set -exu
+
+#           # Build custom JSON payload
+#           CUSTOM_PAYLOAD=$(jq -n \
+#             --arg head_ref "${{ steps.normalize.outputs.head_ref }}" \
+#             --arg user_login "${{ steps.normalize.outputs.user_login }}" \
+#             --arg comment_body "${{ steps.normalize.outputs.comment_body }}" \
+#             '{
+#               head_ref: $head_ref,
+#               user_login: $user_login,
+#               comment_body: $comment_body
+#             }')
+
+#           # Store for webhook call
+#           {
+#             echo 'payload<<EOF'
+#             echo "${CUSTOM_PAYLOAD}"
+#             echo EOF
+#           } >> "${GITHUB_OUTPUT}"
+
+#       - name: Send webhook to Jira
+#         if: startsWith(steps.normalize.outputs.head_ref, 'dev/TPA-') && contains(steps.normalize.outputs.comment_body, '#Sync-To-Jira')
+#         run: |
+#           curl -X POST "${WEBHOOK_URL}" \
+#             -H "Content-Type: application/json" \
+#             -H "X-Automation-Webhook-Token: ${WEBHOOK_SECRET}" \
+#             -d "${WEBHOOK_PAYLOAD}"
+#         env:
+#           WEBHOOK_URL: ${{ secrets.JIRA_PR_COMMENT_SYNC_WEBHOOK_URL }}
+#           WEBHOOK_SECRET: ${{ secrets.JIRA_PR_COMMENT_SYNC_WEBHOOK_SECRET }}
+#           WEBHOOK_PAYLOAD: ${{ steps.build-payload.outputs.payload }}

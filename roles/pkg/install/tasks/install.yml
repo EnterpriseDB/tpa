@@ -28,6 +28,7 @@
   package:
     name: "{{ package_list|mandatory }}"
     state: present
+    force_resolution: "{{ force_resolution|default(false)|ternary(true, omit) }}"
     allowerasing: "{{ allowerasing|default(false)|ternary(true, omit) }}"
     use: "{{ allowerasing|default(false)|ternary('dnf', 'auto') }}"
   register: install_cmd

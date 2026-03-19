@@ -48,6 +48,17 @@ jobs:
       matrix:
         variant: ['-rh8', '']
     steps:
+      - name: Free up disk space
+        run: |
+          # Android libraries
+          sudo rm -rf /usr/local/lib/android
+          # .NET runtime
+          sudo rm -rf /usr/share/dotnet
+          # Haskell runtime
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/.ghcup
+        shell: bash
+
       - name: Checkout source repository
         id: checkout-source
         uses: actions/checkout@v6
@@ -68,7 +79,7 @@ jobs:
           pip-compile -U --generate-hashes --reuse-hashes requirements${{ matrix.variant }}.in -o requirements${{ matrix.variant }}.txt
 
       - name: Share new requirements.txt file with next steps
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: new_requirements${{ matrix.variant }}
           path: requirements${{ matrix.variant }}.txt
@@ -102,20 +113,16 @@ jobs:
           path: foundation
 
       - name: Download generated requirements.txt
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: new_requirements${{ env.FILENAME_SUFFIX }}
           path: ${{ github.workspace }}
 
-      - name: Connect to a Native Executor
-        uses: ./foundation/actions/linux/native/executor/connect
-        with:
-          architecture: ${{ matrix.architecture }}
-          tunnel-login: ${{ env.FOUNDATION_TUNNEL_LOGIN }}
 
       - name: Setup container
         uses: ./foundation/actions/linux/container/setup
         with:
+          force-qemu: ${{ case(matrix.architecture == 's390x', 'true', 'false') }}
           architecture: ${{ matrix.architecture }}
           distro: ${{ matrix.distro }}
           distro-version: ${{ matrix.distro-version }}
@@ -141,7 +148,7 @@ jobs:
         uses: ./foundation/actions/linux/container/destroy
 
       - name: Share generated arch specific requirement files
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: requirements-${{ matrix.architecture }}${{ env.FILENAME_SUFFIX}}
           path: ${{ github.workspace }}/packages/requirements-${{ matrix.architecture }}${{ env.FILENAME_SUFFIX }}.*
@@ -193,7 +200,7 @@ jobs:
 
       - name: Upload modified requirements.yml
         if: steps.list-collections.outputs.changed == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: collection-requirements.yml
           path: ${{ github.workspace }}/collections/requirements.yml
@@ -209,42 +216,42 @@ jobs:
           token: ${{ secrets.GH_SLONIK }}
 
       - name: Download generated main requirements.txt
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: new_requirements
           path: ${{ github.workspace }}
 
       - name: Download generated main requirements.txt for rh8
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: new_requirements-rh8
           path: ${{ github.workspace }}
       - name: Download generated requirements.txt for ppc64le
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: requirements-ppc64le
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for ppc64le on rh8
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: requirements-ppc64le-rh8
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for s390x
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: requirements-s390x
           path: ${{ github.workspace }}
 
       - name: Download generated requirements.txt for s390x on rh8
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: requirements-s390x-rh8
           path: ${{ github.workspace }}
 
       - name: Download generated collections/requirements.yml
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: collection-requirements.yml
           path: ${{ github.workspace }}/collections

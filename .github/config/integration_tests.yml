@@ -40,7 +40,6 @@ simple:
     # PGD-Always-ON only edbpge or epas
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_flavour: "postgresql"
-    # PGD 6 architectures all flavours
   include:
     # for BDR-Always-ON, go back to pg14
     - tpa_architecture: "BDR-Always-ON"

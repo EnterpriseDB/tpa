@@ -239,6 +239,17 @@
       {%- else -%}xlog
       {%- endif -%}
 
+- name: Ensure pgextended is not used with PGD 4 or later
+  assert:
+    msg: >-
+      The pgextended flavour is not supported with PGD version 4 or later.
+      Use edbpge instead.
+    that:
+      - postgres_flavour != 'pgextended'
+        or bdr_version is version('4', '<')
+  when:
+    - "'bdr' in role"
+
 - name: Split extension from postgres_log_file
   set_fact:
     _postgres_log_file_last: "{{ postgres_log_file | splitext | last }}"

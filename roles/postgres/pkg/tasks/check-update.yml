@@ -15,6 +15,9 @@
   vars:
     package_list_name: "postgres packages"
     package_list: "{{ _all_postgres_packages }}"
+    force_resolution: "{{ 
+        ansible_os_family == 'SUSE' 
+        }}"
     allowerasing: "{{
         ansible_os_family == 'RedHat' 
         }}"

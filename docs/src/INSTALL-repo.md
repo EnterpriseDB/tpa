@@ -17,18 +17,19 @@ To run TPA from source, you must install all of the dependencies
 the source and [run TPA in a Docker container](INSTALL-docker.md).
 (Either way will work fine on Linux and macOS.)
 
-## Quickstart
+## Prerequisites
 
-First, you must install the various dependencies Python 3, Python
-venv, git, and openvpn. Installing from EDB repositories
-would install these automatically along with the TPA
-packages.
+Before installing TPA from source, ensure that `git` is available on your system.
 
-Before you install TPA, you must install the required packages:
+You must also have a **Python 3.12** interpreter, including the `pip` and `venv` modules, present on the TPA controller host. 
 
-* **Debian/Ubuntu** <br/> `sudo apt-get install python3 python3-pip python3-venv git openvpn`
-* **Redhat, Rocky or AlmaLinux (RHEL7)** <br/> `sudo yum install python3 python3-pip epel-release git openvpn`
-* **Redhat, Rocky or AlmaLinux (RHEL8)** <br/>`sudo yum install python36 python3-pip epel-release git openvpn`
+- For **RHEL 9**, you may need to enable the CodeReady Linux Builder (CRB) repository to install necessary build dependencies.
+- For **SLES**, ensure the Python 3.12 module is enabled.
+- If your operating system repositories do not provide Python 3.12, we recommend using [pyenv](https://github.com/pyenv/pyenv) to install it.
+
+!!! Note
+
+      Legacy dependencies such as `openvpn` and `patch` are no longer required for standard TPA installations and have been removed from these instructions.
 
 
 ## Clone and setup

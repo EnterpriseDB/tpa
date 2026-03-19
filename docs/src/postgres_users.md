@@ -60,7 +60,7 @@ tpaexec show-password ~/clusters/speedy example
 ```
 
 ```output
-)>tkc}}k1y4&epaJ?;NJ:l'uT{C7D*<p
+)>tkc}}k1y4&epaJ?;NJ:l'uT{C7D*&lt;p
 ```
 
 ```shell

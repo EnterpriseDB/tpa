@@ -15,6 +15,7 @@ full: # 125+ clusters do not use this option
     - "debian:11"
     - "redhat:9"
     - "redhat:8"
+    - "sles:15"
   tpa_postgres_flavour: &full_tpa_postgres_flavour
     - "postgresql"
     - "edbpge"
@@ -31,16 +32,17 @@ full: # 125+ clusters do not use this option
   tpa_architecture: &full_tpa_architecture
     - "PGD-Always-ON"
 
-# latest os               3
+# latest os               4
 # all postgres_flavour    3
 # postgres 17             1
 # proxy routing           2
-# total                   18
+# total                   24
 latest-17:
   tpa_os_image:
     - "debian:12"
     - "redhat:9"
     - "ubuntu:24.04"
+    - "sles:15"
   tpa_postgres_flavour: *full_tpa_postgres_flavour
   tpa_postgres_version:
     - 17
@@ -61,16 +63,17 @@ debian12-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-# latest os               3
+# latest os               4
 # postgresql              1
 # postgres version 17     1
 # proxy routing           2
-# total                   6
+# total                   8
 latest-pg-17:
   tpa_os_image:
     - "debian:12"
     - "redhat:9"
     - "ubuntu:24.04"
+    - "sles:15"
   tpa_postgres_flavour:
     - "postgresql"
   tpa_postgres_version:
@@ -79,16 +82,17 @@ latest-pg-17:
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
 
-# latest os               3
+# latest os               4
 # edb-pge                 1
 # postgres version 17     1
 # proxy routing           2
-# total                   6
+# total                   8
 latest-pge-17:
   tpa_os_image:
     - "debian:12"
     - "redhat:9"
     - "ubuntu:24.04"
+    - "sles:15"
   tpa_postgres_flavour:
     - "edbpge"
   tpa_postgres_version:
@@ -96,16 +100,17 @@ latest-pge-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-# latest os               3
-# epas                 1
+# latest os               4
+# epas                    1
 # postgres version 17     1
 # proxy routing           2
-# total                   6
+# total                   8
 latest-epas-17:
   tpa_os_image:
     - "debian:12"
     - "redhat:9"
     - "ubuntu:24.04"
+    - "sles:15"
   tpa_postgres_flavour:
     - "epas"
   tpa_postgres_version:
@@ -158,16 +163,31 @@ ubuntu-full-17:
   tpa_proxy_routing: *full_tpa_proxy_routing
   tpa_platform: *full_tpa_platform
   tpa_architecture: *full_tpa_architecture
-# latest os               3
+# all sles                1
+# all flavour             3
+# postgres version 17     1
+# proxy routing           2
+# total                   6
+sles-full-17:
+  tpa_os_image:
+    - "sles:15"
+  tpa_postgres_flavour: *full_tpa_postgres_flavour
+  tpa_postgres_version:
+    - 17
+  tpa_proxy_routing: *full_tpa_proxy_routing
+  tpa_platform: *full_tpa_platform
+  tpa_architecture: *full_tpa_architecture
+# latest os               4
 # postgresql              1
 # all postgres versions   3
 # proxy routing           2
-# total                   18
+# total                   24
 latest-pg:
   tpa_os_image:
     - "debian:12"
     - "redhat:9"
     - "ubuntu:24.04"
+    - "sles:15"
   tpa_postgres_flavour:
     - "postgresql"
   tpa_postgres_version: *full_tpa_postgres_version

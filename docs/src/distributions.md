@@ -64,7 +64,12 @@ on the target instances.
 
 ## SLES x86
 
-* SLES 15.x is fully supported
+* SLES 15 SP7 is supported.
+
+!!! Note
+M1 architecture using Repmgr in combination with EDBPGE or EPAS is not supported for SLES.
+Use community PostgreSQL in this situation. 
+!!!    
 
 ## Platform-specific considerations
 

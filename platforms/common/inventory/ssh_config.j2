@@ -5,11 +5,23 @@ Host *
     IdentityFile "{{ ssh_key_file }}"
     UserKnownHostsFile known_hosts tpa_known_hosts
     ServerAliveInterval 60
+    {% if not use_ssh_agent|default(False) %}IdentitiesOnly yes{% endif %}
+    {% if forward_ssh_agent is defined %}ForwardAgent yes{% endif %}
+
+{% if jumphost is defined %}
+# jumphost
+Host {{ jumphost.name }}
+    User {{ jumphost.user }}
+    IdentityFile {{ jumphost.identity_file }}
+{% endif %}
 
 {% for h in instance_vars %}
-Host {{ h.Name }}
+Host {{ h.Name }} {{ h|deploy_ip_address }}
 {% if 'ansible_user' in h.vars %}
     User {{ h.vars.ansible_user }}
 {% endif %}
     HostName {{ h|deploy_ip_address }}
+{% if jumphost is defined %}
+    ProxyJump {{ jumphost.name }}
+{% endif %}
 {% endfor %}
