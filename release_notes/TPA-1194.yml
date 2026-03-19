@@ -1,9 +1,0 @@
-- summary: Add task selector to skip cluster SSH key installation in authorized_keys
-  description: |
-    Added a new task selector 'ssh-cluster-key-config' that allows skipping
-    the 'Ensure authorized_keys allows admin access' task during deployment.
-    This is useful in environments where the authorized_keys file is managed
-    externally or is read-only (e.g. Oracle Cloud Infrastructure).
-  type: minor_change
-  jira_tickets:
-  - TPA-1194

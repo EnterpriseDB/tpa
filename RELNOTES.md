@@ -2,6 +2,176 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+## v23.43.0 (2025-03-18)
+
+### Minor changes
+
+- Improve ssh configuration, supporting jump host
+
+  TPA now fully populates its generated ssh_config with all the options
+  needed by ansible, and ansible uses the config instead of adding options to
+  the command line.
+
+  The configuration can now include a jump host, which will therefore be
+  automatically used when deploying.
+
+  References: TPA-934.
+
+- Add support for SLES 15 SP7 across all platforms
+
+  TPA now supports SLES 15 SP7, upgrading from SP6. This support extends
+  to all platforms, including bare-metal, AWS, and Docker. TPA can now
+  be used as a deployment node on SLES 15 SP7 and can also provision and
+  manage target nodes running this Service Pack. The update includes new
+  AMI images, Docker base images, and validated package builds.
+
+  References: TPA-1418.
+
+- Forbid pgextended flavour with PGD 4 or later
+
+  Deploy now fails with a clear error if postgres_flavour is set to
+  pgextended with bdr_version 4 or later. The pgextended flavour is
+  only supported with BDR 3. Use edbpge instead for PGD 4 and newer.
+
+  References: TPA-1113.
+
+- Add task selector to skip cluster SSH key installation in authorized_keys
+
+  Added a new task selector 'ssh-cluster-key-config' that allows skipping
+  the 'Ensure authorized_keys allows admin access' task during deployment.
+  This is useful in environments where the authorized_keys file is managed
+  externally or is read-only (e.g. Oracle Cloud Infrastructure).
+
+  References: TPA-1194.
+
+- Update EFM-dependency OpenJDK in RHEL, Debian and Ubuntu
+
+  This change ensures that EFM uses the latest available version of OpenJDK
+  in the supported distributions:
+  * RHEL 8 and 9, from version 11 to 21.
+  * Debian 11, from version 11 to 17.
+  * Ubuntu 22.04 and 24.04, from version 11 to 21.
+  as part of being able to receive all up-to-date software dependencies from public
+  repositories.
+
+  References: TPA-1370.
+
+- Standardize `pemworker` argument ordering for PEM 10.4
+
+  Refactored `pemworker` command-line usage to place subcommands
+  (e.g., `--enable-probe`) as the first argument. This update addresses
+  changes in the PEM 10.4 CLI, which no longer supports
+  arbitrary argument positioning, ensuring that TPA continues to
+  successfully configure and manage PEM agents.
+
+  References: TPA-1425.
+
+- Docker platform compatibility with recent Docker versions
+
+  Recent versions of Docker no longer populate the top-level
+  NetworkSettings.IPAddress field when inspecting containers - the IP is now
+  only available within NetworkSettings.Networks[<name>].IPAddress. This
+  caused container provisioning to fail when TPA attempted to determine the
+  IP of containers. TPA now checks the top-level field for compatibility with
+  older Docker versions, falls back to the configured docker_networks entry
+  if defined, and otherwise uses the first available network IP.
+
+  References: TPA-1395.
+
+- Support `--keep-compression` in `barman-wal-restore`
+
+  Replaced the deprecated `-z` flag with `--keep-compression` in the Barman
+  `restore_command` for installations using Barman 3.12+. TPA implements a
+  conditional fallback to the deprecated flag for legacy versions,
+  maintaining backward compatibility while adopting modern CLI standards
+  based on the detected or specified Barman version.
+
+  References: TPA-1185.
+
+- Update OpenJDK version used in EFM SLES 15 deployments
+
+  The OpenJDK version used in EFM for SLES 15 deployments has been updated 
+  to a newer version (from version 11 to 21). 
+  The reason behind is to ensure the availability of an OpenJDK version in
+  the SLES 15 repositories used on the docker images.
+
+  References: TPA-1356.
+
+- Create TPA rc-local service on systems without rc-local
+
+  A change has been introduced to support distributions that do not have
+  rc-local by default. The change includes creating a custom TPA rc-local
+  service and ensuring that it is enabled on the system's boot. 
+  This allows TPA to run /etc/tpa/rc.local at startup, providing a 
+  consistent way to execute TPA startup tasks across different 
+  distributions.
+
+  References: TPA-1361, TPA-1405.
+
+### Bugfixes
+
+- Retry efm's health check after an upgrade
+
+  In a busy system, the cluster can take a bit longer to recover making just
+  a single health check insufficient. This change introduces a retry mechanism
+  for efm's health check after an upgrade to give the cluster more time before
+  deciding that the upgrade has failed.
+
+  References: TPA-1268.
+
+- Fix PEM version pinning issues on Debian/Ubuntu
+
+  Resolved a dependency conflict on Debian/Ubuntu systems that occurred
+  when pinning the PEM version. TPA now correctly pins both `edb-pem-cli`
+  and `edb-pem-agent` dependencies to the same version, preventing the
+  package manager from rejecting the installation due to mismatched
+  version requirements.
+
+  References: TPA-1178.
+
+- Fix EFM switchover failures on busy systems with standby lag
+
+  Fixed an issue where EFM switchover operations could fail during upgrades
+  or maintenance operations on busy systems when the standby server was
+  lagging behind the primary.
+
+  Previously, TPA's pre-switchover health checks would immediately fail if
+  standby nodes were not fully synchronised with the primary, causing upgrade
+  procedures to abort even when the nodes would catch up within seconds.
+
+  TPA now implements a wait-and-retry mechanism in the EFM health check that
+  monitors cluster status and waits for all nodes to synchronise before
+  allowing the switchover to proceed. This ensures switchover operations only
+  begin when the cluster is in a safe state for promotion.
+
+  This resolves spurious failures on distributed systems where temporary
+  replication lag exists during upgrade workflows on production systems with
+  active workloads.
+
+  References: TPA-1315.
+
+- AWS provisioning now validates that specified security groups exist
+
+  When provisioning AWS clusters with ec2_groups configured in config.yml,
+  TPA now explicitly validates that the specified security groups actually
+  exist. Previously, if a non-existent security group was specified (for
+  example, due to a typo in the group name), provisioning would continue
+  silently and EC2 instances would be created using the VPC's default
+  security group instead. This could result in instances having incorrect
+  or unexpected network access rules without the user realizing it.
+
+  Provisioning now fails immediately with a clear error message indicating
+  which region has the problem, what filters were used, and guidance on
+  how to fix the issue. This prevents security misconfigurations and makes
+  troubleshooting easier.
+
+  Additionally, TPA now provides explicit validation with actionable error
+  messages when creating optional AWS resources such as Internet Gateways,
+  Route Tables, and Elastic IP associations, improving error visibility
+  during provisioning.
+
+  References: TPA-183.
+
 ## 23.42.0 (2026-02-24)
 
 ### Notable changes
