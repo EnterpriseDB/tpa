@@ -126,3 +126,22 @@ on `Waiting for PostgreSQL to accept connections...`, the logs will show a fatal
 ### Workaround
 You can manually remove this incorrect setting from each Postgres node in your cluster by deleting the file `/opt/postgres/data/conf.d/8901-primary_slot_name.conf` and reloading Postgres.
 As long as you are now using TPA 23.35 or later, it will not be reinstated.
+
+## SSH configuration templating error in clusters using  `forward_ssh_agent: true`
+
+### Details
+
+TPA 23.43 changed the templating for the ssh_config file in the cluster
+directory and introduced a bug whereby if `forward_ssh_agent` is set to
+True, the generated config file will be invalid. The default for this
+setting is False, and it is usually only set to True when installing
+components of the cluster from source code for testing.
+
+### Workaround
+After running `tpaexec provision` to generate the ssh_config file, edit
+the file in a text editor. Find the line reading `IdentitiesOnly yes
+ForwardAgent yes`, usually line 7 in the file, and split it two lines by
+adding a newline after the first "yes". The file will be overwritten by
+`tpaexec provision` so it must be re-edited after provisioning when a
+change is made to config.yml.
+
