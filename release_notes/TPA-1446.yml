@@ -1,0 +1,10 @@
+- summary: Fix custom rc-local service creation 
+  description: |
+    TPA creates a custom systemd service file to ensure rc-local script is running on startup
+    on distributions that don't support it out of the box.   
+    This fix changes the location of said service file to comply with conventions and avoid failures
+    with missing parent folder that could happen with previous chosen path.
+    This fix also ensure that this service file creation task is only applied when it is actually needed.
+  type: bugfix
+  jira_tickets:
+  - TPA-1446
