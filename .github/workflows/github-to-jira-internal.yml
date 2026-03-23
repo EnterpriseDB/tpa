@@ -31,7 +31,9 @@ jobs:
     if: >
       github.event_name == 'create' &&
       github.event.ref_type == 'branch' &&
-      startsWith(github.event.ref, 'dev/TPA-')
+      (startsWith(github.event.ref, 'dev/TPA-') ||
+      startsWith(github.event.ref, 'docs/TPA-') ||
+      startsWith(github.event.ref, 'test/TPA-'))
     steps:
       - name: Send webhook to Jira
         run: |
@@ -54,7 +56,9 @@ jobs:
       cancel-in-progress: false
     if: >
       github.event_name == 'pull_request' &&
-      startsWith(github.event.pull_request.head.ref, 'dev/TPA-') &&
+      (startsWith(github.event.pull_request.head.ref, 'dev/TPA-') ||
+      startsWith(github.event.pull_request.head.ref, 'docs/TPA-') ||
+      startsWith(github.event.pull_request.head.ref, 'test/TPA-')) &&
       github.event.action != 'closed' &&
       github.event.pull_request.draft == false
     steps:
@@ -76,7 +80,9 @@ jobs:
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'pull_request_review' &&
-      startsWith(github.event.pull_request.head.ref, 'dev/TPA-') &&
+      (startsWith(github.event.pull_request.head.ref, 'dev/TPA-') ||
+      startsWith(github.event.pull_request.head.ref, 'docs/TPA-') ||
+      startsWith(github.event.pull_request.head.ref, 'test/TPA-')) &&
       github.event.pull_request.draft == false &&
       github.event.review.state == 'changes_requested'
     steps:
@@ -97,7 +103,9 @@ jobs:
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'pull_request' &&
-      startsWith(github.event.pull_request.head.ref, 'dev/TPA-') &&
+      (startsWith(github.event.pull_request.head.ref, 'dev/TPA-') ||
+      startsWith(github.event.pull_request.head.ref, 'docs/TPA-') ||
+      startsWith(github.event.pull_request.head.ref, 'test/TPA-')) &&
       github.event.action == 'closed' &&
       github.event.pull_request.merged == true
     steps:
