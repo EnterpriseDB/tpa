@@ -14,6 +14,7 @@ import yaml
 import re
 
 from typing import List
+from packaging.version import Version, InvalidVersion, parse
 
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
@@ -595,6 +596,23 @@ class Architecture(object):
         if args.get("postgres_flavour") == "pgextended" and args.get("enable_pem"):
             raise ArchitectureError(
                 "PEM is not compatible with the BDR-Always-ON architecture and EDB Postgres Extended"
+            )
+
+    def _package_version_at_least(self, version_string, minimum):
+        """Return True if the major.minor in version_string >= minimum.
+
+        Handles wildcards (*5.3*), epoch prefixes (4:5.5.1).
+        Raises ArchitectureError for malformed version strings.
+        Must not be called with None or empty values — callers should
+        guard against that.
+        """
+        try:
+            cleaned = version_string.replace("*", "")
+            parts = cleaned.split(":", maxsplit=1)[-1].split(".")
+            return parse(f"{parts[0]}.{parts[1]}") >= Version(minimum)
+        except (InvalidVersion, AttributeError, IndexError, TypeError):
+            raise ArchitectureError(
+                f"Cannot parse package version '{version_string}'"
             )
 
     def _validate_2q_repositories(self, args):

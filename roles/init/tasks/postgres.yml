@@ -239,6 +239,19 @@
       {%- else -%}xlog
       {%- endif -%}
 
+- name: Ensure read_listen_port is configured for BDR 5.5 and later
+  assert:
+    msg: >-
+      BDR 5.5 and later require read_listen_port to be set in
+      default_pgd_proxy_options in config.yml.
+    that:
+      - "'read_listen_port' in pgd_proxy_options"
+  run_once: true
+  when:
+    - groups['role_pgd-proxy']|default([]) is not empty
+    - bdr_package_version|default('') is match('.*[0-9]+\.[0-9]+')
+    - bdr_package_version|regex_search('[0-9]+\.[0-9]+') is version('5.5', '>=')
+
 - name: Ensure pgextended is not used with PGD 4 or later
   assert:
     msg: >-

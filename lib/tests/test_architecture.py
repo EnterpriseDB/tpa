@@ -272,6 +272,35 @@ class TestBDRArchitecture:
             with pytest.raises(error):
                 assert bdr_architecture.args["cluster_vars"]["harp_http_options"]
 
+    @pytest.mark.parametrize(
+        "version_string, expected",
+        [
+            ("*5.8*", True),
+            ("*6.1.1*", True),
+            ("5.5*", True),
+            ("5.5.1", True),
+            ("6.1.1", True),
+            ("4:5.5.1", True),
+            ("4:5.8.0", True),
+            ("*5.3*", False),
+            ("5.1.0", False),
+            ("5.4.2", False),
+            ("4:5.4.2", False),
+        ],
+    )
+    def test_package_version_at_least(self, version_string, expected):
+        min_ver = BDR_Always_ON.BDR_WITH_READ_LISTEN_PORT
+        assert Architecture._package_version_at_least(object(), version_string, min_ver) is expected
+
+    @pytest.mark.parametrize(
+        "version_string",
+        ["latest", "abc", "not-a-version", None, ""],
+    )
+    def test_package_version_at_least_malformed_raises_error(self, version_string):
+        min_ver = BDR_Always_ON.BDR_WITH_READ_LISTEN_PORT
+        with pytest.raises(ArchitectureError):
+            Architecture._package_version_at_least(object(), version_string, min_ver)
+
 
 @pytest.fixture
 def pgd_architecture(argv):

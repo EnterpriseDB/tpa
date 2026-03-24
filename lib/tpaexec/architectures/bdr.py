@@ -9,6 +9,9 @@ import re
 
 
 class BDR(Architecture):
+    # Minimum BDR version that requires read_listen_port in proxy options
+    BDR_WITH_READ_LISTEN_PORT = "5.5"
+
     def supported_versions(self) -> List[Tuple[str, str]]:
         """
         Returns a list of (postgres_version, bdr_version) tuples that this
@@ -262,3 +265,4 @@ class BDR(Architecture):
                 roles = self._instance_roles(instance)
                 if "bdr" in roles:
                     instance["role"].append("beacon-agent")
+
