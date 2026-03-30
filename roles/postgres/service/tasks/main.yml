@@ -87,3 +87,5 @@
   with_items:
     - "{{ postgres_service_name }}"
     - "{{ postgres_service_name }}-monitor"
+  when: >
+    task_selector|permits('service')
