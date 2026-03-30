@@ -125,6 +125,8 @@
     name: "{{ pem_web_server_service_name[ansible_os_family] }}"
     enabled: yes
     state: started
+  when: >
+    task_selector|permits('service')
 
 - name: Webserver configured
   debug:

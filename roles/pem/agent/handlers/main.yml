@@ -7,3 +7,5 @@
     name: pemagent
     state: restarted
   listen: "Restart pemagent"
+  when: >
+    task_selector|permits('service', 'restart')

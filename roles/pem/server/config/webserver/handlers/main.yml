@@ -7,3 +7,5 @@
     name: "{{ pem_web_server_service_name[ansible_os_family] }}"
     state: restarted
   listen: Restart apache for pem
+  when: >
+    task_selector|permits('service', 'restart')

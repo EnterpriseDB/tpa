@@ -212,6 +212,8 @@
       "{{ (agent_cfg is not changed)|ternary('started', 'restarted') }}"
     enabled: yes
     daemon_reload: yes
+  when: >
+    task_selector|permits('service', 'restart')
 
 - name: Enable probes for PEM agents registered on EFM nodes
   command: >
