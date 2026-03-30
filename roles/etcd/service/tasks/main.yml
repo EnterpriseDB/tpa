@@ -20,3 +20,4 @@
     daemon_reload: "{{ unit is changed }}"
   when: >
     'etcd' in role
+    and task_selector|permits('service')

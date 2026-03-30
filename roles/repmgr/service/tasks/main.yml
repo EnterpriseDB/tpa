@@ -40,3 +40,5 @@
         and not postgres_volume_encrypted|bool
       }}"
     daemon_reload: "{{ unit is changed }}"
+  when: >
+    task_selector|permits('service')

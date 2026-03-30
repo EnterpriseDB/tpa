@@ -17,3 +17,4 @@
     enabled: yes
   when: >
     'pgd-proxy' in role
+    and task_selector|permits('service')
