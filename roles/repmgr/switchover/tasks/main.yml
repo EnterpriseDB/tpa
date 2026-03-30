@@ -14,6 +14,7 @@
     state: stopped
   when: >
     'primary' in role or 'replica' in role
+    and task_selector|permits('service', 'restart')
 
 - name: Perform switchover to {{ target }}
   command: >
@@ -29,6 +30,7 @@
     state: started
   when: >
     'primary' in role or 'replica' in role
+    and task_selector|permits('service', 'restart')
 
 - include_role:
     name: repmgr/service

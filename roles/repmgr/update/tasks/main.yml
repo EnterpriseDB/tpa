@@ -23,6 +23,8 @@
   service:
     name: repmgr
     state: restarted
+  when: >
+    task_selector|permits('service', 'restart')
 
 - name: Include repmgr-post-update hook
   include_tasks: "{{ hook }}"

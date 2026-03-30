@@ -41,6 +41,8 @@
   service:
     name: "{{ postgres_service_name }}"
     state: started
+  when: >
+    task_selector|permits('service', 'restart')
 
 - name: Wait for Postgres to start
   include_role:
