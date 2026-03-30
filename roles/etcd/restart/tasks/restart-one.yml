@@ -37,6 +37,8 @@
     state: "{{ etcd_service_end_state|default('started') }}"
   become_user: root
   become: yes
+  when: >
+    task_selector|permits('service', 'restart')
 
 - name: Wait until etcd cluster is healthy after restart
   command:
