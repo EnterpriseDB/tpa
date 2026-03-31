@@ -1,0 +1,38 @@
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+name: Build TPA EE images and publish them to Cloudsmith
+run-name: Build TPA EE images and publish them to Cloudsmith
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to apply to the image"
+        required: true
+        default: "latest"
+        type: string
+      environment_file:
+        description: "environment file to use"
+        type: string
+        required: true
+        default: "execution-environment.yml"
+      tpa-internal-ref:
+        description: "ref used for tpa-internal repo"
+        type: string
+        required: false
+
+env:
+  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_IMAGE_PUBLISHER }}
+
+jobs:
+  build-ee-images:
+    runs-on: ubuntu-24.04
+    strategy:
+        matrix:
+          base-image: [rhel, alpine]
+
+    steps:
+      - name: Summary of Manual Trigger
+        run: |
+          echo "Deploying version: ${{ github.event.inputs.tag }}"
+          echo "Target environment_file: ${{ github.event.inputs.environment_file }}"
+          echo "tpa-internal-ref tests: ${{ github.event.inputs.tpa-internal-ref }}"
