@@ -51,6 +51,16 @@ all_pg_versions:
     - tpa_postgres_version: "17"
       tpa_postgres_package_version: "17.0*"
 
+pgd5_versions:
+  tpa_architecture:
+    - "PGD-Always-ON"
+  tpa_postgres_flavour: *default_tpa_postgres_flavour
+  tpa_os_image:
+    - "redhat:8"
+    - "redhat:9"
+  tpa_postgres_version:
+    - "15"
+
 pgd6_versions:
   tpa_architecture:
     - "PGD-S"
