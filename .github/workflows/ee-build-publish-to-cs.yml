@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to apply to the image"
+        description: "Tag to apply to the image (X.Y.Z). In case of release maturity, it must match the tag."
         required: true
-        default: "latest"
+        default: "test"
         type: string
       environment_file:
         description: "environment file to use"
@@ -19,20 +19,203 @@ on:
         description: "ref used for tpa-internal repo"
         type: string
         required: false
+      ee_images_list:
+        description: "Select what EE images to build (comma-separated: rhel, alpine)"
+        required: false
+        type: choice
+        default: "['rhel','alpine']"
+        options:
+          - "['rhel']"
+          - "['alpine']"
+          - "['rhel','alpine']"
+      maturity:
+        description: "Select maturity of the EE images (snapshot, release)"
+        type: choice
+        default: testing
+        options:
+          - testing
+          - snapshot
+          - release
 
 env:
-  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_IMAGE_PUBLISHER }}
+  EDB_SUBSCRIPTION_TOKEN: ${{ secrets.CLOUDSMITH_READ_ALL }}
+  CLOUDSMITH_API_KEY: ${{ secrets.FOUNDATION_PUBLISHER }}
+  FOUNDATION_PACKAGING_VERSION: v5 #${{ vars.FOUNDATION_PACKAGING_VERSION }}
+  MATURITY: ${{ github.event.inputs.maturity }}
+
+# This GH workflow consists of the old implementation of building EE images, but with the
+# addition of the publishing step to Cloudsmith. Essentially, the maturity choice will determine if the images are only built (testing),
+# built and scanned (snapshot) or if they are also published to Cloudsmith (release), in addition to publishing the manifest.json file
+# to the S3 bucket used by Conveyor.
 
 jobs:
+  checks-pre-execution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the release maturity is used against a tag
+        if: >-
+          github.event.inputs.maturity == 'release' && !startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "::error:: Validation Failed! 'release' maturity can only be executed against a tag. Current ref is: ${{ github.ref }}"
+          exit 1
+      - name: Verify that the tag used is the same as the one defined on the input section
+        if: >-
+          github.event.inputs.maturity == 'release' && github.ref_name != inputs.tag 
+        run: |
+          echo "::error:: Validation Failed! If you use 'release' maturity, the tag defined on the input section must match the branch tag. Current reference name is: ${{ github.ref_name }} and input tag is ${{ github.event.inputs.tag }}"
+          exit 1
+
   build-ee-images:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
-        matrix:
-          base-image: [rhel, alpine]
+      matrix:
+        ee: ${{ fromJSON(github.event.inputs.ee_images_list) }}
+    steps:
+      - name: Checkout source repository
+        id: checkout-source
+        uses: actions/checkout@v6
+        with:
+          repository: EnterpriseDB/tpa-internal
+          token: ${{ secrets.GH_SLONIK }}
+
+      - name: Build EE images
+        uses: ./.github/actions/execution-environment-image-build
+        with: 
+          tag: ${{ inputs.tag }}
+          environment_file: ${{ inputs.environment_file }}
+          tpa-internal-ref: ${{ inputs.tpa-internal-ref }}
+          base-image: ${{ matrix.ee }}
+          GH_SLONIK: ${{ secrets.GH_SLONIK }}
+          RH_TPA_USERNAME: ${{ secrets.RH_TPA_USERNAME }}
+          RH_TPA_TOKEN: ${{ secrets.RH_TPA_TOKEN }}
+    
+  foundation-prepare:
+    runs-on: ubuntu-latest
+    if: >-
+        github.event.inputs.maturity == 'snapshot' || github.event.inputs.maturity == 'release'
+    needs: checks-pre-execution
+    outputs:
+      gh_run_identifier: ${{ steps.gh_run_identifier.outputs.GH_RUN_IDENTIFIER }}
+      cs_destination: ${{ steps.cs_destination.outputs.CS_DESTINATION }}
+      app_name: ${{ steps.define_app_name.outputs.APP_NAME }}
+      app_version: ${{ steps.define_app_version.outputs.APP_VERSION }}
+      source_images: ${{ steps.source_images.outputs.SOURCE_IMAGES }}
 
     steps:
-      - name: Summary of Manual Trigger
+      - name: Define GH_RUN_IDENTIFIER
+        id: gh_run_identifier
         run: |
-          echo "Deploying version: ${{ github.event.inputs.tag }}"
-          echo "Target environment_file: ${{ github.event.inputs.environment_file }}"
-          echo "tpa-internal-ref tests: ${{ github.event.inputs.tpa-internal-ref }}"
+          echo "GH_RUN_IDENTIFIER=${GITHUB_REPOSITORY##*/}-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}-${{ github.event.inputs.tag }}-${{ github.event.inputs.maturity }}" >> $GITHUB_OUTPUT
+      
+      # This is only needed if maturity is 'release' and we want to publish to production
+      - name: Define CS_DESTINATION
+        id: cs_destination
+        run: |
+          echo "CS_DESTINATION=staging_standard,staging_enterprise" >> $GITHUB_OUTPUT
+
+      - name: Define APP_NAME
+        id: define_app_name
+        run: |
+          APP_NAME="tpa-ee-images"
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT          
+
+      - name: Define APP_VERSION
+        id: define_app_version
+        run: |
+          APP_VERSION=$(date +'%y%m%d%H%M')
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Define SOURCE_IMAGES
+        id: source_images
+        run: |
+          echo "SOURCE_IMAGES<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ github.event.inputs.ee_images_list }}" | sed "s/'/\"/g" | jq -r '.[]' | while read ee; do
+            echo "ghcr.io/enterprisedb/tpa/tpa-ee-${ee}:${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  copy-to-cs:
+      runs-on: ubuntu-latest
+      if: >-
+        needs.checks-pre-execution.result == 'success' &&
+        needs.build-ee-images.result == 'success' &&
+        github.event.inputs.maturity == 'release'
+      needs: [ checks-pre-execution, foundation-prepare, build-ee-images ]
+      outputs:
+        cs-images: ${{ steps.copy-to-cs.outputs.cs-images }}
+
+      steps:
+        - name: Checkout foundation-packaging repository
+          uses: actions/checkout@v6
+          with:
+            repository: EnterpriseDB/foundation-packaging
+            path: foundation
+            token: ${{ secrets.GH_SLONIK }}
+            ref: ${{ env.FOUNDATION_PACKAGING_VERSION }}
+
+        - name: Get images to copy
+          run: |
+            echo "${{ needs.foundation-prepare.outputs.source_images }}" > ./source-images.txt
+
+        - name: Copy images to CS destination
+          id: copy-to-cs
+          uses: ./foundation/actions/cloudsmith/docker/skopeo
+          with:
+            images-source: ./source-images.txt
+            source-username: edb-slonik
+            source-password: ${{ secrets.GH_SLONIK }}
+            source-registry: ghcr.io
+            gh-run-identifier: ${{ needs.foundation-prepare.outputs.gh_run_identifier }}
+            cs-destination: ${{ needs.foundation-prepare.outputs.cs_destination }}
+        
+  anchore-stateful-scan:
+    if: >-
+      needs.checks-pre-execution.result == 'success' &&
+      (github.event.inputs.maturity == 'release' || github.event.inputs.maturity == 'snapshot')
+    needs: [ checks-pre-execution, build-ee-images, foundation-prepare ]
+    uses: Enterprisedb/foundation-security/.github/workflows/anchore-scan-application-reusable.yml@stable
+    with:
+      app-name: ${{ needs.foundation-prepare.outputs.APP_NAME }}
+      app-version: ${{ needs.foundation-prepare.outputs.APP_VERSION }}
+      images: ${{ needs.foundation-prepare.outputs.source_images }}
+      registry: 'ghcr.io'
+      cr-username: 'edb-slonik'
+      release-phase: ${{ github.event.inputs.maturity == 'release' && 'release-candidate' || 'development' }}
+      product-branch: ${{ github.event.inputs.maturity == 'release' && 'main' || 'dev' }}
+
+    secrets:
+      gh-app-key: ${{ secrets.FOUNDATION_SECURITY_APP_PRIVATE_KEY }}
+      gh-app-id: ${{ secrets.FOUNDATION_SECURITY_APP_ID }}
+      cr-password: ${{ secrets.GH_SLONIK }}
+      anchore-token: ${{ secrets.ANCHORE_CI_TOKEN }}
+      
+  publish:
+    runs-on: ubuntu-latest
+    if: >-
+      needs.checks-pre-execution.result == 'success' && needs.copy-to-cs.result == 'success' &&
+      (github.event.inputs.maturity == 'release')
+    needs: [ checks-pre-execution, foundation-prepare, copy-to-cs, anchore-stateful-scan ]
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout foundation-packaging repository
+        uses: actions/checkout@v6
+        with:
+          repository: EnterpriseDB/foundation-packaging
+          token: ${{ secrets.GH_SLONIK }}
+          path: foundation
+          ref: ${{ env.FOUNDATION_PACKAGING_VERSION }}
+      
+      # For some reason (GitHub error?), if you pass a variable to 'environment', it won't
+      # catch it later on the 'conveyor-upload' action, and the bucket will be 'conveyor-storage-/(...)'
+      # resulting in error
+
+      - name: Create a manifest.json file and upload to S3 bucket (production)
+        if: github.event.inputs.maturity == 'release'
+        uses: ./foundation/actions/publish
+        with:
+          gh-run-identifier: ${{ needs.foundation-prepare.outputs.gh_run_identifier }}
+          cs-destination: ${{ needs.foundation-prepare.outputs.cs_destination }}
+          environment: production
