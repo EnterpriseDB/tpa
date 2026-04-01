@@ -474,6 +474,121 @@ class TestPGDXArchitecture:
             )
         finally:
             cleanup(cluster_path)
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "2"],
+            STANDARD_PGDX_ARGV
+            + [
+                "--data-nodes-per-location",
+                "2",
+                "--location-names",
+                "west",
+                "east",
+            ],
+            STANDARD_PGDX_ARGV
+            + [
+                "--data-nodes-per-location",
+                "2",
+                "--location-names",
+                "west",
+                "mid",
+                "east",
+                "--witness-only-location",
+                "mid",
+            ],
+        ],
+    )
+    def test_pgdx_two_data_nodes_without_camo(self, argv, pgdx_cluster):
+        """Test that --data-nodes-per-location 2 without --enable-camo does NOT
+        enable CAMO. No instance should have bdr_node_camo_partner set, and no
+        bdr_commit_scopes should be created.
+
+        This is a regression test: previously _update_instance_camo() was called
+        unconditionally, causing CAMO to be configured whenever a location had
+        exactly 2 data nodes.
+        """
+        for instance in pgdx_cluster.instances:
+            assert (
+                "bdr_node_camo_partner" not in instance.host_vars
+            ), f"Instance {instance.name} should not have bdr_node_camo_partner without --enable-camo"
+
+        assert (
+            "bdr_commit_scopes" not in pgdx_cluster.cluster_vars
+        ), "bdr_commit_scopes should not be set without --enable-camo"
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDX_ARGV
+            + [
+                "--edbpge",
+                "16",
+                "--data-nodes-per-location",
+                "2",
+                "--enable-camo",
+            ],
+        ],
+    )
+    def test_pgdx_camo_enabled(self, argv, pgdx_cluster):
+        """Test that --enable-camo with --data-nodes-per-location 2 and a
+        compatible flavour correctly configures CAMO partners and commit scopes.
+        """
+        bdr_instances = pgdx_cluster.instances.with_role("bdr")
+        data_instances = bdr_instances.with_bdr_node_kind("data")
+
+        # Each data instance should have a CAMO partner
+        for instance in data_instances:
+            assert (
+                "bdr_node_camo_partner" in instance.host_vars
+            ), f"Data instance {instance.name} should have bdr_node_camo_partner"
+
+        # Commit scopes should be created
+        commit_scopes = pgdx_cluster.cluster_vars.get("bdr_commit_scopes", [])
+        assert (
+            len(commit_scopes) > 0
+        ), "bdr_commit_scopes should be set with --enable-camo"
+        assert commit_scopes[0]["name"] == "camo"
+
+    def test_pgdx_camo_requires_compatible_flavour(self):
+        """Test that --enable-camo with postgresql flavour raises an error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.STANDARD_PGDX_ARGV + [
+            "--data-nodes-per-location",
+            "2",
+            "--enable-camo",
+        ]
+
+        try:
+            with pytest.raises(
+                PGDXArchitectureError, match="Postgres Extended or EPAS"
+            ):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
+
+    def test_pgdx_camo_requires_two_data_nodes(self):
+        """Test that --enable-camo with data-nodes-per-location != 2 raises an error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.MINIMUM_PGDX_ARGV + [
+            "--edbpge",
+            "16",
+            "--data-nodes-per-location",
+            "3",
+            "--enable-camo",
+        ]
+
+        try:
+            with pytest.raises(
+                PGDXArchitectureError, match="different than 2 data nodes"
+            ):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
 
 
 # @patch.object(Architecture, "expand_template", expand_template)
