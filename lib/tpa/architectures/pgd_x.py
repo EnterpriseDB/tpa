@@ -98,6 +98,9 @@ class PGDX(PGD):
 
         Requires postgres_flavour to be edbpge or epas.
         """
+        if not self.args.get("enable_camo", False):
+            return
+
         cluster.set_var("bdr_commit_scopes", [])
         subgroups = []
         scope = "camo"
