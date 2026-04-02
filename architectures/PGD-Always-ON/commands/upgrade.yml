@@ -163,7 +163,9 @@
     bdr_major_version_upgrade: "{{ bdr4_major_version_upgrade }}"
   when: >
     bdr4_major_version_upgrade
-    or
+
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_minor_5.yml"
+  when: >
     bdr5_minor_version_upgrade
 
 - import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_3to5.yml"
