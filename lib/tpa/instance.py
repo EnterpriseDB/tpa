@@ -20,7 +20,9 @@ class Instance:
         host_vars=None,
     ):
         def _next_node_id(cluster):
-            nodes = (i.settings["node"] for i in cluster.instances if "node" in i.settings)
+            nodes = (
+                i.settings["node"] for i in cluster.instances if "node" in i.settings
+            )
             return max(nodes, default=0) + 1
 
         self._name: str = name
@@ -103,7 +105,7 @@ class Instance:
             self.settings, self._cluster.instance_defaults, self.location.settings or {}
         )
         return v.get(key, default)
-    
+
     def set_hostvar(self, key, val):
         """Sets the given key=val on the instance."""
         self.host_vars[key] = val

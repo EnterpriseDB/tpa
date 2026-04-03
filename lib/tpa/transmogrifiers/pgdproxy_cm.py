@@ -6,6 +6,7 @@
 This transmogrifier changes a PGD-Always-ON cluster running PGD version 5
 from using pgd-proxy to Connection Manager(PGD 5.9+)
 """
+
 # --- Rationale and Migration Strategy ---
 #
 # This transmogrifier handles the complex task of migrating a PGD 5 cluster's

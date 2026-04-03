@@ -18,7 +18,6 @@ class Platform:
         self._name = name
         self.arch = arch
 
-
     @staticmethod
     def load(name, arch):
         module = "tpa.platforms.%s" % name
@@ -27,7 +26,6 @@ class Platform:
 
         p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)
-
 
     @property
     def name(self):
@@ -130,4 +128,3 @@ class Platform:
         Make platform-specific changes the subnet prefix used if none is specified by the user.
         """
         return DEFAULT_SUBNET_PREFIX_LENGTH
-

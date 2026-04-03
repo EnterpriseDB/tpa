@@ -147,10 +147,12 @@ class PGD(Architecture):
         if bdr_node_group_options != {}:
             cluster_vars.update(
                 {
-                    "bdr_node_groups": [{
-                        "name": self.bdr_safe_name(self.cluster_name()),
-                        "options": bdr_node_group_options,
-                    }]
+                    "bdr_node_groups": [
+                        {
+                            "name": self.bdr_safe_name(self.cluster_name()),
+                            "options": bdr_node_group_options,
+                        }
+                    ]
                 }
             )
 
@@ -175,7 +177,7 @@ class PGD(Architecture):
         self._update_instance_pem(cluster)
         self._update_instance_beacon(cluster)
         self._update_instance_barman(cluster)
-    
+
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
 
@@ -242,8 +244,8 @@ class PGD(Architecture):
                 else "pemserver"
             )
             pemserver = cluster.add_instance(
-                instance_name = pemserver_name,
-                location_name = cluster.locations[0].name,
+                instance_name=pemserver_name,
+                location_name=cluster.locations[0].name,
             )
             pemserver.add_role("pem-server")
 
@@ -264,7 +266,9 @@ class PGD(Architecture):
         for location in cluster.locations:
 
             # Data nodes for the given location
-            data_nodes = cluster.instances.with_bdr_node_kind("data").in_location(location.name)
+            data_nodes = cluster.instances.with_bdr_node_kind("data").in_location(
+                location.name
+            )
             # Barman nodes for the given location
             barman = cluster.instances.with_role("barman").in_location(location.name)
 

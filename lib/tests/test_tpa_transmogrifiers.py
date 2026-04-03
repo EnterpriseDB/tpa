@@ -86,7 +86,12 @@ class TestReplace2qRepositories:
         ],
     )
     def test_replace2qrepositories_is_applicable(
-        self, tpa_2q_repositories, edb_repositories, extra_repositories, postgres_flavour, expected
+        self,
+        tpa_2q_repositories,
+        edb_repositories,
+        extra_repositories,
+        postgres_flavour,
+        expected,
     ):
         """test is_applicable function"""
         x = Replace2qRepositories()
@@ -161,9 +166,10 @@ class TestReplace2qRepositories:
         x.apply(cls)
 
         assert ("edb_repositories" not in cls.vars and expected is None) or (
-            (cls.vars.get("edb_repositories") is None) or
-            set(cls.vars.get("edb_repositories")) == set(expected)
+            (cls.vars.get("edb_repositories") is None)
+            or set(cls.vars.get("edb_repositories")) == set(expected)
         )
+
 
 class TestArchitecture:
     """test suite for Architecture class"""
@@ -173,9 +179,9 @@ class TestArchitecture:
         assert "--architecture" in Architecture.options()
         assert "--pgd-proxy-routing" in Architecture.options()
 
+
 class TestBDR4PGD5:
     """test suite for BDR4PGD5 class"""
-
 
     @pytest.mark.parametrize(
         "input, error, expected",

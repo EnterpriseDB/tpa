@@ -40,6 +40,7 @@ def bdr_node_versions(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, s
 
     return versions
 
+
 def bdr_node_version_nums(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, str]:
     """Given hostvars, returns a list of BDR major numbers running on each of
     the given hostnames, assumed to be BDR instances that have already run

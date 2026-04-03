@@ -16,6 +16,7 @@ NO_KEYRING_ERROR_MSG = """Could not find compatible keyring backend,
 ensure that you have a compatible backend for python keyring module
 or use keyring_backend: legacy in config.yml"""
 
+
 def generate_password():
     """
     Generates a password for use within TPA.
@@ -26,7 +27,7 @@ def generate_password():
     """
 
     charset = string.ascii_letters + string.digits + APPROVED_SYMBOLS
-    return ''.join(secrets.choice(charset) for i in range(32))
+    return "".join(secrets.choice(charset) for i in range(32))
 
 
 def store_password(cluster_dir, password_name, password, keyring_backend):
@@ -87,7 +88,9 @@ def show_password(cluster_dir, password_name, keyring_backend):
 
     elif keyring_backend in KEYRING_SUPPORTED_BACKENDS:
         try:
-            password = keyring.get_password(KEYRING_PREFIX + cluster_name, password_name)
+            password = keyring.get_password(
+                KEYRING_PREFIX + cluster_name, password_name
+            )
         except keyring.errors.NoKeyringError:
             print(NO_KEYRING_ERROR_MSG)
             exit(1)
@@ -143,12 +146,12 @@ def exists(cluster_dir, password_name, keyring_backend):
         keyring_backend=keyring_backend,
     )
     cluster_name = os.path.basename(os.path.abspath(cluster_dir))
-    if (
-        keyring_backend in KEYRING_SUPPORTED_BACKENDS
-        and keyring_backend != "legacy"
-    ):
+    if keyring_backend in KEYRING_SUPPORTED_BACKENDS and keyring_backend != "legacy":
         try:
-            if keyring.get_password(KEYRING_PREFIX + cluster_name, password_name) is None:
+            if (
+                keyring.get_password(KEYRING_PREFIX + cluster_name, password_name)
+                is None
+            ):
                 return False
         except keyring.errors.NoKeyringError:
             return False

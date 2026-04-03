@@ -93,8 +93,7 @@ class Cluster:
         return self._settings
 
     def num_subnets(self):
-        """ Returns the number of subnets required by this cluster
-        """
+        """Returns the number of subnets required by this cluster"""
         if self.platform == "docker":
             return 1
 
@@ -168,7 +167,11 @@ class Cluster:
         list of locations, a dict of instance_defaults, and a list of instances.
         Then there are some other settings, depending on platform etc."""
 
-        c = {"architecture": self.architecture, "cluster_name": self.name, **self.settings}
+        c = {
+            "architecture": self.architecture,
+            "cluster_name": self.name,
+            **self.settings,
+        }
         c.update(
             {
                 "cluster_vars": self.group.group_vars,
@@ -241,5 +244,3 @@ class Cluster:
         c.settings.update(y)
 
         return c
-
-

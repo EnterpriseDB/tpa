@@ -27,6 +27,7 @@ from tpa import constants
 
 KEYRING_SUPPORTED_BACKENDS = ["system", "legacy"]
 
+
 class Architecture:
     """An Architecture is responsible for configuring a Cluster according to
     EDB's recommendations for a particular purpose, e.g., running Postgres
@@ -111,7 +112,6 @@ class Architecture:
 
         platform.validate_arguments(args)
 
-
     def _validate_flavour_version(self, args):
         """Verify postgres flavour, version and related arguments.
         By now, both postgres_flavour and postgres_version must be set,
@@ -122,7 +122,7 @@ class Architecture:
         version = args.get("postgres_version")
 
         if isinstance(flavour, tuple):
-            (flavour, v) = flavour
+            flavour, v = flavour
             if version and version != v:
                 # We don't need to worry about conflicts between
                 # `--postgres-flavour epas` and `--epas`, because they're in a
@@ -171,7 +171,7 @@ class Architecture:
             # We accept either something like 2ndqpostgres or
             # 2ndqpostgres:2QREL_11_STABLE_dev
             if ":" in name:
-                (name, _) = name.split(":", 1)
+                name, _ = name.split(":", 1)
             if name.lower() not in installable:
                 errors.append("doesn't know how to install '%s' from source" % name)
             source_names.append(name.lower())
@@ -193,7 +193,7 @@ class Architecture:
         args["cluster_name"] = self.cluster.name
 
         # args have been validated so we know keyring_backend is set by now
-        cluster.add_settings({ 'keyring_backend': self.args['keyring_backend']})
+        cluster.add_settings({"keyring_backend": self.args["keyring_backend"]})
 
         # If --overrides-from is specified, we load files one by one (treating
         # them as templates) and merge them recursively into args. This can be
@@ -207,7 +207,9 @@ class Architecture:
 
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
-        (args["hostnames"], args["ip_addresses"], args["private_ip_addresses"]) = self.hostnames(self.num_instances())
+        args["hostnames"], args["ip_addresses"], args["private_ip_addresses"] = (
+            self.hostnames(self.num_instances())
+        )
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
                 re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
@@ -244,22 +246,20 @@ class Architecture:
         for instance in cluster.instances:
             node_number = instance.get_setting("node")
             if args["private_ip_addresses"][node_number] is not None:
-                instance.set_settings({
-                    "public_ip": args["ip_addresses"][node_number],
-                    "private_ip": args["private_ip_addresses"][node_number]
-                })
+                instance.set_settings(
+                    {
+                        "public_ip": args["ip_addresses"][node_number],
+                        "private_ip": args["private_ip_addresses"][node_number],
+                    }
+                )
             elif args["ip_addresses"][node_number] is not None:
-                instance.set_settings({
-                    "ip_address": args["ip_addresses"][node_number]
-                })
-
-
+                instance.set_settings({"ip_address": args["ip_addresses"][node_number]})
 
         try:
             args["subnets"] = self.subnets(cluster.num_subnets())
         except ValueError as e:
             raise ArchitectureError(
-                    f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
+                f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
             )
 
         # the cluster already knows about the locations
@@ -269,8 +269,7 @@ class Architecture:
         cluster_tags = args.get("cluster_tags", {})
         self.update_cluster_tags(cluster_tags)
         platform.update_cluster_tags(cluster_tags, args)
-        cluster.add_settings( { "cluster_tags": cluster_tags } )
-
+        cluster.add_settings({"cluster_tags": cluster_tags})
 
         self._init_top_level_settings(cluster)
 
@@ -301,18 +300,24 @@ class Architecture:
         Adds instances to the given cluster based on the appropriate layout
         template
         """
-        y = self.load_yaml(self.layout_template(args), args|{'location_names': [ l.name for l in cluster.locations]})
+        y = self.load_yaml(
+            self.layout_template(args),
+            args | {"location_names": [l.name for l in cluster.locations]},
+        )
 
-        for i in y['instances']:
+        for i in y["instances"]:
             # the instances may contain a node number, a Name, a location,
             # a list of roles, a dict of vars, and other fields
             # like backup and upstream
-            cluster.add_instance(i['Name'], location_name = i['location'], host_vars = i.get('vars', []), settings = i)
-
+            cluster.add_instance(
+                i["Name"],
+                location_name=i["location"],
+                host_vars=i.get("vars", []),
+                settings=i,
+            )
 
         if y is not None:
             args.update(y)
-
 
     def layout_template(self, args):
         """
@@ -337,10 +342,6 @@ class Architecture:
         Returns a list of platforms supported by this architecture
         """
         return Platform.all_platforms()
-
-
-
-
 
     def add_options(self, p):
         """
@@ -417,7 +418,7 @@ class Architecture:
             "--compliance",
             action="store",
             dest="compliance",
-            choices=['stig','cis'],
+            choices=["stig", "cis"],
             help="configure to assist with a compliance standard",
         )
 
@@ -715,7 +716,22 @@ class Architecture:
         Returns a list of packages for which --xxx-package-version options
         should be accepted
         """
-        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy", "pg-backup-api", "patroni", "pem-server", "pem-agent", "etcd", "beacon-agent"]
+        return [
+            "postgres",
+            "repmgr",
+            "barman",
+            "pglogical",
+            "bdr",
+            "pgbouncer",
+            "pgdcli",
+            "pgd-proxy",
+            "pg-backup-api",
+            "patroni",
+            "pem-server",
+            "pem-agent",
+            "etcd",
+            "beacon-agent",
+        ]
 
     def installable_sources(self):
         """
@@ -819,7 +835,7 @@ class Architecture:
             env=env,
             **popen_params,
         )
-        (stdout, stderr) = p.communicate()
+        stdout, stderr = p.communicate()
 
         if p.returncode != 0:
             raise ConfigureError(stderr.strip())
@@ -899,7 +915,9 @@ class Architecture:
 
             # set platform-specific default subnet size if a non-None value has not been specified
             if self.args.get("subnet_prefix") is None:
-                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(self.num_instances())
+                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(
+                    self.num_instances()
+                )
             net = Network(cidr, self.args["subnet_prefix"])
             self._net = net
         return self._net
@@ -1004,11 +1022,11 @@ class Architecture:
                 top.update({"vault_name": str(uuid.uuid4())})
             self.args["top_level_settings"] = top
 
-###############################
-#
-# cluster_vars setup functions
-#
-###############################
+    ###############################
+    #
+    # cluster_vars setup functions
+    #
+    ###############################
 
     def _init_cluster_vars(self, cluster_vars):
         """
@@ -1059,7 +1077,6 @@ class Architecture:
                 val = {"common": packages}
                 cluster_vars[var] = cluster_vars.get(var, val)
 
-
     def _add_source_install(self, cluster_vars):
         """Add --install-from-source entries into cluster_vars"""
         sources = self.args.get("install_from_source") or []
@@ -1081,7 +1098,7 @@ class Architecture:
         installable_sources = self.installable_sources()
         ref = None
         if ":" in name:
-            (name, ref) = name.split(":", 1)
+            name, ref = name.split(":", 1)
         name = name.lower()
         entry = installable_sources[name]
 
@@ -1182,7 +1199,7 @@ class Architecture:
                 cluster_vars.update({"edb_repositories": []})
             else:
                 cluster_vars.update({"edb_repositories": edb_repositories})
-            
+
             # In general, if we're using EDB repositories at all, we don't want
             # packages from PGDG, unless we're using community360 as explained
             # above.
@@ -1197,21 +1214,18 @@ class Architecture:
                 )
         else:
             cluster_vars.update(
-                    {
-                        "edb_repositories": self.default_edb_repos(cluster_vars)
-                    }
-                )
-            # We double-check if we don't need EDB repositories, since we might 
+                {"edb_repositories": self.default_edb_repos(cluster_vars)}
+            )
+            # We double-check if we don't need EDB repositories, since we might
             # be having a setup that involves PGDG repositories
             if cluster_vars["edb_repositories"] != []:
                 cluster_vars.update(
-                        {
-                            "apt_repository_list": [],
-                            "yum_repository_list": ["EPEL"],
-                            "suse_repository_list": [],
-                        }
-                    )
-
+                    {
+                        "apt_repository_list": [],
+                        "yum_repository_list": ["EPEL"],
+                        "suse_repository_list": [],
+                    }
+                )
 
     def cluster_vars_args(self):
         """
@@ -1226,14 +1240,32 @@ class Architecture:
             "use_local_repo_only",
             "failover_manager",
             "enable_pg_backup_api",
-        ] + ["%s_package_version" % x.replace("-", "_") for x in self.versionable_packages()]
+        ] + [
+            "%s_package_version" % x.replace("-", "_")
+            for x in self.versionable_packages()
+        ]
 
     def versionable_packages(self):
         """
         Returns a list of packages for which --xxx-package-version options
         should be accepted
         """
-        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy", "pg-backup-api", "patroni", "pem-server", "pem-agent", "etcd", "beacon-agent"]
+        return [
+            "postgres",
+            "repmgr",
+            "barman",
+            "pglogical",
+            "bdr",
+            "pgbouncer",
+            "pgdcli",
+            "pgd-proxy",
+            "pg-backup-api",
+            "patroni",
+            "pem-server",
+            "pem-agent",
+            "etcd",
+            "beacon-agent",
+        ]
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
         """Returns the default EDB (i.e., Cloudsmith) repositories we think are
@@ -1261,19 +1293,22 @@ class Architecture:
 
         if (
             postgres_flavour == "postgresql"
-            and self.args.get("failover_manager") != 'efm'
-            and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight", "PGD-X", "PGD-S")
-            and not (self.args.get("enable_pem") or self.args.get("enable_beacon_agent"))
+            and self.args.get("failover_manager") != "efm"
+            and self.name
+            not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight", "PGD-X", "PGD-S")
+            and not (
+                self.args.get("enable_pem") or self.args.get("enable_beacon_agent")
+            )
         ):
             repos = []
 
         return repos
 
-###############################
-#
-# instance and instance_defaults setup functions
-#
-###############################
+    ###############################
+    #
+    # instance and instance_defaults setup functions
+    #
+    ###############################
     def _init_instance_defaults(self, instance_defaults):
         """
         Makes changes to instance_defaults applicable across architectures
@@ -1297,11 +1332,11 @@ class Architecture:
         """
         pass
 
-###############################
-#
-# compliance-related functions
-#
-###############################
+    ###############################
+    #
+    # compliance-related functions
+    #
+    ###############################
 
     def _validate_compliance(self, args):
         """
@@ -1358,7 +1393,7 @@ class Architecture:
                 "client_min_messages": "ERROR",
             }
         )
-        cluster.group.add_to_group_vars({ "postgres_conf_settings": pcs })
+        cluster.group.add_to_group_vars({"postgres_conf_settings": pcs})
 
         cluster.group.add_to_group_vars(
             {
@@ -1374,8 +1409,10 @@ class Architecture:
                 "hba_force_certificate_auth": True,
                 "hba_cert_authentication_map": "sslmap",
                 # EPAS-00-006200 and others
-                "extra_postgres_extensions": cluster.group.group_vars.get("extra_postgres_extensions", [])
-                + ["sql_protect"]
+                "extra_postgres_extensions": cluster.group.group_vars.get(
+                    "extra_postgres_extensions", []
+                )
+                + ["sql_protect"],
             }
         )
 
@@ -1399,7 +1436,7 @@ class Architecture:
                 "temp_file_limit": "1GB",
             }
         )
-        cluster.group.add_to_group_vars({"postgres_conf_settings": pcs })
+        cluster.group.add_to_group_vars({"postgres_conf_settings": pcs})
 
         cluster.group.add_to_group_vars(
             {
@@ -1408,19 +1445,23 @@ class Architecture:
                 # 3.1.21
                 "log_disconnections": "on",
                 # 2.1
-                "extra_bash_rc_lines": cluster.group.group_vars.get("extra_bashrc_lines", [])
+                "extra_bash_rc_lines": cluster.group.group_vars.get(
+                    "extra_bashrc_lines", []
+                )
                 + ["umask 0077"],
                 # 3.2, 5.3
-                "extra_postgres_extensions": cluster.group.group_vars.get("extra_postgres_extensions", [])
-                + ["passwordcheck", "pgaudit"]
+                "extra_postgres_extensions": cluster.group.group_vars.get(
+                    "extra_postgres_extensions", []
+                )
+                + ["passwordcheck", "pgaudit"],
             }
         )
 
-###############################
-#
-# filesystem functions for an existing cluster directory
-#
-###############################
+    ###############################
+    #
+    # filesystem functions for an existing cluster directory
+    #
+    ###############################
 
     def setup_local_repo(self):
         """
@@ -1431,7 +1472,10 @@ class Architecture:
             major_version = self.image()["version"].split(".")[0]
             os.makedirs(
                 os.path.join(
-                    self.cluster.name, "local-repo", self.image()["os_family"], major_version
+                    self.cluster.name,
+                    "local-repo",
+                    self.image()["os_family"],
+                    major_version,
                 )
             )
         except KeyError:
@@ -1463,7 +1507,7 @@ class Architecture:
             stderr=subprocess.PIPE,
             universal_newlines=True,
         )
-        (_, errstr) = p.communicate()
+        _, errstr = p.communicate()
         if p.returncode != 0:
             raise ExternalCommandError("errstr")
 
@@ -1487,9 +1531,7 @@ class Architecture:
                 ["git", "init"],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(
-                f"Failed to initialise git repository: { ece }"
-            )
+            raise ArchitectureError(f"Failed to initialise git repository: { ece }")
 
         try:
             self.run_external_command(
@@ -1510,9 +1552,7 @@ class Architecture:
                     ],
                 )
             except ExternalCommandError as ece:
-                raise ArchitectureError(
-                    f"Failed to add remote repository: { ece }"
-                )
+                raise ArchitectureError(f"Failed to add remote repository: { ece }")
 
         files = [
             f
@@ -1573,7 +1613,9 @@ class Architecture:
                     os.mkdir(destination)
                 for ls_link in os.listdir(source):
                     update_symlinks_recursively(
-                        os.path.join(source, ls_link), os.path.join(destination, ls_link), force
+                        os.path.join(source, ls_link),
+                        os.path.join(destination, ls_link),
+                        force,
                     )
             else:
                 if force:
@@ -1609,4 +1651,3 @@ class Architecture:
         Returns a list of targets to create_links() for
         """
         return ["deploy.yml", "commands", "tests", "playbooks"]
-

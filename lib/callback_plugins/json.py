@@ -45,7 +45,6 @@ from ansible.module_utils._text import to_text
 from ansible.parsing.ajson import AnsibleJSONEncoder
 from ansible.plugins.callback import CallbackBase
 
-
 LOCKSTEP_CALLBACKS = frozenset(("linear", "debug"))
 
 

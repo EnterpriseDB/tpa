@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 """Tests for the main architecture module."""
+
 import shutil
 from unittest.mock import patch
 
@@ -13,7 +14,6 @@ from tpaexec.architecture import Architecture
 from tpaexec.architectures import M1, BDR_Always_ON, PGD_Always_ON
 from tpaexec.exceptions import ArchitectureError
 from tpaexec.platforms import Platform, PlatformError
-
 
 CONFIG_PATH = {
     "BASIC": "lib/tests/config/cluster-basic",
@@ -290,7 +290,10 @@ class TestBDRArchitecture:
     )
     def test_package_version_at_least(self, version_string, expected):
         min_ver = BDR_Always_ON.BDR_WITH_READ_LISTEN_PORT
-        assert Architecture._package_version_at_least(object(), version_string, min_ver) is expected
+        assert (
+            Architecture._package_version_at_least(object(), version_string, min_ver)
+            is expected
+        )
 
     @pytest.mark.parametrize(
         "version_string",

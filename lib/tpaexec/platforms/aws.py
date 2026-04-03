@@ -9,10 +9,10 @@ from ..exceptions import AWSPlatformError
 
 from tpa import constants
 
-
 AWS_DEFAULT_INSTANCE_TYPE = "t3.micro"
 AWS_DEFAULT_REGION = "eu-west-1"
 AWS_DEFAULT_VOLUME_DEVICE_NAME = "/dev/xvd"
+
 
 class aws(CloudPlatform):
     def __init__(self, name, arch):
@@ -146,7 +146,7 @@ class aws(CloudPlatform):
                     "owner": "792107900819",
                     "user": "rocky",
                     "os_family": "RedHat",
-                }
+                },
             },
             "ubuntu": {
                 "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250624": {

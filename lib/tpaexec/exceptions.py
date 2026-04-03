@@ -45,14 +45,12 @@ class ArchitectureError(TPABaseException):
 
 
 class BDRArchitectureError(ArchitectureError):
-
     """BDR Architecture error exception class."""
 
     MSG = "BDR Architecture error"
 
 
 class ImagesArchitectureError(ArchitectureError):
-
     """Images Architecture error exception class."""
 
     MSG = "Images Architecture error"

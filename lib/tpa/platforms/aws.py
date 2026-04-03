@@ -146,7 +146,7 @@ class aws(CloudPlatform):
                     "owner": "792107900819",
                     "user": "rocky",
                     "os_family": "RedHat",
-                }
+                },
             },
             "ubuntu": {
                 "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20250624": {

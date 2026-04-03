@@ -32,7 +32,7 @@ def md5_password(password, username):
 def scram_password(password, salt=None, rounds=4096):
     s = scram.using(rounds=rounds, salt=salt, algs="sha-1,sha-256").hash(password)
 
-    (salt, rounds, SaltedPassword) = scram.extract_digest_info(s, "sha-256")
+    salt, rounds, SaltedPassword = scram.extract_digest_info(s, "sha-256")
 
     ClientKey = HMAC(
         SaltedPassword, "Client Key".encode("ascii"), hashlib.sha256
@@ -71,8 +71,8 @@ def encrypted_password(
             )
 
         if existing_password and existing_password.startswith("SCRAM-SHA-256$"):
-            (_, info, _) = existing_password.split("$", 2)
-            (rounds, b64salt) = info.split(":", 1)
+            _, info, _ = existing_password.split("$", 2)
+            rounds, b64salt = info.split(":", 1)
             salt = base64.b64decode(b64salt)
             rounds = int(rounds)
 

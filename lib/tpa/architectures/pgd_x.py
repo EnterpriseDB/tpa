@@ -42,7 +42,7 @@ class PGDX(PGD):
         by the parent class ('standard' or 'enterprise', depending on flavour
         or in principle on other requested software)
         """
-        return super().default_edb_repos(cluster_vars) + ['postgres_distributed']
+        return super().default_edb_repos(cluster_vars) + ["postgres_distributed"]
 
     def default_location_names(self):
         return ["first"]
@@ -52,8 +52,7 @@ class PGDX(PGD):
         self._validate_camo(args)
         if not self.args["location_names"]:
             self.args["location_names"] = self.default_location_names()
-    
-    
+
     def _validate_camo(self, args):
         camo = args.get("enable_camo", False)
         data_nodes = args.get("data_nodes_per_location")
@@ -64,7 +63,7 @@ class PGDX(PGD):
                 )
             if data_nodes != 2:
                 raise PGDXArchitectureError(
-                    "Cannot enable CAMO with --data-nodes-per-location " \
+                    "Cannot enable CAMO with --data-nodes-per-location "
                     "different than 2 data nodes"
                 )
 
@@ -84,10 +83,14 @@ class PGDX(PGD):
         subgroups = []
         scope = "camo"
 
-        # Here we set all the BDR Primary nodes found per location, group them by pairs and then 
+        # Here we set all the BDR Primary nodes found per location, group them by pairs and then
         # define their own CAMO "bdr_commit_scope"
         for location in cluster.locations:
-            bdr_primaries = cluster.instances.in_location(location.name).with_bdr_node_kind("data").select(lambda i: "bdr_node_camo_partner" not in i.host_vars)
+            bdr_primaries = (
+                cluster.instances.in_location(location.name)
+                .with_bdr_node_kind("data")
+                .select(lambda i: "bdr_node_camo_partner" not in i.host_vars)
+            )
             if len(bdr_primaries) != 2:
                 continue
             a, b = bdr_primaries[0], bdr_primaries[1]
@@ -104,7 +107,7 @@ class PGDX(PGD):
                     "rule": f"ALL ({subgroup}) ON durable CAMO DEGRADE ON (timeout = 60s, require_write_lead = true) TO ASYNC",
                 }
             )
-        
+
         # Set the "default_commit_scope" option to "camo" inside "bdr_node_groups"
         for node_group in cluster.group.group_vars["bdr_commit_scopes"]:
             if node_group["name"] in subgroups:

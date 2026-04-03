@@ -143,7 +143,7 @@ class CallbackModule(CallbackModule_default):
                 self._output_lines.append(
                     f"{result._host.get_name()} => { self._dump_results(result._result) }"
                 )
-            if result._result.get('changed', False):
+            if result._result.get("changed", False):
                 self._changed += 1
             else:
                 self._ok += 1

@@ -9,7 +9,6 @@ import re
 from argparse import SUPPRESS
 
 
-
 class PGD_Always_ON(BDR):
     def supported_versions(self) -> List[Tuple[str, str]]:
         return [
@@ -388,4 +387,3 @@ class PGD_Always_ON(BDR):
         and false otherwise.
         """
         return location == self.args.get("witness_only_location")
-

@@ -9,7 +9,6 @@ import re
 from argparse import SUPPRESS
 
 
-
 class Lightweight(BDR):
     def supported_versions(self) -> List[Tuple[str, str]]:
         return [
@@ -221,8 +220,7 @@ class Lightweight(BDR):
         scope = "lightweight_scope"
 
         commit_scopes = [
-            (s["name"], s["origin"])
-            for s in cluster_vars["bdr_commit_scopes"]
+            (s["name"], s["origin"]) for s in cluster_vars["bdr_commit_scopes"]
         ]
         if (scope, group) not in commit_scopes:
             cluster_vars["bdr_commit_scopes"].append(
@@ -239,7 +237,6 @@ class Lightweight(BDR):
                 g.setdefault("options", {})
                 g["options"]["default_commit_scope"] = scope
 
-
     def _instance_bdr_group(self, instance):
         """Returns the name of the node group that this instance is (or rather,
         will be) a member of."""
@@ -252,4 +249,3 @@ class Lightweight(BDR):
         """
         loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"
-

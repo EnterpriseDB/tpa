@@ -51,7 +51,7 @@ class CloudPlatform(Platform):
                 if size is not None:
                     v["volume_size"] = size
                 # instance["volumes"] = volumes + [v]
-                instance.set_settings({ "volumes": volumes + [v]})
+                instance.set_settings({"volumes": volumes + [v]})
 
     @staticmethod
     def set_cluster_rules(args, cluster, settings):

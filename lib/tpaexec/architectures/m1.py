@@ -260,7 +260,8 @@ class M1(Architecture):
                 ins_defs = self.args["instance_defaults"]
                 role = instance.get("role", ins_defs.get("role", []))
                 if set(["primary", "replica", "witness"]).intersection(set(role)) or (
-                    "barman" in role and self.args["cluster_vars"].get("enable_pg_backup_api", False)
+                    "barman" in role
+                    and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
@@ -385,7 +386,9 @@ class M1(Architecture):
         )
 
         if failover_manager == "efm":
-            cluster_vars["efm_version"] = self._set_efm_version(cluster_vars,)
+            cluster_vars["efm_version"] = self._set_efm_version(
+                cluster_vars,
+            )
             cluster_vars.update(
                 {
                     "efm_user_password_encryption": "scram-sha-256",

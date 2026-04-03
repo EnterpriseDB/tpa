@@ -49,8 +49,8 @@ class Group:
 
     def add_to_group_vars(self, new_vars: dict):
         """Adds the supplied vars, overwriting existing ones if
-           there are conflicts"""
-        for k,v in new_vars.items():
+        there are conflicts"""
+        for k, v in new_vars.items():
             self._group_vars[k] = v
 
     def remove_from_group_vars(self, vars: list):

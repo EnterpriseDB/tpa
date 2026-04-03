@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #  © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 """Testing net module."""
+
 import os.path
 from ipaddress import IPv4Network
 

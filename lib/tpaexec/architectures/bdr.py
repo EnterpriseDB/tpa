@@ -265,4 +265,3 @@ class BDR(Architecture):
                 roles = self._instance_roles(instance)
                 if "bdr" in roles:
                     instance["role"].append("beacon-agent")
-

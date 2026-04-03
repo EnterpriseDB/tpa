@@ -65,28 +65,23 @@ class PGDS(PGD):
         then we fill in the right number of placeholder names.
         """
         layouts = {
-            'standard': [ 'first' ],
-            'near-far': [ 'first', 'second' ],
+            "standard": ["first"],
+            "near-far": ["first", "second"],
         }
-        default_locations = layouts[args['layout']]
+        default_locations = layouts[args["layout"]]
 
-        if self.args['location_names']:
-            if len(self.args['location_names']) != len(default_locations):
-                 raise PGDArchitectureError(
-                     f"{args['layout']} requires exactly {len(default_locations)} locations"
-                 )
+        if self.args["location_names"]:
+            if len(self.args["location_names"]) != len(default_locations):
+                raise PGDArchitectureError(
+                    f"{args['layout']} requires exactly {len(default_locations)} locations"
+                )
         else:
             self.args["location_names"] = default_locations
-
 
     def update_cluster_vars(self, cluster_vars):
         super().update_cluster_vars(cluster_vars)
 
-        cluster_vars.update(
-            {
-                "pgd_flavour": "essential"
-            }
-        )
+        cluster_vars.update({"pgd_flavour": "essential"})
 
     def add_architecture_options(self, p, g):
         super().add_architecture_options(p, g)
@@ -111,32 +106,31 @@ class PGDS(PGD):
         # 3 data nodes, 1 barman
         for node in range(1, 4):
             cluster.add_instance(
-                instance_name = args["hostnames"][node],
-                location_name = args["location_names"][0],
-                roles = ['bdr'],
-                settings = {
+                instance_name=args["hostnames"][node],
+                location_name=args["location_names"][0],
+                roles=["bdr"],
+                settings={
                     "node": node,
-                }
+                },
             )
-
 
     def load_near_far(self, args, cluster):
         for node in range(1, 3):
             cluster.add_instance(
-                instance_name = args["hostnames"][node],
-                location_name = args["location_names"][0],
-                roles = ['bdr'],
-                settings = {
+                instance_name=args["hostnames"][node],
+                location_name=args["location_names"][0],
+                roles=["bdr"],
+                settings={
                     "node": node,
-                }
+                },
             )
         cluster.add_instance(
-            instance_name = args["hostnames"][3],
-            location_name = args["location_names"][1],
-            roles = ['bdr'],
-            settings = {
+            instance_name=args["hostnames"][3],
+            location_name=args["location_names"][1],
+            roles=["bdr"],
+            settings={
                 "node": 3,
-            }
+            },
         )
 
     def load_topology(self, args, cluster):
@@ -148,19 +142,19 @@ class PGDS(PGD):
 
         # barman and subscriber-only nodes are the same for either layout
         cluster.add_instance(
-            instance_name = args["hostnames"][4],
-            location_name = args["location_names"][0],
-            roles = ['barman'],
-            settings = {
+            instance_name=args["hostnames"][4],
+            location_name=args["location_names"][0],
+            roles=["barman"],
+            settings={
                 "node": 4,
-            }
+            },
         )
         for n in range(5, 5 + args["subscriber_only_nodes"]):
             cluster.add_instance(
-                instance_name = args["hostnames"][n],
-                location_name = args["location_names"][0],
-                roles = ['bdr', 'subscriber_only'],
-                settings = {
+                instance_name=args["hostnames"][n],
+                location_name=args["location_names"][0],
+                roles=["bdr", "subscriber_only"],
+                settings={
                     "node": n,
-                }
+                },
             )

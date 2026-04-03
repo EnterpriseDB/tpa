@@ -61,4 +61,6 @@ class Repositories(Transmogrifier):
             "epas": ["enterprise"],
         }
         existing = cluster.vars.get("edb_repositories")
-        return list(set(postgres_repos[postgres_flavour]).union(self._default_repos, existing))
+        return list(
+            set(postgres_repos[postgres_flavour]).union(self._default_repos, existing)
+        )

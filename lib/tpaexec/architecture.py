@@ -178,7 +178,7 @@ class Architecture(object):
             "--compliance",
             action="store",
             dest="compliance",
-            choices=['stig','cis'],
+            choices=["stig", "cis"],
             help="configure to assist with a compliance standard",
         )
 
@@ -553,7 +553,7 @@ class Architecture(object):
         version = args.get("postgres_version")
 
         if isinstance(flavour, tuple):
-            (flavour, v) = flavour
+            flavour, v = flavour
             if version and version != v:
                 # We don't need to worry about conflicts between
                 # `--postgres-flavour epas` and `--epas`, because they're in a
@@ -611,9 +611,7 @@ class Architecture(object):
             parts = cleaned.split(":", maxsplit=1)[-1].split(".")
             return parse(f"{parts[0]}.{parts[1]}") >= Version(minimum)
         except (InvalidVersion, AttributeError, IndexError, TypeError):
-            raise ArchitectureError(
-                f"Cannot parse package version '{version_string}'"
-            )
+            raise ArchitectureError(f"Cannot parse package version '{version_string}'")
 
     def _validate_2q_repositories(self, args):
         """Validate arguments to --2Q-repositories"""
@@ -631,7 +629,7 @@ class Architecture(object):
 
     def _2q_repo_exists(self, parts, errors):
         """Ensure each part of a 2q repo is a valid input"""
-        (source, name, maturity) = parts
+        source, name, maturity = parts
         if source not in ["ci-spool", "products", "dl"]:
             errors.append(
                 "unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source
@@ -656,7 +654,7 @@ class Architecture(object):
             # We accept either something like 2ndqpostgres or
             # 2ndqpostgres:2QREL_11_STABLE_dev
             if ":" in name:
-                (name, _) = name.split(":", 1)
+                name, _ = name.split(":", 1)
             if name.lower() not in installable:
                 errors.append("doesn't know how to install '%s' from source" % name)
             source_names.append(name.lower())
@@ -698,7 +696,9 @@ class Architecture(object):
 
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
-        (args["hostnames"], args["ip_addresses"], args["private_ip_addresses"]) = self.hostnames(self.num_instances())
+        args["hostnames"], args["ip_addresses"], args["private_ip_addresses"] = (
+            self.hostnames(self.num_instances())
+        )
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
                 re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
@@ -718,7 +718,9 @@ class Architecture(object):
             for instance in args["instances"]:
                 if args["private_ip_addresses"][instance["node"]] is not None:
                     instance["public_ip"] = args["ip_addresses"][instance["node"]]
-                    instance["private_ip"] = args["private_ip_addresses"][instance["node"]]
+                    instance["private_ip"] = args["private_ip_addresses"][
+                        instance["node"]
+                    ]
 
                 elif args["ip_addresses"][instance["node"]] is not None:
                     instance["ip_address"] = args["ip_addresses"][instance["node"]]
@@ -730,9 +732,8 @@ class Architecture(object):
             args["subnets"] = self.subnets(self.num_subnets())
         except ValueError as e:
             raise ArchitectureError(
-                    f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
-                )
-
+                f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
+            )
 
         locations = args.get("locations", [])
         if not locations:
@@ -829,8 +830,10 @@ class Architecture(object):
                 "hba_force_certificate_auth": True,
                 "hba_cert_authentication_map": "sslmap",
                 # EPAS-00-006200 and others
-                "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
-                + ["sql_protect"]
+                "extra_postgres_extensions": cluster_vars.get(
+                    "extra_postgres_extensions", []
+                )
+                + ["sql_protect"],
             }
         )
 
@@ -868,8 +871,10 @@ class Architecture(object):
                 "extra_bash_rc_lines": cluster_vars.get("extra_bashrc_lines", [])
                 + ["umask 0077"],
                 # 3.2, 5.3
-                "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
-                + ["passwordcheck", "pgaudit"]
+                "extra_postgres_extensions": cluster_vars.get(
+                    "extra_postgres_extensions", []
+                )
+                + ["passwordcheck", "pgaudit"],
             }
         )
 
@@ -949,7 +954,7 @@ class Architecture(object):
             env=env,
             **popen_params,
         )
-        (stdout, stderr) = p.communicate()
+        stdout, stderr = p.communicate()
 
         if p.returncode != 0:
             raise ArchitectureError(stderr.strip())
@@ -1006,7 +1011,9 @@ class Architecture(object):
 
             # set platform-specific default subnet size if a non-None value has not been specified
             if self.args.get("subnet_prefix") is None:
-                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(self.num_instances())
+                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(
+                    self.num_instances()
+                )
             net = Network(cidr, self.args["subnet_prefix"])
             self._net = net
         return self._net
@@ -1196,7 +1203,7 @@ class Architecture(object):
         installable_sources = self.installable_sources()
         ref = None
         if ":" in name:
-            (name, ref) = name.split(":", 1)
+            name, ref = name.split(":", 1)
         name = name.lower()
         entry = installable_sources[name]
 
@@ -1351,7 +1358,9 @@ class Architecture(object):
             postgres_flavour == "postgresql"
             and self.args.get("failover_manager") != "efm"
             and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight")
-            and not (self.args.get("enable_pem") or self.args.get("enable_beacon_agent"))
+            and not (
+                self.args.get("enable_pem") or self.args.get("enable_beacon_agent")
+            )
         ):
             repos = []
 
@@ -1416,7 +1425,7 @@ class Architecture(object):
                 cluster_vars.update({"edb_repositories": []})
             else:
                 cluster_vars.update({"edb_repositories": edb_repositories})
-            
+
             # In general, if we're using EDB repositories at all, we don't want
             # packages from PGDG, unless we're using community360 as explained
             # above.
@@ -1431,20 +1440,18 @@ class Architecture(object):
                 )
         else:
             cluster_vars.update(
-                    {
-                        "edb_repositories": self.default_edb_repos(cluster_vars)
-                    }
-                )
-            # We double-check if we don't need EDB repositories, since we might 
+                {"edb_repositories": self.default_edb_repos(cluster_vars)}
+            )
+            # We double-check if we don't need EDB repositories, since we might
             # be having a setup that involves PGDG repositories
             if cluster_vars["edb_repositories"] != []:
                 cluster_vars.update(
-                        {
-                            "apt_repository_list": [],
-                            "yum_repository_list": ["EPEL"],
-                            "suse_repository_list": [],
-                        }
-                    )
+                    {
+                        "apt_repository_list": [],
+                        "yum_repository_list": ["EPEL"],
+                        "suse_repository_list": [],
+                    }
+                )
 
     def cluster_vars_args(self):
         """
@@ -1459,14 +1466,32 @@ class Architecture(object):
             "use_local_repo_only",
             "failover_manager",
             "enable_pg_backup_api",
-        ] + ["%s_package_version" % x.replace("-", "_") for x in self.versionable_packages()]
+        ] + [
+            "%s_package_version" % x.replace("-", "_")
+            for x in self.versionable_packages()
+        ]
 
     def versionable_packages(self):
         """
         Returns a list of packages for which --xxx-package-version options
         should be accepted
         """
-        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy", "pg-backup-api", "patroni", "pem-server", "pem-agent", "etcd", "beacon-agent"]
+        return [
+            "postgres",
+            "repmgr",
+            "barman",
+            "pglogical",
+            "bdr",
+            "pgbouncer",
+            "pgdcli",
+            "pgd-proxy",
+            "pg-backup-api",
+            "patroni",
+            "pem-server",
+            "pem-agent",
+            "etcd",
+            "beacon-agent",
+        ]
 
     def product_repositories(self):
         """
@@ -1668,7 +1693,7 @@ class Architecture(object):
             stderr=subprocess.PIPE,
             universal_newlines=True,
         )
-        (_, errstr) = p.communicate()
+        _, errstr = p.communicate()
         if p.returncode != 0:
             raise ExternalCommandError(errstr)
 

@@ -23,7 +23,7 @@ class BDR_Always_ON(BDR):
             ("15", "5"),
             ("16", "5"),
             ("17", "5"),
-            ("18", "5")
+            ("18", "5"),
         ]
 
     def add_architecture_options(self, p, g):
@@ -65,8 +65,9 @@ class BDR_Always_ON(BDR):
             "silver": 6,
             "bronze": 6,
         }
-        return (instances_per_layout[self.args["layout"]]
-            + (1 if self.args.get("enable_pem") else 0))
+        return instances_per_layout[self.args["layout"]] + (
+            1 if self.args.get("enable_pem") else 0
+        )
 
     def default_location_names(self):
         return [chr(ord("a") + i) for i in range(self.num_locations())]
@@ -77,7 +78,7 @@ class BDR_Always_ON(BDR):
             raise ArchitectureError(
                 "BDR-Always-ON only supports BDR versions 3 and 4."
                 "\nUse PGD-Always-ON with BDR version 5."
-            )   
+            )
 
     def update_cluster_vars(self, cluster_vars):
         super().update_cluster_vars(cluster_vars)

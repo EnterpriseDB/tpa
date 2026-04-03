@@ -5,13 +5,15 @@
 from typing import Dict, List, Any
 import fnmatch as fnm
 
+
 def fnmatch(string: str, pattern: str) -> bool:
     """Given a package version as returned by apt-cache, return True iff it
     matches the package_spec
     """
-    if (fnm.fnmatch(string, pattern)):
+    if fnm.fnmatch(string, pattern):
         return True
     return False
+
 
 class FilterModule(object):
     def filters(self):

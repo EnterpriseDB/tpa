@@ -4,14 +4,14 @@
 
 import os
 import sys
-from argparse import ArgumentParser,ArgumentError
+from argparse import ArgumentParser, ArgumentError
 
 from ..cluster import Cluster
 from ..platform import Platform
 
 from ..architectures import all_architectures
 
-from ..exceptions import ConfigureError,UnsupportedArchitectureError
+from ..exceptions import ConfigureError, UnsupportedArchitectureError
 
 
 def configure(argv, tpa_dir=None):
@@ -45,7 +45,6 @@ def configure(argv, tpa_dir=None):
     except ArgumentError:
         raise UnsupportedArchitectureError
 
-
     # to create the Architecture object, we need to determine the cluster
     # directory
 
@@ -57,9 +56,8 @@ def configure(argv, tpa_dir=None):
         arch_dir = None
 
     arch = all_architectures[parsed_args.architecture](
-        directory=arch_dir,
-        lib=lib_dir,
-        argv=argv)
+        directory=arch_dir, lib=lib_dir, argv=argv
+    )
 
     # The architecture gets to decide which platforms are supported, so we
     # reparse the options once we know what the available choices are.
@@ -92,8 +90,6 @@ def configure(argv, tpa_dir=None):
         print(e)
         sys.exit(1)
 
-
-
     # the cluster object is now complete and we can write it
     yaml_configuration = cluster.to_yaml()
 
@@ -105,7 +101,6 @@ def configure(argv, tpa_dir=None):
                 cfg.write(yaml_configuration)
     except OSError as e:
         raise ConfigureError(f"Could not write cluster directory: {str(e)}")
-
 
     arch.after_configuration(cluster)
 

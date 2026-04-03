@@ -155,14 +155,13 @@ def cluster_discovery(module, conn):
     except psycopg2.Error as e:
         # if the param does not exist, that's OK; if there is some
         # other error, we need to let it propagate
-        if e.pgcode == '42704':
+        if e.pgcode == "42704":
             ebcm = None
             cur.execute("ROLLBACK")
         else:
             raise
     if ebcm is not None:
         settings["bdr.enable_builtin_connection_manager"] = ebcm[0]
-
 
     m["postgres_port"] = int(settings["port"])
     m["postgres_data_dir"] = settings["data_directory"]
@@ -508,7 +507,7 @@ def read_repmgr_conf(m0):
 def relation_exists(conn, relname):
     nspname = "public"
     if "." in relname:
-        (nspname, relname) = relname.split(".", 1)
+        nspname, relname = relname.split(".", 1)
 
     cur = conn.cursor()
     cur.execute(
@@ -524,7 +523,7 @@ def relation_exists(conn, relname):
 def function_exists(conn, proname):
     nspname = "public"
     if "." in proname:
-        (nspname, proname) = proname.split(".", 1)
+        nspname, proname = proname.split(".", 1)
 
     cur = conn.cursor()
     cur.execute(

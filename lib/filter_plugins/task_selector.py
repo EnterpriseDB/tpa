@@ -18,6 +18,7 @@ def selects(selector, *tags) -> bool:
         return True
     return False
 
+
 def strict_selects(selector, *tags) -> bool:
     """The selector is a dict with the keys "include" and "exclude", each
     containing a list of strings. Returns true if for every given tag,
@@ -30,6 +31,7 @@ def strict_selects(selector, *tags) -> bool:
     elif set(tags).intersection(include):
         return True
     return False
+
 
 def permits(selector, *tags) -> bool:
     """The selector is a dict with the key "exclude", containing a list of
@@ -48,5 +50,5 @@ class FilterModule(object):
         return {
             "selects": selects,
             "permits": permits,
-            "strict_selects": strict_selects
+            "strict_selects": strict_selects,
         }
