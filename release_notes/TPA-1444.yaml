@@ -1,0 +1,12 @@
+- summary: Fix issue where requesting PEM agent <9.6 would cause deployment to fail
+  description: |
+    TPA uses the `pemworker --enable-probe` option to enable EFM probes
+    where required. However this option does not exist before PEM 9.6,
+    so trying to call it causes an error. This fix adds a version check
+    to this task meaning it will be skipped when the agent version is
+    <9.6.
+
+  type: bugfix
+
+  jira_tickets:
+  - TPA-1444
