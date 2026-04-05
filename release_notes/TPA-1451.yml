@@ -1,0 +1,8 @@
+- summary: Include correct mod_wsgi module for PEM server version +10.4.0
+  description: |
+    This change ensures that the correct mod_wsgi module is included for PEM server 
+    versions 10.4.0 and higher, guaranteeing compatibility and proper functionality
+    for older PEM server versions as well.
+  type: bugfix
+  jira_tickets:
+  - TPA-1451

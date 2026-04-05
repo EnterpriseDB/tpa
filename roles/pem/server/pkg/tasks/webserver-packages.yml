@@ -1,0 +1,25 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+- include_role: name=pkg/add_to_list
+  vars:
+    list_contents: "{{
+          pem_server_webserver_packages[202602251 if pem_is_v10_4_0_or_higher else 0]
+          |packages_for(ansible_os_family)
+        }}"
+    list_varname: _pem_webserver_packages
+
+- include_role: name=pkg/install
+  vars:
+    package_list_name: "PEM web server packages"
+    package_list: "{{ _pem_webserver_packages }}"
+
+- name: Remove the previous wsgi module when PEM version is 10.4.0 or higher
+  package:
+    name: "{{
+          [pem_server_modwsgi_package_name[0][ansible_distribution][ansible_distribution_major_version]]
+          |difference([pem_server_modwsgi_package_name[202602251][ansible_distribution][ansible_distribution_major_version]])
+        }}"
+    state: absent
+  when: pem_is_v10_4_0_or_higher

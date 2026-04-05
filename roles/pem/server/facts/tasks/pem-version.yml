@@ -22,3 +22,4 @@
     pem_is_v10_or_higher: "{{ pem_schema_version | int >= 202503241 }}"
     pem_is_v10_1_0_or_higher: "{{ pem_schema_version | int >= 202505151 }}"
     pem_is_v10_1_1_or_higher: "{{ pem_schema_version | int >= 202507071 }}"
+    pem_is_v10_4_0_or_higher: "{{ pem_schema_version | int >= 202602251 }}"
