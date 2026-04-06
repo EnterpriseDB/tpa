@@ -657,6 +657,16 @@ Available help topics:
                 Command to show the vault password of the cluster
                 This is used to encrypt other passwords.
 
+  Container management (docker)
+
+    list-containers
+                List all the containers in a cluster
+    stop-containers
+                Stops all the containers in a cluster
+    start-containers
+                Starts all the containers in a cluster
+                
+
   Miscellaneous
 
     relink      Relink symbolic links within a cluster directory (useful
