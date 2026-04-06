@@ -199,19 +199,6 @@ class PGDX(PGD):
             default=None,
         )
         g.add_argument(
-            "--cohost-proxies",
-            action="store_const",
-            const=0,
-            dest="proxy_nodes_per_location",
-            help="not needed; pgd-proxy runs on the data nodes by default",
-        )
-        g.add_argument(
-            "--add-proxy-nodes-per-location",
-            type=int,
-            dest="proxy_nodes_per_location",
-            help="number of separate PGD-Proxy nodes to add in each location",
-        )
-        g.add_argument(
             "--enable-pgd-probes",
             choices=["http", "https"],
             nargs="?",
