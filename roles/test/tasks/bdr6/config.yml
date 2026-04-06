@@ -24,6 +24,8 @@
     debug:
       var: pgdcli_version
 
+  # After an upgrade, replication slots may take a few seconds to reconnect.
+  # Retry the health check to allow slots to recover before failing.
   - name: Run pgd cluster show command
     command: >
       {{ pgdcli_bin }} cluster show --health -f "{{ pgdcli_config }}" --output json
@@ -31,6 +33,10 @@
     become_user: "{{ postgres_user }}"
     changed_when: false
     register: pgd_check
+    retries: 6
+    delay: 10
+    until: >
+      pgd_check.stdout|from_json|selectattr('status', 'equalto', 'Critical')|list|length == 0
 
   # In a perfect scenario, we expect all check status to be `Ok`. However, `Warning`s
   # may occur during a rolling cluster upgrade (e.g. in the `Versions` check due to
