@@ -8,7 +8,9 @@
 
 from __future__ import absolute_import, division, print_function
 
-import sys, time, datetime
+import sys
+import time
+import datetime
 import psycopg2
 from psycopg2 import Error
 

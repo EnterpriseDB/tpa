@@ -52,7 +52,10 @@
 
 from __future__ import absolute_import, division, print_function
 
-import os, io, pwd, grp
+import os
+import io
+import pwd
+import grp
 import traceback
 
 from ansible.module_utils.basic import AnsibleModule
