@@ -256,10 +256,10 @@ class aws(CloudPlatform):
             )
         v = self.arch.args["verbosity"]
         if v > 0:
-            print('aws: Looking up AMI "%s" in "%s"' % (image["name"], region))
+            print(f"aws: Looking up AMI \"{image['name']}\" in \"{region}\"")
         r = self.ec2[region].describe_images(Filters=filters)
         if v > 1:
-            print("aws: Got lookup result: %s" % str(r))
+            print(f"aws: Got lookup result: {r!s}")
         n = len(r["Images"])
         if n != 1:
             raise AWSPlatformError(

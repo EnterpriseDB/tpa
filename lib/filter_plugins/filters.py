@@ -94,12 +94,12 @@ def instance_with_backup_of(hosts, primary, somehost, hostvars):
 def remove_keys(d, keys):
     if not isinstance(d, dict):
         raise AnsibleFilterError(
-            "|remove_keys takes a dict as its first argument, got " + type(d)
+            f"|remove_keys takes a dict as its first argument, got {type(d)}"
         )
 
     if not isinstance(keys, list):
         raise AnsibleFilterError(
-            "|remove_keys takes a list as its second argument, got " + type(keys)
+            f"|remove_keys takes a list as its second argument, got {type(keys)}"
         )
 
     d2 = copy.deepcopy(d)
@@ -117,12 +117,12 @@ def remove_keys(d, keys):
 def extract_keys(d, keys):
     if not isinstance(d, Mapping):
         raise AnsibleFilterError(
-            "|extract_keys takes a dict as its first argument, got " + type(d)
+            f"|extract_keys takes a dict as its first argument, got {type(d)}"
         )
 
     if not isinstance(keys, list):
         raise AnsibleFilterError(
-            "|extract_keys takes a list as its second argument, got " + type(keys)
+            f"|extract_keys takes a list as its second argument, got {type(keys)}"
         )
 
     d2 = {}
@@ -146,7 +146,7 @@ def packages_for(packages, os, version=None):
             sep = "="
             if os == "RedHat":
                 sep = "-"
-            p = "%s%s%s" % (p, sep, version)
+            p = f"{p}{sep}{version}"
         ret.append(p)
 
     return ret
@@ -288,7 +288,7 @@ def cmdline(playbook_dir):
         sq = shlex.quote(x)
 
         if x != sq:
-            dq = '"' + x.replace('"', '"') + '"'
+            dq = f"\"{x.replace('\"', '\"')}\""
             x = dq if len(dq) < len(sq) else sq
 
         return x

@@ -170,8 +170,7 @@ class PGD_Always_ON(BDR):
 
         if witness_only_location and witness_only_location not in location_names:
             errors.append(
-                "--witness-only-location '%s' must be included in location list"
-                % witness_only_location
+                f"--witness-only-location '{witness_only_location}' must be included in location list"
             )
 
         if errors:

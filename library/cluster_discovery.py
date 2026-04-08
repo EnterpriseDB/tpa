@@ -173,22 +173,23 @@ def cluster_discovery(module, conn):
 
     cur.execute("SELECT pg_backend_pid()")
     pid = cur.fetchone()[0]
-    m["postgres_bin_dir"] = os.path.dirname(os.readlink("/proc/%d/exe" % pid))
+    m["postgres_bin_dir"] = os.path.dirname(os.readlink(f"/proc/{pid}/exe"))
 
-    for line in io.open("/proc/%d/status" % pid, "r"):
-        s = line.split()
+    with io.open(f"/proc/{pid}/status", "r", encoding="utf-8") as status_file:
+        for line in status_file:
+            s = line.split()
 
-        if not s:
-            continue
+            if not s:
+                continue
 
-        if s[0] == "Uid:":
-            ent = pwd.getpwuid(int(s[1]))
-            m["postgres_user"] = ent.pw_name
-            m["postgres_home"] = ent.pw_dir
+            if s[0] == "Uid:":
+                ent = pwd.getpwuid(int(s[1]))
+                m["postgres_user"] = ent.pw_name
+                m["postgres_home"] = ent.pw_dir
 
-        elif s[0] == "Gid:":
-            ent = grp.getgrgid(int(s[1]))
-            m["postgres_group"] = ent.gr_name
+            elif s[0] == "Gid:":
+                ent = grp.getgrgid(int(s[1]))
+                m["postgres_group"] = ent.gr_name
 
     # We're done with the basic system facts, so we move on to querying the
     # server to get an idea of its place in the world^Wcluster.
@@ -205,7 +206,7 @@ def cluster_discovery(module, conn):
 def major_version(version_num):
     v = str(int(version_num / 10000))
     if 10 > int(version_num) / 10000:
-        v = "%s.%s" % (v, str(int(version_num / 100) % 10))
+        v = f"{v}.{int(version_num / 100) % 10!s}"
 
     return v
 
@@ -217,12 +218,12 @@ def catalog_discovery(module, conn, m0):
     optional_catalogs = ["pg_stat_wal_receiver"]
 
     for cr in required_catalogs:
-        m.update({cr: query_results(conn, "SELECT * FROM pg_catalog.%s" % cr)})
+        m.update({cr: query_results(conn, f"SELECT * FROM pg_catalog.{cr}")})
 
     for cr in optional_catalogs:
         res = []
-        if relation_exists(conn, "pg_catalog.%s" % cr):
-            res = query_results(conn, "SELECT * FROM pg_catalog.%s" % cr)
+        if relation_exists(conn, f"pg_catalog.{cr}"):
+            res = query_results(conn, f"SELECT * FROM pg_catalog.{cr}")
         m.update({cr: res})
 
     return m
@@ -284,7 +285,7 @@ def database_discovery(module, conn, m0):
         if datname in ("template0", "bdr_supervisordb"):
             continue
 
-        db_conn = psycopg2.connect(module.params["conninfo"] + " dbname=%s" % datname)
+        db_conn = psycopg2.connect(f"{module.params['conninfo']} dbname={datname}")
 
         results.update(schema_discovery(module, db_conn, m0))
         results.update(extension_discovery(module, db_conn, m0))
@@ -420,7 +421,7 @@ def repmgr_discovery(module, conn, m0):
         if repmgr_schema is not None:
             m["repmgr_schema"] = repmgr_schema
             m["nodes"] = query_results(
-                repmgr_conn, 'SELECT * FROM "%s".nodes' % repmgr_schema
+                repmgr_conn, f'SELECT * FROM "{repmgr_schema}".nodes'
             )
 
     return {"repmgr": m} if m else {}
@@ -495,7 +496,7 @@ def read_recovery_conf(m0):
 def read_repmgr_conf(m0):
     m = None
 
-    repmgr_conf = os.path.join("/etc/repmgr/%s/repmgr.conf" % m0["postgres_version"])
+    repmgr_conf = os.path.join(f"/etc/repmgr/{m0['postgres_version']}/repmgr.conf")
     try:
         m = parse_kv_lines(repmgr_conf)
     except (IOError, OSError):

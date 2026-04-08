@@ -51,8 +51,8 @@ def linesinfile(module):
     diff = {
         "before": "",
         "after": "",
-        "before_header": "%s (content)" % path,
-        "after_header": "%s (content)" % path,
+        "before_header": f"{path} (content)",
+        "after_header": f"{path} (content)",
     }
 
     lines = {}

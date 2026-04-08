@@ -74,7 +74,7 @@ class LookupModule(LookupBase):
             if isinstance(list, str) or not isinstance(list, Iterable):
                 list = [list]
         except UndefinedError as e:
-            raise AnsibleUndefinedVariable("Couldn't evaluate loop expression: %s" % e)
+            raise AnsibleUndefinedVariable(f"Couldn't evaluate loop expression: {e}") from None
 
         if len(terms) == 0:
             results = [[i] for i in list]

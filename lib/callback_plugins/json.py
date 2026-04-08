@@ -49,7 +49,7 @@ LOCKSTEP_CALLBACKS = frozenset(("linear", "debug"))
 
 
 def current_time():
-    return "%sZ" % datetime.datetime.utcnow().isoformat()
+    return f"{datetime.datetime.utcnow().isoformat()}Z"
 
 
 class CallbackModule(CallbackBase):

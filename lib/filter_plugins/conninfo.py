@@ -45,7 +45,7 @@ def conninfo_string(d: Dict[str, str]) -> str:
 
     s = []
     for k, v in d.items():
-        s.append("%s=%s" % (k, _quote(str(v))))
+        s.append(f"{k}={_quote(str(v))}")
     return " ".join(s)
 
 
@@ -128,14 +128,13 @@ def provider_dsn(sub, hostvars):
     publication = sub.get("publication")
     if not publication:
         raise AnsibleFilterError(
-            "Subscription %s does not specify .publication.name(+instance)"
-            % sub.get("name")
+            f"Subscription {sub.get('name')} does not specify .publication.name(+instance)"
         )
 
     name = publication.get("name")
     if not name:
         raise AnsibleFilterError(
-            "Subscription %s does not specify .publication.name" % sub.get("name")
+            f"Subscription {sub.get('name')} does not specify .publication.name"
         )
 
     providers = list(hostvars.keys())
@@ -153,12 +152,11 @@ def provider_dsn(sub, hostvars):
 
     if not matches:
         raise AnsibleFilterError(
-            "Publication %s (subscription=%s) not found" % (name, sub.get("name"))
+            f"Publication {name} (subscription={sub.get('name')}) not found"
         )
     if len(matches) != 1:
         raise AnsibleFilterError(
-            "Publication %s (subscription=%s) not unique; specify instance"
-            % (name, sub.get("name"))
+            f"Publication {name} (subscription={sub.get('name')}) not unique; specify instance"
         )
 
     return matches[0]

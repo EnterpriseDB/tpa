@@ -112,9 +112,7 @@ class PatroniCluster(object):
         if not os.path.exists(self.patronictl_path):
             return (
                 "",
-                "Path to patronictl does not exist: {path}".format(
-                    path=self.patronictl_path
-                ),
+                f"Path to patronictl does not exist: {self.patronictl_path}",
                 127,
             )
         os.environ["LANG"] = self.locale
@@ -125,7 +123,7 @@ class PatroniCluster(object):
     @property
     def config(self):
         """Get the patroni cluster configuration."""
-        return "{conf}/{name}.yml".format(conf=self.config_dir, name=self.name)
+        return f"{self.config_dir}/{self.name}.yml"
 
     @property
     def init(self):

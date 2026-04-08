@@ -54,8 +54,7 @@ class Architecture:
         prog = "tpaexec configure"
         p = argparse.ArgumentParser(
             prog=prog,
-            usage="%s <cluster> --architecture %s [--help | …options…]"
-            % (prog, self.name),
+            usage=f"{prog} <cluster> --architecture {self.name} [--help | …options…]",
         )
         p.add_argument("cluster", help="path to cluster directory")
         self.add_options(p)
@@ -171,7 +170,7 @@ class Architecture:
             if ":" in name:
                 name, _ = name.split(":", 1)
             if name.lower() not in installable:
-                errors.append("doesn't know how to install '%s' from source" % name)
+                errors.append(f"doesn't know how to install '{name}' from source")
             source_names.append(name.lower())
 
         if errors:
@@ -210,7 +209,7 @@ class Architecture:
         )
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
-                re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
+                f"{re.sub('[^a-z0-9-]', '-', args['cluster_name'].lower())}-{hostname}"
                 for hostname in args["hostnames"]
             ]
 
@@ -257,8 +256,9 @@ class Architecture:
             args["subnets"] = self.subnets(cluster.num_subnets())
         except ValueError as e:
             raise ArchitectureError(
-                f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
-            )
+                f"--network {e}. The IP used in the CIDR should be the network address of the range,"
+                " not a host address (i.e. XXX.XXX.XXX.{0,16,32,48,64,...}/28) "
+            ) from e
 
         # the cluster already knows about the locations
         platform.update_locations(cluster.locations, args)
@@ -383,16 +383,15 @@ class Architecture:
             "--platform",
             default="aws",
             choices=self.supported_platforms(),
-            help="platforms supported by %s (selected: %s)"
-            % (self.name, self.platform.name),
+            help=f"platforms supported by {self.name} (selected: {self.platform.name})",
         )
 
         # Options relevant to this architecture
-        g = p.add_argument_group("%s architecture options" % self.name)
+        g = p.add_argument_group(f"{self.name} architecture options")
         self.add_architecture_options(p, g)
 
         # Options relevant to the selected platform
-        g = p.add_argument_group("%s platform options" % self.platform.name)
+        g = p.add_argument_group(f"{self.platform.name} platform options")
         self.platform.add_platform_options(p, g)
 
         g = p.add_argument_group("cluster options")
@@ -458,7 +457,7 @@ class Architecture:
         g = p.add_argument_group("install from source options")
         g.add_argument("--install-from-source", nargs="+", metavar="NAME")
         for pkg in self.versionable_packages():
-            g.add_argument("--%s-package-version" % pkg, metavar="VER")
+            g.add_argument(f"--{pkg}-package-version", metavar="VER")
 
         g = p.add_argument_group("software selection")
         g.add_argument(
@@ -629,7 +628,7 @@ class Architecture:
 
         g = p.add_argument_group("volume sizes in GB")
         for vol in ["root", "barman", "postgres"]:
-            g.add_argument("--%s-volume-size" % vol, type=int, metavar="N")
+            g.add_argument(f"--{vol}-volume-size", type=int, metavar="N")
 
         g = p.add_argument_group("network and subnet selection")
         g.add_argument("--network", metavar="NET")
@@ -716,7 +715,7 @@ class Architecture:
         current architecture: Architecture-Name/templates and lib/templates by
         default.
         """
-        return ["%s/templates" % x for x in [self.dir, self.lib]]
+        return [f"{x}/templates" for x in [self.dir, self.lib]]
 
     def versionable_packages(self):
         """
@@ -746,7 +745,7 @@ class Architecture:
         --install-from-source to their corresponding build configuration
         """
         bdr_default_source_dir = "/opt/postgres/src/bdr"
-        bdr_build_commands = ["make -C %s -s install" % bdr_default_source_dir]
+        bdr_build_commands = [f"make -C {bdr_default_source_dir} -s install"]
 
         return {
             "postgres": {
@@ -835,7 +834,7 @@ class Architecture:
             popen_params["encoding"] = sys.getdefaultencoding()
 
         p = subprocess.Popen(
-            ["%s/hostnames" % self.lib, str(num)],
+            [f"{self.lib}/hostnames", str(num)],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -902,7 +901,7 @@ class Architecture:
 
             def _tpaexec_get_template(self, filename):
                 for d in self._basedirs:
-                    t = "%s/%s" % (d, filename)
+                    t = f"{d}/{filename}"
                     if os.path.exists(t):
                         return io.open(t, "r", encoding="utf-8").read()
                 if filename.startswith("/") and os.path.exists(filename):
@@ -1248,7 +1247,7 @@ class Architecture:
             "failover_manager",
             "enable_pg_backup_api",
         ] + [
-            "%s_package_version" % x.replace("-", "_")
+            f"{x.replace('-', '_')}_package_version"
             for x in self.versionable_packages()
         ]
 

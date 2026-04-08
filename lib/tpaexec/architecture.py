@@ -95,8 +95,7 @@ class Architecture(object):
         prog = "tpaexec configure"
         p = argparse.ArgumentParser(
             prog=prog,
-            usage="%s <cluster> --architecture %s [--help | …options…]"
-            % (prog, self.name),
+            usage=f"{prog} <cluster> --architecture {self.name} [--help | …options…]",
         )
         p.add_argument("cluster", help="path to cluster directory")
         self.add_options(p)
@@ -136,16 +135,15 @@ class Architecture(object):
             "--platform",
             default="aws",
             choices=self.supported_platforms(),
-            help="platforms supported by %s (selected: %s)"
-            % (self.name, self.platform.name),
+            help=f"platforms supported by {self.name} (selected: {self.platform.name})",
         )
 
         # Options relevant to this architecture
-        g = p.add_argument_group("%s architecture options" % self.name)
+        g = p.add_argument_group(f"{self.name} architecture options")
         self.add_architecture_options(p, g)
 
         # Options relevant to the selected platform
-        g = p.add_argument_group("%s platform options" % self.platform.name)
+        g = p.add_argument_group(f"{self.platform.name} platform options")
         self.platform.add_platform_options(p, g)
 
         g = p.add_argument_group("cluster options")
@@ -223,7 +221,7 @@ class Architecture(object):
         g = p.add_argument_group("install from source options")
         g.add_argument("--install-from-source", nargs="+", metavar="NAME")
         for pkg in self.versionable_packages():
-            g.add_argument("--%s-package-version" % pkg, metavar="VER")
+            g.add_argument(f"--{pkg}-package-version", metavar="VER")
 
         g = p.add_argument_group("software selection")
         g.add_argument(
@@ -394,7 +392,7 @@ class Architecture(object):
 
         g = p.add_argument_group("volume sizes in GB")
         for vol in ["root", "barman", "postgres"]:
-            g.add_argument("--%s-volume-size" % vol, type=int, metavar="N")
+            g.add_argument(f"--{vol}-volume-size", type=int, metavar="N")
 
         g = p.add_argument_group("network and subnet selection")
         g.add_argument("--network", metavar="NET")
@@ -559,7 +557,9 @@ class Architecture(object):
                 # `--postgres-flavour epas` and `--epas`, because they're in a
                 # mutually exclusive group.
                 raise ArchitectureError(
-                    f"You must select a single Postgres version, '--{flavour} {v}' conflicts with '--postgres-version {version}'"
+                    f"You must select a single Postgres version,"
+                    f" '--{flavour} {v}' conflicts with"
+                    f" '--postgres-version {version}'"
                 )
             args["postgres_flavour"] = flavour
             args["postgres_version"] = version = v
@@ -633,14 +633,13 @@ class Architecture(object):
         source, name, maturity = parts
         if source not in ["ci-spool", "products", "dl"]:
             errors.append(
-                "unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source
+                f"unknown source '{source}' (try 'dl', 'products', or 'ci-spool')"
             )
         if name not in self.product_repositories():
-            errors.append("unknown product name '%s'" % name)
+            errors.append(f"unknown product name '{name}'")
         if maturity not in ["snapshot", "testing", "release"]:
             errors.append(
-                "unknown maturity '%s' (try 'release', 'testing', or 'snapshot')"
-                % maturity
+                f"unknown maturity '{maturity}' (try 'release', 'testing', or 'snapshot')"
             )
         return errors
 
@@ -657,7 +656,7 @@ class Architecture(object):
             if ":" in name:
                 name, _ = name.split(":", 1)
             if name.lower() not in installable:
-                errors.append("doesn't know how to install '%s' from source" % name)
+                errors.append(f"doesn't know how to install '{name}' from source")
             source_names.append(name.lower())
         if "postgres" in source_names and "2ndqpostgres" in source_names:
             errors.append("cannot install both Postgres and 2ndQPostgres")
@@ -702,7 +701,7 @@ class Architecture(object):
         )
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
-                re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
+                f"{re.sub('[^a-z0-9-]', '-', args['cluster_name'].lower())}-{hostname}"
                 for hostname in args["hostnames"]
             ]
 
@@ -733,8 +732,10 @@ class Architecture(object):
             args["subnets"] = self.subnets(self.num_subnets())
         except ValueError as e:
             raise ArchitectureError(
-                f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
-            )
+                f"--network {e}. The IP used in the CIDR should be"
+                " the network address of the range, not a host address"
+                " (i.e. XXX.XXX.XXX.{0,16,32,48,64,...}/28) "
+            ) from e
 
         locations = args.get("locations", [])
         if not locations:
@@ -948,7 +949,7 @@ class Architecture(object):
             popen_params["encoding"] = sys.getdefaultencoding()
 
         p = subprocess.Popen(
-            ["%s/hostnames" % self.lib, str(num)],
+            [f"{self.lib}/hostnames", str(num)],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -1260,9 +1261,7 @@ class Architecture(object):
                 repo_name,
             ]
             cluster_vars["yum_repositories"][repo_name] = {
-                "description": "Archive Postgres {} Repo".format(
-                    self.args.get("postgres_version")
-                ),
+                "description": f"Archive Postgres {self.args.get('postgres_version')} Repo",
                 "baseurl": "https://yum-archive.postgresql.org/{}/redhat/rhel-$releasever-$basearch".format(
                     self.args.get("postgres_version")
                 ),
@@ -1276,10 +1275,13 @@ class Architecture(object):
                 cluster_vars["yum_repository_list"].append("EDB")
 
             if self.args.get("postgres_version") == "9.6":
-                DEBUGINFO_SUFFIX = "{}-debuginfo"
-                cluster_vars["yum_repositories"][DEBUGINFO_SUFFIX.format(repo_name)] = {
-                    "description": "Postgres Debug Info {} Repo".format(
-                        self.args.get("postgres_version")
+                debuginfo_suffix = "{}-debuginfo"
+                cluster_vars["yum_repositories"][debuginfo_suffix.format(repo_name)] = {
+                    "description": f"Postgres Debug Info {self.args.get('postgres_version')} Repo",
+                    "baseurl": (
+                        "https://download.postgresql.org/pub/repos/yum/debug"
+                        f"/{self.args.get('postgres_version')}"
+                        "/redhat/rhel-$releasever-$basearch"
                     ),
                     "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(
                         self.args.get("postgres_version")
@@ -1326,7 +1328,7 @@ class Architecture(object):
         if (
             distribution
             and os_version
-            and distribution + ":" + os_version not in supported_combinations
+            and f"{distribution}:{os_version}" not in supported_combinations
             and "tpa_2q_repositories" not in cluster_vars
         ):
             cluster_vars["tpa_2q_repositories"] = []
@@ -1468,7 +1470,7 @@ class Architecture(object):
             "failover_manager",
             "enable_pg_backup_api",
         ] + [
-            "%s_package_version" % x.replace("-", "_")
+            f"{x.replace('-', '_')}_package_version"
             for x in self.versionable_packages()
         ]
 
@@ -1527,7 +1529,7 @@ class Architecture(object):
         --install-from-source to their corresponding build configuration
         """
         bdr_default_source_dir = "/opt/postgres/src/bdr"
-        bdr_build_commands = ["make -C %s -s install" % bdr_default_source_dir]
+        bdr_build_commands = [f"make -C {bdr_default_source_dir} -s install"]
 
         return {
             "postgres": {
@@ -1720,14 +1722,16 @@ class Architecture(object):
         except ExternalCommandError as ece:
             raise ArchitectureError(
                 f"Failed to initialise git repository: { ece.errstr }"
-            )
+            ) from ece
 
         try:
             self.run_external_command(
                 ["git", "checkout", "-b", self.args["cluster_name"]],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to check out git branch: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to check out git branch: { ece.errstr }"
+            ) from ece
 
         if self.args.get("tower_git_repository"):
             try:
@@ -1756,7 +1760,9 @@ class Architecture(object):
                 ["git", "add"] + files,
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to add files to git: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to add files to git: { ece.errstr }"
+            ) from ece
 
         try:
             self.run_external_command(
@@ -1770,14 +1776,18 @@ class Architecture(object):
                 ],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to commit files to git: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to commit files to git: { ece.errstr }"
+            ) from ece
 
         try:
             self.run_external_command(
                 ["git", "notes", "add", "-m", "Created by TPA"],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to create git note: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to create git note: { ece.errstr }"
+            ) from ece
 
     def create_links(self, force: bool = False) -> None:
         """
@@ -1820,7 +1830,7 @@ class Architecture(object):
         current architecture: Architecture-Name/templates and lib/templates by
         default.
         """
-        return ["%s/templates" % x for x in [self.dir, self.lib]]
+        return [f"{x}/templates" for x in [self.dir, self.lib]]
 
     def layout_names(self):
         """
@@ -1883,7 +1893,7 @@ class Architecture(object):
 
             def _tpaexec_get_template(self, filename):
                 for d in self._basedirs:
-                    t = "%s/%s" % (d, filename)
+                    t = f"{d}/{filename}"
                     if os.path.exists(t):
                         return io.open(t, "r", encoding="utf-8").read()
                 if filename.startswith("/") and os.path.exists(filename):

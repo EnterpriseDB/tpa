@@ -20,8 +20,7 @@ except ImportError:
 
 def md5_password(password, username):
     return (
-        "md5%s"
-        % hashlib.md5(password.encode("utf-8") + username.encode("utf-8")).hexdigest()
+        f"md5{hashlib.md5(password.encode('utf-8') + username.encode('utf-8')).hexdigest()}"
     )
 
 
@@ -42,12 +41,9 @@ def scram_password(password, salt=None, rounds=4096):
     ).digest()
     StoredKey = hashlib.sha256(ClientKey).digest()
 
-    return "%s$%s:%s$%s:%s" % (
-        "SCRAM-SHA-256",
-        rounds,
-        base64.b64encode(salt).decode("ascii"),
-        base64.b64encode(StoredKey).decode("ascii"),
-        base64.b64encode(ServerKey).decode("ascii"),
+    return (
+        f"SCRAM-SHA-256${rounds}:{base64.b64encode(salt).decode('ascii')}"
+        f"${base64.b64encode(StoredKey).decode('ascii')}:{base64.b64encode(ServerKey).decode('ascii')}"
     )
 
 
@@ -79,8 +75,7 @@ def encrypted_password(
         return scram_password(str(password), salt=salt, rounds=rounds)
 
     raise AnsibleFilterError(
-        "|encrypted_password does not recognise password_encryption scheme %s"
-        % password_encryption
+        f"|encrypted_password does not recognise password_encryption scheme {password_encryption}"
     )
 
 

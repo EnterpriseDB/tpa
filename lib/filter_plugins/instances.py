@@ -214,7 +214,7 @@ def update_instance_name(instance, cluster_name, tags):
     """
     name = instance.get("Name", tags.get("Name", None))
     if name is None:
-        name = cluster_name + "-" + str(instance["node"])
+        name = f"{cluster_name}-{instance['node']!s}"
     instance["Name"] = name.replace("_", "-").lower()
     instance["vars"] = instance.get("vars", {})
 

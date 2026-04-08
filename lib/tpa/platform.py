@@ -20,9 +20,9 @@ class Platform:
 
     @staticmethod
     def load(name, arch):
-        module = "tpa.platforms.%s" % name
+        module = f"tpa.platforms.{name}"
         if not importlib.util.find_spec(module):
-            raise PlatformError("Unknown platform: %s" % name)
+            raise PlatformError(f"Unknown platform: {name}")
 
         p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)

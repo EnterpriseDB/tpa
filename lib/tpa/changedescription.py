@@ -61,7 +61,7 @@ class ChangeDescription:
                 lines += wrap(
                     s,
                     width=65,
-                    initial_indent=level * "  " + "* ",
+                    initial_indent=f"{level * '  '}* ",
                     subsequent_indent=(level + 1) * "  ",
                 )
 

@@ -239,7 +239,7 @@ class PGD(Architecture):
                 ):
                     instance.add_role("pem-agent")
             pemserver_name = (
-                "%s-pemserver" % self.args["cluster_name"]
+                f"{self.args['cluster_name']}-pemserver"
                 if self.args.get("cluster_prefixed_hostnames")
                 else "pemserver"
             )

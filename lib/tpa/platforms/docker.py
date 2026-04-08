@@ -68,7 +68,7 @@ class docker(Platform):
             # We don't have access to the cluster name here (it's set only
             # in process_arguments), so we leave a '%s' to be filled in by
             # update_instance_defaults() below.
-            ccache = "ccache-%%s-%s" % time.strftime("%Y%m%d%H%M%S", time.localtime())
+            ccache = f"ccache-%%s-{time.strftime('%Y%m%d%H%M%S', time.localtime())}"
         self.ccache = f"{ccache}:/root/.ccache:rw"
 
     def _validate_sources(self, sources):
@@ -241,7 +241,7 @@ class docker(Platform):
             image = known_images[image_name]
             version = valid_version(image_name, version)
             image["version"] = version
-            label = image_name + ":" + version
+            label = f"{image_name}:{version}"
             image.setdefault("os_family", image.get("os"))
 
         image["name"] = label

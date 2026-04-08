@@ -38,9 +38,9 @@ class TestCompiler(object):
 
         for i, spec in enumerate(specs):
             if not isinstance(spec, dict):
-                raise TestCompilerError("test #%s: not a dict" % i)
+                raise TestCompilerError(f"test #{i}: not a dict")
             if spec.get("test") is None:
-                raise TestCompilerError("test #%s: no 'test' id specified" % i)
+                raise TestCompilerError(f"test #{i}: no 'test' id specified")
 
             self.tests.append(Test.compile(spec, self.options))
 
@@ -59,7 +59,7 @@ class TestCompiler(object):
             for i in t.includes:
                 if i in all_includes:
                     raise TestCompilerError(
-                        "include filename collision: %s (rerun)" % i
+                        f"include filename collision: {i} (rerun)"
                     )
                 all_includes[i] = t.includes[i]
 
@@ -95,14 +95,14 @@ class Test(object):
         t.options = options
 
         t.id = spec.get("test")
-        t.test_group = "test_%s" % re.sub("[._/-]", "_", t.id)
+        t.test_group = f"test_{re.sub('[._/-]', '_', t.id)}"
 
         # We allow arbitrary keys to be set under options to control the
         # playbook generation in (as yet) unspecified ways.
 
         t.test_options = spec.get("options", {})
         if not isinstance(t.test_options, dict):
-            raise TestCompilerError("%s: options: not a dict" % t.id)
+            raise TestCompilerError(f"{t.id}: options: not a dict")
 
         # The hosts list comprises notional host names (which make sense for the
         # purposes of the test, but are not necessarily assigned to real hosts)
@@ -111,16 +111,16 @@ class Test(object):
 
         hosts = spec.get("hosts", [])
         if not isinstance(hosts, list):
-            raise TestCompilerError("%s: hosts: not a list" % t.id)
+            raise TestCompilerError(f"{t.id}: hosts: not a list")
         for h in hosts:
             if not (isinstance(h, dict) and len(h) == 1):
                 raise TestCompilerError(
-                    "%s: hosts: entry must map {hostlabel: [conditions]}" % t.id
+                    f"{t.id}: hosts: entry must map {{hostlabel: [conditions]}}"
                 )
 
         t.append_play(
             {
-                "name": "Identify hosts for test %s" % t.id,
+                "name": f"Identify hosts for test {t.id}",
                 "hosts": "all",
                 "vars": {"test_hosts": {}},
                 "tasks": t.identify_hosts(hosts),
@@ -132,14 +132,14 @@ class Test(object):
 
         steps = spec.get("steps", [])
         if not isinstance(steps, list):
-            raise TestCompilerError("%s: steps: not a list" % t.id)
+            raise TestCompilerError(f"{t.id}: steps: not a list")
         for s in steps:
             if not isinstance(s, dict):
-                raise TestCompilerError("%s: steps: each entry must be a dict" % t.id)
+                raise TestCompilerError(f"{t.id}: steps: each entry must be a dict")
 
         t.append_play(
             {
-                "name": "Execute test %s" % t.id,
+                "name": f"Execute test {t.id}",
                 "hosts": t.test_group,
                 "tasks": t.translate_steps(steps),
             }
@@ -168,7 +168,7 @@ class Test(object):
         Creates a new include for this test with the given list of tasks, and
         returns the random name generated for the include file.
         """
-        name = random_string(11) + ".yml"
+        name = f"{random_string(11)}.yml"
         self.includes[name] = tasks
         return name
 
@@ -185,7 +185,7 @@ class Test(object):
             exprs = h[label]
 
             conditions = [
-                "%s is not defined" % label,
+                f"{label} is not defined",
                 "item not in test_hosts.values()",
             ]
 
@@ -198,7 +198,7 @@ class Test(object):
                     if isinstance(roles, str):
                         roles = [r.strip() for r in roles.split(",")]
                     for r in roles:
-                        conditions.append("'%s' in hostvars[item].role" % r)
+                        conditions.append(f"'{r}' in hostvars[item].role")
 
                 # has_vars:
                 # - must_be_defined
@@ -209,12 +209,12 @@ class Test(object):
                         raise TestCompilerError("has_vars must specify a list")
                     for v in _vars:
                         if isinstance(v, str):
-                            conditions.append("hostvars[item]['%s'] is defined" % v)
+                            conditions.append(f"hostvars[item]['{v}'] is defined")
                         elif isinstance(v, dict) and len(v) == 1:
                             name = list(v.keys())[0]
-                            conditions.append("hostvars[item]['%s'] is defined" % name)
+                            conditions.append(f"hostvars[item]['{name}'] is defined")
                             conditions.append(
-                                "hostvars[item]['%s'] == %s" % (name, v[name])
+                                f"hostvars[item]['{name}'] == {v[name]}"
                             )
                         else:
                             raise TestCompilerError(
@@ -226,7 +226,7 @@ class Test(object):
 
             tasks.append(
                 {
-                    "name": "Identify host for %s" % label,
+                    "name": f"Identify host for {label}",
                     "set_fact": {
                         label: "{{ item }}",
                         "test_hosts": "{{ test_hosts|combine({'%s': item}) }}" % label,
@@ -248,7 +248,7 @@ class Test(object):
             {
                 "assert": {
                     "msg": msg % (len(hosts), self.test_group),
-                    "that": "num_hosts|int == %s" % len(hosts),
+                    "that": f"num_hosts|int == {len(hosts)}",
                 },
                 "vars": {
                     "num_hosts": "{{ groups['%s']|length }}" % self.test_group,
@@ -271,7 +271,7 @@ class Test(object):
 
         for i, s in enumerate(steps):
             if not isinstance(s, dict):
-                raise TestCompilerError("step #%s: not a dict" % i)
+                raise TestCompilerError(f"step #{i}: not a dict")
 
             t = {"vars": {}, "when": []}
 
@@ -300,7 +300,7 @@ class Test(object):
             else:
                 step = self.find_custom_step(s)
                 if step is None:
-                    raise TestCompilerError("unhandled step: %s" % s)
+                    raise TestCompilerError(f"unhandled step: {s}")
                 t.update(step)
 
             # By default, every step runs on every host, but you can set 'hosts'
@@ -354,7 +354,7 @@ class Test(object):
                     tasks.append(
                         {
                             "name": "Randomly select step_hosts",
-                            "shell": "%s > /tmp/step_hosts" % any_host,
+                            "shell": f"{any_host} > /tmp/step_hosts",
                             "delegate_to": "localhost",
                             "run_once": True,
                         }
@@ -416,7 +416,7 @@ class Test(object):
         s = None
         for k in potential_step_names:
             for directory in step_directories:
-                f = os.path.join(directory, "%s.yml" % k)
+                f = os.path.join(directory, f"{k}.yml")
                 if os.path.exists(f):
                     _vars = {}
                     _vars.update(step)

@@ -55,8 +55,8 @@ def hosts_lines(module):
     diff = {
         "before": "",
         "after": "",
-        "before_header": "%s (content)" % path,
-        "after_header": "%s (content)" % path,
+        "before_header": f"{path} (content)",
+        "after_header": f"{path} (content)",
     }
 
     # Given a list of lines that may include comments, blank lines (which don't
@@ -135,7 +135,7 @@ def hosts_lines(module):
 
             else:
                 m["operation"] = "append"
-                contents = to_bytes("".join(map(lambda l: l + "\n", lines)))
+                contents = to_bytes("".join(f"{entry}\n" for entry in lines))
                 with open(b_path, "ab") as f:
                     f.write(contents)
     except Exception as e:

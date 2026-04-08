@@ -40,17 +40,16 @@ class ActionModule(ActionBase):
             try:
                 what(connect_timeout)
                 if what_desc:
-                    display.debug("wait_for_ssh: %s success" % what_desc)
+                    display.debug(f"wait_for_ssh: {what_desc} success")
                 return
             except Exception as e:
                 error = e  # PY3 compatibility to store exception for use outside of this block
                 if what_desc:
                     display.debug(
-                        "wait_for_ssh: %s fail (expected), retrying in %d seconds..."
-                        % (what_desc, sleep)
+                        f"wait_for_ssh: {what_desc} fail (expected), retrying in {sleep} seconds..."
                     )
                 time.sleep(sleep)
-        raise TimedOutException("timed out waiting for %s: %s" % (what_desc, error))
+        raise TimedOutException(f"timed out waiting for {what_desc}: {error}")
 
     def run(self, tmp=None, task_vars=None):
         if task_vars is None:
@@ -70,8 +69,8 @@ class ActionModule(ActionBase):
         def raw_test(connect_timeout):
             display.vvv("wait_for_ssh: attempting raw test")
 
-            pong = "pong %s" % (int(time.time()))
-            raw_result = self._low_level_execute_command("echo %s" % pong)
+            pong = f"pong {int(time.time())}"
+            raw_result = self._low_level_execute_command(f"echo {pong}")
             if pong not in raw_result["stdout_lines"]:
                 raise Exception("raw test failed")
 

@@ -24,7 +24,7 @@ def main():
     prog = os.path.basename(sys.argv[0])
     p = argparse.ArgumentParser(
         prog=prog,
-        usage="%s infile.t.yml /output/dir [options…]" % prog,
+        usage=f"{prog} infile.t.yml /output/dir [options…]",
     )
 
     p.add_argument(
@@ -57,14 +57,14 @@ def main():
 
     except Exception as e:
         error = str(e)
-        if "'%s'" % args.infile not in error:
-            error = "%s: %s" % (args.infile, error)
-        print("ERROR: %s" % error, file=sys.stderr)
+        if f"'{args.infile}'" not in error:
+            error = f"{args.infile}: {error}"
+        print(f"ERROR: {error}", file=sys.stderr)
         if args.verbosity:
             type, obj, tb = sys.exc_info()
             tb = traceback.extract_tb(tb)[-1]
-            print("From %s:%s (in %s)" % (tb[0], tb[1], tb[2]))
-            print("\t%s" % tb[3])
+            print(f"From {tb[0]}:{tb[1]} (in {tb[2]})")
+            print(f"\t{tb[3]}")
         sys.exit(-1)
 
 

@@ -27,9 +27,9 @@ class Platform:
         Returns an object of the desired Platform subclass
         """
         name = Platform.guess_platform(args) or arch.default_platform()
-        module = "tpaexec.platforms.%s" % name
+        module = f"tpaexec.platforms.{name}"
         if not importlib.util.find_spec(module):
-            raise PlatformError("Unknown platform: %s" % name)
+            raise PlatformError(f"Unknown platform: {name}")
 
         p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)
