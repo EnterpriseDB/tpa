@@ -6,7 +6,7 @@
 #
 ansible-builder==3.1.1
     # via
-    #   -r tpa-ee/aap24/build-requirements.in
+    #   -r build-requirements.in
     #   ansible-navigator
 ansible-compat==25.12.1
     # via ansible-lint
@@ -17,7 +17,7 @@ ansible-core==2.20.3
 ansible-lint==26.3.0
     # via ansible-navigator
 ansible-navigator==26.1.3
-    # via -r tpa-ee/aap24/build-requirements.in
+    # via -r build-requirements.in
 ansible-runner==2.4.3
     # via ansible-navigator
 attrs==25.4.0
@@ -37,7 +37,7 @@ cffi==2.0.0
     #   onigurumacffi
 click==8.3.1
     # via black
-cryptography==46.0.5
+cryptography==46.0.7
     # via
     #   ansible-core
     #   ansible-lint
