@@ -5,4 +5,4 @@
 
 from tpaexec.architectures import configure
 
-__all__ = [configure]
+__all__ = ["configure"]

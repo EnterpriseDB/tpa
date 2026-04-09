@@ -2,21 +2,18 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-from ..architecture import Architecture
 from ..exceptions import PGDArchitectureError
 from .pgd import PGD
 from typing import List, Tuple
 
-from argparse import SUPPRESS
-
 
 class PGDS(PGD):
-    pass
 
     @property
     def name(self):
         """
-        The name of this architecture as it goes in config.yml
+        The name of this architecture as it goes in config.yml.
+
         """
         return "PGD-S"
 

@@ -31,15 +31,15 @@ def md5_password(password, username):
 def scram_password(password, salt=None, rounds=4096):
     s = scram.using(rounds=rounds, salt=salt, algs="sha-1,sha-256").hash(password)
 
-    salt, rounds, SaltedPassword = scram.extract_digest_info(s, "sha-256")
+    salt, rounds, SaltedPassword = scram.extract_digest_info(s, "sha-256")  # noqa: N806
 
-    ClientKey = HMAC(
+    ClientKey = HMAC(  # noqa: N806
         SaltedPassword, "Client Key".encode("ascii"), hashlib.sha256
     ).digest()
-    ServerKey = HMAC(
+    ServerKey = HMAC(  # noqa: N806
         SaltedPassword, "Server Key".encode("ascii"), hashlib.sha256
     ).digest()
-    StoredKey = hashlib.sha256(ClientKey).digest()
+    StoredKey = hashlib.sha256(ClientKey).digest()  # noqa: N806
 
     return (
         f"SCRAM-SHA-256${rounds}:{base64.b64encode(salt).decode('ascii')}"
@@ -57,7 +57,7 @@ def encrypted_password(
 ):
     if password_encryption == "md5":
         return md5_password(str(password), username)
-    elif password_encryption == "scram-sha-256":
+    if password_encryption == "scram-sha-256":
         salt = None
         rounds = None
 
@@ -79,7 +79,7 @@ def encrypted_password(
     )
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "encrypted_password": encrypted_password,

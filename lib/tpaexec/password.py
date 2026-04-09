@@ -56,14 +56,15 @@ def store_password(cluster_dir, password_name, password, keyring_backend):
         print(
             f"Failed to store password: {password_name} in system {KEYRING_PREFIX + cluster_name}"
         )
-        exit(1)
+        sys.exit(1)
     except keyring.errors.NoKeyringError:
         print(NO_KEYRING_ERROR_MSG)
-        exit(1)
+        sys.exit(1)
 
 
 def show_password(cluster_dir, password_name, keyring_backend):
-    """Display a password stored into a keyring backend
+    """
+    Display a password stored into a keyring backend.
 
     Args:
         cluster_dir (string): path of the cluster the password belongs to.
@@ -71,6 +72,7 @@ def show_password(cluster_dir, password_name, keyring_backend):
         keyring_backend (string): name of keychain backend used to store the password
     Returns:
         string: password value or None
+
     """
     _initialize_keyring(
         cluster_dir=cluster_dir,
@@ -81,13 +83,13 @@ def show_password(cluster_dir, password_name, keyring_backend):
     # legacy plain text file.
     if keyring_backend is None or keyring_backend == "legacy":
         try:
-            with open("/".join([cluster_dir, VAULT_PASS_RELATIVE_PATH])) as vault_file:
-                return print(vault_file.read().strip("\n"))
+            with open("/".join([cluster_dir, VAULT_PASS_RELATIVE_PATH]), encoding="utf-8") as vault_file:
+                print(vault_file.read().strip("\n"))
         except IOError:
             print(
                 f"Could not open the vault_file: {'/'.join([cluster_dir, VAULT_PASS_RELATIVE_PATH])}"
             )
-            exit(3)
+            sys.exit(3)
 
     elif keyring_backend in KEYRING_SUPPORTED_BACKENDS:
         try:
@@ -96,7 +98,7 @@ def show_password(cluster_dir, password_name, keyring_backend):
             )
         except keyring.errors.NoKeyringError:
             print(NO_KEYRING_ERROR_MSG)
-            exit(1)
+            sys.exit(1)
         if password is None:
             sys.exit(
                 f"""Could not find vault password in system keyring, please use --ask-vault-pass

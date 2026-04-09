@@ -437,7 +437,7 @@ def get_device_variables(volumes):
         dev = volume.get("device_name")
         if dev not in seen:
             seen.add(dev)
-            results.append(dict(device=dev, **volume.get("vars", {})))
+            results.append({"device": dev, **volume.get("vars", {})})
     return results
 
 

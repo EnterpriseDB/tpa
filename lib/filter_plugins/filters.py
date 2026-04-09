@@ -31,13 +31,13 @@ def try_subkey(container, keys, default=None):
                 else:
                     # Can't index a list by a non-integer, and can't call .get
                     # on lists below either.
-                    raise
+                    raise TypeError(f"Cannot index list with non-integer key: {key}")
             else:
                 v = v.get(key, default)
         if isinstance(v, StrictUndefined):
             v = default
         return v
-    except:
+    except Exception:
         return default
 
 
@@ -45,8 +45,8 @@ def try_subkey(container, keys, default=None):
 # the string to '\"'. Caveat emptor.
 
 
-def doublequote(str):
-    return '"%s"' % str.replace('"', '"')
+def doublequote(text):
+    return '"%s"' % text.replace('"', '"')
 
 
 # Given a hostname and hostvars, returns the name of the earliest ancestor that
@@ -162,7 +162,9 @@ def packages_for(packages, os, version=None):
 # role_c (as if there were a group named 'role_a_but_not_b_or_c').
 
 
-def members_of(groups, group, not_in=[]):
+def members_of(groups, group, not_in=None):
+    if not_in is None:
+        not_in = []
     members = set(groups.get(group, []))
     excluded = set()
     for g in not_in:
@@ -210,10 +212,10 @@ def pyformat_attr(container, attr, **kwargs):
 # x.keys()|map('apply_format', '{0} := %s')|list
 
 
-def apply_format(input, format_string, *more):
-    args = [input]
-    if isinstance(input, list):
-        args = input
+def apply_format(input_data, format_string, *more):
+    args = [input_data]
+    if isinstance(input_data, list):
+        args = input_data
     if more:
         args.append(*more)
     return format_string.format(*args)
@@ -316,8 +318,8 @@ def sort_by_node(hosts, hostvars):
 
 def dict_format(d, format_string, **kwargs):
     results = []
-    for k in d:
-        results.append(format_string.format(key=k, value=d[k], **kwargs))
+    for k, v in d.items():
+        results.append(format_string.format(key=k, value=v, **kwargs))
     return results
 
 
@@ -488,7 +490,7 @@ def select_by_hostvar(hostnames, hostvars, varname, value):
     return results
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "try_subkey": try_subkey,

@@ -16,7 +16,7 @@ def has_subkey(container, keys):
             keys = keys.split(".")
         for key in keys:
             v = v.get(key)
-        return v and True or False
+        return bool(v)
     except KeyError:
         return False
 
@@ -64,7 +64,7 @@ def empty(container):
     return len(container) == 0
 
 
-class TestModule(object):
+class TestModule:
     def tests(self):
         return {
             "has_subkey": has_subkey,

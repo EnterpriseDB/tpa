@@ -14,7 +14,7 @@ def fnmatch(string: str, pattern: str) -> bool:
     return False
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "fnmatch": fnmatch,

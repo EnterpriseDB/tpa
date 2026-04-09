@@ -139,10 +139,10 @@ def run_module() -> None:
     Run the Ansible module.
     """
     module = AnsibleModule(
-        argument_spec=dict(
-            old_config=dict(type="dict", required=True),
-            new_config=dict(type="dict", required=True),
-        ),
+        argument_spec={
+            "old_config": {"type": "dict", "required": True},
+            "new_config": {"type": "dict", "required": True},
+        },
         supports_check_mode=True,
     )
 

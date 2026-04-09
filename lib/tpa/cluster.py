@@ -123,23 +123,26 @@ class Cluster:
         self._locations.append(loc)
         return loc
 
-    def add_instance(self, instance_name: str, roles: List = [], **kwargs):
-        """Creates an instance with the given name, add it to this cluster, and
-        return the new instance"""
+    def add_instance(self, instance_name: str, roles: List = None, **kwargs):
+        """
+        Creates an instance with the given name, add it to this cluster, and
+        return the new instance
+
+        """
+        if roles is None:
+            roles = []
         if instance_name not in self.instances.get_names():
             i = Instance(instance_name, cluster=self, **kwargs)
             for r in roles:
                 i.add_role(r)
             self._instances.append(i)
             return i
-        else:
-            raise ClusterError(
-                f"A node with the name: {instance_name} already exists in the cluster"
-            )
+        raise ClusterError(
+            f"A node with the name: {instance_name} already exists in the cluster"
+        )
 
     def add_settings(self, settings: dict):
-        """Adds the settings from the given dict to the cluster's top-level
-        settings"""
+        """Adds the settings from the given dict to the cluster's top-level settings"""
 
         for k, v in settings.items():
             if k not in self._settings:
@@ -154,6 +157,7 @@ class Cluster:
         Args:
             key: The variable name to set
             value: The value to assign to the variable
+
         """
         self._group.add_to_group_vars({key: value})
 
@@ -222,7 +226,7 @@ class Cluster:
         given config.yml file"""
 
         y = {}
-        with open(config_filename) as doc:
+        with open(config_filename, encoding="utf-8") as doc:
             y = yaml.safe_load(doc)
             original_yaml = copy.deepcopy(y)
 

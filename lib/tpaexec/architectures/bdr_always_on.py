@@ -89,7 +89,7 @@ class BDR_Always_ON(BDR):
         postgres_flavour = cluster_vars.get("postgres_flavour")
         bdr_repositories = []
         if bdr_version == "3":
-            extensions = ["pglogical"]
+            _extensions = ["pglogical"]  # noqa: F841
             if postgres_flavour == "pgextended":
                 bdr_repositories.append("bdr_3_7_postgres_extended")
             elif postgres_flavour == "epas":

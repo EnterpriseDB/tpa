@@ -63,7 +63,7 @@ def main():
             error = f"{args.infile}: {error}"
         print(f"ERROR: {error}", file=sys.stderr)
         if args.verbosity:
-            type, obj, tb = sys.exc_info()
+            tb = sys.exc_info()[2]
             tb = traceback.extract_tb(tb)[-1]
             print(f"From {tb[0]}:{tb[1]} (in {tb[2]})")
             print(f"\t{tb[3]}")

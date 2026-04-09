@@ -35,12 +35,10 @@ PGD-X cluster running PGD version 6.
 #   intentionally preserved by the `pgdproxy_cm` transmogrifier for backward
 #   compatibility during the intermediate migration phase.
 
-import sys
-
 from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
 from ..exceptions import ConfigureError
-from ..transmogrifier import Transmogrifier, opt
+from ..transmogrifier import Transmogrifier
 from .repositories import Repositories
 
 
@@ -230,11 +228,11 @@ Please run the following command to migrate it first:
             self._cleanup_deprecated_options(cluster)
 
         except KeyError as e:
-            raise ConfigureError(f"Configuration is missing a required key: {e}")
+            raise ConfigureError(f"Configuration is missing a required key: {e}") from None
         except (AttributeError, TypeError) as e:
             raise ConfigureError(
                 f"Configuration has an unexpected structure or data type. Error: {e}"
-            )
+            ) from None
 
     def description(self, cluster):
         items = [

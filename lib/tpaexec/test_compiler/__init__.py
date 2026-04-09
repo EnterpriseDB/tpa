@@ -13,7 +13,7 @@ import string
 from ..exceptions import TestCompilerError
 
 
-class TestCompiler(object):
+class TestCompiler:
     """
     The test compiler can transform an input file containing test specifications
     (in .t.yml format) into one or more Ansible playbooks to execute the desired
@@ -64,11 +64,11 @@ class TestCompiler(object):
                 all_includes[i] = t.includes[i]
 
         write_yaml(outdir, "index.yml", all_plays)
-        for f in all_includes.keys():
-            write_yaml(outdir, f, all_includes[f])
+        for f, include_data in all_includes.items():
+            write_yaml(outdir, f, include_data)
 
 
-class Test(object):
+class Test:
     """
     Represents a single test specification in the form of a list of Ansible
     plays (and tasks therein) as well as optional include files (containing
@@ -181,7 +181,7 @@ class Test(object):
         tasks = []
 
         for h in hosts:
-            label = h.keys()[0]
+            label = list(h.keys())[0]
             exprs = h[label]
 
             conditions = [
@@ -439,7 +439,7 @@ def read_yaml(infile):
     Parses the contents of the given input file as YAML and returns the
     resulting data structure.
     """
-    with open(infile, "r") as input_fh:
+    with open(infile, "r", encoding="utf-8") as input_fh:
         return yaml.load(input_fh, Loader=yaml.FullLoader)
 
 
@@ -448,7 +448,7 @@ def write_yaml(outdir, filename, data):
     Given an output directory, a filename, and a data structure, creates the
     output file and writes the data structure to it in YAML format.
     """
-    with open(os.path.join(outdir, filename), "w") as f:
+    with open(os.path.join(outdir, filename), "w", encoding="utf-8") as f:
         yaml.dump(
             data, f, explicit_start=True, default_flow_style=False, sort_keys=True
         )

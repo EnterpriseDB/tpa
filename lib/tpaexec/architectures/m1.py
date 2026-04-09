@@ -130,8 +130,7 @@ class M1(Architecture):
     def all_locations(self):
         if self.args.get("location_names"):
             return self.args.get("location_names").copy()
-        else:
-            return self.default_location_names()
+        return self.default_location_names()
 
     def validate_arguments(self, args):
         super().validate_arguments(args)
@@ -257,7 +256,7 @@ class M1(Architecture):
             for instance in instances:
                 ins_defs = self.args["instance_defaults"]
                 role = instance.get("role", ins_defs.get("role", []))
-                if set(["primary", "replica", "witness"]).intersection(set(role)) or (
+                if {"primary", "replica", "witness"}.intersection(set(role)) or (
                     "barman" in role
                     and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
@@ -315,7 +314,7 @@ class M1(Architecture):
 
                 repo_list = set(self.args["cluster_vars"].get(repo_var_name, []))
                 # An empty repo_list means we will add both EPEL and PGDG by default
-                if repo_list != set([]):
+                if repo_list != set():
                     repo_list.add("PGDG")
                     repo_list = list(repo_list)
 

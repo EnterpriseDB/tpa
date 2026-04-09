@@ -84,9 +84,8 @@ class BDR4PGD5(Transmogrifier):
             raise ConfigureError(
                 f"Don't know how to convert bdr_version from {bdr_version} to 5"
             )
-        else:
-            self._bdr_3to5_changes(cluster)
-            cluster.vars["bdr_version"] = "5"
+        self._bdr_3to5_changes(cluster)
+        cluster.vars["bdr_version"] = "5"
 
         cluster._architecture = self.args.target_architecture
 

@@ -88,7 +88,7 @@ patroni_version:
 
 def run(cmd, timeout=10):
     """Run a system command with a timeout."""
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    proc = Popen(cmd, stdout=PIPE, stderr=PIPE)  # pylint: disable=consider-using-with
     timer = Timer(timeout, proc.kill)
     try:
         timer.start()
@@ -99,7 +99,7 @@ def run(cmd, timeout=10):
         timer.cancel()
 
 
-class PatroniCluster(object):
+class PatroniCluster:
     def __init__(self, name, config_dir, patronictl_path, locale):
         self.name = name
         self.config_dir = config_dir
@@ -160,40 +160,39 @@ class PatroniCluster(object):
         result = []
         if not os.path.exists(self.config) or self.installed is False:
             return result
-        stdout, stderr, ret = self._patronictl("-c", self.config, "list", "-f", "json")
+        stdout, _stderr, ret = self._patronictl("-c", self.config, "list", "-f", "json")
         if ret:
             # warning here? Raise?
             return result
-        else:
-            try:
-                result = json.loads(stdout)
-            except json.JSONDecodeError:
-                # warning here? Raise?
-                return result
+        try:
+            result = json.loads(stdout)
+        except json.JSONDecodeError:
+            # warning here? Raise?
+            return result
         return result
 
 
 def run_module():  # pragma: nocover
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
-        cluster=dict(type="str", required=True),
-        config_dir=dict(type="str", required=False, default="/etc/patroni"),
-        patronictl_path=dict(type="str", required=False, default="/usr/bin/patronictl"),
-        locale=dict(type="str", required=False, default="C.UTF-8"),
-    )
+    module_args = {
+        "cluster": {"type": "str", "required": True},
+        "config_dir": {"type": "str", "required": False, "default": "/etc/patroni"},
+        "patronictl_path": {"type": "str", "required": False, "default": "/usr/bin/patronictl"},
+        "locale": {"type": "str", "required": False, "default": "C.UTF-8"},
+    }
 
     # seed the result dict in the object
     # we primarily care about changed and state
     # changed is if this module effectively modified the target
     # state will include any data that you want your module to pass back
     # for consumption, for example, in a subsequent task
-    result = dict(
-        changed=False,
-        ansible_facts=dict(
-            patroni_cluster=dict(config="", initialised="no", members=[]),
-            patroni_version="",
-        ),
-    )
+    result = {
+        "changed": False,
+        "ansible_facts": {
+            "patroni_cluster": {"config": "", "initialised": "no", "members": []},
+            "patroni_version": "",
+        },
+    }
 
     # the AnsibleModule object will be our abstraction working with Ansible
     # this includes instantiation, a couple of common attr would be the
@@ -215,12 +214,14 @@ def run_module():  # pragma: nocover
         patronictl_path=module.params["patronictl_path"],
         locale=module.params["locale"],
     )
-    result["ansible_facts"] = dict(
-        patroni_cluster=dict(
-            config=cluster.config, initialised=cluster.init, members=cluster.status
-        ),
-        patroni_version=cluster.installed,
-    )
+    result["ansible_facts"] = {
+        "patroni_cluster": {
+            "config": cluster.config,
+            "initialised": cluster.init,
+            "members": cluster.status,
+        },
+        "patroni_version": cluster.installed,
+    }
 
     # during the execution of the module, if there is an exception or a
     # conditional state that effectively causes a failure, run

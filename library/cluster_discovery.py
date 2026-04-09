@@ -106,9 +106,9 @@ def main():
 
     module = AnsibleModule(
         supports_check_mode=True,
-        argument_spec=dict(
-            conninfo=dict(default=""),
-        ),
+        argument_spec={
+            "conninfo": {"default": ""},
+        },
     )
 
     if not psycopg2_found:
@@ -131,7 +131,7 @@ def main():
 
 
 def cluster_discovery(module, conn):
-    m = dict()
+    m = {}
     cur = conn.cursor()
 
     # First, we discover postgres_version and its variants.
@@ -215,7 +215,7 @@ def major_version(version_num):
 
 
 def catalog_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     required_catalogs = ["pg_stat_replication", "pg_replication_slots"]
     optional_catalogs = ["pg_stat_wal_receiver"]
@@ -233,7 +233,7 @@ def catalog_discovery(module, conn, m0):
 
 
 def replica_discovery(module, conn, m0):
-    m = dict()
+    m = {}
     cur = conn.cursor()
 
     cur.execute("SELECT pg_is_in_recovery()")
@@ -270,8 +270,8 @@ def replica_discovery(module, conn, m0):
 
 
 def database_discovery(module, conn, m0):
-    m = dict()
-    m["databases"] = dict()
+    m = {}
+    m["databases"] = {}
     m["bdr_databases"] = []
 
     dbs = query_results(
@@ -302,8 +302,8 @@ def database_discovery(module, conn, m0):
 
 
 def schema_discovery(module, conn, m0):
-    m = dict()
-    m["schemas"] = dict()
+    m = {}
+    m["schemas"] = {}
 
     schemas = query_results(
         conn, "SELECT nspname, nspowner, nspacl FROM pg_catalog.pg_namespace"
@@ -318,8 +318,8 @@ def schema_discovery(module, conn, m0):
 
 
 def extension_discovery(module, conn, m0):
-    m = dict()
-    m["extensions"] = dict()
+    m = {}
+    m["extensions"] = {}
 
     extensions = query_results(conn, "SELECT * FROM pg_catalog.pg_extension")
     for e in extensions:
@@ -332,7 +332,7 @@ def extension_discovery(module, conn, m0):
 
 
 def pglogical_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     if relation_exists(conn, "pglogical.node"):
         try:
@@ -341,7 +341,7 @@ def pglogical_discovery(module, conn, m0):
                 """SELECT pglogical.pglogical_version(),
                 pglogical.pglogical_version_num()""",
             )
-        except psycopg2.Error as _:
+        except psycopg2.Error:
             # Since pglogical.node exists, the version query should fail only if
             # the pglogical extension does not exist. This could happen if we've
             # removed it from shared_preload_libraries during an upgrade to BDR4
@@ -371,7 +371,7 @@ def get_shared_fields_config_bdr_5_6(conn):
 
 
 def bdr_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     bdr_major_version = 0
 
@@ -411,14 +411,14 @@ def bdr_discovery(module, conn, m0):
 
 
 def repmgr_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     repmgr_conf = read_repmgr_conf(m0)
     if repmgr_conf is not None:
         m["repmgr_conf"] = repmgr_conf
 
     if "repmgr" in m0["databases"]:
-        repmgr_conn = psycopg2.connect(module.params["conninfo"] + " dbname=repmgr")
+        repmgr_conn = psycopg2.connect(f"{module.params['conninfo']} dbname=repmgr")
 
         repmgr_schema = repmgr_schema_name(repmgr_conn)
         if repmgr_schema is not None:
@@ -431,8 +431,8 @@ def repmgr_discovery(module, conn, m0):
 
 
 def role_discovery(module, conn, m0):
-    m = dict()
-    m["roles"] = dict()
+    m = {}
+    m["roles"] = {}
 
     roles = query_results(
         conn,
@@ -453,8 +453,8 @@ def role_discovery(module, conn, m0):
     return m
 
 
-def parse_kv(str):
-    parts = [x.strip() for x in str.split("=", 1)]
+def parse_kv(text):
+    parts = [x.strip() for x in text.split("=", 1)]
 
     v = None
     if len(parts) == 2:
@@ -472,19 +472,20 @@ def parse_kv(str):
 
 def parse_conninfo(conninfo):
     settings = {}
-    for str in conninfo.split(" "):
-        settings.update(parse_kv(str.strip()))
+    for part in conninfo.split(" "):
+        settings.update(parse_kv(part.strip()))
 
     return settings
 
 
 def parse_kv_lines(filename):
-    m = dict()
+    m = {}
 
-    for line in io.open(filename, "r"):
-        line = line.strip()
-        if not (line == "" or line.startswith("#")):
-            m.update(parse_kv(line))
+    with io.open(filename, "r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not (line == "" or line.startswith("#")):
+                m.update(parse_kv(line))
 
     return m
 

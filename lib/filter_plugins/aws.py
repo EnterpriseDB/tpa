@@ -389,7 +389,7 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
 
     """
     instances = []
-    EBS_KEYS = [
+    ebs_keys = [
         "ebs",
         "encrypted",
         "volume_type",
@@ -409,7 +409,7 @@ def expand_ec2_instance_volumes(old_instances, ec2_ami_properties):
             # we want to format our volume to match the new module
             # ec2_instance. We either want an ebs volume or a store volume
             # priorize ebs over ephemeral volume
-            if any(ebs_key in volume for ebs_key in EBS_KEYS):
+            if any(ebs_key in volume for ebs_key in ebs_keys):
                 ebs = volume.get("ebs", {})
                 volume_type = volume.pop("volume_type", "gp2")
                 ebs["encrypted"] = volume.pop("encrypted", False)
@@ -469,7 +469,7 @@ def _detect_if_ips_are_private_only(aws_item):
     # default is True, meaning we must receive a public IP from amazon
     # unless user decides to not get one
     assign_public_ip = aws_item["item"].get("assign_public_ip", True)
-    return assign_public_ip == False
+    return not assign_public_ip
 
 
 def extract_instance_vars(ec2_jobs_results):

@@ -341,7 +341,7 @@ class PgdproxyCM(Transmogrifier):
         except (KeyError, AttributeError, TypeError) as e:
             raise ConfigureError(
                 f"Configuration has an unexpected structure or data type. Error: {e}"
-            )
+            ) from None
 
     def description(self, cluster):
         items = [

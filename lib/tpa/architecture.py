@@ -5,6 +5,8 @@
 import argparse
 import os
 import io
+import shutil
+from functools import reduce
 from pathlib import Path
 import re
 import subprocess
@@ -14,14 +16,15 @@ import yaml
 
 from typing import List
 
+from ansible.utils.vars import merge_hash
+
 from .platform import Platform
-from .cluster import Cluster
 
 from ansible.template import Templar
 
 from .exceptions import ArchitectureError, ConfigureError, ExternalCommandError
 
-from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
+from .net import Network, DEFAULT_NETWORK_CIDR
 
 from tpa import constants
 
@@ -228,8 +231,8 @@ class Architecture:
 
         # an architecture must populate args.location_names appropriately as
         # part of validation
-        for l in self.args.get("location_names"):
-            cluster.add_location(l)
+        for loc_name in self.args.get("location_names"):
+            cluster.add_location(loc_name)
 
         # we used to give load_topology just the args, as modified before
         # we got here - but now we are more structured, we must give it
@@ -842,15 +845,15 @@ class Architecture:
         if int(str(sys.version_info.major) + str(sys.version_info.minor)) >= 36:
             popen_params["encoding"] = sys.getdefaultencoding()
 
-        p = subprocess.Popen(
+        with subprocess.Popen(
             [f"{self.lib}/hostnames", str(num)],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=env,
             **popen_params,
-        )
-        stdout, stderr = p.communicate()
+        ) as p:
+            stdout, stderr = p.communicate()
 
         if p.returncode != 0:
             raise ConfigureError(stderr.strip())
@@ -874,20 +877,21 @@ class Architecture:
         version = self.args.get("os_version")
         return self.platform.image(label, version=version)
 
-    def load_yaml(self, filename, vars, loader=None):
+    def load_yaml(self, filename, template_vars, loader=None):
         """
         Takes a template filename and some vars, expands the template, parses
         the output as YAML, and returns the resulting data structure
         """
-        text = self.expand_template(filename, vars, loader)
+        text = self.expand_template(filename, template_vars, loader)
         return yaml.load(text, Loader=yaml.FullLoader)
 
-    def expand_template(self, filename, vars, loader=None):
+    def expand_template(self, filename, template_vars, loader=None):
         """
-        Takes a template filename and some args and returns the template output
+        Takes a template filename and some args and returns the template output.
+
         """
         loader = loader or self.loader()
-        templar = Templar(loader=loader, variables=vars)
+        templar = Templar(loader=loader, variables=template_vars)
         template = loader._tpaexec_get_template(filename)
         return templar.do_template(template)
 
@@ -899,7 +903,7 @@ class Architecture:
         the loader will return the contents of that template directly.
         """
 
-        class MinimalLoader(object):
+        class MinimalLoader:
             _basedirs = []
 
             def __init__(self, basedirs):
@@ -912,9 +916,11 @@ class Architecture:
                 for d in self._basedirs:
                     t = f"{d}/{filename}"
                     if os.path.exists(t):
-                        return io.open(t, "r", encoding="utf-8").read()
+                        with io.open(t, "r", encoding="utf-8") as f:
+                            return f.read()
                 if filename.startswith("/") and os.path.exists(filename):
-                    return io.open(filename, "r", encoding="utf-8").read()
+                    with io.open(filename, "r", encoding="utf-8") as f:
+                        return f.read()
                 return "{}"
 
         return MinimalLoader(basedirs or self.template_directories())
@@ -984,7 +990,7 @@ class Architecture:
         values = []
         for dir_name in exclude_dirs:
             try:
-                with open(f"{dir_name}/config.yml") as exclude_config_yml:
+                with open(f"{dir_name}/config.yml", encoding="utf-8") as exclude_config_yml:
                     config_data = yaml.safe_load(exclude_config_yml)
                     for key in ("instances", "locations"):
                         values.extend(
@@ -995,26 +1001,26 @@ class Architecture:
                     ).get("subnet")
                     if instance_default_subnet:
                         values.append(instance_default_subnet)
-            except FileNotFoundError:
+            except FileNotFoundError as exc:
                 raise ArchitectureError(
                     f"Could not open a config.yml file in the provided path: {dir_name}"
-                )
+                ) from exc
         return list(set(values))
 
     def update_cluster_tags(self, cluster_tags):
         """
-        Makes architecture-specific changes to cluster_tags if required
+        Makes architecture-specific changes to cluster_tags if required.
+
         """
-        pass
 
     def _init_top_level_settings(self, cluster):
-        """Add top level settings applicable accross all architectures"""
+        """Add top level settings applicable accross all architectures."""
         self._add_tower_settings(cluster)
 
         self._add_keyring_settings(cluster)
 
     def _add_tower_settings(self, cluster):
-        """Add top level settings for Tower"""
+        """Add top level settings for Tower."""
         if self.args.get("tower_api_url"):
             top = cluster.settings
             top.update({"use_ssh_agent": "true"})
@@ -1261,28 +1267,6 @@ class Architecture:
             for x in self.versionable_packages()
         ]
 
-    def versionable_packages(self):
-        """
-        Returns a list of packages for which --xxx-package-version options
-        should be accepted
-        """
-        return [
-            "postgres",
-            "repmgr",
-            "barman",
-            "pglogical",
-            "bdr",
-            "pgbouncer",
-            "pgdcli",
-            "pgd-proxy",
-            "pg-backup-api",
-            "patroni",
-            "pem-server",
-            "pem-agent",
-            "etcd",
-            "beacon-agent",
-        ]
-
     def default_edb_repos(self, cluster_vars) -> List[str]:
         """Returns the default EDB (i.e., Cloudsmith) repositories we think are
         required for the given cluster, based on postgres_flavour etc. (which
@@ -1327,26 +1311,27 @@ class Architecture:
     ###############################
     def _init_instance_defaults(self, instance_defaults):
         """
-        Makes changes to instance_defaults applicable across architectures
+        Makes changes to instance_defaults applicable across architectures.
+
         """
         if instance_defaults.get("platform") is None:
             instance_defaults["platform"] = self.platform.name
-        vars = instance_defaults.get("vars", {})
-        if vars.get("ansible_user") is None and "tower_settings" not in self.args:
-            vars["ansible_user"] = self.args["image"].get("user", "root")
-            instance_defaults["vars"] = vars
+        default_vars = instance_defaults.get("vars", {})
+        if default_vars.get("ansible_user") is None and "tower_settings" not in self.args:
+            default_vars["ansible_user"] = self.args["image"].get("user", "root")
+            instance_defaults["vars"] = default_vars
 
     def update_instance_defaults(self, instance_defaults):
         """
-        Makes architecture-specific changes to instance_defaults if required
+        Makes architecture-specific changes to instance_defaults if required.
+
         """
-        pass
 
     def update_instances(self, cluster):
         """
-        Makes architecture-specific changes to instances if required
+        Makes architecture-specific changes to instances if required.
+
         """
-        pass
 
     ###############################
     #
@@ -1496,16 +1481,17 @@ class Architecture:
                     major_version,
                 )
             )
-        except KeyError:
+        except KeyError as exc:
             raise ArchitectureError(
                 f"Warning: Unable to detect OS family and version or image ({self.image().get('name', 'None')})\n"
                 f"Please create the '{self.cluster}/local-repo/<os_family>/<version>' directory yourself.\n"
                 f"(See docs/src/local-repo.md for details.)",
-            )
+            ) from exc
 
     def after_configuration(self, force: bool = False) -> None:
         """
-        Performs additional actions after config.yml has been written
+        Performs additional actions after config.yml has been written.
+
         """
         self.create_links(force=force)
         if self.args.get("enable_local_repo"):
@@ -1525,7 +1511,7 @@ class Architecture:
             stderr=subprocess.PIPE,
             universal_newlines=True,
         )
-        _, errstr = p.communicate()
+        _, _errstr = p.communicate()
         if p.returncode != 0:
             raise ExternalCommandError("errstr")
 
@@ -1541,7 +1527,7 @@ class Architecture:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-        except:
+        except Exception:
             return
 
         try:
@@ -1549,14 +1535,14 @@ class Architecture:
                 ["git", "init"],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to initialise git repository: { ece }")
+            raise ArchitectureError(f"Failed to initialise git repository: { ece }") from ece
 
         try:
             self.run_external_command(
                 ["git", "checkout", "-b", self.args["cluster_name"]],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to check out git branch: { ece }")
+            raise ArchitectureError(f"Failed to check out git branch: { ece }") from ece
 
         if self.args.get("tower_git_repository"):
             try:
@@ -1570,7 +1556,7 @@ class Architecture:
                     ],
                 )
             except ExternalCommandError as ece:
-                raise ArchitectureError(f"Failed to add remote repository: { ece }")
+                raise ArchitectureError(f"Failed to add remote repository: { ece }") from ece
 
         files = [
             f
@@ -1583,7 +1569,7 @@ class Architecture:
                 ["git", "add"] + files,
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to add files to git: { ece }")
+            raise ArchitectureError(f"Failed to add files to git: { ece }") from ece
 
         try:
             self.run_external_command(
@@ -1597,14 +1583,14 @@ class Architecture:
                 ],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to commit files to git: { ece }")
+            raise ArchitectureError(f"Failed to commit files to git: { ece }") from ece
 
         try:
             self.run_external_command(
                 ["git", "notes", "add", "-m", "Created by TPA"],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to create git note: { ece }")
+            raise ArchitectureError(f"Failed to create git note: { ece }") from ece
 
     def create_links(self, force: bool = False) -> None:
         """
@@ -1639,7 +1625,7 @@ class Architecture:
                 if force:
                     try:
                         os.unlink(destination)
-                    except:
+                    except Exception:
                         pass
 
                 os.symlink(source, destination)

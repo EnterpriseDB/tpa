@@ -9,27 +9,30 @@ def selects(selector, *tags) -> bool:
     containing a list of strings. Returns true if for every given tag,
     it is both (a) not explicitly excluded and (b) included, either
     explicitly or by the include list being empty.
+
     """
 
     exclude = selector.get("exclude", [])
     include = selector.get("include", [])
     if set(tags).intersection(exclude):
         return False
-    elif not include or set(tags).intersection(include):
+    if not include or set(tags).intersection(include):
         return True
     return False
 
 
 def strict_selects(selector, *tags) -> bool:
-    """The selector is a dict with the keys "include" and "exclude", each
+    """The selector is a dict with the keys "include" and "exclude", each.
+
     containing a list of strings. Returns true if for every given tag,
     it is both (a) not explicitly excluded and (b) explicitly included.
+
     """
     exclude = selector.get("exclude", [])
     include = selector.get("include", [])
     if set(tags).intersection(exclude):
         return False
-    elif set(tags).intersection(include):
+    if set(tags).intersection(include):
         return True
     return False
 
@@ -46,7 +49,7 @@ def permits(selector, *tags) -> bool:
     return True
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "selects": selects,

@@ -97,11 +97,11 @@ for subdir, dirs, files in os.walk("."):
 # (The cluster configuration may have been generated long before the current
 # TPA release.)
 
-with open(r"./config.yml") as config_file:
+with open(r"./config.yml", encoding="utf-8") as config_file:
     try:
         config = yaml.safe_load(config_file)
         architecture = config["architecture"]
-    except:
+    except Exception:
         sys.exit("Failed to read 'architecture' from config.yml")
 
     # In theory, the architecture may return something else from

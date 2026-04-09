@@ -49,13 +49,12 @@ class Platform:
         Adds platform-specific options to the (relevant group in the) parser
         (subclasses are expected to override this).
         """
-        pass
 
     def validate_arguments(self, args):
         """
         Performs any platform-specific argument validation required.
+
         """
-        pass
 
     def supported_distributions(self):
         """

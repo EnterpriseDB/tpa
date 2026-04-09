@@ -7,14 +7,15 @@ from typing import Dict, List
 
 
 def parse_conninfo(conninfo: str, key: str = None) -> Dict[str, str]:
-    """
+    """Parse a conninfo string into a dict of settings.
+
     Takes a conninfo string and returns a dict of the settings it represents; or
     if given a key, returns the value if the key is specified, or None.
     """
 
     settings = {}
-    for str in conninfo.strip().split(" "):
-        parts = [x.strip() for x in str.strip().split("=", 1)]
+    for part_str in conninfo.strip().split(" "):
+        parts = [x.strip() for x in part_str.strip().split("=", 1)]
 
         v = None
         if len(parts) == 2:
@@ -148,11 +149,11 @@ def provider_dsn(sub, hostvars):
 
     matches = []
     for h in providers:
-        vars = hostvars.get(h, {})
-        publications = vars.get("publications", [])
+        host_vars = hostvars.get(h, {})
+        publications = host_vars.get("publications", [])
         for p in publications:
             if p.get("type") == "pglogical" and p.get("name") == name:
-                matches.append(dbname(vars.get("node_dsn"), p.get("database")))
+                matches.append(dbname(host_vars.get("node_dsn"), p.get("database")))
 
     if not matches:
         raise AnsibleFilterError(

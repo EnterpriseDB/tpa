@@ -53,7 +53,7 @@ class ActionModule(ActionBase):
 
     def run(self, tmp=None, task_vars=None):
         if task_vars is None:
-            task_vars = dict()
+            task_vars = {}
         connect_timeout = int(
             self._task.args.get("connect_timeout", self.DEFAULT_CONNECT_TIMEOUT)
         )
@@ -62,8 +62,8 @@ class ActionModule(ActionBase):
         timeout = int(self._task.args.get("timeout", self.DEFAULT_TIMEOUT))
         if self._play_context.check_mode:
             display.vvv("wait_for_ssh: skipping for check_mode")
-            return dict(skipped=True)
-        result = super(ActionModule, self).run(tmp, task_vars)
+            return {"skipped": True}
+        result = super().run(tmp, task_vars)
         del tmp  # tmp no longer has any effect
 
         def raw_test(connect_timeout):
@@ -72,7 +72,7 @@ class ActionModule(ActionBase):
             pong = f"pong {int(time.time())}"
             raw_result = self._low_level_execute_command(f"echo {pong}")
             if pong not in raw_result["stdout_lines"]:
-                raise Exception("raw test failed")
+                raise RuntimeError("raw test failed")
 
         start = datetime.now()
         if delay:

@@ -143,8 +143,6 @@ class PGD_Always_ON(BDR):
         witness_only_location = self.args["witness_only_location"]
         data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_node_per_location = self.args["witness_node_per_location"]
-        self.args["pgd_proxy_routing"]
-
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
 
@@ -267,19 +265,19 @@ class PGD_Always_ON(BDR):
 
     def update_instances(self, instances):
         """
-        Update instances with bdr node and proxy configuration specific
+        Update instances with bdr node and proxy configuration specific.
+
         to PGD-Always-ON.
+
         """
         super().update_instances(instances)
 
         # Map location names to the corresponding barman instances.
-        barman_instances_by_location = dict(
-            [
-                (x["location"], x)
-                for x in instances
-                if "barman" in self._instance_roles(x)
-            ]
-        )
+        barman_instances_by_location = {
+            x["location"]: x
+            for x in instances
+            if "barman" in self._instance_roles(x)
+        }
 
         # Map BDR group names to a list of instances in the group.
         bdr_primaries_by_group = {}

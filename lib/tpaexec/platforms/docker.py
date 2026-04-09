@@ -62,7 +62,7 @@ class docker(Platform):
                 try:
                     os.mkdir(ccache)
                 except OSError as e:
-                    raise DockerPlatformError(f"--shared-ccache: {str(e)}")
+                    raise DockerPlatformError(f"--shared-ccache: {str(e)}") from None
         else:
             # We don't have access to the cluster name here (it's set only
             # in process_arguments), so we leave a '%s' to be filled in by
@@ -152,7 +152,7 @@ class docker(Platform):
         """
         image = {}
         name, _, version = label.partition(":")
-        _, _, img = name.rpartition("/")
+        _, _, _img = name.rpartition("/")
 
         known_images = {
             "tpa/almalinux": {
@@ -240,7 +240,7 @@ class docker(Platform):
             image = known_images[image_name]
             version = valid_version(image_name, version)
             image["version"] = version
-            label = image_name + ":" + version
+            label = f"{image_name}:{version}"
             image.setdefault("os_family", image.get("os"))
 
         image["name"] = label
@@ -284,8 +284,7 @@ class docker(Platform):
             for v in volumes:
                 if "volume_type" in v and v["volume_type"] == "none":
                     continue
-                else:
-                    newvolumes.append(v)
+                newvolumes.append(v)
             if volumes:
                 i["volumes"] = newvolumes
                 if not i["volumes"]:

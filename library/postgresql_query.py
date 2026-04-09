@@ -197,12 +197,12 @@ def get_query(q):
 
 def main():
     module = AnsibleModule(
-        argument_spec=dict(
-            conninfo=dict(default=""),
-            queries=dict(type="list"),
-            query=dict(type="str"),
-            autocommit=dict(type="bool", default=False),
-        ),
+        argument_spec={
+            "conninfo": {"default": ""},
+            "queries": {"type": "list"},
+            "query": {"type": "str"},
+            "autocommit": {"type": "bool", "default": False},
+        },
         required_one_of=[["query", "queries"]],
         mutually_exclusive=[["query", "queries"]],
         supports_check_mode=True,
@@ -211,7 +211,7 @@ def main():
     if not psycopg2_found:
         module.fail_json(msg="the python psycopg2 module is required")
 
-    m = dict()
+    m = {}
     changed = False
 
     queries = get_queries(module)

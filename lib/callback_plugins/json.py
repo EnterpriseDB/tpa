@@ -58,7 +58,7 @@ class CallbackModule(CallbackBase):
     CALLBACK_NAME = "json"
 
     def __init__(self, display=None):
-        super(CallbackModule, self).__init__(display)
+        super().__init__(display)
         self.results = []
         self._task_map = {}
         self._is_lockstep = False
@@ -129,9 +129,7 @@ class CallbackModule(CallbackBase):
 
         if self.get_option("show_custom_stats") and stats.custom:
             custom_stats.update(
-                dict(
-                    (self._convert_host_to_name(k), v) for k, v in stats.custom.items()
-                )
+                {self._convert_host_to_name(k): v for k, v in stats.custom.items()}
             )
             global_custom_stats.update(custom_stats.pop("_run", {}))
 

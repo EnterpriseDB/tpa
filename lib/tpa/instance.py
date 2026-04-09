@@ -123,25 +123,25 @@ class Instance:
             self._settings[k] = v
 
     def remove_setting(self, setting):
-        """Deletes a setting entirely"""
+        """Deletes a setting entirely."""
 
         if setting in self._settings:
             del self._settings[setting]
 
     def add_role(self, r):
-        """Adds the given role to this instance's roles"""
+        """Adds the given role to this instance's roles."""
         self._settings.setdefault("role", []).append(r)
 
     def remove_role(self, r):
-        """Removes the given role from this instance's roles"""
+        """Removes the given role from this instance's roles."""
         self._settings.setdefault("role", []).remove(r)
 
     def to_yaml_dict(self):
-        d = {
+        result = {
             "Name": self.name,
             "location": self.location.name or "",
             **self.settings,
         }
         if self.host_vars:
-            d.update({"vars": self.host_vars})
-        return d
+            result.update({"vars": self.host_vars})
+        return result

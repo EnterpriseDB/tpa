@@ -20,14 +20,14 @@ from ansible.utils.vars import merge_hash
 from functools import reduce
 
 from .exceptions import ArchitectureError, ExternalCommandError
-from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
+from .net import Network, DEFAULT_NETWORK_CIDR
 from .platforms import Platform
 from tpa import constants
 
 KEYRING_SUPPORTED_BACKENDS = ["system", "legacy"]
 
 
-class Architecture(object):
+class Architecture:
     """
     This is the base class for TPA architectures, and it knows how to generate a
     configuration based on architecture-specific defaults defined by subclasses,
@@ -964,18 +964,18 @@ class Architecture(object):
         if int(str(sys.version_info.major) + str(sys.version_info.minor)) >= 36:
             popen_params["encoding"] = sys.getdefaultencoding()
 
-        p = subprocess.Popen(
+        with subprocess.Popen(
             [f"{self.lib}/hostnames", str(num)],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=env,
             **popen_params,
-        )
-        stdout, stderr = p.communicate()
+        ) as p:
+            stdout, stderr = p.communicate()
 
-        if p.returncode != 0:
-            raise ArchitectureError(stderr.strip())
+            if p.returncode != 0:
+                raise ArchitectureError(stderr.strip())
 
         names = []
         addresses = []
@@ -1083,7 +1083,7 @@ class Architecture(object):
         values = []
         for dir_name in exclude_dirs:
             try:
-                with open(f"{dir_name}/config.yml") as exclude_config_yml:
+                with open(f"{dir_name}/config.yml", encoding="utf-8") as exclude_config_yml:
                     config_data = yaml.safe_load(exclude_config_yml)
                     for key in ("instances", "locations"):
                         values.extend(
@@ -1195,15 +1195,14 @@ class Architecture(object):
             "extra_postgres_packages": "extra_postgres_packages",
         }
 
-        for e in package_option_vars.keys():
+        for e, var in package_option_vars.items():
             packages = self.args.get(e)
             if packages is not None:
-                var = package_option_vars[e]
                 val = {"common": packages}
                 cluster_vars[var] = cluster_vars.get(var, val)
 
     def _add_source_install(self, cluster_vars):
-        """Add --install-from-source entries into cluster_vars"""
+        """Add --install-from-source entries into cluster_vars."""
         sources = self.args.get("install_from_source") or []
         install_from_source = []
         for name in sources:
@@ -1272,7 +1271,7 @@ class Architecture(object):
             if "yum_repositories" not in cluster_vars.keys():
                 cluster_vars["yum_repositories"] = {}
 
-            repo_name = "PGDG" + str.replace(self.args.get("postgres_version"), ".", "")
+            repo_name = f"PGDG{str.replace(self.args.get('postgres_version'), '.', '')}"
             cluster_vars["yum_repository_list"] = [
                 "PGDG",
                 "EPEL",
@@ -1301,20 +1300,18 @@ class Architecture(object):
                         f"/{self.args.get('postgres_version')}"
                         "/redhat/rhel-$releasever-$basearch"
                     ),
-                    "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(
-                        self.args.get("postgres_version")
-                    ),
-                    "file": DEBUGINFO_SUFFIX.format(repo_name),
+                    "file": debuginfo_suffix.format(repo_name),
                     "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
                     "repo_gpgcheck": "yes",
                 }
                 cluster_vars["yum_repository_list"].append(
-                    DEBUGINFO_SUFFIX.format(repo_name)
+                    debuginfo_suffix.format(repo_name)
                 )
 
     def set_2q_repos(self, cluster_vars):
-        """Set 2q repos to be empty explicitly if we are on an OS/version combination
-        that they don't support."""
+        """
+        Set 2q repos to be empty explicitly if we are on an OS/version combination that they don't support.
+        """
 
         supported_combinations = [
             "RedHat:7",
@@ -1621,24 +1618,26 @@ class Architecture(object):
 
     def _init_instance_defaults(self, instance_defaults):
         """
-        Makes changes to instance_defaults applicable across architectures
+        Makes changes to instance_defaults applicable across architectures.
+
         """
         if instance_defaults.get("platform") is None:
             instance_defaults["platform"] = self.platform.name
-        vars = instance_defaults.get("vars", {})
-        if vars.get("ansible_user") is None and "tower_settings" not in self.args:
-            vars["ansible_user"] = self.args["image"].get("user", "root")
-            instance_defaults["vars"] = vars
+        instance_vars = instance_defaults.get("vars", {})
+        if instance_vars.get("ansible_user") is None and "tower_settings" not in self.args:
+            instance_vars["ansible_user"] = self.args["image"].get("user", "root")
+            instance_defaults["vars"] = instance_vars
 
     def update_instance_defaults(self, instance_defaults):
         """
-        Makes architecture-specific changes to instance_defaults if required
+        Makes architecture-specific changes to instance_defaults if required.
+
         """
-        pass
 
     def _init_instances(self, instances):
         """
-        Makes changes to instances applicable across architectures
+        Makes changes to instances applicable across architectures.
+
         """
         for instance in instances:
             location = instance.get("location", None)
@@ -1647,32 +1646,34 @@ class Architecture(object):
 
     def update_instances(self, instances):
         """
-        Makes architecture-specific changes to instances if required
-        """
-        pass
+        Makes architecture-specific changes to instances if required.
 
-    ##
-    ## Cluster directory creation
-    ##
+        """
+
+    # 
+    # Cluster directory creation
+    #
 
     def generate_configuration(self) -> str:
         """
-        Returns the final contents of config.yml
+        Returns the final contents of config.yml.
+
         """
         return self.expand_template("config.yml.j2", self.args)
 
     def write_configuration(self, configuration: str, force: bool = False) -> None:
         """
-        Creates the cluster directory and writes config.yml
+        Creates the cluster directory and writes config.yml.
+
         """
         try:
             os.makedirs(self.cluster, exist_ok=force)
             config_path = f"{self.cluster}/config.yml"
             if not os.path.exists(config_path) or force:
-                with open(config_path, "w") as cfg:
+                with open(config_path, "w", encoding="utf-8") as cfg:
                     cfg.write(configuration)
         except OSError as e:
-            raise ArchitectureError(f"Could not write cluster directory: {str(e)}")
+            raise ArchitectureError(f"Could not write cluster directory: {str(e)}") from e
 
     def setup_local_repo(self):
         """
@@ -1709,16 +1710,16 @@ class Architecture(object):
             self.setup_git_repository()
 
     def run_external_command(self, command) -> None:
-        p = subprocess.Popen(
+        with subprocess.Popen(
             command,
             cwd=self.cluster,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
-        )
-        _, errstr = p.communicate()
-        if p.returncode != 0:
-            raise ExternalCommandError(errstr)
+        ) as p:
+            _, errstr = p.communicate()
+            if p.returncode != 0:
+                raise ExternalCommandError(errstr)
 
     def setup_git_repository(self) -> None:
         """
@@ -1732,7 +1733,7 @@ class Architecture(object):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-        except:
+        except Exception:
             return
 
         try:
@@ -1767,7 +1768,7 @@ class Architecture(object):
             except ExternalCommandError as ece:
                 raise ArchitectureError(
                     f"Failed to add remote repository: { ece.errstr }"
-                )
+                ) from ece
 
         files = [
             f
@@ -1877,21 +1878,23 @@ class Architecture(object):
         main_template = f"{template_dir}/main.yml.j2"
         if os.path.islink(main_template):
             return os.path.basename(os.readlink(main_template)).replace(".yml.j2", "")
+        return None
 
-    def load_yaml(self, filename, vars, loader=None):
+    def load_yaml(self, filename, template_vars, loader=None):
         """
         Takes a template filename and some vars, expands the template, parses
         the output as YAML, and returns the resulting data structure
         """
-        text = self.expand_template(filename, vars, loader)
+        text = self.expand_template(filename, template_vars, loader)
         return yaml.load(text, Loader=yaml.FullLoader)
 
-    def expand_template(self, filename, vars, loader=None):
+    def expand_template(self, filename, template_vars, loader=None):
         """
-        Takes a template filename and some args and returns the template output
+        Takes a template filename and some args and returns the template output.
+
         """
         loader = loader or self.loader()
-        templar = Templar(loader=loader, variables=vars)
+        templar = Templar(loader=loader, variables=template_vars)
         template = loader._tpaexec_get_template(filename)
         return templar.do_template(template)
 
@@ -1903,7 +1906,7 @@ class Architecture(object):
         the loader will return the contents of that template directly.
         """
 
-        class MinimalLoader(object):
+        class MinimalLoader:
             _basedirs = []
 
             def __init__(self, basedirs):
@@ -1916,9 +1919,11 @@ class Architecture(object):
                 for d in self._basedirs:
                     t = f"{d}/{filename}"
                     if os.path.exists(t):
-                        return io.open(t, "r", encoding="utf-8").read()
+                        with open(t, "r", encoding="utf-8") as f:
+                            return f.read()
                 if filename.startswith("/") and os.path.exists(filename):
-                    return io.open(filename, "r", encoding="utf-8").read()
+                    with open(filename, "r", encoding="utf-8") as f:
+                        return f.read()
                 return "{}"
 
         return MinimalLoader(basedirs or self.template_directories())
@@ -1938,7 +1943,7 @@ def update_symlinks_recursively(source, destination, force):
     """
     if not os.path.exists(source):
         return
-    elif os.path.isdir(source):
+    if os.path.isdir(source):
         if not os.path.exists(destination):
             os.mkdir(destination)
         for ls_link in os.listdir(source):
@@ -1949,7 +1954,7 @@ def update_symlinks_recursively(source, destination, force):
         if force:
             try:
                 os.unlink(destination)
-            except:
+            except Exception:
                 pass
 
         os.symlink(source, destination)

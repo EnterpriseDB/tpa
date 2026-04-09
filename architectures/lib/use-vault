@@ -9,12 +9,10 @@ from tpaexec.password import show_password
 
 
 def main():
-    """
-    retrieve vault password from chosen keyring backend
-    """
+    """Retrieve vault password from chosen keyring backend."""
     cluster_dir = getcwd()
     try:
-        with open(path.join(cluster_dir, "config.yml")) as config_file:
+        with open(path.join(cluster_dir, "config.yml"), encoding="utf-8") as config_file:
             config = yaml.safe_load(config_file)
             keyring_backend = config.get(
                 "keyring_backend", getenv("TPA_KEYRING_BACKEND", None)
