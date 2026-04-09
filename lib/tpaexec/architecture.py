@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 import sys
 import os
-import io
 import uuid
 import subprocess
 import argparse

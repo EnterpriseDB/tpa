@@ -15,7 +15,7 @@
 from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
 from ..exceptions import ConfigureError
-from ..transmogrifier import Transmogrifier, opt
+from ..transmogrifier import Transmogrifier
 from .repositories import Repositories
 
 

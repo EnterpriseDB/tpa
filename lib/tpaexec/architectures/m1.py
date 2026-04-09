@@ -4,8 +4,6 @@
 
 import argparse
 
-from typing import List
-
 from ..architecture import Architecture
 from ..exceptions import ArchitectureError
 

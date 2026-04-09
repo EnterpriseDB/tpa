@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
-import argparse
 import copy
-import importlib.util
 
-from ..exceptions import PlatformError
 from ..platform import Platform
-from ..net import DEFAULT_SUBNET_PREFIX_LENGTH
 
 
 class CloudPlatform(Platform):

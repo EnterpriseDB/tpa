@@ -9,9 +9,9 @@ from typing import Any, Dict, List
 
 from ..transmogrifier import Transmogrifier
 from .architecture import Architecture
-from .bdr4pgd5 import BDR4PGD5
+from .bdr4pgd5 import BDR4PGD5  # noqa: F401
 from .common import Common
-from .pgd5pgdx import PGD5PGDX
+from .pgd5pgdx import PGD5PGDX  # noqa: F401
 from .pgdproxy_cm import PgdproxyCM
 from .replace_2q_repositories import Replace2qRepositories
 from .repositories import Repositories

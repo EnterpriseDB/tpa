@@ -53,8 +53,6 @@ from using pgd-proxy to Connection Manager(PGD 5.9+)
 #   `enable_raft: false`, it forces `enable_raft` to `true`.
 # - It detects per-instance overrides, prints a clear WARNING, and safely
 #   removes the obsolete instance-level keys.
-import sys
-
 from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
 from ..exceptions import ConfigureError

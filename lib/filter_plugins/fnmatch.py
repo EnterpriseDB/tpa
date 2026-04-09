@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-from typing import Dict, List, Any
 import fnmatch as fnm
 
 

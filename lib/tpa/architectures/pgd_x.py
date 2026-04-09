@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from tpa.exceptions import PGDXArchitectureError
-from ..architecture import Architecture
 from .pgd import PGD
 from typing import List, Tuple
 
