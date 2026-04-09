@@ -456,7 +456,8 @@ def write_yaml(outdir, filename, data):
 
 def random_string(length):
     """
-    Returns a random string of the given length
+    Returns a random string of the given length.
+
     """
     return "".join(
         random.choice(string.ascii_letters + string.digits) for _ in range(length)

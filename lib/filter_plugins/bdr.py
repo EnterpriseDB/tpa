@@ -6,9 +6,7 @@ from typing import Dict, List, Any
 
 
 def bdr_node_kind(role: List[str]) -> str:
-    """Returns a BDR node_kind value corresponding to the given the list of
-    roles for an instance.
-    """
+    """Return a BDR node_kind value for the given list of roles."""
     if "witness" in role:
         return "witness"
     elif "subscriber-only" in role:
@@ -20,7 +18,9 @@ def bdr_node_kind(role: List[str]) -> str:
 
 
 def bdr_node_versions(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, str]:
-    """Given hostvars, returns a list of BDR major versions running on each of
+    """Return BDR major versions running on each of the given hostnames.
+
+    Given hostvars, returns a list of BDR major versions running on each of
     the given hostnames, assumed to be BDR instances that have already run
     cluster_discovery.
 
@@ -42,7 +42,9 @@ def bdr_node_versions(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, s
 
 
 def bdr_node_version_nums(hosts: List[str], hostvars: Dict[str, Any]) -> Dict[str, str]:
-    """Given hostvars, returns a list of BDR major numbers running on each of
+    """Return BDR major version numbers running on each of the given hostnames.
+
+    Given hostvars, returns a list of BDR major numbers running on each of
     the given hostnames, assumed to be BDR instances that have already run
     cluster_discovery.
 

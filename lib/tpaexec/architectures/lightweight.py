@@ -246,6 +246,7 @@ class Lightweight(BDR):
     def _sub_group_name(self, loc):
         """
         Returns a name for the BDR subgroup in the given location.
+
         """
         loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"

@@ -35,7 +35,8 @@ class Architecture:
 
     def __init__(self, directory, lib, argv=None):
         """
-        Sets up args
+        Sets up args.
+
         """
 
         self.dir = directory
@@ -113,9 +114,11 @@ class Architecture:
 
     def _validate_flavour_version(self, args):
         """Verify postgres flavour, version and related arguments.
+
         By now, both postgres_flavour and postgres_version must be set,
         whether they were specified separately or through a shortcut like
         `--postgresql 14`.
+
         """
         flavour = args.get("postgres_flavour")
         version = args.get("postgres_version")
@@ -158,7 +161,7 @@ class Architecture:
             args["postgres_flavour"] = "edbpge"
 
     def _validate_from_source(self, args):
-        """Validate arguments to --install-from-source"""
+        """Validate arguments to --install-from-source."""
 
         errors = []
         source_names = []
@@ -346,13 +349,15 @@ class Architecture:
 
     def supported_platforms(self):
         """
-        Returns a list of platforms supported by this architecture
+        Returns a list of platforms supported by this architecture.
+
         """
         return Platform.all_platforms()
 
     def add_options(self, p):
         """
-        Adds any relevant options to the parser object
+        Adds any relevant options to the parser object.
+
         """
         p.add_argument(
             "-v",
@@ -669,11 +674,11 @@ class Architecture:
         Adds architecture-specific options to the (relevant group in the) parser
         (subclasses are expected to override this).
         """
-        pass
 
     def set_defaults(self, p):
         """
-        Set default values for command-line options
+        Set default values for command-line options.
+
         """
         argument_defaults = self._argument_defaults()
         self.update_argument_defaults(argument_defaults)
@@ -681,7 +686,8 @@ class Architecture:
 
     def _argument_defaults(self):
         """
-        Returns a dict of defaults for the corresponding options
+        Returns a dict of defaults for the corresponding options.
+
         """
         return {
             "root_volume_size": 16,
@@ -691,15 +697,17 @@ class Architecture:
 
     def update_argument_defaults(self, defaults):
         """
-        Makes architecture-specific changes to argument_defaults if required
+        Makes architecture-specific changes to argument_defaults if required.
+
         """
-        pass
 
     def layout_names(self):
         """
-        Returns a list of template names that can be selected with the --layout
+        Returns a list of template names that can be selected with the --layout.
+
         option (apart from the default main.yml.j2). May be empty if the
         architecture provides no selectable layouts.
+
         """
         path = Path(self.template_directories()[0])
         return list(
@@ -802,7 +810,8 @@ class Architecture:
 
     def cluster_name(self):
         """
-        Returns a name for the cluster
+        Returns a name for the cluster.
+
         """
         return os.path.basename(self.cluster.name)
 
@@ -1036,7 +1045,8 @@ class Architecture:
 
     def _init_cluster_vars(self, cluster_vars):
         """
-        Makes changes to cluster_vars applicable across architectures
+        Makes changes to cluster_vars applicable across architectures.
+
         """
 
         self._add_cluster_vars_args(cluster_vars)
@@ -1061,14 +1071,14 @@ class Architecture:
         self._add_source_install(cluster_vars)
 
     def _add_cluster_vars_args(self, cluster_vars):
-        """Add args that belongs to cluster_vars without any change or logic"""
+        """Add args that belongs to cluster_vars without any change or logic."""
         for k in self.cluster_vars_args():
             val = self.args.get(k)
             if val is not None:
                 cluster_vars[k] = cluster_vars.get(k, val)
 
     def _add_extra_packages(self, cluster_vars):
-        """Add extra packages lists to cluster_vars"""
+        """Add extra packages lists to cluster_vars."""
 
         package_option_vars = {
             "extra_packages": "packages",
@@ -1084,7 +1094,7 @@ class Architecture:
                 cluster_vars[var] = cluster_vars.get(var, val)
 
     def _add_source_install(self, cluster_vars):
-        """Add --install-from-source entries into cluster_vars"""
+        """Add --install-from-source entries into cluster_vars."""
         sources = self.args.get("install_from_source") or []
         install_from_source = []
         for name in sources:
@@ -1132,7 +1142,7 @@ class Architecture:
             install_from_source.append(entry)
 
     def _check_local_sources(self, name, ref):
-        """Check that we don't fix a ref when using local source"""
+        """Check that we don't fix a ref when using local source."""
         local_sources = self.args.get("local_sources") or {}
         if ref and name in local_sources:
             raise ArchitectureError(
@@ -1142,9 +1152,9 @@ class Architecture:
 
     def update_cluster_vars(self, cluster_vars):
         """
-        Makes architecture-specific changes to cluster_vars if required
+        Makes architecture-specific changes to cluster_vars if required.
+
         """
-        pass
 
     def update_repos(self, cluster_vars):
         """Define package repositories for the cluster based on the selected
@@ -1380,7 +1390,8 @@ class Architecture:
 
     def _apply_stig(self, cluster, args):
         """
-        Applies changes to config.yml required by STIG compliance
+        Applies changes to config.yml required by STIG compliance.
+
         """
         cluster.add_settings({"compliance": "stig"})
 
@@ -1424,7 +1435,8 @@ class Architecture:
 
     def _apply_cis(self, cluster, args):
         """
-        Applies changes to config.yml required by CIS compliance
+        Applies changes to config.yml required by CIS compliance.
+
         """
 
         cluster.add_settings({"compliance": "cis"})
@@ -1654,6 +1666,7 @@ class Architecture:
 
     def links_to_create(self) -> List[str]:
         """
-        Returns a list of targets to create_links() for
+        Returns a list of targets to create_links() for.
+
         """
         return ["deploy.yml", "commands", "tests", "playbooks"]

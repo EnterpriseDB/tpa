@@ -55,9 +55,9 @@ class Architecture(object):
         self._args = None
         self._net = None
 
-    ##
-    ## Command-line parsing
-    ##
+    #
+    # Command-line parsing
+    #
 
     @property
     def args(self):
@@ -103,7 +103,8 @@ class Architecture(object):
 
     def add_options(self, p):
         """
-        Adds any relevant options to the parser object
+        Adds any relevant options to the parser object.
+
         """
         p.add_argument(
             "-v",
@@ -432,11 +433,11 @@ class Architecture(object):
         Adds architecture-specific options to the (relevant group in the) parser
         (subclasses are expected to override this).
         """
-        pass
 
     def set_defaults(self, p):
         """
-        Set default values for command-line options
+        Set default values for command-line options.
+
         """
         argument_defaults = self._argument_defaults()
         self.update_argument_defaults(argument_defaults)
@@ -444,7 +445,8 @@ class Architecture(object):
 
     def _argument_defaults(self):
         """
-        Returns a dict of defaults for the corresponding options
+        Returns a dict of defaults for the corresponding options.
+
         """
         return {
             "root_volume_size": 16,
@@ -454,9 +456,9 @@ class Architecture(object):
 
     def update_argument_defaults(self, defaults):
         """
-        Makes architecture-specific changes to argument_defaults if required
+        Makes architecture-specific changes to argument_defaults if required.
+
         """
-        pass
 
     def default_platform(self):
         """
@@ -467,19 +469,21 @@ class Architecture(object):
 
     def supported_platforms(self):
         """
-        Returns a list of platforms supported by this architecture
+        Returns a list of platforms supported by this architecture.
+
         """
         return Platform.all_platforms()
 
     def default_location_names(self):
         """
-        Returns a list of names for the locations used by the cluster
+        Returns a list of names for the locations used by the cluster.
+
         """
         return ["first", "second", "third", "fourth"]
 
-    ##
-    ## Cluster configuration
-    ##
+    # 
+    # Cluster configuration
+    #
 
     def validate_arguments(self, args):
         """
@@ -541,10 +545,13 @@ class Architecture(object):
                 raise ArchitectureError("STIG compliance requires RHEL version 8 or 9")
 
     def _validate_flavour_version(self, args):
-        """Verify postgres flavour, version and related arguments.
+        """
+        Verify postgres flavour, version and related arguments.
+
         By now, both postgres_flavour and postgres_version must be set,
         whether they were specified separately or through a shortcut like
         `--postgresql 14`.
+
         """
         flavour = args.get("postgres_flavour")
         version = args.get("postgres_version")
@@ -576,7 +583,8 @@ class Architecture(object):
         if flavour == "epas":
             if redwood is None:
                 raise ArchitectureError(
-                    "You must specify --redwood or --no-redwood to enable or disable Oracle compatibility features in EPAS"
+                    "You must specify --redwood or --no-redwood to enable"
+                    " or disable Oracle compatibility features in EPAS"
                 )
         elif redwood is not None:
             raise ArchitectureError(
@@ -599,22 +607,24 @@ class Architecture(object):
             )
 
     def _package_version_at_least(self, version_string, minimum):
-        """Return True if the major.minor in version_string >= minimum.
+        """
+        Return True if the major.minor in version_string >= minimum.
 
         Handles wildcards (*5.3*), epoch prefixes (4:5.5.1).
         Raises ArchitectureError for malformed version strings.
         Must not be called with None or empty values — callers should
         guard against that.
+
         """
         try:
             cleaned = version_string.replace("*", "")
             parts = cleaned.split(":", maxsplit=1)[-1].split(".")
             return parse(f"{parts[0]}.{parts[1]}") >= Version(minimum)
-        except (InvalidVersion, AttributeError, IndexError, TypeError):
-            raise ArchitectureError(f"Cannot parse package version '{version_string}'")
+        except (InvalidVersion, AttributeError, IndexError, TypeError) as e:
+            raise ArchitectureError(f"Cannot parse package version '{version_string}'") from e
 
     def _validate_2q_repositories(self, args):
-        """Validate arguments to --2Q-repositories"""
+        """Validate arguments to --2Q-repositories."""
         repos = args.get("tpa_2q_repositories") or []
         for r in repos:
             errors = []
@@ -628,7 +638,7 @@ class Architecture(object):
                 raise ArchitectureError(*(f"repository '{r}' has {e}" for e in errors))
 
     def _2q_repo_exists(self, parts, errors):
-        """Ensure each part of a 2q repo is a valid input"""
+        """Ensure each part of a 2q repo is a valid input."""
         source, name, maturity = parts
         if source not in ["ci-spool", "products", "dl"]:
             errors.append(
@@ -643,7 +653,7 @@ class Architecture(object):
         return errors
 
     def _validate_from_source(self, args):
-        """Validate arguments to --install-from-source"""
+        """Validate arguments to --install-from-source."""
 
         errors = []
         source_names = []
@@ -793,7 +803,8 @@ class Architecture(object):
 
     def _apply_stig(self, args):
         """
-        Applies changes to config.yml required by STIG compliance
+        Applies changes to config.yml required by STIG compliance.
+
         """
         top = args.get("top_level_settings") or {}
         top.update({"compliance": "stig"})
@@ -840,7 +851,8 @@ class Architecture(object):
 
     def _apply_cis(self, args):
         """
-        Applies changes to config.yml required by CIS compliance
+        Applies changes to config.yml required by CIS compliance.
+
         """
         top = args.get("top_level_settings") or {}
         top.update({"compliance": "cis"})
@@ -881,20 +893,24 @@ class Architecture(object):
 
     def cluster_name(self):
         """
-        Returns a name for the cluster
+        Returns a name for the cluster.
+
         """
         return os.path.basename(self.cluster)
 
     def num_instances(self):
         """
-        Returns the number of instances required (which may be known beforehand,
+        Returns the number of instances required (which may be known beforehand,.
+
         or based on a --num-instances option, etc.)
+
         """
         return self.args["num_instances"]
 
     def num_locations(self):
         """
-        Returns the number of locations required by this architecture
+        Returns the number of locations required by this architecture.
+
         """
         locations = {}
         for i in self.args["instances"]:
@@ -913,7 +929,8 @@ class Architecture(object):
 
     def num_subnets(self):
         """
-        Returns the number of subnets required by this architecture
+        Returns the number of subnets required by this architecture.
+
         """
         if self.platform.name == "docker":
             return 1
@@ -1077,15 +1094,16 @@ class Architecture(object):
                     ).get("subnet")
                     if instance_default_subnet:
                         values.append(instance_default_subnet)
-            except FileNotFoundError:
+            except FileNotFoundError as e:
                 raise ArchitectureError(
                     f"Could not open a config.yml file in the provided path: {dir_name}"
-                )
+                ) from e
         return list(set(values))
 
     def _init_locations(self, locations):
         """
-        Makes changes to locations applicable across architectures
+        Makes changes to locations applicable across architectures.
+
         """
         names = self.args.get("location_names") or self.default_location_names()
         for li in range(0, self.num_locations()):
@@ -1093,24 +1111,24 @@ class Architecture(object):
 
     def update_locations(self, locations):
         """
-        Makes architecture-specific changes to locations if required
+        Makes architecture-specific changes to locations if required.
+
         """
-        pass
 
     def update_cluster_tags(self, cluster_tags):
         """
-        Makes architecture-specific changes to cluster_tags if required
+        Makes architecture-specific changes to cluster_tags if required.
+
         """
-        pass
 
     def _init_top_level_settings(self):
-        """Add top level settings applicable accross all architectures"""
+        """Add top level settings applicable accross all architectures."""
         self._add_tower_settings()
 
         self._add_keyring_settings()
 
     def _add_tower_settings(self):
-        """Add top level settings for Tower"""
+        """Add top level settings for Tower."""
         if self.args.get("tower_api_url"):
             top = self.args.get("top_level_settings") or {}
             top.update({"use_ssh_agent": "true"})
@@ -1136,7 +1154,8 @@ class Architecture(object):
 
     def _init_cluster_vars(self, cluster_vars):
         """
-        Makes changes to cluster_vars applicable across architectures
+        Makes changes to cluster_vars applicable across architectures.
+
         """
         preferred_python_version = self.args["image"].get(
             "preferred_python_version", "python3"
@@ -1161,14 +1180,14 @@ class Architecture(object):
         self._add_source_install(cluster_vars)
 
     def _add_cluster_vars_args(self, cluster_vars):
-        """Add args that belongs to cluster_vars without any change or logic"""
+        """Add args that belongs to cluster_vars without any change or logic."""
         for k in self.cluster_vars_args():
             val = self.args.get(k)
             if val is not None:
                 cluster_vars[k] = cluster_vars.get(k, val)
 
     def _add_extra_packages(self, cluster_vars):
-        """Add extra packages lists to cluster_vars"""
+        """Add extra packages lists to cluster_vars."""
 
         package_option_vars = {
             "extra_packages": "packages",
@@ -1232,7 +1251,7 @@ class Architecture(object):
             install_from_source.append(entry)
 
     def _check_local_sources(self, name, ref):
-        """Check that we don't fix a ref when using local source"""
+        """Check that we don't fix a ref when using local source."""
         local_sources = self.args.get("local_sources") or {}
         if ref and name in local_sources:
             raise ArchitectureError(
@@ -1585,13 +1604,14 @@ class Architecture(object):
 
     def update_cluster_vars(self, cluster_vars):
         """
-        Makes architecture-specific changes to cluster_vars if required
+        Makes architecture-specific changes to cluster_vars if required.
+
         """
-        pass
 
     def update_cluster_vars_from_instances(self, cluster_vars, instances):
         """
         Makes architecture-specific changes to cluster_vars that depend on instance variables if required.
+
         """
         if self.args.get("enable_pem") and any(
             "barman" in self._instance_roles(x) for x in instances
@@ -1666,16 +1686,17 @@ class Architecture(object):
                     self.cluster, "local-repo", self.image()["os_family"], major_version
                 )
             )
-        except KeyError:
+        except KeyError as e:
             raise ArchitectureError(
                 f"Warning: Unable to detect OS family and version or image ({self.image().get('name', 'None')})\n"
                 f"Please create the '{self.cluster}/local-repo/<os_family>/<version>' directory yourself.\n"
                 f"(See docs/src/local-repo.md for details.)",
-            )
+            ) from e
 
     def after_configuration(self, force: bool = False) -> None:
         """
-        Performs additional actions after config.yml has been written
+        Performs additional actions after config.yml has been written.
+
         """
         self.create_links(force=force)
         if self.args.get("enable_local_repo"):
@@ -1815,13 +1836,14 @@ class Architecture(object):
 
     def links_to_create(self) -> List[str]:
         """
-        Returns a list of targets to create_links() for
+        Returns a list of targets to create_links() for.
+
         """
         return ["deploy.yml", "commands", "tests", "playbooks"]
 
-    ##
-    ## Template processing
-    ##
+    # 
+    # Template processing
+    #
 
     def template_directories(self):
         """

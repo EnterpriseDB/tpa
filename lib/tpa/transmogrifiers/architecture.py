@@ -4,8 +4,10 @@
 
 """
 This transmogrifier acts as a dispatcher for handling architecture changes.
+
 It owns the global --architecture flag and delegates work to the specialist
 transmogrifiers for each specific upgrade path.
+
 """
 
 # --- Why do we need this Dispatcher ---

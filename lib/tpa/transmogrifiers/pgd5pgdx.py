@@ -5,6 +5,7 @@
 """
 This transmogrifier changes a PGD-Always-ON cluster running PGD version 5 to a
 PGD-X cluster running PGD version 6.
+
 """
 
 # --- Rationale and Migration Strategy ---
@@ -50,6 +51,7 @@ class PGD5PGDX(Transmogrifier):
     This transmogrifier handles the configuration changes required for the
     major version upgrade, such as updating version numbers and removing
     deprecated keys. It is activated by the --architecture PGD-X option.
+
     """
 
     def __init__(self):
@@ -68,6 +70,7 @@ class PGD5PGDX(Transmogrifier):
     def _run_prerequisite_checks(self, cluster):
         """
         Runs a series of checks to ensure the cluster is in a valid state for the upgrade.
+
         """
         # Alright, before we touch anything, let's make sure this cluster
         # configuration is actually in the right state for this upgrade. If
@@ -138,6 +141,7 @@ Please run the following command to migrate it first:
     def _cleanup_deprecated_options(self, cluster):
         """
         Iterates through the configuration and removes any deprecated keys.
+
         """
         bdr_node_groups = cluster.vars.get("bdr_node_groups")
 

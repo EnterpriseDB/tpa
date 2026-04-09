@@ -16,7 +16,8 @@ from tpa.exceptions import ConfigureError, TransmogrifierError
 
 
 class Transmogrifier(ABC):
-    """Represents any change to a Cluster in the abstract.
+    """
+    Represents any change to a Cluster in the abstract.
 
     The best way to think of a Transmogrifier is as a machine that takes some
     user input (e.g., a dial set to eel, giant bug, baboon, or dinosaur) and
@@ -32,6 +33,7 @@ class Transmogrifier(ABC):
     tpa.transmogrifiers.
 
     A Transmogrifier may require() other Transmogrifiers to delegate work.
+
     """
 
     @classmethod
@@ -64,6 +66,7 @@ class Transmogrifier(ABC):
 
         We always apply() the "Common" Transmogrifier before all others, so you
         don't need to require it explicitly anywhere.
+
         """
         self._requires = self.required + [t]
 
@@ -103,19 +106,16 @@ class Transmogrifier(ABC):
         """Checks for problems with making the requested changes to the given
         Cluster, and returns a CheckResult with any warnings and errors found.
         """
-        pass
 
     @abstractmethod
     def apply(self, cluster: Cluster):
         """Makes some changes to the given Cluster object."""
-        pass
 
     @abstractmethod
     def description(self, cluster: Cluster) -> ChangeDescription:
         """Returns an object that describes the changes apply() would make to
         the Cluster, if any.
         """
-        pass
 
 
 def opt(*args, **kwargs) -> Dict[str, Dict[str, Any]]:

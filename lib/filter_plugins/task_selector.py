@@ -4,7 +4,8 @@
 
 
 def selects(selector, *tags) -> bool:
-    """The selector is a dict with the keys "include" and "exclude", each
+    """
+    The selector is a dict with the keys "include" and "exclude", each
     containing a list of strings. Returns true if for every given tag,
     it is both (a) not explicitly excluded and (b) included, either
     explicitly or by the include list being empty.

@@ -22,6 +22,7 @@ class BDR(Architecture):
     def bdr_major_versions(self) -> List[str]:
         """
         Returns a list of BDR major versions supported by this architecture.
+
         """
         return list(set(map(lambda t: t[1], self.supported_versions())))
 
@@ -68,6 +69,7 @@ class BDR(Architecture):
         postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
+        # TODO: check if harp_enabled is needed. It's not used anywhere
         harp_enabled = self.args.get("failover_manager") == "harp"
 
         arch = self.args["architecture"]
@@ -177,6 +179,7 @@ class BDR(Architecture):
         At this stage, a BDR primary would not have "primary" in its role, so it
         is a BDR instance that has none of the roles that would identify it as a
         not-primary instance.
+
         """
         roles = self._instance_roles(instance)
         return "bdr" in roles and not roles & self._readonly_bdr_roles
@@ -233,6 +236,7 @@ class BDR(Architecture):
         If --enable-pem is specified, we add the 'pem-agent' role to BDR and
         Barman instances, and add a dedicated 'pemserver' instance to host the
         PEM server.
+
         """
         if self.args.get("enable_pem", False):
             for instance in instances:
@@ -258,7 +262,8 @@ class BDR(Architecture):
 
     def _update_instance_beacon(self, instances):
         """
-        Add beacon-agent to instance roles where applicable
+        Add beacon-agent to instance roles where applicable.
+
         """
         if self.args.get("enable_beacon_agent"):
             for instance in instances:

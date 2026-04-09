@@ -301,7 +301,7 @@ class BDR4PGD5(Transmogrifier):
                 continue
 
     def _bdr_3to5_changes(self, cluster):
-        """specific changes for BDR3 to PGD5 upgrade"""
+        """Specific changes for BDR3 to PGD5 upgrade."""
 
         # merged all conditions for now since no other changes were needed
         if (

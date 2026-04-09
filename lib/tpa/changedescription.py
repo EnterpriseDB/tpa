@@ -7,7 +7,8 @@ from typing import List, Optional, Any
 
 
 class ChangeDescription:
-    """Represents a list of changes to a Cluster.
+    """
+    Represents a list of changes to a Cluster.
 
     A change description comprises an optional title (e.g., "Transmogrify eel
     to giant bug") and zero or more individual items, each one describing some
@@ -30,7 +31,9 @@ class ChangeDescription:
             * z
 
     If a ChangeDescription has no title, its items become siblings to the items
-    of any ChangeDescription that includes it."""
+    of any ChangeDescription that includes it.
+
+    """
 
     def __init__(self, title: Optional[str] = None, items: Optional[List[Any]] = None):
         self._title = title

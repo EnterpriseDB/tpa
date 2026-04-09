@@ -317,7 +317,8 @@ class docker(Platform):
 
     def get_default_subnet_prefix(self, num_instances=None) -> int:
         """
-        Return a subnet prefix large enough to fit all the instances
+        Return a subnet prefix large enough to fit all the instances.
+
         """
         if num_instances is None:
             return net.DEFAULT_SUBNET_PREFIX_LENGTH

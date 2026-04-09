@@ -299,7 +299,8 @@ class aws(CloudPlatform):
 
     def validate_arguments(self, args):
         """
-        Validate aws specific arguments
+        Validate aws specific arguments.
+
         """
 
         # ensure regions given are not duplicated.

@@ -35,7 +35,9 @@ def parse_conninfo(conninfo: str, key: str = None) -> Dict[str, str]:
 def conninfo_string(d: Dict[str, str]) -> str:
     """
     Returns a conninfo string assembled from the keys and values in the dict d.
+
     Values are single-quoted if needed.
+
     """
 
     def _quote(s):
@@ -50,7 +52,8 @@ def conninfo_string(d: Dict[str, str]) -> str:
 
 
 def dbname(conninfo: str, dbname: str = "postgres", **kwargs) -> str:
-    """
+    """Return a conninfo string with dbname and other settings added.
+
     Given a conninfo string, a dbname, and optional additional key=value
     settings, returns a new conninfo string that includes the dbname and other
     settings.
@@ -63,7 +66,8 @@ def dbname(conninfo: str, dbname: str = "postgres", **kwargs) -> str:
 
 
 def multihost_conninfo(conninfos: List[str]) -> str:
-    """
+    """Merge a list of conninfo strings into a multi-host conninfo.
+
     Takes a list of conninfo strings and returns a conninfo with the host and
     port set to comma-separated strings of the hosts and ports in the original
     list (or port set to a single value if all conninfos have the same value),

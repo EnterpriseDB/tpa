@@ -19,6 +19,7 @@ class PGD(Architecture):
     def bdr_major_versions(self) -> List[str]:
         """
         Returns a list of BDR major versions supported by this architecture.
+
         """
         return list(set(map(lambda t: t[1], self.supported_versions())))
 
@@ -169,6 +170,7 @@ class PGD(Architecture):
     def _sub_group_name(self, loc):
         """
         Returns a name for the BDR subgroup in the given location.
+
         """
         loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"
@@ -219,6 +221,7 @@ class PGD(Architecture):
         At this stage, a BDR primary would not have "primary" in its role, so it
         is a BDR instance that has none of the roles that would identify it as a
         not-primary instance.
+
         """
         roles = self._instance_roles(instance)
         return "bdr" in roles and not roles & self._readonly_bdr_roles
@@ -230,6 +233,7 @@ class PGD(Architecture):
         If --enable-pem is specified, we add the 'pem-agent' role to BDR and
         Barman instances, and add a dedicated 'pemserver' instance to host the
         PEM server.
+
         """
         if self.args.get("enable_pem", False):
             for instance in cluster.instances:
@@ -251,7 +255,8 @@ class PGD(Architecture):
 
     def _update_instance_beacon(self, cluster):
         """
-        Add beacon-agent to instance roles where applicable
+        Add beacon-agent to instance roles where applicable.
+
         """
         if self.args.get("enable_beacon_agent"):
             for instance in cluster.instances:

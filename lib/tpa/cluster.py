@@ -14,7 +14,9 @@ from .instances import Instances
 
 
 class Cluster:
-    """A cluster is a named collection of locations, groups, instances, and an
+    """
+    A cluster is a named collection of locations, groups, instances, and an.
+
     assortment of key-value settings (apart from the key-value settings attached
     to the locations, groups, and instances). It's an object representation that
     corresponds exactly to a config.yml file.
@@ -27,7 +29,9 @@ class Cluster:
 
     A cluster has a main inventory group (corresponding to cluster_vars) and one
     subgroup per location. Every instance belongs to the group for the location
-    it is in, and inherits membership in the main group thereby."""
+    it is in, and inherits membership in the main group thereby.
+
+    """
 
     def __init__(self, cluster_name, architecture, platform=None, group_vars=None):
         self._name: str = cluster_name
@@ -42,25 +46,30 @@ class Cluster:
 
     @property
     def name(self):
-        """The name of this cluster"""
+        """The name of this cluster."""
         return self._name
 
     @property
     def architecture(self):
-        """The architecture that this cluster was initialised with"""
+        """The architecture that this cluster was initialised with."""
         return self._architecture
 
     @property
     def platform(self):
-        """The platform that this cluster was initialised with (may be None if
-        the platform is not known)"""
+        """The platform that this cluster was initialised with (may be None if.
+
+        the platform is not known)
+
+        """
         return self._platform
 
     @property
     def group(self):
-        """The main inventory group for this cluster
+        """The main inventory group for this cluster.
 
-        The cluster_vars in config.yml are the group_vars set for this group."""
+        The cluster_vars in config.yml are the group_vars set for this group.
+
+        """
 
         return self._group
 
@@ -73,17 +82,17 @@ class Cluster:
 
     @property
     def locations(self):
-        """A list of locations in this cluster"""
+        """A list of locations in this cluster."""
         return self._locations
 
     @property
     def instances(self):
-        """A list of instances in this cluster"""
+        """A list of instances in this cluster."""
         return Instances(self._instances)
 
     @property
     def instance_defaults(self):
-        """Default settings for all instances in this cluster"""
+        """Default settings for all instances in this cluster."""
         return self._instance_defaults
 
     @property
@@ -93,7 +102,7 @@ class Cluster:
         return self._settings
 
     def num_subnets(self):
-        """Returns the number of subnets required by this cluster"""
+        """Returns the number of subnets required by this cluster."""
         if self.platform == "docker":
             return 1
 
@@ -157,15 +166,18 @@ class Cluster:
         Args:
             key: The variable name to set
             value: The value to assign to the variable
+
         """
         self._group.add_to_group_vars({key: value})
 
     def to_yaml(self):
-        """Returns a YAML representation of this cluster (WIP)
+        """Returns a YAML representation of this cluster (WIP).
 
         There are four major top-level sections: a dict named cluster_vars, a
         list of locations, a dict of instance_defaults, and a list of instances.
-        Then there are some other settings, depending on platform etc."""
+        Then there are some other settings, depending on platform etc.
+
+        """
 
         c = {
             "architecture": self.architecture,

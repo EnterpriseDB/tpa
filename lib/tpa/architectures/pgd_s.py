@@ -37,7 +37,8 @@ class PGDS(PGD):
         return 4 + self.args["subscriber_only_nodes"] + ("enable_pem" in self.args)
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
-        """PGD-S requires the enterprise repository.
+        """
+        PGD-S requires the enterprise repository.
 
         If the parent class has already determined that 'standard' should be
         used (e.g., for postgresql flavour), we remove it and replace with
@@ -49,6 +50,7 @@ class PGDS(PGD):
 
         Returns:
             List[str]: List of repositories required for the PGD-S architecture
+
         """
         base_repos = set(super().default_edb_repos(cluster_vars))
         base_repos.discard("standard")
@@ -58,12 +60,10 @@ class PGDS(PGD):
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
 
-        """
-        The layout has been determined either directly or by falling back to
-        the default of "standard". If the user has supplied location names
-        then we check they have supplied the right number; if they haven't,
-        then we fill in the right number of placeholder names.
-        """
+        # The layout has been determined either directly or by falling back to
+        # the default of "standard". If the user has supplied location names
+        # then we check they have supplied the right number; if they haven't,
+        # then we fill in the right number of placeholder names.
         layouts = {
             "standard": ["first"],
             "near-far": ["first", "second"],

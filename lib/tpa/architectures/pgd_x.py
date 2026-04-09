@@ -14,7 +14,8 @@ class PGDX(PGD):
     @property
     def name(self):
         """
-        The name of this architecture as it goes in config.yml
+        The name of this architecture as it goes in config.yml.
+
         """
         return "PGD-X"
 
@@ -52,11 +53,13 @@ class PGDX(PGD):
         return total
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
-        """PGD-X requires the postgres_distributed repository.
+        """
+        PGD-X requires the postgres_distributed repository.
 
         This is added to whatever repositories have already been determined
         by the parent class ('standard' or 'enterprise', depending on flavour
         or in principle on other requested software)
+
         """
         return super().default_edb_repos(cluster_vars) + ["postgres_distributed"]
 
@@ -188,7 +191,8 @@ class PGDX(PGD):
         super().add_architecture_options(p, g)
         g.add_argument(
             "--pgd-routing",
-            help="configure Connection Manager to route connections to a globally-elected write leader (global) or a write leader within its own location (local)",
+            help="configure Connection Manager to route connections to a globally-elected "
+            "write leader (global) or a write leader within its own location (local)",
             choices=["global", "local"],
             dest="pgd_routing",
             default=None,
@@ -219,7 +223,8 @@ class PGDX(PGD):
             choices=["http", "https"],
             nargs="?",
             default=SUPPRESS,
-            help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
+            help="Enable http(s) api endpoints for pgd-proxy "
+            "such as `health/is-ready` to allow probing proxy's health",
         )
         g.add_argument(
             "--enable-camo",

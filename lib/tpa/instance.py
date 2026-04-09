@@ -44,34 +44,39 @@ class Instance:
 
     @property
     def name(self):
-        """The name of this instance"""
+        """The name of this instance."""
         return self._name
 
     @property
     def roles(self):
-        """A list of roles set anywhere in the cluster for this instance"""
+        """A list of roles set anywhere in the cluster for this instance."""
         return self.get_setting("role", [])
 
     @property
     def location(self):
-        """The location that this instance belongs to"""
+        """The location that this instance belongs to."""
         return self._location
 
     @property
     def settings(self):
-        """This instance's settings
+        """
+        This instance's settings.
 
         These are the settings specified directly for this instance, not
-        anything inherited through its location or instance_defaults."""
+        anything inherited through its location or instance_defaults.
+
+        """
 
         return self._settings
 
     @property
     def host_vars(self):
-        """This instance's inventory variables
+        """This instance's inventory variables.
 
         These are the inventory variables specified directly for this instance,
-        not including anything inherited through group membership."""
+        not including anything inherited through group membership.
+
+        """
 
         return self._host_vars
 

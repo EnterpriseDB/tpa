@@ -71,28 +71,18 @@ class DockerPlatformError(PlatformError):
 class NetError(TPABaseException):
     """Net error exception class."""
 
-    pass
-
 
 class TestCompilerError(TPABaseException):
     """Test Compiler error exception class."""
-
-    pass
 
 
 class PasswordReadError(TPABaseException):
     """Password reading error exception class."""
 
-    pass
-
 
 class PasswordWriteError(TPABaseException):
     """Password writing error exception class."""
 
-    pass
-
 
 class ExternalCommandError(TPABaseException):
     """External command execution error."""
-
-    pass

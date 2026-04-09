@@ -304,6 +304,7 @@ class M1(Architecture):
         :param instances: the instances which belong to this TPA cluster. We are
             interested in the ones with role ``etcd``, so we can configure PGDG repos
             for them.
+
         """
         if self.args.get("failover_manager") == "patroni":
             for repo_var_name in ["yum_repository_list", "suse_repository_list"]:
@@ -333,6 +334,7 @@ class M1(Architecture):
         the configured repositories.
 
         :param cluster_vars: cluster variables to be inspected.
+
         """
         # If the user explicitly set the flavour, use that.
         ret = self.args.get("patroni_package_flavour")
@@ -368,13 +370,16 @@ class M1(Architecture):
         Use value configured by the user, if any, otherwise get the default
 
         :param cluster_vars: cluster variables to be inspected.
+
         """
         if self.args.get("efm_version"):
             return self.args.get("efm_version")
+        return None
 
     def update_cluster_vars(self, cluster_vars):
         """
-        Makes architecture-specific changes to cluster_vars if required
+        Makes architecture-specific changes to cluster_vars if required.
+
         """
         failover_manager = self.args.get("failover_manager")
         cluster_vars.update(

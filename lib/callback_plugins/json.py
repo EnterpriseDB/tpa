@@ -115,7 +115,7 @@ class CallbackModule(CallbackBase):
         return key
 
     def v2_playbook_on_stats(self, stats):
-        """Display info about playbook statistics"""
+        """Display info about playbook statistics."""
 
         hosts = sorted(stats.processed.keys())
 
@@ -147,7 +147,7 @@ class CallbackModule(CallbackBase):
         )
 
     def _record_task_result(self, on_info, result, **kwargs):
-        """This function is used as a partial to add failed/skipped info in a single method"""
+        """This function is used as a partial to add failed/skipped info in a single method."""
         host = result._host
         task = result._task
 
@@ -169,7 +169,7 @@ class CallbackModule(CallbackBase):
             del self._task_map[key]
 
     def __getattribute__(self, name):
-        """Return ``_record_task_result`` partial with a dict containing skipped/failed if necessary"""
+        """Return ``_record_task_result`` partial with a dict containing skipped/failed if necessary."""
         if name not in (
             "v2_runner_on_ok",
             "v2_runner_on_failed",

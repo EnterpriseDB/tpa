@@ -111,6 +111,7 @@ class BDR_Always_ON(BDR):
     def update_instances(self, instances):
         """
         Update instances with bdr-always-on specific changes.
+
         """
 
         super().update_instances(instances)
@@ -146,7 +147,9 @@ class BDR_Always_ON(BDR):
     def _etcd_harp_exclude_roles(self):
         """
         Instance roles that should not run etcd while using harp consensus etcd.
+
         Returns: Set of role names
+
         """
         _exclude_roles = {
             "replica",

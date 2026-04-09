@@ -447,19 +447,21 @@ def index_list_of_dicts(obj, key=None, recursive=False):
 
 
 def pyformat_hostvars(hostname, format_str, hostvars):
-    """
+    """Format a string with references to hostvars for a given hostname.
+
     Takes a hostname, hostvars, and a string with {references} to attributes in
-    hostvars, and returns the .format()ed string
+    hostvars, and returns the .format()ed string.
     """
     return format_str.format(**hostvars.get(hostname, {}))
 
 
 def expected_replication_slots(replica_list, inventory_hostname):
-    """
+    """Return expected replication slots for a given inventory hostname.
+
     Deep copy a variable inside a clean dict to ensure the variable is correctly
     formatted as dict. This filter is added due to an issue while switching to
-    aws_ec2 inventory plugin. hostvars were not returned corectly. this would
-    result in expected replication slots to be returned as "" or "\n".
+    aws_ec2 inventory plugin. hostvars were not returned correctly. This would
+    result in expected replication slots to be returned as "" or "\\n".
     """
     expected_slots = []
     for replica in replica_list:
@@ -471,7 +473,8 @@ def expected_replication_slots(replica_list, inventory_hostname):
 
 
 def select_by_hostvar(hostnames, hostvars, varname, value):
-    """
+    """Select hostnames where a given hostvar matches a specified value.
+
     Takes a list of hostnames, hostvars, the name of a variable, and a value to
     compare with, and returns those hostnames for which the variable is set to
     the given value in hostvars.

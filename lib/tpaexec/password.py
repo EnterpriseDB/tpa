@@ -24,6 +24,7 @@ def generate_password():
     This function takes no arguments and returns a string containing a password
     that is suitable for use as a database password, or as needed elsewhere for
     the cluster.
+
     """
 
     charset = string.ascii_letters + string.digits + APPROVED_SYMBOLS
@@ -31,13 +32,15 @@ def generate_password():
 
 
 def store_password(cluster_dir, password_name, password, keyring_backend):
-    """Leverage the chosen keyring backend to store a password for the cluster
+    """
+    Leverage the chosen keyring backend to store a password for the cluster.
 
     Args:
         cluster_dir (string): path of the cluster the password belongs to.
         password_name (string): name of the password entry to store
         password (string): password to store
         keyring_backend (string): name of keychain backend used to store the password
+
     """
     cluster_name = os.path.basename(os.path.abspath(cluster_dir))
     _initialize_keyring(
@@ -105,18 +108,20 @@ exists with the correct vault password by running:
 or
 `keyring set {KEYRING_PREFIX + cluster_name} {password_name}`"""
             )
-        return print(password)
+        print(password)
     else:
         sys.exit(1)
 
 
 def delete_password(cluster_dir, password_name, keyring_backend):
-    """delete password from keyring backend
+    """
+    Delete password from keyring backend.
 
     Args:
         cluster_dir (string): path of the cluster the password belongs to.
         keyring_backend (string): name of keychain backend used to store the password
         password_name (string): name of the password entry to delete
+
     """
     _initialize_keyring(
         cluster_dir=cluster_dir,
@@ -131,7 +136,8 @@ def delete_password(cluster_dir, password_name, keyring_backend):
 
 
 def exists(cluster_dir, password_name, keyring_backend):
-    """Returns true if password already exists otherwise returns false
+    """
+    Returns true if password already exists otherwise returns false.
 
     Args:
         cluster_dir (string): path of the cluster the password belongs to.
@@ -140,6 +146,7 @@ def exists(cluster_dir, password_name, keyring_backend):
 
     Returns:
         _type_: _description_
+
     """
     _initialize_keyring(
         cluster_dir=cluster_dir,
@@ -164,11 +171,13 @@ def exists(cluster_dir, password_name, keyring_backend):
 
 
 def _initialize_keyring(cluster_dir, keyring_backend):
-    """Prepare keyring module to use the selected backend
+    """
+    Prepare keyring module to use the selected backend.
 
     Args:
         cluster_dir (string): path of the cluster the password belongs to.
         keyring_backend (string): name of keychain backend to initialize
+
     """
     # will start with keyring only and we will probably need more python module to
     # support more use case (hashicorp vault seems to have no good keyring
@@ -179,4 +188,4 @@ def _initialize_keyring(cluster_dir, keyring_backend):
     # nothing to do but keeping the example for later use.
     if keyring_backend in KEYRING_SUPPORTED_BACKENDS:
         if keyring_backend == "system":
-            pass
+            return
