@@ -153,12 +153,14 @@ if os.path.exists(".git") and modified_paths:
             shell=True,
             stdout=subprocess.PIPE,
             universal_newlines=True,
+            check=False,
         )
         if cp.stdout.rstrip() == "Created by TPA":
             cp = subprocess.run(
                 ["git", "add", *modified_paths],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
+                check=False,
             )
             if v:
                 print(cp.stdout)
@@ -166,6 +168,7 @@ if os.path.exists(".git") and modified_paths:
                 ["git", "commit", "-m", "Relink files to the correct $TPA_DIR"],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
+                check=False,
             )
             if v:
                 print(cp.stdout)
