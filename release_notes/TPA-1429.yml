@@ -1,0 +1,10 @@
+- summary: Include additional modules to deploy EPAS in SLES 15
+  description: |
+    When deploying a SLES 15 cluster, PackageHub registration is now performed
+    as part of the initial system registration for both EPAS and PEM installations.
+    Additionally, two new modules (sle-module-desktop-applications and
+    sle-module-development-tools) are now enabled for EPAS deployments in order
+    to install dependencies such as libclang13.
+  type: bugfix
+  jira_tickets:
+  - TPA-1429
