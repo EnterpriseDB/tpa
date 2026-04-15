@@ -38,6 +38,7 @@ transmogrifiers for each specific upgrade path.
 # future extensions, which is a worthwhile trade-off for the added clarity
 # and robustness.
 
+from ..checkresult import CheckResult
 from ..exceptions import ConfigureError
 from ..transmogrifier import Transmogrifier, opt
 from .bdr4pgd5 import BDR4PGD5
@@ -77,16 +78,26 @@ class Architecture(Transmogrifier):
         return self.args.target_architecture is not None
 
     def check(self, cluster):
-        # We're acting as a pass-through here. We ask our internal dispatcher
-        # to find the right specialist for the job, and then we tell that
-        # specialist to run its own `check` method.
-        return self._dispatcher(cluster).check(cluster)
+        # We delegate to the specialist and its required transmogrifiers,
+        # since these dependencies are not visible to the top-level queue.
+        specialist = self._dispatcher(cluster)
+        result = CheckResult()
+        for req in specialist.required:
+            if req.is_applicable(cluster):
+                result.absorb(req.check(cluster))
+        result.absorb(specialist.check(cluster))
+        return result
 
     def apply(self, cluster):
-        # Same as above, but for the `apply` action. The dispatcher finds
-        # the specialist, and we delegate the actual configuration changes
-        # to that specialist's `apply` method.
-        return self._dispatcher(cluster).apply(cluster)
+        # The dispatcher finds the specialist and we apply its required
+        # transmogrifiers (e.g., Repositories) before applying the specialist
+        # itself, since these dependencies are not visible to the top-level
+        # transmogrifier queue.
+        specialist = self._dispatcher(cluster)
+        for req in specialist.required:
+            if req.is_applicable(cluster):
+                req.apply(cluster)
+        specialist.apply(cluster)
 
     def description(self, cluster):
         # Again, we delegate. The detailed, user-facing description of the

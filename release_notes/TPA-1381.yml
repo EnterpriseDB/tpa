@@ -1,0 +1,10 @@
+- summary: tpaexec reconfigure doesn't add postgres_distributed in BDR 4 to BDR 5 upgrades.
+  description: |
+    The 'tpaexec reconfigure' command, when upgrading from BDR 4 to BDR 5, didn't add the
+    'postgres_distributed' repository, this would result on a failure when trying to download
+    the new BDR 5 packages.
+    A fix has been introduced to ensure that the mentioned repository would be included in the
+    configuration file.
+  type: minor_change
+  jira_tickets:
+  - TPA-1381
