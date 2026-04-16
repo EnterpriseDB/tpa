@@ -43,7 +43,7 @@
   - when: >
       upgrade_selector|strict_selects('pgd-proxy') or upgrade_selector|strict_selects('all')
     block:
-    - name: Define pdg_proxy_package_version if not defined in config.yml
+    - name: Define pgd_proxy_package_version if not defined in config.yml
       set_fact:
         pgd_proxy_package_version: "{{ bdr_package_version }}"
       when:

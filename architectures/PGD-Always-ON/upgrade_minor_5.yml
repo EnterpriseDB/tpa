@@ -4,7 +4,7 @@
 
 # This playbook performs PGD 5 minor version upgrades for PGD-Always-ON
 # clusters. It handles upgrades within the PGD 5.x release series only
-# (e.g., 5.3→5.4). For BDR 4→PGD 5 major upgrades, see upgrade_legacy.yml.
+# (e.g., 5.3→5.4). For BDR 4→PGD 5 major upgrades, see upgrade_major_4to5.yml.
 #
 # The process is:
 # 1. Health checks (pgd-cli diagnostics, pgd-proxy status)
@@ -125,7 +125,7 @@
     - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
     - (('bdr' in role  or 'pgd-proxy' in role) and bdrdb_major_version is version('5', '<=')) or 'pgdcli' in role
     block:
-    - name: Define pdgcli package version if not defined in config.yml
+    - name: Define pgdcli package version if not defined in config.yml
       set_fact:
         pgdcli_package_version: "{{ bdr_package_version }}"
       when:
@@ -287,8 +287,8 @@
       inventory_hostname == first_bdr_primary
 
   - name: Wait for write leader elections to complete
-    command:
-      pgd show-groups -o json
+    command: >
+      {{ pgdcli_bin }} show-groups -o json
     register: pgd_show_groups
     become_user: "{{ postgres_user }}"
     become: yes

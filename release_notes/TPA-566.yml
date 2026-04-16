@@ -1,0 +1,11 @@
+- summary: Replace upgrade_legacy.yml with dedicated upgrade_major_4to5.yml playbook
+  description: |
+    The BDR 4→5 major upgrade logic has been extracted from the monolithic
+    upgrade_legacy.yml into a dedicated playbook. This simplifies the upgrade
+    path by removing all conditional branching, hardcoding harp as the
+    failover manager and upgrade_from as version 4. The now-orphaned
+    upgrade_legacy.yml files have been removed from PGD-Always-ON and
+    Lightweight architectures.
+  type: notable_change
+  jira_tickets:
+  - TPA-566

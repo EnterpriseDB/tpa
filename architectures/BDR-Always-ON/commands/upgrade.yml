@@ -139,7 +139,7 @@
   - when:
     - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
     block:
-    - name: Define pdgcli package version if not defined in config.yml
+    - name: Define pgdcli package version if not defined in config.yml
       set_fact:
         pgdcli_package_version: "{{ bdr_package_version }}"
       when:
