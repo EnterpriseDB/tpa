@@ -26,6 +26,13 @@ class BDR4PGD5(Transmogrifier):
     def is_applicable(self, cluster):
         return self.args.target_architecture == "PGD-Always-ON"
 
+    def is_ready(self, cluster):
+        # Wait for all required transmogrifiers (e.g. Repositories) to be
+        # applied before this one runs, since the framework's all_required()
+        # ordering may place this transmogrifier before its own dependencies
+        # in the apply queue.
+        return all(getattr(req, "_applied", False) for req in self.required)
+
     def check(self, cluster):
         res = CheckResult()
 

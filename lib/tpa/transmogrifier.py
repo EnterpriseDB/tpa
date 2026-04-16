@@ -170,6 +170,10 @@ def apply(cluster: Cluster, tlist: List[Transmogrifier]):
         t = ts.popleft()
         if t.is_ready(cluster):
             t.apply(cluster)
+
+            # Mark the Transmogrifier as applied so that other
+            # Transmogrifiers can check this in their is_ready().
+            t._applied = True
         else:
             ts.append(t)
 

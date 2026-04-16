@@ -58,6 +58,13 @@ class PGD5PGDX(Transmogrifier):
     def is_applicable(self, cluster):
         return self.args.target_architecture == "PGD-X"
 
+    def is_ready(self, cluster):
+        # Wait for all required transmogrifiers (e.g. Repositories) to be
+        # applied before this one runs, since the framework's all_required()
+        # ordering may place this transmogrifier before its own dependencies
+        # in the apply queue.
+        return all(getattr(req, "_applied", False) for req in self.required)
+
     def _run_prerequisite_checks(self, cluster):
         """
         Runs a series of checks to ensure the cluster is in a valid state for the upgrade.

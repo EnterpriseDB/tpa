@@ -46,28 +46,7 @@ def transmogrifiers_from_args(args: List[str]) -> List[Transmogrifier]:
         if options_match(options, parsed_args):
             tlist.append(tclass())
 
-    # We now have a list of Transmogrifier objects for some subset of entries in
-    # selectable_transmogrifiers, selected based on their relevance to what's in
-    # args. We omit entries for any Transmogrifiers that are already declared as
-    # dependencies. Dependencies take precedence over objects we created above
-    # because they may be initialised with more information than just args.
-    #
-    # For example, if args contains --edb-repositories, we need the Repositories
-    # Transmogrifier to process the value. We would have created a Repositories
-    # object above, but we can ignore it if it occurs somewhere in the .required
-    # chain of another Transmogrifier—say, because BDR4PGD5 created one with a
-    # PGD5-specific default repository list in addition to the values from args.
-    # In this case, we treat --edb-repositories as being subsidiary to a request
-    # for "--architecture PGD-Always-ON", rather than an independent operation.
-    #
-    # In general, we'll use a top-level object only if no Transmogrifier of the
-    # same class is better-placed to take ownership of its command-line options.
-
-    dependencies = reduce(add, [t.all_required() for t in tlist], [])
-    dependency_classes = set([type(t) for t in dependencies])
-    tlist = [t for t in tlist if type(t) not in dependency_classes]
-
-    # If tlist end up empty at this point, we return the empty list since no
+    # If tlist ends up empty at this point, we return the empty list since no
     # Transmogrifiers matched (probably `cluster` was the only argument given)
     # we don't want to add Common, the command should error out with `Nothing
     # to do` message.
@@ -85,6 +64,29 @@ def transmogrifiers_from_args(args: List[str]) -> List[Transmogrifier]:
     parsed_args = p.parse_args(args)
     for t in tlist:
         t.set_parsed_args(parsed_args)
+
+    # We now omit entries for any Transmogrifiers that are already declared as
+    # dependencies. Dependencies take precedence over objects we created above
+    # because they may be initialised with more information than just args.
+    #
+    # For example, if args contains --edb-repositories, we need the Repositories
+    # Transmogrifier to process the value. We would have created a Repositories
+    # object above, but we can ignore it if it occurs somewhere in the .required
+    # chain of another Transmogrifier—say, because BDR4PGD5 created one with a
+    # PGD5-specific default repository list in addition to the values from args.
+    # In this case, we treat --edb-repositories as being subsidiary to a request
+    # for "--architecture PGD-Always-ON", rather than an independent operation.
+    #
+    # In general, we'll use a top-level object only if no Transmogrifier of the
+    # same class is better-placed to take ownership of its command-line options.
+    #
+    # Note: this dedup runs AFTER set_parsed_args() so that Transmogrifiers
+    # like Architecture can register their specialist dependencies during
+    # set_parsed_args(), making them visible in all_required().
+
+    dependencies = reduce(add, [t.all_required() for t in tlist], [])
+    dependency_classes = {type(t) for t in dependencies}
+    tlist = [t for t in tlist if type(t) not in dependency_classes]
 
     return tlist
 

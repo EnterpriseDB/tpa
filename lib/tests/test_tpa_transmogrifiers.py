@@ -38,7 +38,7 @@ class TestTransmogrifiers:
                     "dev",
                 ],
                 None,
-                [Common, Architecture, Repositories],
+                [Common, Architecture],
             ),
             ([], None, []),
         ],
