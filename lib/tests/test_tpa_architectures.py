@@ -350,6 +350,67 @@ class TestPGDXArchitecture:
         edb_repos = pgdx_cluster.cluster_vars.get("edb_repositories", [])
         assert edb_repos == expected_repos
 
+    @pytest.mark.parametrize(
+        "argv, expected_total",
+        [
+            # default: 1 location, 3 data + 1 barman
+            (STANDARD_PGDX_ARGV, 4),
+            # 3 locations, 3 data + 1 barman each
+            (STANDARD_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"], 12),
+            # 2 locations with a per-location witness node: (3 + 1 + 1) per location
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--location-names",
+                    "dc1",
+                    "dc2",
+                    "--add-witness-node-per-location",
+                ],
+                10,
+            ),
+            # 3 locations with the third designated witness-only: 2 * 4 + 1
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--location-names",
+                    "dc1",
+                    "dc2",
+                    "dc3",
+                    "--witness-only-location",
+                    "dc3",
+                ],
+                9,
+            ),
+            # --enable-pem adds a single pemserver instance
+            (STANDARD_PGDX_ARGV + ["--enable-pem"], 5),
+            # custom data-nodes-per-location
+            (STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "5"], 6),
+            # combo: 3 locations (one witness-only) + per-location witness + pem
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--location-names",
+                    "dc1",
+                    "dc2",
+                    "dc3",
+                    "--witness-only-location",
+                    "dc3",
+                    "--add-witness-node-per-location",
+                    "--enable-pem",
+                ],
+                12,
+            ),
+        ],
+    )
+    def test_pgdx_instance_count(self, argv, expected_total, pgdx_cluster):
+        """Pin the instance count produced by each PGD-X configuration.
+
+        Documents the topology and flags surprises if the template changes.
+        The num_instances()-vs-len(instances) invariant is enforced
+        separately, inside process_arguments().
+        """
+        assert len(pgdx_cluster.instances) == expected_total
+
 
 # @patch.object(Architecture, "expand_template", expand_template)
 class TestPGDSArchitecture:
