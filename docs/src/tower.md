@@ -177,6 +177,54 @@ To create a template:
 
 5. To deploy your cluster, run a job based on the new template.
 
+## Running custom playbooks
+
+In addition to the initial deploy, you will often want to run small
+ad-hoc playbooks against an existing cluster: to check service status,
+inspect logs, collect diagnostic output, and so on. AAP's ad-hoc
+command facility is not a good fit for this, because it runs directly
+against inventory hosts without reference to a Project and so has no
+access to the cluster directory's `ssh_config`, `ansible.cfg`, vault,
+or other TPA context. The right approach is to add your playbook to
+the cluster's git repository and run it from a second Template.
+
+We recommend putting the playbook in the `commands/` subdirectory of
+the cluster, which has two benefits: it keeps custom playbooks
+separate from TPA's own files, and anything placed there is also
+picked up by `tpaexec` as a subcommand (the same mechanism works for
+shell scripts placed in `commands/`).
+
+For example, save the following as
+`<cluster_dir>/commands/check-disk-space.yml`:
+
+```yaml
+---
+# Sample playbook: check disk space on every cluster node.
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Show disk usage
+      ansible.builtin.command: df -h
+      changed_when: false
+```
+
+Commit and push the file to the cluster's branch in the remote
+repository so AAP can see it:
+
+```shell
+git add commands/check-disk-space.yml
+git commit -m "Add check-disk-space playbook"
+git push
+```
+
+In the AAP UI, use the **Duplicate template** action on your deploy
+template to create a copy with the same project, inventory,
+credentials, and extra variables. Edit the new template and change
+the playbook to `commands/check-disk-space.yml`. Launch a job based
+on the new template. The per-host output of `df -h` is available by
+clicking through to each host in the job details and selecting the
+**Output** tab.
+
 ## Use one project for multiple inventory
 
 TPA uses a different branch name for each of your clusters in the
