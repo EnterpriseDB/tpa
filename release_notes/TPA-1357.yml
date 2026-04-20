@@ -1,0 +1,13 @@
+- summary: Document running custom playbooks on AAP
+  description: |
+    The AAP user documentation now explains how to add custom playbooks
+    to a cluster and run them through AAP, using the `commands/`
+    subdirectory convention and AAP's Duplicate template action.
+  # Possible types: notable_change, minor_change, bugfix or breaking_change
+  type: minor_change
+  # At least one between jira_tickets or support_tickets must be defined. You
+  # can define both if you want
+  # You must have at least one list item in each *_tickets section that is
+  # defined
+  jira_tickets:
+  - TPA-1357
