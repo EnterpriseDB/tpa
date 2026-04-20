@@ -1,0 +1,14 @@
+- summary: Fix PGD-X demanding too many hostnames in --hostnames-from
+  description: |
+    Configuring a PGD-X cluster with --hostnames-from used to fail with
+    "found only N/16 names matching …" whenever the supplied file held
+    fewer than 16 names, even when the cluster only needed a handful.
+    The underlying PGD-X architecture now computes the real number of
+    instances it will build (data + witness + barman nodes per location,
+    plus an optional witness-only location and a pemserver if requested),
+    so --hostnames-from accepts a correctly-sized file and no longer
+    requires padding it out to 16 entries.
+  type: bugfix
+  jira_tickets:
+  - TPA-1426
+  - TPA-1115
