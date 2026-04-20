@@ -29,11 +29,28 @@ class PGDX(PGD):
         ]
 
     def num_instances(self):
+        """Count instances built by the PGD-X topology template.
+
+        Sum of data, witness, and barman nodes across every non-witness-only
+        location, plus the single extra witness instance in a witness-only
+        location if one is configured, plus a pemserver if requested. Mirrors
+        architectures/PGD-X/templates/main.yml.j2 and PGD._update_instance_pem.
         """
-        Should do a calculation here - temporarily, we just return a
-        big enough number
-        """
-        return 16
+        per_location = (
+            self.args["data_nodes_per_location"]
+            + (1 if self.args.get("witness_node_per_location") else 0)
+            + 1  # barman
+        )
+        witness_only = self.args.get("witness_only_location")
+        data_locations = [
+            loc for loc in self.args["location_names"] if loc != witness_only
+        ]
+        total = len(data_locations) * per_location
+        if witness_only:
+            total += 1
+        if self.args.get("enable_pem", False):
+            total += 1
+        return total
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
         """PGD-X requires the postgres_distributed repository.

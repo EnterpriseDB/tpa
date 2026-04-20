@@ -292,6 +292,15 @@ class Architecture:
         self.update_instances(cluster)
         self.platform.update_instances(cluster.instances, args)
 
+        # num_instances() decides how many hostnames and IPs we ask for up
+        # front (see line ~211), so a mismatch here means --hostnames-from
+        # will either reject a correct-sized file or silently truncate one.
+        assert self.num_instances() == len(cluster.instances), (
+            f"{type(self).__name__}.num_instances() claims "
+            f"{self.num_instances()} but cluster was built with "
+            f"{len(cluster.instances)} instances"
+        )
+
         self.platform.process_arguments(args, cluster)
         return cluster
 
