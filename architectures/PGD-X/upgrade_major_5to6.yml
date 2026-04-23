@@ -137,7 +137,8 @@
       tasks_from: proxy-monitor/start.yml
     vars:
       conninfos:
-        "{{ groups['role_bdr']|default([])
+        "{{ (groups['role_bdr']|default([]))
+            |difference(groups['role_witness']|default([]))
             |map('extract', hostvars, 'cm_endpoint')
             |list }}"
     when:

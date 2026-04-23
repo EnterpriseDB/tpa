@@ -130,7 +130,7 @@ runs:
       working-directory: ${{ inputs.source_directory }}
       run: |
         echo "::group::Upgrade cluster"
-        ./bin/tpaexec upgrade "$CLUSTER" -vv
+        ./bin/tpaexec upgrade "$CLUSTER" -vv -e enable_proxy_monitoring=yes
         status=$?
         echo "::endgroup::"
         exit $status
