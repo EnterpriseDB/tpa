@@ -58,7 +58,18 @@
   - name: Record connection manager endpoint DSN for monitoring
     set_fact:
       cm_endpoint:
-        "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, port=bdr_node_groups[0]['options']['read_write_port']|default(postgres_port|int + 1000)) }}"
+        "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, port=cm_port) }}"
+    vars:
+      this_node_group:
+        "{{ cluster_facts['databases'][bdr_database]['bdr']['local_node']['nodegroup_name'] }}"
+      this_node_top_group:
+        "{{ cluster_facts['databases'][bdr_database]['bdr']['local_node']['node_topgroup_name'] }}"
+      group_port: "{{ bdr_node_groups|selectattr('name','equalto',this_node_group)|map(attribute='options')|selectattr('read_write_port','defined')|map(attribute='read_write_port')|list }}"
+      top_port: "{{ bdr_node_groups|selectattr('name','equalto',this_node_top_group)|map(attribute='options')|selectattr('read_write_port','defined')|map(attribute='read_write_port')|list }}"
+      cm_port:
+        "{{ group_port[0] if group_port|length > 0
+            else (top_port[0] if top_port|length > 0
+                  else postgres_port|int + 1000) }}"
 
 # We check pgbouncer nodes are healthy; at this point maybe we could also
 # do checks on the existing Connection Manager nodes?
