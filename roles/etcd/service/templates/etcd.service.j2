@@ -10,7 +10,11 @@ Group={{ etcd_group }}
 Type=notify
 Environment=ETCD_DATA_DIR=/var/lib/etcd
 Environment=ETCD_NAME=%m
+{% if ansible_os_family == 'SUSE' and postgres_flavour in ('edbpge', 'epas') %}
+ExecStart=/usr/sbin/etcd
+{% else %}
 ExecStart=/usr/bin/etcd
+{% endif %}
 EnvironmentFile=/etc/etcd/etcd.conf
 Restart=always
 RestartSec=10s

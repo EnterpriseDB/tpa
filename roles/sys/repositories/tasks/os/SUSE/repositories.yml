@@ -112,7 +112,8 @@
 
 - when: >
     postgres_flavour == 'epas' or
-    'pem-agent' in role or 'pem-server' in role
+    'pem-agent' in role or 'pem-server' in role or
+    (failover_manager == 'patroni' and postgres_flavour == 'edbpge')
   block:
   - name: Install SUSEConnect
     zypper:
