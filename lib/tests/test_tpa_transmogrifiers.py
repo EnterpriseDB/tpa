@@ -293,6 +293,34 @@ class TestBDR4PGD5:
         )
         assert camo_msg in x.description(basic_bdr_cluster)._items
 
+    def test_bdr4pgd5_is_ready_waits_for_repositories(self, basic_bdr_cluster):
+        """is_ready returns False until its Repositories dep has been applied
+
+        Because all_required() places a parent before its children, the
+        framework's apply queue would otherwise run BDR4PGD5 before its own
+        Repositories dependency. is_ready() must return False when the
+        required Repositories hasn't been applied yet so the queue defers
+        this transmogrifier until Repositories runs.
+        """
+        x = BDR4PGD5()
+        # Fresh instance: Repositories exists in self.required but has no
+        # _applied attribute yet, so is_ready must be False.
+        assert x.is_ready(basic_bdr_cluster) is False
+
+    def test_bdr4pgd5_is_ready_after_repositories_applied(self, basic_bdr_cluster):
+        """is_ready returns True once every required transmogrifier is applied
+
+        The framework sets `_applied = True` on each transmogrifier after
+        calling its apply(). Once that flag is present on the specialist's
+        Repositories dependency, is_ready must return True so the queue
+        can finally apply BDR4PGD5.
+        """
+        x = BDR4PGD5()
+        # Simulate the framework marking the requirement as applied.
+        for req in x.required:
+            req._applied = True
+        assert x.is_ready(basic_bdr_cluster) is True
+
 
 class TestCommon:
     """test suite for Common transmogrifier"""
