@@ -57,6 +57,46 @@ class TestTransmogrifiers:
         p = ArgumentParser()
         add_all_transmogrifier_options(p)
 
+    def test_transmogrifiers_from_args_specialist_owns_its_repositories(self):
+        """Architecture's specialist owns its Repositories dependency
+
+        This verifies the structural invariant the dedup relies on: when the
+        user requests both --architecture and --edb-repositories, the
+        specialist's Repositories instance (which carries PGD-specific
+        default_repos) appears in Architecture's all_required() after dedup.
+        The user's --edb-repositories value still reaches this instance
+        through set_parsed_args, so it is NOT dropped — it's applied by the
+        specialist's Repositories rather than by a separate standalone one.
+        """
+        result = transmogrifiers_from_args(
+            [
+                "--architecture", "PGD-Always-ON",
+                "--edb-repositories", "dev",
+            ]
+        )
+        # Architecture is in the list and owns a Repositories in its
+        # dependency chain (via the specialist).
+        architecture = next(t for t in result if isinstance(t, Architecture))
+        required_classes = [type(t) for t in architecture.all_required()]
+        assert Repositories in required_classes
+        # The owning Repositories instance has received the user's
+        # --edb-repositories value through set_parsed_args propagation.
+        repos = next(
+            t for t in architecture.all_required() if isinstance(t, Repositories)
+        )
+        assert repos.args.edb_repositories == ["dev"]
+
+    def test_transmogrifiers_from_args_standalone_repositories_preserved(self):
+        """Repositories is preserved when no other transmogrifier requires it
+
+        When --edb-repositories is passed without --architecture, there's no
+        Architecture dispatcher to claim ownership of Repositories, so the
+        dedup must not filter it out — otherwise the user's input would
+        have nowhere to land.
+        """
+        result = transmogrifiers_from_args(["--edb-repositories", "dev"])
+        assert [type(t) for t in result] == [Common, Repositories]
+
 
 @pytest.fixture
 def basic_bdr_cluster():
