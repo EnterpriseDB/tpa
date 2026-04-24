@@ -460,6 +460,51 @@ class TestBDR4PGD5:
         assert x.is_ready(basic_bdr_cluster) is True
 
 
+class TestPGD5PGDX:
+    """test suite for PGD5PGDX class"""
+
+    @pytest.mark.parametrize(
+        "input, expected",
+        [
+            ({"target_architecture": "PGD-X"}, True),
+            ({"target_architecture": "PGD-Always-ON"}, False),
+            ({"target_architecture": "other"}, False),
+        ],
+    )
+    def test_pgd5pgdx_is_applicable(self, input, expected):
+        """is_applicable returns True only when target_architecture is PGD-X
+
+        PGD5PGDX handles the PGD-Always-ON → PGD-X migration. It must
+        activate only for --architecture PGD-X so it doesn't interfere
+        with other upgrade paths dispatched by Architecture.
+        """
+        x = PGD5PGDX()
+        x._args = Namespace(**input)
+        assert x.is_applicable("cluster") == expected
+
+    def test_pgd5pgdx_is_ready_waits_for_repositories(self, basic_pgd_cluster):
+        """is_ready returns False until its Repositories dep has been applied
+
+        Same ordering constraint as BDR4PGD5: the framework's all_required()
+        places the specialist before its Repositories, so is_ready() must
+        defer PGD5PGDX until Repositories has run first.
+        """
+        x = PGD5PGDX()
+        assert x.is_ready(basic_pgd_cluster) is False
+
+    def test_pgd5pgdx_is_ready_after_repositories_applied(self, basic_pgd_cluster):
+        """is_ready returns True once every required transmogrifier is applied
+
+        Once the framework marks the required Repositories with
+        `_applied = True`, PGD5PGDX must signal ready so the queue can
+        apply it.
+        """
+        x = PGD5PGDX()
+        for req in x.required:
+            req._applied = True
+        assert x.is_ready(basic_pgd_cluster) is True
+
+
 class TestCommon:
     """test suite for Common transmogrifier"""
 
