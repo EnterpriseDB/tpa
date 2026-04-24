@@ -210,6 +210,36 @@
       name: test
       tasks_from: bdr6/ports.yml
 
+# After the last rolling restart, BDR replication slots can still be
+# briefly inactive while they re-handshake with the just-updated node.
+# Give them a bounded amount of time to come back before we run the
+# strict post-upgrade `pgd cluster show --health` check. If the window
+# is not enough, fall through so the real check reports the genuine
+# problem.
+- name: Wait for BDR replication slots to reactivate after upgrade
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - name: Poll bdr.group_replslots_details until all slots are active
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        select count(*) = 0 as all_active
+        from bdr.group_replslots_details where not active::boolean;
+    register: slot_check
+    until: slot_check.all_active|default(false)
+    retries: 60
+    delay: 2
+    become_user: "{{ postgres_user }}"
+    become: yes
+    ignore_errors: yes
+    when:
+      inventory_hostname == first_bdr_primary
+
 - name: Post-upgrade health checks
   any_errors_fatal: true
   max_fail_percentage: 0
