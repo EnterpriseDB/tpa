@@ -9,6 +9,7 @@ import pytest
 
 from tpa.cluster import Cluster
 from tpa.exceptions import ConfigureError
+from tpa.transmogrifier import apply as apply_queue
 from tpa.transmogrifiers import (
     BDR4PGD5,
     PGD5PGDX,
@@ -96,6 +97,32 @@ class TestTransmogrifiers:
         """
         result = transmogrifiers_from_args(["--edb-repositories", "dev"])
         assert [type(t) for t in result] == [Common, Repositories]
+
+
+class TestApplyQueue:
+    """test suite for the framework apply queue behaviour"""
+
+    def test_apply_queue_marks_transmogrifiers_as_applied(self, basic_bdr_cluster):
+        """apply() sets _applied = True on each transmogrifier after it runs
+
+        This is the mechanism that lets is_ready() checks tell whether a
+        dependency has already been processed. Without this flag being set,
+        specialists that rely on `getattr(req, "_applied", False)` would
+        never see their dependencies as ready, and the queue would fail
+        with "no Transmogrifier ready to apply".
+        """
+        # A minimal applicable scenario: --edb-repositories applies
+        # Repositories against a cluster with postgres_flavour set (required
+        # by Repositories._unified_repos when no edb_repositories is in vars).
+        basic_bdr_cluster.vars["postgres_flavour"] = "postgresql"
+        tlist = transmogrifiers_from_args(["--edb-repositories", "standard"])
+        apply_queue(basic_bdr_cluster, tlist)
+        # After applying, every transmogrifier in the queue must have
+        # _applied set so downstream is_ready() checks can rely on it.
+        for t in tlist:
+            assert getattr(t, "_applied", False) is True, (
+                f"{type(t).__name__} was not marked as applied"
+            )
 
 
 @pytest.fixture
