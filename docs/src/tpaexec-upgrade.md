@@ -79,8 +79,9 @@ restarting services, and performing any runtime configuration changes,
 before moving on to do the same thing on the next instance. At any time
 during the process, only one of the cluster's nodes will be unavailable.
 
-When upgrading a cluster to PGD-Always-ON or upgrading an existing
-PGD-Always-ON cluster, you can enable monitoring of the status of your
+When upgrading a cluster to PGD-Always-ON, upgrading an existing
+PGD-Always-ON cluster, or performing a minor upgrade of a PGD-S or
+PGD-X cluster, you can enable monitoring of the status of your
 proxy nodes during the upgrade by adding the option
 `-e enable_proxy_monitoring=true` to your `tpaexec upgrade` command
 line. If enabled, this will create an extra table in the bdr database

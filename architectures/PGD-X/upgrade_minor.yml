@@ -107,8 +107,45 @@
       name: "{{ hostvars[first_bdr_primary].write_leader }}"
       groups: "g_write_leader"
 
+  - name: Record connection manager endpoint DSN for monitoring
+    set_fact:
+      cm_endpoint:
+        "{{ bdr_node_route_dsn|dbname(bdr_database, user=postgres_user, port=cm_port) }}"
+    vars:
+      this_node_group:
+        "{{ cluster_facts['databases'][bdr_database]['bdr']['local_node']['nodegroup_name'] }}"
+      this_node_top_group:
+        "{{ cluster_facts['databases'][bdr_database]['bdr']['local_node']['node_topgroup_name'] }}"
+      group_port: "{{ (bdr_node_groups|default([]))|selectattr('name','equalto',this_node_group)|map(attribute='options')|selectattr('read_write_port','defined')|map(attribute='read_write_port')|list }}"
+      top_port: "{{ (bdr_node_groups|default([]))|selectattr('name','equalto',this_node_top_group)|map(attribute='options')|selectattr('read_write_port','defined')|map(attribute='read_write_port')|list }}"
+      cm_port:
+        "{{ group_port[0] if group_port|length > 0
+            else (top_port[0] if top_port|length > 0
+                  else postgres_port|int + 1000) }}"
+
   # postgres_pkg_check has now been registered - examine its output
   # should we actually verify something about version numbers?
+
+- name: Start monitoring proxy downtime
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - include_role:
+      name: test
+      tasks_from: proxy-monitor/start.yml
+    vars:
+      conninfos:
+        "{{ (groups['role_bdr']|default([]))
+            |difference(groups['role_witness']|default([]))
+            |map('extract', hostvars, 'cm_endpoint')
+            |list }}"
+    when:
+      inventory_hostname == first_bdr_primary
+      and enable_proxy_monitoring
 
 - name: Update postgres/pgd on chosen instances, except write leader
   any_errors_fatal: true
@@ -209,6 +246,21 @@
     include_role:
       name: test
       tasks_from: bdr6/ports.yml
+
+- name: Stop monitoring proxy downtime
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr:&g_update_hosts
+  tasks:
+  - include_role:
+      name: test
+      tasks_from: proxy-monitor/report.yml
+    when:
+      inventory_hostname == first_bdr_primary
+      and enable_proxy_monitoring
 
 # After the last rolling restart, BDR replication slots can still be
 # briefly inactive while they re-handshake with the just-updated node.
