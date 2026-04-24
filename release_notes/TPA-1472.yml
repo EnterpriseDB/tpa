@@ -1,0 +1,7 @@
+- summary: Include missing flags in tpaexec help
+  description: |
+    'tpaexec help' was missing some flags that are actually supported. 
+    This change adds those flags to the help output.
+  type: minor_change
+  jira_tickets:
+  - TPA-1472

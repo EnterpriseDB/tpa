@@ -627,6 +627,7 @@ Available help topics:
     provision   Create instances and Ansible inventory from config.yml
     deploy      Install and configure software on a cluster
     test        Test the deployed cluster
+    version     Alias for 'tpaexec info version'
 
   Utility commands
 
@@ -639,6 +640,11 @@ Available help topics:
     download-packages
                 Download all packages required for a cluster (useful when
                 cluster instances don't have outside connectivity)
+    
+    reconfigure
+                Change the configuration of an existing cluster by modifying
+                config.yml according to the options specified (e.g., the 
+                cluster architecture)
 
     upgrade
                 Perform a node-by-node upgrade of Postgres and related
@@ -655,7 +661,20 @@ Available help topics:
                 (e.g., postgres_password, pgbouncer_password)
     show-vault
                 Command to show the vault password of the cluster
-                This is used to encrypt other passwords.
+                This is used to encrypt other passwords
+    
+    rebuild-sources
+                Rebuild the source code of Postgres and related components on
+                the cluster instances
+    
+    rehydrate
+                Rebuilds AWS EC2 instances with an updated machine image (AMI),
+                and allows for the rapid deployment of security patches and OS
+                upgrades to a cluster managed by TPA
+    
+    {start,stop}-postgres
+                Start or stop Postgres on all cluster instances that use 
+                LUKS-encrypted volumes
 
   Container management (docker)
 
@@ -669,10 +688,27 @@ Available help topics:
 
   Miscellaneous
 
-    relink      Relink symbolic links within a cluster directory (useful
+    archive-logs
+                Archives logs from cluster instances to a local directory
+
+    relink      
+                Relink symbolic links within a cluster directory (useful
                 when someone sends you their cluster directory)
 
-    deprovision Destroy the cluster and resources it uses
+    deprovision 
+                Destroy the cluster and resources it uses
+    
+    check_cis
+                Check the cluster configuration against the CIS standards for
+                PostgreSQL
+
+    check_stag
+                Check the cluster configuration against the STAG standards for
+                PostgreSQL
+    
+    eval
+                Evaluate arbitrary Ansible expressions against the cluster 
+                inventory
 
 Run 'tpaexec help <topic>' for more details.
 TOPICS
@@ -764,16 +800,16 @@ Options:
 
         See 'tpaexec info architectures' for a list of supported
         architectures, and 'tpaexec info architectures/Name' for
-        more details.
+        more details
 
     --platform Name
 
         See 'tpaexec info platforms' for a list of supported platforms,
-        and 'tpaexec info platforms/Name' for more details.
+        and 'tpaexec info platforms/Name' for more details
 
     --help
 
-        Displays all other options available.
+        Displays all other options available
 
 Docs: $TPA_DIR/docs/src/tpaexec-configure.md
 CONFIG
@@ -828,7 +864,7 @@ Options:
 
     --help
 
-        Displays all other options available.
+        Displays all other options available
 
 Docs: $TPA_DIR/docs/src/tpaexec-reconfigure.md
 RECONFIG
@@ -859,13 +895,13 @@ Options:
 
     --owner OwnerName
 
-        Override the cluster owner (default: your login name, ${USER:-$(id -u -n)}).
+        Override the cluster owner (default: your login name, ${USER:-$(id -u -n)})
 
     --cached
 
         Speed up repeated provision runs in development by relying on
         cached information and skipping retests of resources like VPCs
-        and subnets.
+        and subnets
 
     --force-reprovision
 
@@ -926,7 +962,7 @@ Synopsis:
 Options:
 
     -vvv    Increase verbosity enough to show the exact ssh commands
-            used. Helpful for debugging.
+            used. Helpful for debugging
 PING
             ;;
 
@@ -965,11 +1001,11 @@ Synopsis:
 
 Options:
 
-    -vv     Increase verbosity (recommended to debug any failures).
+    -vv     Increase verbosity (recommended to debug any failures)
 
     -e var=value
 
-            Override the value of a variable during the deploy.
+            Override the value of a variable during the deploy
 
 Any options you specify will be passed through to ansible-playbook.
 DEPLOY
@@ -999,7 +1035,7 @@ Options:
     --include-tests-from /other/path
 
         Also look for tests defined under /other/path (in addition to
-        the default locations).
+        the default locations)
 
 The different kinds of tests executed by default have different tags,
 e.g., postgres, repmgr, barman, pgbench. Use '--tags x,y' to select
