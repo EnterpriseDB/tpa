@@ -11,6 +11,7 @@ from tpa.cluster import Cluster
 from tpa.exceptions import ConfigureError
 from tpa.transmogrifiers import (
     BDR4PGD5,
+    PGD5PGDX,
     Repositories,
     Replace2qRepositories,
     Common,
@@ -175,9 +176,146 @@ class TestArchitecture:
     """test suite for Architecture class"""
 
     def test_architecture_options(self):
-        """test options function"""
+        """Architecture owns both --architecture and --pgd-proxy-routing flags
+
+        These must be defined centrally in the dispatcher to avoid conflicts
+        between specialists that would otherwise each declare their own
+        --architecture option.
+        """
         assert "--architecture" in Architecture.options()
         assert "--pgd-proxy-routing" in Architecture.options()
+
+    def test_architecture_options_choices_match_specialists(self):
+        """--architecture choices are derived from the _specialists map
+
+        Adding a new specialist to _specialists should automatically expose
+        its target architecture as a valid --architecture choice, without
+        needing to update the option definition separately.
+        """
+        choices = Architecture.options()["--architecture"]["choices"]
+        assert set(choices) == set(Architecture._specialists.keys())
+
+    def test_architecture_set_parsed_args_no_target(self):
+        """No specialist is registered when --architecture is not passed
+
+        If the user doesn't request an architecture change, set_parsed_args
+        should not create or register any specialist. Architecture.required
+        must remain empty so the transmogrifier is effectively inert.
+        """
+        x = Architecture()
+        x.set_parsed_args(Namespace(target_architecture=None))
+        assert x.required == []
+
+    @pytest.mark.parametrize(
+        "target, specialist_class",
+        [
+            ("PGD-Always-ON", BDR4PGD5),
+            ("PGD-X", PGD5PGDX),
+        ],
+    )
+    def test_architecture_set_parsed_args_registers_specialist(
+        self, target, specialist_class
+    ):
+        """The correct specialist is registered based on target architecture
+
+        This is the core dispatch behaviour: set_parsed_args must instantiate
+        the specialist class matching the --architecture target and register
+        it via require() so the framework sees it in the dependency tree.
+        """
+        x = Architecture()
+        x.set_parsed_args(Namespace(target_architecture=target))
+        assert len(x.required) == 1
+        assert isinstance(x.required[0], specialist_class)
+
+    def test_architecture_set_parsed_args_propagates_to_specialist(self):
+        """Specialist and its transitive dependencies receive parsed args
+
+        When Architecture registers a specialist, it must also propagate the
+        parsed args down the dependency chain so that the specialist and its
+        own required transmogrifiers (e.g. Repositories) can access the same
+        command-line values via self.args.
+        """
+        x = Architecture()
+        args = Namespace(target_architecture="PGD-Always-ON", edb_repositories=None)
+        x.set_parsed_args(args)
+        specialist = x.required[0]
+        assert specialist.args is args
+        # The specialist's own required (Repositories) should also have args set.
+        assert specialist.required[0].args is args
+
+    def test_architecture_set_parsed_args_all_required_includes_transitive(self):
+        """all_required() surfaces the specialist and its transitive deps
+
+        The fix's primary goal: after dispatch, Architecture.all_required()
+        must expose the full dependency tree (specialist + Repositories +
+        anything deeper) so the framework's check/apply/describe queues and
+        the deduplication logic in transmogrifiers_from_args() can see them.
+        """
+        x = Architecture()
+        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        required_classes = [type(t) for t in x.all_required()]
+        assert BDR4PGD5 in required_classes
+        assert Repositories in required_classes
+
+    def test_architecture_is_applicable(self, basic_bdr_cluster):
+        """is_applicable returns True only when --architecture is passed
+
+        Architecture should be inert (is_applicable=False) when the user
+        hasn't requested an architecture change, so the framework skips it
+        during check/apply/describe.
+        """
+        x = Architecture()
+        x._args = Namespace(target_architecture=None)
+        assert x.is_applicable(basic_bdr_cluster) is False
+        x._args = Namespace(target_architecture="PGD-Always-ON")
+        assert x.is_applicable(basic_bdr_cluster) is True
+
+    def test_architecture_check_returns_empty(self, basic_bdr_cluster):
+        """Architecture.check() defers to the framework via required chain
+
+        Architecture is a pure dispatcher — it has nothing to validate on
+        its own. The framework's top-level check() processes the specialist
+        (and its Repositories) through Architecture.required, so
+        Architecture.check() itself must return an empty CheckResult to
+        avoid either double-processing or adding spurious findings.
+        """
+        x = Architecture()
+        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        result = x.check(basic_bdr_cluster)
+        assert len(result.errors) == 0
+        assert len(result.warnings) == 0
+
+    def test_architecture_apply_is_noop(self, basic_bdr_cluster):
+        """Architecture.apply() is a no-op; specialist handled by framework queue
+
+        The framework's apply queue expands all_required() and processes the
+        specialist and Repositories directly. Architecture.apply() must not
+        also apply them manually, or they would run twice. This verifies
+        that Architecture.apply() makes no changes to the cluster.
+        """
+        x = Architecture()
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing=None)
+        )
+        before = dict(basic_bdr_cluster.vars)
+        x.apply(basic_bdr_cluster)
+        # No direct mutations from Architecture itself.
+        assert dict(basic_bdr_cluster.vars) == before
+
+    def test_architecture_description_empty(self, basic_bdr_cluster):
+        """Architecture.description() returns title-less empty description
+
+        The framework's describe() prepends descriptions from t.required to
+        the parent's _items. If Architecture.description() returned the
+        specialist's description directly, it would appear twice in the
+        output. The empty, title-less description lets the specialist's
+        output surface at the correct nesting level via t.required.
+        """
+        x = Architecture()
+        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        desc = x.description(basic_bdr_cluster)
+        assert desc._items == []
+        assert desc._title is None
 
 
 class TestBDR4PGD5:
