@@ -72,19 +72,19 @@ class aws(CloudPlatform):
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-11-amd64-20241111-1928": {
+                "debian-11-amd64-20260419-2453": {
                     "versions": ["11", "bullseye", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-12-amd64-20250210-2019": {
+                "debian-12-amd64-20260413-2447": {
                     "versions": ["12", "bookworm"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
             },
             "debian-arm": {
-                "debian-12-arm64-20250210-2019": {
+                "debian-12-arm64-20260413-2447": {
                     "versions": ["12", "bookworm", "default"],
                     "owner": "136693071363",
                     "user": "admin",
@@ -97,29 +97,29 @@ class aws(CloudPlatform):
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-8.10.0_HVM-20250117-x86_64-1662-Hourly2-GP3": {
+                "RHEL-8.10.0_HVM-20260318-x86_64-2090-Hourly2-GP3": {
                     "versions": ["8", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-9.5.0_HVM-20250128-x86_64-0-Hourly2-GP3": {
+                "RHEL-9.7.0_HVM-20260331-x86_64-0-Hourly2-GP3": {
                     "versions": ["9"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-10.1.0_HVM-20260108-x86_64-0-Hourly2-GP3": {
+                "RHEL-10.1.0_HVM-20260331-x86_64-0-Hourly2-GP3": {
                     "versions": ["10"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
             },
             "redhat-arm": {
-                "RHEL-9.5.0_HVM-20250128-arm64-0-Hourly2-GP3": {
+                "RHEL-9.7.0_HVM-20260331-arm64-0-Hourly2-GP3": {
                     "versions": ["9", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-10.1.0_HVM-20260108-arm64-0-Hourly2-GP3": {
+                "RHEL-10.1.0_HVM-20260331-arm64-0-Hourly2-GP3": {
                     "versions": ["10"],
                     "owner": "309956199498",
                     "user": "ec2-user",
@@ -133,7 +133,7 @@ class aws(CloudPlatform):
                     "user": "rocky",
                     "os_family": "RedHat",
                 },
-                "Rocky-9-EC2-Base-9.5-20241118.0.x86_64": {
+                "Rocky-9-EC2-Base-9.7-20251123.2.x86_64": {
                     "versions": ["9", "default"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
@@ -154,7 +154,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20250516": {
+                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20260424": {
                     "versions": [
                         "22.04",
                         "jammy",
@@ -162,7 +162,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250627": {
+                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260424": {
                     "versions": [
                         "24.04",
                         "noble",
@@ -173,7 +173,7 @@ class aws(CloudPlatform):
                 },
             },
             "sles": {
-                "suse-sles-15-sp7-v20250920-ecs-hvm-ssd-x86_64": {
+                "suse-sles-15-sp7-v20260123-ecs-hvm-ssd-x86_64": {
                     "versions": ["15"],
                     "preferred_python_version": "python3",
                     "owner": "013907871322",
