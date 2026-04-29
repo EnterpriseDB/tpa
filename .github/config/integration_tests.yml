@@ -238,9 +238,13 @@ M1:
 
 BDR-Always-ON:
   tpa_architecture: ["BDR-Always-ON"]
-  tpa_os_image: *all_supported_images
+  tpa_os_image:
+    - "ubuntu:22.04"
+    - "debian:11"
+    - "redhat:8"
+    - "redhat:9"
   tpa_postgres_flavour:
-    - "edbpge"
+    - "pgextended"
     - "epas"
   tpa_postgres_version: [ 14 ]
   cpu_architecture: [ *default_cpu_architecture ]

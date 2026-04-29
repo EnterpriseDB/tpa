@@ -252,16 +252,16 @@
     - bdr_package_version|default('') is match('.*[0-9]+\.[0-9]+')
     - bdr_package_version|regex_search('[0-9]+\.[0-9]+') is version('5.5', '>=')
 
-- name: Ensure pgextended is not used with PGD 4 or later
+- name: Ensure pgextended is not used with PGD 5 or later
   assert:
     msg: >-
-      The pgextended flavour is not supported with PGD version 4 or later.
+      The pgextended flavour is not supported with PGD version 5 or later.
       Use edbpge instead.
     that:
-      - postgres_flavour != 'pgextended'
-        or bdr_version is version('4', '<')
+      - bdr_version is version('5', '<')
   when:
     - "'bdr' in role"
+    - postgres_flavour == 'pgextended'
 
 - name: Split extension from postgres_log_file
   set_fact:

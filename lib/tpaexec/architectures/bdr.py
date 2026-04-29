@@ -91,9 +91,9 @@ class BDR(Architecture):
                 f"Postgres {postgres_version} with BDR {bdr_version} is not supported"
             )
 
-        if postgres_flavour == "pgextended" and int(bdr_version) >= 4:
+        if postgres_flavour == "pgextended" and int(bdr_version) > 4:
             raise BDRArchitectureError(
-                "The pgextended flavour is not supported with PGD version 4 or later."
+                "The pgextended flavour is not supported with PGD version 5 or later."
                 " Use edbpge instead."
             )
 

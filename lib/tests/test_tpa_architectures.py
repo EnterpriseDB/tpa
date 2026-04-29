@@ -410,6 +410,44 @@ class TestPGDXArchitecture:
         separately, inside process_arguments().
         """
         assert len(pgdx_cluster.instances) == expected_total
+    
+    PGDX_BASE_ARGV = [
+        CONFIG_PATH["PGDX"],
+        "--architecture",
+        "PGD-X",
+        "--no-git",
+        "--pgd-routing",
+        "local",
+    ]
+
+    @pytest.mark.parametrize(
+        "argv, expected",
+        [
+            (PGDX_BASE_ARGV + ["--pgextended", "16"], "edbpge"),
+            (PGDX_BASE_ARGV + ["--edbpge", "16"], "edbpge"),
+            (PGDX_BASE_ARGV + ["--edb-postgres-extended", "16"], "edbpge"),
+            (
+                PGDX_BASE_ARGV
+                + ["--postgres-flavour", "edbpge", "--postgres-version", "16"],
+                "edbpge",
+            ),
+            (
+                PGDX_BASE_ARGV
+                + ["--postgres-flavour", "pgextended", "--postgres-version", "16"],
+                "edbpge",
+            ),
+        ],
+    )
+    def test_pgdx_normalises_to_edbpge(self, argv, expected):
+        """Verify that all ways of requesting Postgres Extended produce 'edbpge'
+        for non-BDR-Always-ON architectures (PGD-X, PGD-S)."""
+        cleanup(CONFIG_PATH["PGDX"])
+        cluster_path = CONFIG_PATH["PGDX"]
+        try:
+            configured = ConfiguredCluster(PGDX, argv, cluster_path)
+            assert configured.cluster_vars["postgres_flavour"] == expected
+        finally:
+            cleanup(cluster_path)
 
 
 # @patch.object(Architecture, "expand_template", expand_template)
@@ -824,3 +862,4 @@ class TestPGDCommon:
         )
 
         assert arch.bdr_safe_name(name) == expected
+

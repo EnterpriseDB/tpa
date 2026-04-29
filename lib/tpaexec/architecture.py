@@ -584,9 +584,10 @@ class Architecture(object):
                 "You can specify --redwood/--no-redwood only when using EPAS"
             )
 
-        # If you specify --edb-postgres-extended, we have to translate the value
-        # to pgextended or edbpge depending on architecture.
-        if flavour == "edb-postgres-extended":
+        # Translate between the two Postgres Extended flavours based on
+        # architecture: BDR-Always-ON (BDR 3/4) uses 'pgextended' (legacy 2Q
+        # packages), everything else uses 'edbpge' (new EDB packages).
+        if flavour in ("edb-postgres-extended", "edbpge", "pgextended"):
             if self.name == "BDR-Always-ON":
                 args["postgres_flavour"] = "pgextended"
             else:

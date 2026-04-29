@@ -152,13 +152,11 @@ class Architecture:
             raise ConfigureError(
                 "You can specify --redwood/--no-redwood only when using EPAS"
             )
-        # If you specify --edb-postgres-extended, we have to translate the value
-        # to pgextended or edbpge depending on architecture.
-        if flavour == "edb-postgres-extended":
-            if self.name == "BDR-Always-ON":
-                args["postgres_flavour"] = "pgextended"
-            else:
-                args["postgres_flavour"] = "edbpge"
+        # Translate between the two Postgres Extended flavours based on
+        # architecture: 'pgextended' (legacy 2Q packages), is translated
+        # to 'edbpge' (new EDB packages).
+        if flavour in ("edb-postgres-extended", "edbpge", "pgextended"):
+            args["postgres_flavour"] = "edbpge"
 
     def _validate_from_source(self, args):
         """Validate arguments to --install-from-source"""
