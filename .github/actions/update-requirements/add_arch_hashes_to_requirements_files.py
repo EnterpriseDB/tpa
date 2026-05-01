@@ -3,7 +3,13 @@ import textwrap
 from string import Template
 
 
-def main(actuals):
+def main():
+    for infix in ["", "-rh8"]:
+        add_hashes(infix)
+    exit()
+
+
+def add_hashes(infix):
     """
     Verify that all target requirements entries can be match (version and hash)
     inside the actual requirement files that should be updated right before the
@@ -23,8 +29,12 @@ def main(actuals):
 
     # List of files holding dependencies we want to ensure are still being used.
     TARGETS = [
-        "requirements-ppc64le.txt",
-        "requirements-s390x.txt",
+        f"requirements-ppc64le{infix}.txt",
+        f"requirements-s390x{infix}.txt",
+    ]
+
+    actuals = [
+        f"requirements{infix}.txt",
     ]
 
     # parse the files and generate both target and actual deps dicts
@@ -66,7 +76,6 @@ def main(actuals):
                     )
                 )
     _render_template(actual_deps)
-    exit()
 
 
 def parse_requirements(files: list):
@@ -193,4 +202,4 @@ def _render_template(actual_deps):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main(sys.argv[1:])
+    main()
