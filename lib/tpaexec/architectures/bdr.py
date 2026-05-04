@@ -69,8 +69,6 @@ class BDR(Architecture):
         postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
-        # TODO: check if harp_enabled is needed. It's not used anywhere
-        harp_enabled = self.args.get("failover_manager") == "harp"
 
         arch = self.args["architecture"]
         default_bdr_versions = {
