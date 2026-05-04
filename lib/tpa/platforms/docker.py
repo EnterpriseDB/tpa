@@ -153,7 +153,6 @@ class docker(Platform):
         """
         image = {}
         name, _, version = label.partition(":")
-        _, _, _img = name.rpartition("/")
 
         known_images = {
             "tpa/almalinux": {

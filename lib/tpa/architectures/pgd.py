@@ -85,7 +85,6 @@ class PGD(Architecture):
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
 
-        _ = self.args["architecture"]
         default_bdr_versions = {
             "13": "6",
             "14": "6",
