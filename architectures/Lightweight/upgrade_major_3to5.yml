@@ -263,6 +263,7 @@
       name: "/var/run/postgresql/.s.PGSQL.{{ postgres_port }}"
       src: "/var/run/edb-pge/.s.PGSQL.{{ postgres_port }}"
       state: "link"
+      force: true
     when: >
       postgres_flavour == 'edbpge'
       and 'bdr' in role
