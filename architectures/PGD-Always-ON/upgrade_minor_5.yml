@@ -321,7 +321,8 @@
       name: test
       tasks_from: pgd-cli/info.yml
     when:
-      inventory_hostname == first_bdr_primary
+    - inventory_hostname == first_bdr_primary
+    - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
 
   - name: Wait for write leader elections to complete
     command: >
@@ -343,7 +344,8 @@
     retries: "{{ (4*(election_timeout|int)/1000)|int }}"
     delay: 1
     when:
-      inventory_hostname == first_bdr_primary
+    - inventory_hostname == first_bdr_primary
+    - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
 
 - name: Update proxies in cluster {{ cluster_dir }}
   any_errors_fatal: true

@@ -256,7 +256,8 @@
       name: test
       tasks_from: pgd-cli/info.yml
     when:
-      inventory_hostname == first_bdr_primary
+    - inventory_hostname == first_bdr_primary
+    - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
 
   - name: Wait for write leader elections to complete
     command: >
@@ -278,7 +279,8 @@
     retries: "{{ (4*(election_timeout|int)/1000)|int }}"
     delay: 1
     when:
-      inventory_hostname == first_bdr_primary
+    - inventory_hostname == first_bdr_primary
+    - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
 
 # All harp-proxy instances remain generally available throughout the
 # node-by-node process (other than the two brief interruptions when we
