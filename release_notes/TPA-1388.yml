@@ -1,0 +1,12 @@
+- summary: Fix pgd-cli tasks being run when pgd-cli was not upgraded
+  description: |
+    During a postgres-only upgrade (the default), the tasks that log pgd-cli
+    diagnostic output and wait for write leader elections were always executed
+    on the first BDR primary, even when pgd-cli had not been upgraded as part
+    of that run. This caused the upgrade to fail with "unknown command
+    show-groups" because the old pgd-cli binary does not support that
+    subcommand. Both tasks are now skipped unless pgdcli or all components are
+    included in the upgrade.
+  type: bugfix
+  jira_tickets:
+  - TPA-1388
