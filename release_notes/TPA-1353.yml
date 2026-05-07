@@ -1,0 +1,12 @@
+- summary: Install pgd-cli on pgd-proxy nodes during 4to5 upgrade
+  description: |
+    The BDR-Always-ON to PGD-Always-ON upgrade adds the pgd-proxy role
+    to former harp-proxy nodes, but pgd-cli was never installed on
+    those nodes during the upgrade. The post-upgrade diagnostic then
+    failed with "No such file or directory".
+
+    The pgdcli-upgrade plays now also target pgd-proxy hosts, so
+    pgd-cli is in place when the diagnostic runs.
+  type: bugfix
+  jira_tickets:
+  - TPA-1353
