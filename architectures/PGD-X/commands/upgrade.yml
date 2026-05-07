@@ -7,6 +7,32 @@
     upgrade_in_progress: true
   tags: always
 
+- import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"
+  tags: always
+
+# We must check that 'tpaexec upgrade' is not run on a cluster
+# that uses shared PEM or share Barman
+# ('pem_shared' or 'barman_shared' are 'true') in the 'config.yml'
+- name: Import upgrade precondition checks
+  import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/upgrade_preconditions.yml"
+
+# Ascertain the status/health of PgBouncer, pg-backup-api and Barman BEFORE upgrade
+# If any fail, the upgrade playbook will bail out.
+# NOTE: The Barman WAL-receiver is stopped after this play is run,
+# as we do not want new backup jobs to start mid-upgrade.
+- name: Import pre-upgrade common-component health-checks
+  import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/pre_upgrade_checks.yml"
+
+# Ensure repositories are up-to-date before checking against component
+# software versions that can be installed.
+- name: Import repository update
+  import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/repository_update.yml"
+
+# Ensure any selected component software versions are not currently installed
+# or are not able to be resolved (determined by the package manager in 'dry-run' mode)
+- name: Check if all desired common-components are able to be upgraded
+  import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/check_upgrade_components.yml"
+
 - name: Determine upgrade type for cluster {{ cluster_dir }}
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -83,9 +109,6 @@
       bdr6_minor_version_upgrade:
         "{{ all_bdr_major_versions == ['6'] }}"
 
-- import_playbook: "{{ tpa_dir }}/architectures/lib/dynamic_groups.yml"
-  tags: always
-
 - name: Set upgrade facts for all hosts
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -130,3 +153,18 @@
 - import_playbook: "{{ tpa_dir }}/architectures/PGD-X/upgrade_minor.yml"
   when: >
     bdr6_minor_version_upgrade
+
+# This will update PgBouncer, pg-backup-api, Barman, PEM server and PEM agent
+# if they are selected components and their packages are able to be upgraded.
+# Otherwise, their respective upgrade plays are skipped.
+- name: Update all desired common cluster components that are able to be upgraded
+  import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/components_upgrade.yml"
+
+# Ascertain the status/health of PgBouncer, pg-backup-api and Barman AFTER upgrade
+# If any fail, the upgrade playbook will bail out.
+# NOTE: The Barman WAL-receiver is started after this play is run,
+# since we stopped it as part of the pre-upgrade checks. It may have already
+# been started if Barman was upgraded (which makes the service start here a no-op)
+- name: Import post-upgrade health-checks for common components in the cluster
+  import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/post_upgrade_checks.yml"
+  
