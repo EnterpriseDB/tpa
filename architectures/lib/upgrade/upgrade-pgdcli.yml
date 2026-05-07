@@ -60,7 +60,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr:role_pgd-proxy:&g_update_hosts
   tasks:
   - when:
     - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
@@ -88,7 +88,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr:role_pgd-proxy:&g_update_hosts
   tasks:
   - include_role: name=pgdcli/update
     when: 
