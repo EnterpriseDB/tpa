@@ -53,6 +53,45 @@ The following instance variables can be set:
 Any extra settings in `repmgr_conf_settings` will also be passed through
 into the repmgr config file.
 
+## repmgr service configuration
+
+`repmgr_service_environment`: sets environment variables to the repmgr service unit file. The environment variables
+must be defined under the `repmgr_service_environment` variable, in a 'key-value' fashion (see example below).
+You can use `repmgr_service_environment` to set any parameters, whether recognised by TPA or not. 
+You need to quote the value exactly as it would appear in the `repmgrd.service` file.
+
+```yaml
+cluster_vars:
+  repmgr_service_environment:
+    LD_PRELOAD: '/usr/edb/pge15/lib/libpq.so.5:/usr/edb/pge15/lib/libpqagent86.so'
+    AGENT86_SHARD_FILE: '/var/lib/pgsql/shard.dat'
+```
+
+On the repmgr service file:
+
+```shell
+root@kaput:~# cat /etc/systemd/system/repmgr.service
+[Unit]
+Description=Postgres replication manager
+After=postgres-monitor.service
+Wants=postgres-monitor.service
+
+[Service]
+Type=simple
+User=postgres
+Group=postgres
+Environment=AGENT86_SHARD_FILE=/var/lib/pgsql/shard.dat
+Environment=LD_PRELOAD=/usr/edb/pge15/lib/libpq.so.5:/usr/edb/pge15/lib/libpqagent86.so
+StandardOutput=syslog
+ExecStart=/usr/lib/postgresql/17/bin/repmgrd -f /etc/repmgr/17/repmgr.conf --verbose --daemonize=false
+ExecStop=/bin/kill -TERM $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ## repmgr on PGD instances
 
 On PGD instances, `repmgr_failover` will be set to `manual` by default.
