@@ -538,7 +538,7 @@ requests-mock==1.12.1 \
     --hash=sha256:b1e37054004cdd5e56c84454cc7df12b25f90f382159087f4b6915aaeef39563 \
     --hash=sha256:e9e12e333b525156e82a3c852f22016b9158220d2f47454de9cae8a77d371401
     # via -r requirements/testing.in
-urllib3==2.6.3 \
-    --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed \
-    --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4
+urllib3==2.7.0 \
+    --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c \
+    --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897
     # via requests
