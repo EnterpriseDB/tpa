@@ -175,12 +175,13 @@
     - include_role: name=postgres/config
     - include_role: name=postgres/final
 
-  - name: Unfence node {{ inventory_hostname }}
-    include_role:
-      name: postgres/bdr
-      tasks_from: unfence.yml
-
-  - name: wait for bdr consensus before proceeding
+  # We need Raft consensus restored before refreshing cluster_facts:
+  # bdr.alter_node_option() (called by fence.yml above) is Raft-replicated,
+  # so until this node has rejoined consensus after its restart, its local
+  # bdr.node_config may not yet reflect the fence change. Without that, the
+  # fact refresh would re-cache the pre-fence value and unfence.yml's
+  # idempotency guard would still skip the SQL.
+  - name: wait for bdr consensus before unfence
     postgresql_query:
       conninfo: "{{ dsn|dbname(bdr_database) }}"
       query: >
@@ -191,6 +192,14 @@
     delay: 1
     become_user: "{{ postgres_user }}"
     become: yes
+
+  - name: Refresh cluster facts before unfence
+    include_role: name=postgres/facts
+
+  - name: Unfence node {{ inventory_hostname }}
+    include_role:
+      name: postgres/bdr
+      tasks_from: unfence.yml
 
   - name: listening ports check
     include_role:
@@ -225,12 +234,8 @@
     - include_role: name=postgres/config
     - include_role: name=postgres/final
 
-  - name: Unfence node {{ inventory_hostname }}
-    include_role:
-      name: postgres/bdr
-      tasks_from: unfence.yml
-
-  - name: wait for bdr consensus before proceeding
+  # See the comment on the equivalent task in the non-write-leader play above.
+  - name: wait for bdr consensus before unfence
     postgresql_query:
       conninfo: "{{ dsn|dbname(bdr_database) }}"
       query: >
@@ -241,6 +246,14 @@
     delay: 1
     become_user: "{{ postgres_user }}"
     become: yes
+
+  - name: Refresh cluster facts before unfence
+    include_role: name=postgres/facts
+
+  - name: Unfence node {{ inventory_hostname }}
+    include_role:
+      name: postgres/bdr
+      tasks_from: unfence.yml
 
   - name: listening ports check
     include_role:

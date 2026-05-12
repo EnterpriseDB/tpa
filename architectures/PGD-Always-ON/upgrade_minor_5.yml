@@ -240,17 +240,13 @@
       and 'bdr' in role
       and any_harp_proxy_still_running
 
-  - name: Unfence the node after upgrade
-    include_role:
-      name: postgres/bdr
-      tasks_from: unfence.yml
-    vars:
-      failover_manager: pgd
-    when:
-      - "'bdr' in role"
-      - inventory_hostname in first_bdr_primary_candidates
-
-  - name: Wait for bdr nodes to reach consensus before proceeding
+  # We need Raft consensus restored before refreshing cluster_facts:
+  # bdr.alter_node_option() (called by fence.yml above) is Raft-replicated,
+  # so until this node has rejoined consensus after its restart, its local
+  # bdr.node_config may not yet reflect the fence change. Without that, the
+  # fact refresh would re-cache the pre-fence value and unfence.yml's
+  # idempotency guard would still skip the SQL.
+  - name: Wait for bdr nodes to reach consensus before unfence
     postgresql_query:
       conninfo: "{{ dsn|dbname(bdr_database) }}"
       query: >
@@ -264,6 +260,22 @@
     when:
     - "'bdr' in role"
     - "'replica' not in role"
+
+  - name: Refresh cluster facts before unfence
+    include_role: name=postgres/facts
+    when:
+      - "'bdr' in role"
+      - inventory_hostname in first_bdr_primary_candidates
+
+  - name: Unfence the node after upgrade
+    include_role:
+      name: postgres/bdr
+      tasks_from: unfence.yml
+    vars:
+      failover_manager: pgd
+    when:
+      - "'bdr' in role"
+      - inventory_hostname in first_bdr_primary_candidates
 
   # Ansible won't stop execution if a host becomes unreachable, despite
   # the any_errors_fatal setting. We must detect that situation and fail
