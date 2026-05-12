@@ -1,0 +1,16 @@
+- summary: Fix PGD 5/6 minor and 5-to-6 major upgrades occasionally leaving nodes fenced
+  description: |
+    During a node-by-node upgrade, the "Wait for write leader elections to
+    complete" task could time out because nodes that had been fenced earlier in
+    the loop were never unfenced. The unfence step calls bdr.alter_node_option()
+    via a helper that skips the SQL call when its cached view of bdr.node_config
+    already shows the desired value. After fence.yml ran the matching SQL the
+    cache was not consistently refreshed before unfence checked it, so the
+    unfence was wrongly skipped and the node was left with route_fence = true.
+    Two changes address this: the existing "Wait for bdr nodes to reach
+    consensus" task now runs immediately before unfence (rather than after) so
+    that the node has rejoined Raft, and a new postgres/facts refresh runs
+    between that wait and the unfence so the helper sees the post-fence value.
+  type: bugfix
+  jira_tickets:
+  - TPA-1321
