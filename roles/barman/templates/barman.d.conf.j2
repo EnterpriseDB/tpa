@@ -60,6 +60,8 @@ post_backup_retry_script = "{{ barman_post_backup_retry_script }}"
 post_backup_script = "{{ barman_post_backup_script }}"
 {% endif %}
 
+path_prefix = {{ barman_path_prefix | default(hostvars[target].postgres_bin_dir) }}
+
 active = {{ active|lower }}
 
 {% if barman_streaming_wals_directory is defined %}

@@ -104,3 +104,15 @@ Check the [documentation](tpaexec-download-packages.md#regenerate-local-reposito
 
 Once the changes are saved, we can execute `tpaexec upgrade cluster-dir` and
 the packages will be updated.
+
+## Cross-version Shared Barman
+
+When a single Barman host backs up Postgres instances running
+different major version from the initial cluster managing the shared 
+barman node, the additional major client packages must be
+present in the Barman cluster's `local-repo`. The default `tpaexec
+download-packages` run is only aware of the cluster's version and won't pre-fetch
+additional version from other clusters using the shared barman instance.
+See [Backing up nodes at different PostgreSQL
+versions](barman.md#backing-up-nodes-at-different-postgresql-versions)
+for the recommended workflow.
