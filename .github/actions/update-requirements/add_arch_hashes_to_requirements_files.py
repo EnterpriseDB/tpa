@@ -1,8 +1,31 @@
+"""Reconcile per-architecture hashes into the main requirements files.
+
+Invoked by the CI action at
+``.github/actions/update-requirements/action.yml`` after pip-compile has
+produced architecture-specific files for ppc64le and s390x. For each
+(name, version) match the script unions the per-arch hash set into the
+main ``requirements{,-rh8}.txt`` entry so that every platform's hashes
+are present in a single locked file.
+
+Mismatches (missing dep or version skew between arch and main) are
+printed to stdout; the action fails the workflow step when stdout is
+non-empty.
+"""
+
 import re
 import textwrap
 from pathlib import Path
 
 
+# The regexes below encode the pip-compile --generate-hashes output
+# format we expect to consume:
+#  - a leading run of "#"-only lines is the auto-generated header;
+#  - each dep starts on its own line as "name==version \" and is
+#    followed by one or more "    --hash=sha256:HEX" lines;
+#  - every hash line except the last for a given dep ends with " \"
+#    (line continuation), hence the trailing "\\?" in DEP_BLOCK_RE;
+#  - "    # via ..." comments may follow the last hash;
+#  - sha256 is the only algorithm we support (pip-compile's default).
 HEADER_RE = re.compile(r"\A(?:#[^\n]*\n)+")
 DEP_BLOCK_RE = re.compile(
     r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)==(?P<version>\S+)\s*\\\s*\n"
@@ -53,6 +76,9 @@ def _merge_into_actuals(name, target_info, actual_deps):
     string. Returns True if at least one actual dep was matched.
     """
     matched = False
+    # A dep can appear in more than one actual file; merge into every
+    # match rather than stopping at the first so the loop stays correct
+    # if `actuals` ever grows beyond a single file.
     for a_data in actual_deps.values():
         actual = a_data["deps"].get(name)
         if actual and actual["version"] == target_info["version"]:
@@ -114,6 +140,10 @@ def _render_template(actual_deps):
     `via` comment lines).
     """
     for a_file, file_data in actual_deps.items():
+        # Header is stripped, each dep block carries no trailing newline,
+        # and the final join leaves no trailing newline at EOF — matching
+        # what pip-compile writes, so this script's output round-trips
+        # against a fresh pip-compile run without spurious diffs.
         chunks = ["".join(file_data["comment_header"]).strip()]
         for dep in file_data["deps"].values():
             hashes = " \\\n    --hash=sha256:".join(sorted(dep["hash_set"]))
