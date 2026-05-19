@@ -360,6 +360,28 @@ class TestBDRArchitecture:
             with pytest.raises(error):
                 bdr_architecture.args["cluster_vars"]["postgres_flavour"]
 
+    @pytest.mark.parametrize(
+        "argv, error_match",
+        [
+            (
+                MINIMUM_BDR_ARGV + ["--location-names", "dc"],
+                "requires 2 locations, but 1",
+            ),
+            (
+                MINIMUM_BDR_ARGV + ["--location-names", "a", "b", "c"],
+                "requires 2 locations, but 3",
+            ),
+            (MINIMUM_BDR_ARGV + ["--location-names", "a", "b"], None),
+        ],
+    )
+    def test_bdr_location_name_count(self, argv, error_match, bdr_architecture):
+        if error_match is not None:
+            with pytest.raises(ArchitectureError, match=error_match):
+                bdr_architecture.configure(force=True)
+        else:
+            bdr_architecture.configure(force=True)
+            assert len(bdr_architecture.args["locations"]) == 2
+
 
 @pytest.fixture
 def pgd_architecture(argv):
