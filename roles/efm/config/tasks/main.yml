@@ -26,8 +26,31 @@
   vars:
     username: efm
     role_attrs:
-    - superuser
+      - SUPERUSER
     password_encryption: "{{ efm_user_password_encryption }}"
+  when: efm_user_is_superuser
+
+- name: Create efm role and user for non-superuser setup
+  block:
+  - name: Include role postgres/createuser
+    include_role: name=postgres/createuser
+    vars:
+      username: efm_role
+      role_attrs: "{{ default_efm_role_attrs }}"
+
+  - name: Include role postgres/createuser
+    include_role: name=postgres/createuser
+    vars:
+      username: efm
+      granted_roles: [efm_role]
+      role_attrs: "{{
+          ['NOSUPERUSER'] +
+          (['REPLICATION']
+            if efm_conf_settings['update.physical.slots.period']|default(10 if postgres_version is version('12','>=') else 0)|int > 0
+            else [])
+        }}"
+      password_encryption: "{{ efm_user_password_encryption }}"
+  when: not efm_user_is_superuser
 
 - name: Include efm-pre-config hook
   include_tasks: "{{ hook }}"

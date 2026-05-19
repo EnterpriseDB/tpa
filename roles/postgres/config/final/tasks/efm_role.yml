@@ -1,0 +1,85 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+- name: Grant required privileges to efm_role
+  community.postgresql.postgresql_privs:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    database: postgres
+    privs: "{{ item.privs|default(omit) }}"
+    schema: "{{ item.schema|default(omit) }}"
+    type: "{{ item.type }}"
+    objs: "{{ item.objs }}"
+    roles: "efm_role"
+    state: present
+  with_items:
+    - type: function
+      privs: EXECUTE
+      objs: pg_current_wal_lsn()
+      schema: pg_catalog
+    - type: function
+      privs: EXECUTE
+      objs: pg_last_wal_replay_lsn()
+      schema: pg_catalog
+    - type: function
+      privs: EXECUTE
+      objs: pg_wal_replay_resume()
+      schema: pg_catalog
+    - type: function
+      privs: EXECUTE
+      objs: pg_wal_replay_pause()
+      schema: pg_catalog
+    - type: function
+      privs: EXECUTE
+      objs: pg_reload_conf()
+      schema: pg_catalog
+    - type: group
+      objs: pg_monitor
+    - type: group
+      objs: pg_read_all_settings
+    - type: group
+      objs: pg_read_all_stats
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when: not efm_user_is_superuser
+
+# When efm_user_is_superuser flips from false back to true on a re-deploy,
+# the efm user has already been promoted to SUPERUSER by the
+# "Create Postgres users" task. Drop the now-redundant efm_role membership
+# and the role itself so cluster state matches the chosen configuration.
+- when: efm_user_is_superuser
+  block:
+  - name: Check whether efm_role exists
+    community.postgresql.postgresql_query:
+      port: "{{ postgres_port }}"
+      login_user: "{{ postgres_user }}"
+      login_db: postgres
+      query: SELECT 1 FROM pg_roles WHERE rolname = 'efm_role'
+    become_user: "{{ postgres_user }}"
+    become: yes
+    register: efm_role_check
+
+  - name: Revoke efm_role membership from efm
+    community.postgresql.postgresql_membership:
+      port: "{{ postgres_port }}"
+      login_user: "{{ postgres_user }}"
+      login_db: postgres
+      groups: efm_role
+      target_role: efm
+      state: absent
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: efm_role_check.rowcount > 0
+
+  - name: Drop efm_role if present
+    community.postgresql.postgresql_query:
+      port: "{{ postgres_port }}"
+      login_user: "{{ postgres_user }}"
+      login_db: postgres
+      query: |
+        DROP OWNED BY efm_role CASCADE;
+        DROP ROLE efm_role;
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: efm_role_check.rowcount > 0

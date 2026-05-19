@@ -395,6 +395,7 @@ class M1(Architecture):
             cluster_vars.update(
                 {
                     "efm_user_password_encryption": "scram-sha-256",
+                    "efm_user_is_superuser": False,
                 }
             )
 

@@ -1,0 +1,18 @@
+- summary: Ensure EFM database user has minimum required permissions
+  description: |
+    On a regular EFM deployment, TPA granted the EFM user with SUPERUSER
+    privileges.
+    A new variable called 'efm_user_is_superuser' has been introduced, where
+    TPA deploys the EFM user as a Postgres SUPERUSER, or as a regular login user
+    that is a member of 'efm_role', a role created by TPA with only the specific
+    catalog functions and predefined roles (pg_monitor,  pg_read_all_settings, 
+    pg_read_all_stats) that EFM requires (the variable is set to 'false' by default
+    when creating new clusters via `tpaexec configure`, removing this variable from
+    the configuration file would consider 'efm_user_is_superuser' as true).
+
+    The variable acts as a switch and can be toggled with a regular deployment, and
+    can be used on already deployed clusters to switch the privileges of the EFM user.
+    
+  type: notable_change
+  jira_tickets:
+  - TPA-1485
