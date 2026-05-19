@@ -1,6 +1,6 @@
 import sys
 import textwrap
-from string import Template
+from pathlib import Path
 
 
 def main():
@@ -176,29 +176,24 @@ def _add_dep(file, name, version, hash_set, comment, file_dependencies):
 
 
 def _render_template(actual_deps):
+    """Write each requirements file with its dependency entries rebuilt
+    from parsed data.
 
-    with open(".github/actions/update-requirements/template.txt", "r") as f:
-        src = Template(f.read())
-        for a_file in actual_deps.keys():
-            result = "".join(actual_deps[a_file]["comment_header"]).strip()
-            for a_dep in actual_deps[a_file]["deps"].keys():
-                format_actual_dep = {
-                    a_dep: {
-                        "name": actual_deps[a_file]["deps"][a_dep]["name"],
-                        "version": actual_deps[a_file]["deps"][a_dep]["version"],
-                        "hash_set": "\t--hash=sha256:".expandtabs(4)
-                        + " \\\n\t--hash=sha256:".expandtabs(4).join(
-                            sorted(actual_deps[a_file]["deps"][a_dep]["hash_set"])
-                        ),
-                        "comment": "\t".expandtabs(4)
-                        + "\n\t".expandtabs(4).join(
-                            actual_deps[a_file]["deps"][a_dep]["comment"]
-                        ),
-                    }
-                }
-                result += "\n" + src.substitute(format_actual_dep[a_dep])
-            with open(a_file, "w") as o:
-                o.write(result)
+    Hashes are emitted alphabetically for deterministic output. Layout
+    mirrors what pip-compile produces (four-space indent for hash and
+    `via` comment lines).
+    """
+    for a_file, file_data in actual_deps.items():
+        chunks = ["".join(file_data["comment_header"]).strip()]
+        for dep in file_data["deps"].values():
+            hashes = " \\\n    --hash=sha256:".join(sorted(dep["hash_set"]))
+            comment = "\n    ".join(dep["comment"])
+            chunks.append(
+                f"{dep['name']}=={dep['version']} \\\n"
+                f"    --hash=sha256:{hashes}\n"
+                f"    {comment}"
+            )
+        Path(a_file).write_text("\n".join(chunks))
 
 
 if __name__ == "__main__":  # pragma: no cover

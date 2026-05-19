@@ -1,3 +1,0 @@
-$name==$version \
-$hash_set
-$comment
