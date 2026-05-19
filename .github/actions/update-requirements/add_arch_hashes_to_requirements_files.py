@@ -188,7 +188,7 @@ def _render_template(actual_deps):
                         "version": actual_deps[a_file]["deps"][a_dep]["version"],
                         "hash_set": "\t--hash=sha256:".expandtabs(4)
                         + " \\\n\t--hash=sha256:".expandtabs(4).join(
-                            actual_deps[a_file]["deps"][a_dep]["hash_set"]
+                            sorted(actual_deps[a_file]["deps"][a_dep]["hash_set"])
                         ),
                         "comment": "\t".expandtabs(4)
                         + "\n\t".expandtabs(4).join(
