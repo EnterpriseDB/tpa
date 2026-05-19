@@ -434,6 +434,11 @@ switch2cm() {
        error "No inventory found. Did you run 'tpaexec deploy $(pwd)'?"
     fi
 
+    if [[ ! -h commands/switch2cm.yml ]]; then
+        echo "Creating link to switch2cm.yml"
+        "$TPA_DIR"/architectures/lib/commands/relink
+    fi
+
     provision
     playbook commands/switch2cm.yml "$@"
 }
