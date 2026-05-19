@@ -131,6 +131,55 @@ def test_render_is_deterministic(aah, tmp_path, monkeypatch):
     assert first == second
 
 
+def _dep(version, hashes):
+    return {"name": "x", "version": version, "hash_set": set(hashes), "comment": []}
+
+
+def test_merge_unions_hashes_on_name_and_version_match(aah):
+    actual_deps = {
+        "requirements.txt": {
+            "comment_header": [],
+            "deps": {"pkg": _dep("1.0", ["a"])},
+        }
+    }
+    target = _dep("1.0", ["b"])
+
+    matched = aah._merge_into_actuals("pkg", target, actual_deps)
+
+    assert matched is True
+    assert actual_deps["requirements.txt"]["deps"]["pkg"]["hash_set"] == {"a", "b"}
+
+
+def test_merge_skips_on_version_mismatch(aah):
+    actual_deps = {
+        "requirements.txt": {
+            "comment_header": [],
+            "deps": {"pkg": _dep("1.0", ["a"])},
+        }
+    }
+    target = _dep("2.0", ["b"])
+
+    matched = aah._merge_into_actuals("pkg", target, actual_deps)
+
+    assert matched is False
+    assert actual_deps["requirements.txt"]["deps"]["pkg"]["hash_set"] == {"a"}
+
+
+def test_merge_skips_on_missing_name(aah):
+    actual_deps = {
+        "requirements.txt": {
+            "comment_header": [],
+            "deps": {"other": _dep("1.0", ["a"])},
+        }
+    }
+    target = _dep("1.0", ["b"])
+
+    matched = aah._merge_into_actuals("pkg", target, actual_deps)
+
+    assert matched is False
+    assert actual_deps["requirements.txt"]["deps"]["other"]["hash_set"] == {"a"}
+
+
 def test_round_trip_preserves_deps(aah, tmp_path, monkeypatch):
     f = _write_sample(tmp_path)
     monkeypatch.chdir(REPO_ROOT)

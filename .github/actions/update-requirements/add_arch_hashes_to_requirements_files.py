@@ -18,55 +18,49 @@ def add_hashes(infix):
     a diagnostic to stdout so the caller can fail the workflow step.
     """
 
-    # List of files holding dependencies we want to ensure are still being used.
-    TARGETS = [
+    targets = [
         f"requirements-ppc64le{infix}.txt",
         f"requirements-s390x{infix}.txt",
     ]
+    actuals = [f"requirements{infix}.txt"]
 
-    actuals = [
-        f"requirements{infix}.txt",
-    ]
-
-    # parse the files and generate both target and actual deps dicts
-    target_deps = parse_requirements(TARGETS)
+    target_deps = parse_requirements(targets)
     actual_deps = parse_requirements(actuals)
 
-    # walk through target deps entries (version and hash_set)
-    for t_file in target_deps.keys():
-        for t_dep in target_deps[t_file]["deps"].keys():
-            ret = False
-            # walk through actual deps entries
-            for a_file in actual_deps.keys():
-                for a_dep in actual_deps[a_file]["deps"].keys():
+    for t_data in target_deps.values():
+        for name, target_info in t_data["deps"].items():
+            if not _merge_into_actuals(name, target_info, actual_deps):
+                _report_unmatched(name, target_info, actual_deps)
 
-                    # comparing set of hashes, verify that target is a subset of actual dep's hash list
-                    # otherwise we compare target version strings and add the hash to the list if version matches.
-                    if t_dep == a_dep and (
-                        actual_deps[a_file]["deps"][a_dep]["version"]
-                        == target_deps[t_file]["deps"][t_dep]["version"]
-                    ):
-                        # ensure the hash is present in the actual file hash_set
-                        actual_deps[a_file]["deps"][a_dep]["hash_set"] = actual_deps[
-                            a_file
-                        ]["deps"][a_dep]["hash_set"].union(
-                            target_deps[t_file]["deps"][t_dep]["hash_set"]
-                        )
-                        ret = True
-
-            # if we reach this and ret is still False the dep is not in the actual files
-            # we need to output the failed dependency name and hash.
-            if not ret:
-                print(
-                    textwrap.dedent(
-                        f"""
-                                    {t_dep}:{target_deps[t_file]["deps"][t_dep]['version']}
-                                    with hashes: {target_deps[t_file]["deps"][t_dep]['hash_set']}
-                                    could not be matched in files {actual_deps.keys()}.
-                                    """
-                    )
-                )
     _render_template(actual_deps)
+
+
+def _merge_into_actuals(name, target_info, actual_deps):
+    """Union the target hash set into every matching actual dependency.
+
+    A match requires the same dependency name and the same version
+    string. Returns True if at least one actual dep was matched.
+    """
+    matched = False
+    for a_data in actual_deps.values():
+        actual = a_data["deps"].get(name)
+        if actual and actual["version"] == target_info["version"]:
+            actual["hash_set"] |= target_info["hash_set"]
+            matched = True
+    return matched
+
+
+def _report_unmatched(name, target_info, actual_deps):
+    """Print a diagnostic for a target dep that couldn't be reconciled."""
+    print(
+        textwrap.dedent(
+            f"""
+            {name}:{target_info['version']}
+            with hashes: {target_info['hash_set']}
+            could not be matched in files {actual_deps.keys()}.
+            """
+        )
+    )
 
 
 def parse_requirements(files):
