@@ -69,6 +69,8 @@
 - name: Prepare proxy to connection manager shift
   any_errors_fatal: true
   max_fail_percentage: 0
+  become_user: root
+  become: yes
   environment: "{{ target_environment }}"
   hosts: role_bdr:!role_witness
   tasks:
@@ -157,6 +159,8 @@
 - name: Switch proxy to connection manager on read-only/replica nodes
   any_errors_fatal: true
   max_fail_percentage: 0
+  become_user: root
+  become: yes
   environment: "{{ target_environment }}"
   serial: 1
   hosts: role_bdr:&(role_replica:role_readonly:role_subscriber-only)
@@ -233,6 +237,8 @@
 - name: Switch proxy to connection manager on write-capable nodes
   any_errors_fatal: true
   max_fail_percentage: 0
+  become_user: root
+  become: yes
   environment: "{{ target_environment }}"
   serial: 1
   hosts: role_bdr:!role_witness:!role_replica:!role_readonly:!role_subscriber-only
