@@ -1,0 +1,13 @@
+- summary: Make switch2cm work when ansible_user is not root
+  description: |
+    Three plays in the PGD-Always-ON switch2cm command did not declare
+    become at the play level, so the command only worked when
+    ansible_user was root. With a non-root ansible_user it failed with
+    "Permission denied" on /pgdata/data/conf.d.
+
+    Those plays now explicitly become root, matching the pattern used
+    elsewhere in PGD-Always-ON. Per-task become overrides for SQL
+    queries that run as the postgres user are unaffected.
+  type: bugfix
+  jira_tickets:
+  - TPA-1473
