@@ -693,6 +693,13 @@ class Architecture:
 
         args["cluster_name"] = self.cluster_name()
 
+        # Keep this regex in sync with platforms/common/validate.yml.
+        if not re.match(r"^[_a-zA-Z0-9-]+$", args["cluster_name"]):
+            raise ArchitectureError(
+                f"Invalid cluster_name '{args['cluster_name']}': "
+                "may contain only letters, numbers, underscores, and minus signs"
+            )
+
         # If --overrides-from is specified, we load files one by one (treating
         # them as templates) and merge them recursively into args. This can be
         # used to set cluster_tags, add stuff to instance_vars etc. We don't do

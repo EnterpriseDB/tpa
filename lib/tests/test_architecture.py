@@ -124,6 +124,28 @@ class TestBarePlatform:
             architecture_bare.setup_local_repo()
 
 
+class TestClusterNameValidation:
+    def test_invalid_cluster_name_rejected(self):
+        bad_path = "lib/tests/config/cluster.bad"
+        d = BasicArchitecture(
+            directory="lib/tests/architectures/basic",
+            lib="lib/tests/architectures/lib",
+            argv=[
+                bad_path,
+                "--architecture",
+                "basic",
+                "--network",
+                "10.33.0.0/24",
+                "--no-git",
+                "--postgresql",
+                "14",
+            ],
+        )
+        with pytest.raises(ArchitectureError, match="Invalid cluster_name"):
+            d.configure(force=True)
+        cleanup(bad_path)
+
+
 @pytest.fixture
 def architecture_m1(argv):
     yield M1(

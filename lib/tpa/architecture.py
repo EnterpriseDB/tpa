@@ -195,6 +195,13 @@ class Architecture:
 
         args["cluster_name"] = self.cluster.name
 
+        # Keep this regex in sync with platforms/common/validate.yml.
+        if not re.match(r"^[_a-zA-Z0-9-]+$", args["cluster_name"]):
+            raise ArchitectureError(
+                f"Invalid cluster_name '{args['cluster_name']}': "
+                "may contain only letters, numbers, underscores, and minus signs"
+            )
+
         # args have been validated so we know keyring_backend is set by now
         cluster.add_settings({"keyring_backend": self.args["keyring_backend"]})
 

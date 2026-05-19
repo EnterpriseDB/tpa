@@ -863,3 +863,25 @@ class TestPGDCommon:
 
         assert arch.bdr_safe_name(name) == expected
 
+
+class TestClusterNameValidation:
+    def test_invalid_cluster_name_rejected(self):
+        from tpa.exceptions import ArchitectureError
+
+        bad_path = "lib/tests/config/cluster.bad"
+        argv = [
+            bad_path,
+            "--architecture",
+            "PGD-X",
+            "--no-git",
+            "--pgd-routing",
+            "local",
+            "--postgresql",
+            "16",
+        ]
+        try:
+            with pytest.raises(ArchitectureError, match="Invalid cluster_name"):
+                configure(argv, tpa_dir=".")
+        finally:
+            cleanup(bad_path)
+
