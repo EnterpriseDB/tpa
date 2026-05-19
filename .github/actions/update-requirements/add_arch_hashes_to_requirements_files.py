@@ -1,5 +1,16 @@
+import re
 import textwrap
 from pathlib import Path
+
+
+HEADER_RE = re.compile(r"\A(?:#[^\n]*\n)+")
+DEP_BLOCK_RE = re.compile(
+    r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)==(?P<version>\S+)\s*\\\s*\n"
+    r"(?P<hashes>(?:[ \t]+--hash=sha256:[a-f0-9]+\s*\\?\s*\n)+)"
+    r"(?P<comments>(?:[ \t]+#[^\n]*\n?)*)",
+    re.MULTILINE,
+)
+HASH_RE = re.compile(r"--hash=sha256:([a-f0-9]+)")
 
 
 def main():
@@ -70,43 +81,27 @@ def parse_requirements(files):
     header comments and a per-dependency entry of the form
     ``{name, version, hash_set, comment}``. Hashes are collected into a
     set; the trailing ``# via ...`` lines are captured as a list of
-    comment strings.
+    stripped comment strings.
     """
     dependencies = {}
     for file in files:
-        file_data = {"comment_header": [], "deps": {}}
-        with open(file) as f:
-            header = []
-            comment = []
-            hash_set = set()
-            name = version = None
-            for entry in f:
-                if file_data["deps"] == {} and not hash_set and entry.startswith("#"):
-                    header.append(entry)
-                elif "==" in entry:
-                    if hash_set:
-                        file_data["deps"][name] = {
-                            "name": name,
-                            "version": version,
-                            "hash_set": hash_set,
-                            "comment": comment,
-                        }
-                    name, version = entry.split()[0].split("==")
-                    hash_set = set()
-                    comment = []
-                elif entry.strip().startswith("--"):
-                    hash_set.add(entry.strip().strip("\\").split(":")[1].strip())
-                elif entry.strip().startswith("#") and hash_set:
-                    comment.append(entry.strip().strip("\n"))
-
-            file_data["deps"][name] = {
-                "name": name,
-                "version": version,
-                "hash_set": hash_set,
-                "comment": comment,
+        text = Path(file).read_text()
+        header_match = HEADER_RE.match(text)
+        header = (
+            header_match.group(0).splitlines(keepends=True) if header_match else []
+        )
+        deps = {
+            m["name"]: {
+                "name": m["name"],
+                "version": m["version"],
+                "hash_set": set(HASH_RE.findall(m["hashes"])),
+                "comment": [
+                    line.strip() for line in m["comments"].splitlines() if line.strip()
+                ],
             }
-            file_data["comment_header"] = header
-        dependencies[file] = file_data
+            for m in DEP_BLOCK_RE.finditer(text)
+        }
+        dependencies[file] = {"comment_header": header, "deps": deps}
     return dependencies
 
 
