@@ -1,0 +1,13 @@
+- summary: Report a clear error when --location-names doesn't match the architecture's requirement
+  description: |
+    Previously, supplying `--location-names` with the wrong number of names
+    (for example, a single location for a `BDR-Always-ON` cluster using the
+    `bronze` layout, which requires two) caused `tpaexec configure` to abort
+    with an unhandled Python traceback. `tpaexec configure` now compares the
+    supplied location names against the number of locations the chosen
+    architecture and layout actually need, and reports a clear error if they
+    differ. The change applies to the `M1`, `BDR-Always-ON` and
+    `PGD-Always-ON` architectures.
+  type: bugfix
+  jira_tickets:
+  - TPA-1465
