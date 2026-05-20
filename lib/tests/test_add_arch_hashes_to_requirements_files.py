@@ -192,3 +192,110 @@ def test_round_trip_preserves_deps(aah, tmp_path, monkeypatch):
     for name in before:
         assert before[name]["version"] == after[name]["version"]
         assert before[name]["hash_set"] == after[name]["hash_set"]
+
+
+# ---- end-to-end stdout contract: feeds the CI hash_check step ----
+#
+# The CI action captures this script's stdout into $GITHUB_OUTPUT.ERRORS;
+# non-empty ERRORS forces the PR open as draft (action.yml: `draft: ${{
+# steps.hash_check.conclusion == 'failure' }}`) and puts the diagnostic
+# into the PR body.
+
+ACTUALS_ONE_DEP = textwrap.dedent(
+    """\
+    #
+    # header
+    #
+    kept==1.0 \\
+        --hash=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        # via -r requirements.in
+    """
+)
+
+ARCH_MATCHING = textwrap.dedent(
+    """\
+    #
+    # header
+    #
+    kept==1.0 \\
+        --hash=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        # via -r requirements-ppc64le.in
+    """
+)
+
+ARCH_MISSING_DEP = textwrap.dedent(
+    """\
+    #
+    # header
+    #
+    notinactuals==1.0 \\
+        --hash=sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        # via -r requirements-ppc64le.in
+    """
+)
+
+ARCH_VERSION_SKEW = textwrap.dedent(
+    """\
+    #
+    # header
+    #
+    kept==2.0 \\
+        --hash=sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+        # via -r requirements-ppc64le.in
+    """
+)
+
+
+def _seed_arch_inputs(tmp_path, ppc64le, s390x):
+    (tmp_path / "requirements.txt").write_text(ACTUALS_ONE_DEP)
+    (tmp_path / "requirements-ppc64le.txt").write_text(ppc64le)
+    (tmp_path / "requirements-s390x.txt").write_text(s390x)
+
+
+def test_add_hashes_silent_when_all_match(aah, tmp_path, monkeypatch, capsys):
+    _seed_arch_inputs(tmp_path, ARCH_MATCHING, ARCH_MATCHING)
+    monkeypatch.chdir(tmp_path)
+
+    aah.add_hashes("")
+
+    assert capsys.readouterr().out == ""
+
+
+def test_add_hashes_reports_dep_missing_from_actuals(
+    aah, tmp_path, monkeypatch, capsys
+):
+    _seed_arch_inputs(tmp_path, ARCH_MISSING_DEP, ARCH_MISSING_DEP)
+    monkeypatch.chdir(tmp_path)
+
+    aah.add_hashes("")
+
+    out = capsys.readouterr().out
+    assert out.strip(), "expected diagnostic on stdout to fail hash_check step"
+    assert "notinactuals:1.0" in out
+    assert "could not be matched" in out
+
+
+def test_add_hashes_reports_version_skew(aah, tmp_path, monkeypatch, capsys):
+    _seed_arch_inputs(tmp_path, ARCH_VERSION_SKEW, ARCH_VERSION_SKEW)
+    monkeypatch.chdir(tmp_path)
+
+    aah.add_hashes("")
+
+    out = capsys.readouterr().out
+    assert "kept:2.0" in out
+    assert "could not be matched" in out
+
+
+def test_add_hashes_reports_per_arch_file(aah, tmp_path, monkeypatch, capsys):
+    # ppc64le matches, s390x has a missing dep — only s390x's mismatch
+    # should trigger output.
+    _seed_arch_inputs(tmp_path, ARCH_MATCHING, ARCH_MISSING_DEP)
+    monkeypatch.chdir(tmp_path)
+
+    aah.add_hashes("")
+
+    out = capsys.readouterr().out
+    assert "notinactuals:1.0" in out
+    # Exactly one diagnostic — kept matched in ppc64le and the union
+    # carried into actuals satisfies s390x's kept entry too.
+    assert out.count("could not be matched") == 1
