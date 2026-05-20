@@ -1,0 +1,29 @@
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+#
+# Per-target Galaxy collection version pins.
+# Format:
+#   <target>:
+#     "namespace.collection": "version.prefix"
+#
+# A pin is a leading substring match against the upstream version list
+# (see .github/scripts/check_one_collection.sh). Collections not listed
+# under a target resolve to the empty string (= no pin = latest).
+#
+# The `main:` block exists because TPA's main lane still ships
+# ansible-core 2.16-compatible collections. Once the main lane moves
+# to a newer ansible-core, the `main:` entries can be emptied or
+# removed without any workflow change.
+
+rh8:
+  community.aws: "9."
+  community.crypto: "2."
+  community.docker: "4."
+  community.general: "11."
+  amazon.aws: "9."
+
+main:
+  community.aws: "9."
+  community.crypto: "2."
+  community.docker: "4."
+  community.general: "11."
+  amazon.aws: "9."
