@@ -271,8 +271,9 @@ def test_add_hashes_reports_dep_missing_from_actuals(
 
     out = capsys.readouterr().out
     assert out.strip(), "expected diagnostic on stdout to fail hash_check step"
-    assert "notinactuals:1.0" in out
-    assert "could not be matched" in out
+    assert "notinactuals==1.0" in out
+    assert "    --hash=sha256:cccc" in out
+    assert "could not be matched in requirements.txt" in out
 
 
 def test_add_hashes_reports_version_skew(aah, tmp_path, monkeypatch, capsys):
@@ -282,8 +283,8 @@ def test_add_hashes_reports_version_skew(aah, tmp_path, monkeypatch, capsys):
     aah.add_hashes("")
 
     out = capsys.readouterr().out
-    assert "kept:2.0" in out
-    assert "could not be matched" in out
+    assert "kept==2.0" in out
+    assert "could not be matched in requirements.txt" in out
 
 
 def test_add_hashes_reports_per_arch_file(aah, tmp_path, monkeypatch, capsys):
@@ -295,7 +296,23 @@ def test_add_hashes_reports_per_arch_file(aah, tmp_path, monkeypatch, capsys):
     aah.add_hashes("")
 
     out = capsys.readouterr().out
-    assert "notinactuals:1.0" in out
+    assert "notinactuals==1.0" in out
     # Exactly one diagnostic — kept matched in ppc64le and the union
     # carried into actuals satisfies s390x's kept entry too.
     assert out.count("could not be matched") == 1
+
+
+def test_add_hashes_diagnostic_has_no_python_reprs(
+    aah, tmp_path, monkeypatch, capsys
+):
+    """The diagnostic ends up in the PR body verbatim; no leaky Python
+    repr (set, dict_keys) should surface there."""
+    _seed_arch_inputs(tmp_path, ARCH_MISSING_DEP, ARCH_MISSING_DEP)
+    monkeypatch.chdir(tmp_path)
+
+    aah.add_hashes("")
+
+    out = capsys.readouterr().out
+    assert "dict_keys" not in out
+    assert "{'" not in out
+    assert "set()" not in out

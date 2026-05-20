@@ -13,7 +13,6 @@ non-empty.
 """
 
 import re
-import textwrap
 from pathlib import Path
 
 
@@ -88,15 +87,23 @@ def _merge_into_actuals(name, target_info, actual_deps):
 
 
 def _report_unmatched(name, target_info, actual_deps):
-    """Print a diagnostic for a target dep that couldn't be reconciled."""
+    """Print a diagnostic for a target dep that couldn't be reconciled.
+
+    Output mimics pip-compile's ``name==version`` + indented ``--hash``
+    layout so the message reads as a snippet of the file a reviewer
+    might paste in. The CI step captures stdout into the bot-generated
+    PR body, so the format must stay human-readable when rendered as
+    markdown (the four-space-indented hash lines render as a code
+    block).
+    """
+    hash_lines = "\n".join(
+        f"    --hash=sha256:{h}" for h in sorted(target_info["hash_set"])
+    )
+    files = ", ".join(actual_deps)
     print(
-        textwrap.dedent(
-            f"""
-            {name}:{target_info['version']}
-            with hashes: {target_info['hash_set']}
-            could not be matched in files {actual_deps.keys()}.
-            """
-        )
+        f"\n{name}=={target_info['version']}\n"
+        f"{hash_lines}\n"
+        f"could not be matched in {files}"
     )
 
 
