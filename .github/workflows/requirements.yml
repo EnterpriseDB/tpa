@@ -183,7 +183,8 @@ jobs:
           COLLECTIONS=$(yq -r '.collections[] | .name' collections/requirements.yml)
           for col in $COLLECTIONS; do
             chmod 755 ./.github/scripts/check_one_collection.sh
-            ./.github/scripts/check_one_collection.sh $col collections/requirements.yml
+            PIN=$(yq ".main[\"$col\"] // \"\"" collections/pins.yml)
+            ./.github/scripts/check_one_collection.sh $col collections/requirements.yml "$PIN"
             if [ "$(cat $FLAG_FILE)" == "true" ]; then
               COLLECTION_UPDATE_FLAG="true"
             fi
