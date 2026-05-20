@@ -1448,6 +1448,11 @@ class Architecture:
         )
         cluster.group.add_to_group_vars({"postgres_conf_settings": pcs})
 
+        extra_extensions = ["passwordcheck"]
+        # EPAS has built-in audit logging so no need for pgaudit
+        if args.get("postgres_flavour") != "epas":
+            extra_extensions.append("pgaudit")
+
         cluster.group.add_to_group_vars(
             {
                 # 3.1.20
@@ -1463,7 +1468,7 @@ class Architecture:
                 "extra_postgres_extensions": cluster.group.group_vars.get(
                     "extra_postgres_extensions", []
                 )
-                + ["passwordcheck", "pgaudit"],
+                + extra_extensions,
             }
         )
 

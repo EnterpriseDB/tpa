@@ -881,6 +881,13 @@ class Architecture:
         )
         cluster_vars["postgres_conf_settings"] = pcs
 
+        # pgaudit packages exist for EPAS but install their files in
+        # locations EPAS doesn't load from, so we omit pgaudit on EPAS;
+        # EPAS provides built-in edb_audit for audit logging instead.
+        extra_extensions = ["passwordcheck"]
+        if args.get("postgres_flavour") != "epas":
+            extra_extensions.append("pgaudit")
+
         cluster_vars.update(
             {
                 # 3.1.20
@@ -894,7 +901,7 @@ class Architecture:
                 "extra_postgres_extensions": cluster_vars.get(
                     "extra_postgres_extensions", []
                 )
-                + ["passwordcheck", "pgaudit"],
+                + extra_extensions,
             }
         )
 
