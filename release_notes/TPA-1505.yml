@@ -1,0 +1,9 @@
+- summary: Omit pgaudit from CIS compliance on EPAS clusters
+  description: |
+    Previously, `tpaexec configure --compliance cis` unconditionally
+    added `pgaudit` to `extra_postgres_extensions`. This caused
+    startup failures on EPAS, which has built-in audit logging, so
+    `pgaudit` is now omitted on EPAS clusters.
+  type: bugfix
+  jira_tickets:
+  - TPA-1505
