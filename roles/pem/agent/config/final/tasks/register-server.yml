@@ -23,11 +23,15 @@
       --asb-host-db "{{ asb_host_db|default('postgres') }}"            \
       --remote-monitoring "{{ remote_monitoring|default('no') }}"      \
       --group "{{ monitoring_group | default(hostvars[pem_server].pem_server_group) }}" \
-      {% if monitoring_cluster is defined %} 
-      --cluster-name "{{ monitoring_cluster }}" \ 
+      {% if monitoring_cluster is defined %}
+      --cluster-name "{{ monitoring_cluster }}" \
       {% endif %}
-      --team "{{ monitoring_team |default('') }}"                      \
-      --owner "{{ monitoring_server_owner |default('') }}"             \
+      {% if monitoring_team is defined %}
+      --team "{{ monitoring_team }}" \
+      {% endif %}
+      {% if monitoring_server_owner is defined %}
+      --owner "{{ monitoring_server_owner }}" \
+      {% endif %}
       --config-dir "{{ pem_agent_config_path|dirname }}"               \
       --cert-path "{{ pem_agent_certificate_directory }}"              \
       {% for option in efm_options if 'efm' in role %} {{ option }} {% endfor %}
