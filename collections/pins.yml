@@ -19,6 +19,7 @@ rh8:
   community.crypto: "2."
   community.docker: "4."
   community.general: "11."
+  community.postgresql: "3."
   amazon.aws: "9."
 
 main:
@@ -26,4 +27,5 @@ main:
   community.crypto: "2."
   community.docker: "4."
   community.general: "11."
+  community.postgresql: "3."
   amazon.aws: "9."
