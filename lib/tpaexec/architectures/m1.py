@@ -170,7 +170,8 @@ class M1(Architecture):
         if args.get("primary_location"):
             if args["primary_location"] not in locations:
                 raise ArchitectureError(
-                    f"Location {args.get['primary_location']} unknown"
+                    f"Location {args['primary_location']} unknown.\n"
+                    f"Please ensure that primary location is included in --location-names"
                 )
             if args["primary_location"] != locations[0]:
                 locations.remove(args["primary_location"])

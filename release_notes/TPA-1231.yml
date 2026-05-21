@@ -1,0 +1,11 @@
+- summary: Improve error output for `--primary-location` in `tpaexec configure`
+  description: |
+    An error in the argument parsing logic between the `--primary-location` and the 
+    `--location-names` arguments when the primary location is not found in the list
+    of locations caused a built-in Python error to be thrown, which could be 
+    misleading to users, as it is not a TPA-related error.
+    This fix properly handles the mismatch between the provided 
+    primary location and the list of known locations, avoiding confusing error messages.
+  type: bugfix
+  jira_tickets:
+  - TPA-1231
