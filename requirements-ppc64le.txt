@@ -4,10 +4,10 @@ cffi==2.0.0 \
     # via
     #   -r /out/requirements-ppc64le.in
     #   cryptography
-cryptography==46.0.5 \
-    --hash=sha256:2f87615311a25fcaec3b9114da07fdc79cb5dc6389a828b1a335440278c77297 \
-    --hash=sha256:47fb8a66058b80e509c47118ef8a75d14c455e81ac369050f20ba0d23e77fee0 \
-    --hash=sha256:803812e111e75d1aa73690d2facc295eaefd4439be1023fefc4995eaea2af90d
+cryptography==48.0.0 \
+    --hash=sha256:369a6348999f94bbd53435c894377b20ab95f25a9065c283570e70150d8abc3c \
+    --hash=sha256:6a4173441c937d5502659485949ab5da874c77f0c747e20841cef3ca95bfdbe4 \
+    --hash=sha256:9ccdac7d40688ecb5a3b4a604b8a88c8002e3442d6c60aead1db2a89a041560c
     # via -r /out/requirements-ppc64le.in
 markupsafe==3.0.3 \
     --hash=sha256:2a8bcea224a7a20b839f3a792ef54a8378a807453b10004389c58ce2aa111da0 \
