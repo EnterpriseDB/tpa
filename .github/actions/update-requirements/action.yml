@@ -86,7 +86,7 @@ runs:
     - name: Template PR body
       if: ${{ !cancelled() }}
       id: template
-      uses: chuhlomin/render-template@v1.10
+      uses: chuhlomin/render-template@v1.12
       with:
         template: .github/actions/update-requirements/body.template.md
         vars: |
