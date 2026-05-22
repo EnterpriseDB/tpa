@@ -167,22 +167,26 @@ class BdrPackageVersion(Transmogrifier):
         """Return True if the cluster will end up needing read_listen_port.
 
         Two conditions must hold: (1) the effective bdr_package_version
-        is >= 5.5 (or absent/unparseable, treated as 'latest'), and
-        (2) the cluster will end up using pgd-proxy — not connection
-        manager, and not BDR-Always-ON's harp-proxy. Both apply() and
+        is >= 5.5 (an absent value is treated as 'latest'), and (2) the
+        cluster will end up using pgd-proxy — not connection manager,
+        and not BDR-Always-ON's harp-proxy. Both apply() and
         description() consult this method, so the prediction must hold
         for both the eventual cluster state (after our apply has run)
         and the description-time view of it.
+
+        Raises ConfigureError if the effective version string can't be
+        parsed. check() catches that early for an arg supplied on the
+        command line; here we let it propagate so a malformed value
+        that slipped through (e.g. hand-edited into config.yml) surfaces
+        cleanly during apply() or --describe rather than being silently
+        treated as 'latest'.
         """
         if not self._will_use_pgd_proxy(cluster):
             return False
         effective = self._arg_version() or cluster.vars.get("bdr_package_version")
         if effective is None:
             return True
-        try:
-            return _package_version_at_least(effective, BDR_WITH_READ_LISTEN_PORT)
-        except ConfigureError:
-            return True
+        return _package_version_at_least(effective, BDR_WITH_READ_LISTEN_PORT)
 
     def _will_use_pgd_proxy(self, cluster):
         """Return True if the cluster will use pgd-proxy after apply.

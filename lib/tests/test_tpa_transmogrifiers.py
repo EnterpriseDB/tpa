@@ -842,10 +842,13 @@ class TestBdrPackageVersion:
         result = x.check(basic_pgd_cluster)
         assert any("Cannot parse package version" in e for e in result.errors)
 
-    def test_check_accepts_unparseable_cluster_vars(self, basic_pgd_cluster):
-        """A weird value already in config.yml is left alone by check();
-        apply() handles it via the safe 'assume modern' fallback so we
-        don't block the user mid-upgrade."""
+    def test_check_doesnt_validate_existing_cluster_vars_when_arg_given(
+        self, basic_pgd_cluster
+    ):
+        """check() validates the user-supplied --bdr-package-version,
+        but doesn't pre-validate a stale value already in cluster.vars
+        — apply() will overwrite it with the (validated) arg anyway, so
+        check() has nothing to flag."""
         x = BdrPackageVersion()
         x._args = Namespace(
             bdr_package_version="5.5.0",
@@ -853,6 +856,28 @@ class TestBdrPackageVersion:
         )
         basic_pgd_cluster.vars["bdr_package_version"] = "completely-bogus"
         assert len(x.check(basic_pgd_cluster).errors) == 0
+
+    def test_description_propagates_bad_cluster_vars_version(self, basic_pgd_cluster):
+        """If cluster.vars["bdr_package_version"] is unparseable and no
+        --bdr-package-version arg was supplied to override it, a dry-run
+        must surface that as an error rather than silently producing a
+        description (epoch-prefix / wildcard syntax is easy to typo)."""
+        x = BdrPackageVersion()
+        x._args = Namespace(bdr_package_version=None, target_architecture=None)
+        basic_pgd_cluster.vars["bdr_package_version"] = "not-a-version"
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        with pytest.raises(ConfigureError, match="Cannot parse package version"):
+            x.description(basic_pgd_cluster)
+
+    def test_apply_propagates_bad_cluster_vars_version(self, basic_pgd_cluster):
+        """Apply mirrors description: no silent 'assume modern' fallback,
+        so a malformed value that slipped past check() surfaces here."""
+        x = BdrPackageVersion()
+        x._args = Namespace(bdr_package_version=None, target_architecture=None)
+        basic_pgd_cluster.vars["bdr_package_version"] = "not-a-version"
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        with pytest.raises(ConfigureError, match="Cannot parse package version"):
+            x.apply(basic_pgd_cluster)
 
     def test_apply_records_version_arg(self, basic_pgd_cluster):
         """Supplying --bdr-package-version writes it into cluster.vars
