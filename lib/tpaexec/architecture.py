@@ -755,18 +755,7 @@ class Architecture:
 
         locations = args.get("locations", [])
         if not locations:
-            location_names = args.get("location_names")
-            if (
-                location_names is not None
-                and len(location_names) != self.num_locations()
-            ):
-                layout = args.get("layout")
-                layout_clause = f" with --layout {layout}" if layout else ""
-                raise ArchitectureError(
-                    f"This architecture{layout_clause} requires "
-                    f"{self.num_locations()} locations, but {len(location_names)} "
-                    f"were given via --location-names"
-                )
+            self._check_location_names(args)
             self._init_locations(locations)
         self.update_locations(locations)
         self.platform.update_locations(locations, args)
@@ -1125,6 +1114,24 @@ class Architecture:
                     f"Could not open a config.yml file in the provided path: {dir_name}"
                 ) from e
         return list(set(values))
+
+    def _check_location_names(self, args):
+        """
+        Raise ArchitectureError if --location-names doesn't match num_locations().
+
+        """
+        location_names = args.get("location_names")
+        if location_names is None:
+            return
+        if len(location_names) == self.num_locations():
+            return
+        layout = args.get("layout")
+        layout_clause = f" with --layout {layout}" if layout else ""
+        raise ArchitectureError(
+            f"This architecture{layout_clause} requires "
+            f"{self.num_locations()} locations, but {len(location_names)} "
+            f"were given via --location-names"
+        )
 
     def _init_locations(self, locations):
         """
