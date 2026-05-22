@@ -88,6 +88,25 @@
 
 - include_tasks: distribution.yml
 
+# script_python_interpreter is the Python interpreter that TPA-installed
+# scripts (e.g. /etc/tpa/postgres-monitor) use in their shebang lines.
+# The default uses /usr/bin/env so that interpreter selection follows
+# whatever python3 is first in PATH on the target host, preserving
+# historic behaviour. Customers who need a specific interpreter can set
+# this fact explicitly in cluster_vars (e.g. /usr/bin/python3, or a path
+# to their own build); we only default it when it isn't already defined.
+
+- name: Set script_python_interpreter default if not configured
+  set_fact:
+    script_python_interpreter: "/usr/bin/env {{ python }}"
+    script_python_interpreter_explicit: false
+  when: script_python_interpreter is not defined
+
+- name: Record that script_python_interpreter was set explicitly
+  set_fact:
+    script_python_interpreter_explicit: true
+  when: script_python_interpreter_explicit is not defined
+
 - include_tasks: locale.yml
 
 # Set various facts related to Postgres and other components we need to

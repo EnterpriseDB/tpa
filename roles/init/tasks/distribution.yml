@@ -8,6 +8,7 @@
 
 - minimal_setup:
     preferred_python_version: "{{ preferred_python_version|default('python2') }}"
+    python_pkg_prefix: "{{ python_pkg_prefix|default('') }}"
 
 - name: Ensure ansible_distribution is supported
   assert:

@@ -1,0 +1,12 @@
+#!{{ script_python_interpreter }}
+# -*- coding: utf-8 -*-
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+#
+# Canary script: verifies that the Python interpreter resolved by the
+# shebang on TPA-installed scripts can import psycopg2. Installed and
+# executed by roles/test/tasks/script-python-psycopg2.yml.
+
+import sys
+import psycopg2
+
+print(sys.executable, psycopg2.__file__)

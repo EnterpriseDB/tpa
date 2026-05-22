@@ -10,6 +10,17 @@
     group: root
     mode: "0755"
 
+# If the customer has set script_python_interpreter explicitly in
+# cluster_vars, validate the override at deploy time so that a bad
+# value fails here with a clear diagnostic, rather than later when the
+# wait-for-postgres task runs postgres-monitor for real.
+
+- name: Verify script_python_interpreter override can import psycopg2
+  include_role:
+    name: test
+    tasks_from: script-python-psycopg2.yml
+  when: script_python_interpreter_explicit|default(false)|bool
+
 - name: Install Postgres service unit files
   template:
     src: "{{ item.0 }}.service.j2"
