@@ -182,22 +182,25 @@ class BdrPackageVersion(Transmogrifier):
     def _will_use_pgd_proxy(self, cluster):
         """Return True if the cluster will use pgd-proxy after apply.
 
-        - target_architecture == "PGD-X": no. PGD-X is a connection-
-          manager architecture; PgdproxyCM (a prerequisite of PGD5PGDX)
-          will have removed default_pgd_proxy_options already.
-        - target_architecture == "PGD-Always-ON": yes. BDR4PGD5 creates
-          default_pgd_proxy_options during its apply.
-        - No target (standalone use): cluster's current shape is its
-          final shape; default_pgd_proxy_options is present iff the
-          cluster uses pgd-proxy. BDR-Always-ON and CM-enabled
-          PGD-Always-ON clusters don't have it.
+        PGD-X and PGD-S are connection-manager-only architectures.
+        BDR-Always-ON uses harp-proxy, not pgd-proxy. PGD-Always-ON
+        uses pgd-proxy unless it has been migrated to connection
+        manager — the source of truth being
+        bdr.enable_builtin_connection_manager in postgres_conf_settings,
+        which PgdproxyCM.apply() flips on. PGD 5.9+ clusters may or may
+        not have been migrated yet.
         """
-        target = getattr(self.args, "target_architecture", None)
-        if target == "PGD-X":
+        final_arch = (
+            getattr(self.args, "target_architecture", None) or cluster.architecture
+        )
+        if final_arch in ("PGD-X", "PGD-S"):
             return False
-        if target == "PGD-Always-ON":
-            return True
-        return isinstance(cluster.vars.get("default_pgd_proxy_options"), dict)
+        if final_arch != "PGD-Always-ON":
+            # BDR-Always-ON, M1, etc.
+            return False
+        conf = cluster.vars.get("postgres_conf_settings") or {}
+        cm = conf.get("bdr.enable_builtin_connection_manager")
+        return str(cm).lower() != "true"
 
     def _apply_read_listen_port(self, cluster):
         """Ensure read_listen_port is set in default_pgd_proxy_options.

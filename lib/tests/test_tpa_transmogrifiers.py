@@ -985,6 +985,43 @@ class TestBdrPackageVersion:
         items = x.description(basic_pgd_cluster)._items
         assert not any("read_listen_port" in item for item in items)
 
+    def test_description_omits_read_listen_port_when_cm_enabled(
+        self, basic_pgd_cluster
+    ):
+        """A PGD-Always-ON cluster that has been migrated to connection
+        manager (bdr.enable_builtin_connection_manager: true in
+        postgres_conf_settings) is no longer a pgd-proxy cluster, even if
+        it still has a default_pgd_proxy_options dict lingering in
+        cluster_vars. The conf setting is the source of truth."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.9.0",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["postgres_conf_settings"] = {
+            "bdr.enable_builtin_connection_manager": "true",
+        }
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        items = x.description(basic_pgd_cluster)._items
+        assert not any("read_listen_port" in item for item in items)
+
+    def test_apply_skips_read_listen_port_when_cm_enabled(self, basic_pgd_cluster):
+        """And apply() agrees with description(): no read_listen_port
+        added when CM is enabled on a PGD-Always-ON cluster."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.9.0",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["postgres_conf_settings"] = {
+            "bdr.enable_builtin_connection_manager": "true",
+        }
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        x.apply(basic_pgd_cluster)
+        assert basic_pgd_cluster.vars["default_pgd_proxy_options"] == {
+            "listen_port": 6432,
+        }
+
 
 class TestBDR4PGD5ReadListenPort:
     """Integration: BDR4PGD5 + BdrPackageVersion produces a complete
