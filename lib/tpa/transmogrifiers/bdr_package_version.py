@@ -193,10 +193,9 @@ class BdrPackageVersion(Transmogrifier):
         final_arch = (
             getattr(self.args, "target_architecture", None) or cluster.architecture
         )
-        if final_arch in ("PGD-X", "PGD-S"):
-            return False
         if final_arch != "PGD-Always-ON":
-            # BDR-Always-ON, M1, etc.
+            # BDR-Always-ON uses harp-proxy; PGD-X / PGD-S are CM-only;
+            # anything else has no pgd-proxy to speak of either.
             return False
         conf = cluster.vars.get("postgres_conf_settings") or {}
         cm = conf.get("bdr.enable_builtin_connection_manager")
