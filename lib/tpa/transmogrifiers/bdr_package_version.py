@@ -103,6 +103,11 @@ class BdrPackageVersion(Transmogrifier):
     def check(self, cluster):
         res = CheckResult()
 
+        # Validate the user-supplied --bdr-package-version is parseable.
+        # We don't care about the comparison result here — we just want
+        # the ConfigureError that _package_version_at_least raises on a
+        # malformed string, surfaced as a clean check() error rather
+        # than a stack trace from apply().
         arg_version = self._arg_version()
         if arg_version is not None:
             try:
