@@ -613,20 +613,6 @@ class TestPGD5PGDX:
             req._applied = True
         assert x.is_ready(basic_pgd_cluster) is True
 
-    def test_pgd5pgdx_is_ready_excludes_bdr_package_version(self, basic_pgd_cluster):
-        """is_ready ignores BdrPackageVersion in its requires gate.
-
-        Same trick as BDR4PGD5: BdrPackageVersion runs *after* PGD5PGDX
-        (it waits on cluster.architecture becoming PGD-X). It's listed
-        in our requires for inclusion in the run, not for ordering; if
-        we waited for it to be _applied, the two would deadlock.
-        """
-        x = PGD5PGDX()
-        for req in x.required:
-            if not isinstance(req, BdrPackageVersion):
-                req._applied = True
-        assert x.is_ready(basic_pgd_cluster) is True
-
 
 class TestCommon:
     """test suite for Common transmogrifier"""

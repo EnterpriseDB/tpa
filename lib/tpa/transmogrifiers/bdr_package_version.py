@@ -6,10 +6,12 @@
 Transmogrifier that owns the --bdr-package-version flag.
 
 Applies to BDR-Always-ON, PGD-Always-ON, PGD-X, and PGD-S clusters
-(see SUPPORTED_ARCHITECTURES), and is pulled in as a require() of the
-architecture-changing specialists (BDR4PGD5 for BDR-Always-ON →
-PGD-Always-ON, PGD5PGDX for PGD-Always-ON → PGD-X) so that the same
-version-gated rules apply when the user is also changing architecture.
+(see SUPPORTED_ARCHITECTURES). Pulled in as a require() of BDR4PGD5
+(the BDR-Always-ON → PGD-Always-ON specialist) so that the
+read_listen_port rule for PGD 5.5+ also fires when the user is moving
+to PGD-Always-ON in the same command. When a future PGD-X / PGD-S
+rule appears, the equivalent wiring against PGD5PGDX (or a PGD6→6
+specialist) can be added then.
 
 When a specialist is in the run, the apply queue's initial order tries
 this transmogrifier first, but is_ready() defers it until the
