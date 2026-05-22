@@ -410,7 +410,7 @@ class TestPGDXArchitecture:
         separately, inside process_arguments().
         """
         assert len(pgdx_cluster.instances) == expected_total
-    
+
     PGDX_BASE_ARGV = [
         CONFIG_PATH["PGDX"],
         "--architecture",
@@ -446,6 +446,32 @@ class TestPGDXArchitecture:
         try:
             configured = ConfiguredCluster(PGDX, argv, cluster_path)
             assert configured.cluster_vars["postgres_flavour"] == expected
+        finally:
+            cleanup(cluster_path)
+
+    def test_pgdx_overrides_from_merges_into_cluster(self, tmp_path):
+        """Regression test for TPA-1462: --overrides-from must not crash and
+        the override values must be merged into the cluster configuration.
+
+        Before commit 67c31f29b, lib/tpa/architecture.py was missing imports
+        for `reduce` (functools) and `merge_hash` (ansible.utils.vars), so
+        configuring any cluster with --overrides-from raised
+        `NameError: name 'reduce' is not defined`.
+        """
+        override_file = tmp_path / "overrides.yml"
+        override_file.write_text("cluster_tags:\n  tpa_1462_marker: regression\n")
+        argv = self.STANDARD_PGDX_ARGV + [
+            "--overrides-from",
+            str(override_file),
+        ]
+        cleanup(CONFIG_PATH["PGDX"])
+        cluster_path = CONFIG_PATH["PGDX"]
+        try:
+            configured = ConfiguredCluster(PGDX, argv, cluster_path)
+            assert (
+                configured.cluster.settings["cluster_tags"]["tpa_1462_marker"]
+                == "regression"
+            )
         finally:
             cleanup(cluster_path)
 
@@ -884,4 +910,3 @@ class TestClusterNameValidation:
                 configure(argv, tpa_dir=".")
         finally:
             cleanup(bad_path)
-
