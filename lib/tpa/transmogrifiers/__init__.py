@@ -10,6 +10,7 @@ from typing import Any, Dict, List
 from ..transmogrifier import Transmogrifier
 from .architecture import Architecture
 from .bdr4pgd5 import BDR4PGD5  # noqa: F401
+from .bdr_package_version import BdrPackageVersion
 from .common import Common
 from .pgd5pgdx import PGD5PGDX  # noqa: F401
 from .pgdproxy_cm import PgdproxyCM
@@ -25,6 +26,7 @@ selectable_transmogrifiers = [
     Repositories,
     Replace2qRepositories,
     PgdproxyCM,
+    BdrPackageVersion,
 ]
 
 

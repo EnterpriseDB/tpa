@@ -13,12 +13,18 @@ from tpa.transmogrifier import apply as apply_queue
 from tpa.transmogrifiers import (
     BDR4PGD5,
     PGD5PGDX,
+    BdrPackageVersion,
     Repositories,
     Replace2qRepositories,
     Common,
     Architecture,
     transmogrifiers_from_args,
     add_all_transmogrifier_options,
+)
+from tpa.transmogrifiers.bdr_package_version import (
+    BDR_WITH_READ_LISTEN_PORT,
+    DEFAULT_READ_LISTEN_PORT,
+    _package_version_at_least,
 )
 
 
@@ -40,6 +46,24 @@ class TestTransmogrifiers:
                     "dev",
                 ],
                 None,
+                [Common, Architecture],
+            ),
+            (
+                ["--bdr-package-version", "5.5.0"],
+                None,
+                [Common, BdrPackageVersion],
+            ),
+            (
+                [
+                    "--architecture",
+                    "PGD-Always-ON",
+                    "--bdr-package-version",
+                    "5.5.0",
+                ],
+                None,
+                # BdrPackageVersion is required by BDR4PGD5 (via Architecture),
+                # so it dedups out of the top-level list — its parsed args
+                # still reach the required instance via set_parsed_args.
                 [Common, Architecture],
             ),
             ([], None, []),
@@ -71,8 +95,10 @@ class TestTransmogrifiers:
         """
         result = transmogrifiers_from_args(
             [
-                "--architecture", "PGD-Always-ON",
-                "--edb-repositories", "dev",
+                "--architecture",
+                "PGD-Always-ON",
+                "--edb-repositories",
+                "dev",
             ]
         )
         # Architecture is in the list and owns a Repositories in its
@@ -120,9 +146,9 @@ class TestApplyQueue:
         # After applying, every transmogrifier in the queue must have
         # _applied set so downstream is_ready() checks can rely on it.
         for t in tlist:
-            assert getattr(t, "_applied", False) is True, (
-                f"{type(t).__name__} was not marked as applied"
-            )
+            assert (
+                getattr(t, "_applied", False) is True
+            ), f"{type(t).__name__} was not marked as applied"
 
 
 @pytest.fixture
@@ -513,17 +539,33 @@ class TestBDR4PGD5:
         assert x.is_ready(basic_bdr_cluster) is False
 
     def test_bdr4pgd5_is_ready_after_repositories_applied(self, basic_bdr_cluster):
-        """is_ready returns True once every required transmogrifier is applied
+        """is_ready returns True once every gating requirement is applied.
 
         The framework sets `_applied = True` on each transmogrifier after
         calling its apply(). Once that flag is present on the specialist's
-        Repositories dependency, is_ready must return True so the queue
-        can finally apply BDR4PGD5.
+        gating dependencies, is_ready must return True so the queue can
+        finally apply BDR4PGD5.
         """
         x = BDR4PGD5()
         # Simulate the framework marking the requirement as applied.
         for req in x.required:
             req._applied = True
+        assert x.is_ready(basic_bdr_cluster) is True
+
+    def test_bdr4pgd5_is_ready_excludes_bdr_package_version(self, basic_bdr_cluster):
+        """is_ready ignores BdrPackageVersion in its requires gate.
+
+        BdrPackageVersion runs *after* BDR4PGD5 (it waits on cluster.
+        architecture becoming PGD-Always-ON, which BDR4PGD5 does in its
+        apply()). It's listed in our requires for inclusion in the run,
+        not for ordering. If we waited for it to be _applied, the two
+        transmogrifiers would deadlock waiting for each other.
+        """
+        x = BDR4PGD5()
+        # Mark only Repositories applied; leave BdrPackageVersion unapplied.
+        for req in x.required:
+            if not isinstance(req, BdrPackageVersion):
+                req._applied = True
         assert x.is_ready(basic_bdr_cluster) is True
 
 
@@ -560,7 +602,7 @@ class TestPGD5PGDX:
         assert x.is_ready(basic_pgd_cluster) is False
 
     def test_pgd5pgdx_is_ready_after_repositories_applied(self, basic_pgd_cluster):
-        """is_ready returns True once every required transmogrifier is applied
+        """is_ready returns True once every gating requirement is applied.
 
         Once the framework marks the required Repositories with
         `_applied = True`, PGD5PGDX must signal ready so the queue can
@@ -569,6 +611,20 @@ class TestPGD5PGDX:
         x = PGD5PGDX()
         for req in x.required:
             req._applied = True
+        assert x.is_ready(basic_pgd_cluster) is True
+
+    def test_pgd5pgdx_is_ready_excludes_bdr_package_version(self, basic_pgd_cluster):
+        """is_ready ignores BdrPackageVersion in its requires gate.
+
+        Same trick as BDR4PGD5: BdrPackageVersion runs *after* PGD5PGDX
+        (it waits on cluster.architecture becoming PGD-X). It's listed
+        in our requires for inclusion in the run, not for ordering; if
+        we waited for it to be _applied, the two would deadlock.
+        """
+        x = PGD5PGDX()
+        for req in x.required:
+            if not isinstance(req, BdrPackageVersion):
+                req._applied = True
         assert x.is_ready(basic_pgd_cluster) is True
 
 
@@ -662,3 +718,303 @@ class TestRepositories:
             "Set edb_repositories to ['standard']"
         ]
         assert x.description(basic_bdr_cluster)._title is None
+
+
+class TestBdrPackageVersion:
+    """test suite for BdrPackageVersion transmogrifier"""
+
+    def test_options(self):
+        """--bdr-package-version is the option owned by this transmogrifier."""
+        assert "--bdr-package-version" in BdrPackageVersion.options()
+
+    @pytest.mark.parametrize(
+        "version_string, expected",
+        [
+            ("*5.8*", True),
+            ("*6.1.1*", True),
+            ("5.5*", True),
+            ("5.5.1", True),
+            ("6.1.1", True),
+            ("4:5.5.1", True),
+            ("4:5.8.0", True),
+            ("*5.3*", False),
+            ("5.1.0", False),
+            ("5.4.2", False),
+            ("4:5.4.2", False),
+        ],
+    )
+    def test_package_version_at_least(self, version_string, expected):
+        """The lib/tpa-local copy of _package_version_at_least handles the
+        same set of cases as the configure-side helper it mirrors."""
+        assert (
+            _package_version_at_least(version_string, BDR_WITH_READ_LISTEN_PORT)
+            is expected
+        )
+
+    @pytest.mark.parametrize(
+        "version_string",
+        ["latest", "abc", "not-a-version", None, ""],
+    )
+    def test_package_version_at_least_malformed_raises(self, version_string):
+        """Malformed version strings raise ConfigureError from tpa.exceptions
+        (not ArchitectureError, which belongs to lib/tpaexec)."""
+        with pytest.raises(ConfigureError):
+            _package_version_at_least(version_string, BDR_WITH_READ_LISTEN_PORT)
+
+    def test_is_applicable_always_true(self, basic_pgd_cluster):
+        """is_applicable defaults to True. Selection upstream (options_match
+        for standalone use, require() for the BDR4PGD5 path) is what
+        determines whether we run at all."""
+        x = BdrPackageVersion()
+        x._args = Namespace(bdr_package_version=None, target_architecture=None)
+        assert x.is_applicable(basic_pgd_cluster) is True
+
+    @pytest.mark.parametrize(
+        "architecture, target, expected",
+        [
+            # Standalone use on a supported architecture: ready
+            # immediately.
+            ("PGD-Always-ON", None, True),
+            ("PGD-X", None, True),
+            ("PGD-S", None, True),
+            ("BDR-Always-ON", None, True),
+            # Architecture-driven change in flight: wait for the
+            # specialist to flip cluster.architecture to the target.
+            ("BDR-Always-ON", "PGD-Always-ON", False),
+            ("PGD-Always-ON", "PGD-X", False),
+            # Once the flip has happened (cluster.architecture matches
+            # target), we're ready.
+            ("PGD-Always-ON", "PGD-Always-ON", True),
+            ("PGD-X", "PGD-X", True),
+            # Cluster shape we don't support and no target either:
+            # never ready (caught by check()).
+            ("M1", None, False),
+        ],
+    )
+    def test_is_ready(self, architecture, target, expected):
+        """is_ready is target-aware: when --architecture is being
+        changed, wait for the flip; otherwise the cluster's current
+        shape decides."""
+        x = BdrPackageVersion()
+        x._args = Namespace(bdr_package_version=None, target_architecture=target)
+        cluster = Cluster("c", architecture, "docker")
+        assert x.is_ready(cluster) is expected
+
+    @pytest.mark.parametrize(
+        "architecture, target, expected_errors",
+        [
+            # Standalone use on a supported architecture (incl.
+            # BDR-Always-ON for BDR 3.x / 4.x minor upgrades).
+            ("PGD-Always-ON", None, 0),
+            ("PGD-X", None, 0),
+            ("PGD-S", None, 0),
+            ("BDR-Always-ON", None, 0),
+            # Architecture-driven changes: the specialist will validate
+            # whether the source→target transition is supported; we
+            # accept any (source, supported-target) pair so we don't
+            # block legitimate flows.
+            ("BDR-Always-ON", "PGD-Always-ON", 0),
+            ("PGD-Always-ON", "PGD-X", 0),
+            # Cluster shape we don't support and no target either:
+            # we'd deadlock at is_ready, so reject early.
+            ("M1", None, 1),
+        ],
+    )
+    def test_check_architecture(self, architecture, target, expected_errors):
+        """check() permits the architectures we can run against and
+        rejects those that would stall the apply queue."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=target,
+        )
+        cluster = Cluster("c", architecture, "docker")
+        assert len(x.check(cluster).errors) == expected_errors
+
+    def test_check_rejects_malformed_arg(self, basic_pgd_cluster):
+        """A bad --bdr-package-version surfaces as a check() error so the
+        user sees a clean message before apply runs."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="not-a-version",
+            target_architecture=None,
+        )
+        result = x.check(basic_pgd_cluster)
+        assert any("Cannot parse package version" in e for e in result.errors)
+
+    def test_check_accepts_unparseable_cluster_vars(self, basic_pgd_cluster):
+        """A weird value already in config.yml is left alone by check();
+        apply() handles it via the safe 'assume modern' fallback so we
+        don't block the user mid-upgrade."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["bdr_package_version"] = "completely-bogus"
+        assert len(x.check(basic_pgd_cluster).errors) == 0
+
+    def test_apply_records_version_arg(self, basic_pgd_cluster):
+        """Supplying --bdr-package-version writes it into cluster.vars
+        and then runs the version-gated rules."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        x.apply(basic_pgd_cluster)
+        assert basic_pgd_cluster.vars["bdr_package_version"] == "5.5.0"
+        assert (
+            basic_pgd_cluster.vars["default_pgd_proxy_options"]["read_listen_port"]
+            == DEFAULT_READ_LISTEN_PORT
+        )
+
+    def test_apply_skips_read_listen_port_for_old_version(self, basic_pgd_cluster):
+        """Version < 5.5 → read_listen_port stays absent."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.4.2",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        x.apply(basic_pgd_cluster)
+        assert basic_pgd_cluster.vars["default_pgd_proxy_options"] == {
+            "listen_port": 6432,
+        }
+
+    def test_apply_no_version_assumes_latest(self, basic_pgd_cluster):
+        """No --bdr-package-version arg, no existing cluster_vars setting:
+        assume 'latest' and apply every rule. This is the no-arg BDR4PGD5
+        path (where we're pulled in by require but the user didn't pass
+        --bdr-package-version)."""
+        x = BdrPackageVersion()
+        x._args = Namespace(bdr_package_version=None, target_architecture=None)
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        x.apply(basic_pgd_cluster)
+        assert (
+            basic_pgd_cluster.vars["default_pgd_proxy_options"]["read_listen_port"]
+            == DEFAULT_READ_LISTEN_PORT
+        )
+
+    def test_apply_no_proxy_options_is_noop(self, basic_pgd_cluster):
+        """If default_pgd_proxy_options doesn't exist (e.g. no harp-proxy
+        instances in the source cluster), the rule is silently skipped
+        rather than synthesising the dict."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=None,
+        )
+        x.apply(basic_pgd_cluster)
+        assert "default_pgd_proxy_options" not in basic_pgd_cluster.vars
+
+    def test_apply_preserves_existing_read_listen_port(self, basic_pgd_cluster):
+        """A read_listen_port already set in config.yml is not overwritten
+        by the default — the user's chosen value wins."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {
+            "listen_port": 6432,
+            "read_listen_port": 7777,
+        }
+        x.apply(basic_pgd_cluster)
+        assert (
+            basic_pgd_cluster.vars["default_pgd_proxy_options"]["read_listen_port"]
+            == 7777
+        )
+
+    def test_description_modern_version(self, basic_pgd_cluster):
+        """description() lists the version assignment and the gated option."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        items = x.description(basic_pgd_cluster)._items
+        assert any("bdr_package_version" in item for item in items)
+        assert any("read_listen_port" in item for item in items)
+
+    def test_description_old_version(self, basic_pgd_cluster):
+        """description() omits the gated option when the version is too old."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.4.2",
+            target_architecture=None,
+        )
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        items = x.description(basic_pgd_cluster)._items
+        assert not any("read_listen_port" in item for item in items)
+
+    @pytest.mark.parametrize(
+        "architecture",
+        ["PGD-X", "PGD-S", "BDR-Always-ON"],
+    )
+    def test_description_omits_read_listen_port_on_non_pgd_proxy_arch(
+        self, architecture
+    ):
+        """description() must not promise to add read_listen_port on
+        clusters that don't (and won't) use pgd-proxy — connection-
+        manager and harp-proxy clusters never gain the option."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="5.5.0",
+            target_architecture=None,
+        )
+        cluster = Cluster("c", architecture, "docker")
+        items = x.description(cluster)._items
+        assert not any("read_listen_port" in item for item in items)
+
+    def test_description_omits_read_listen_port_for_pgd_x_target(
+        self, basic_pgd_cluster
+    ):
+        """When --architecture PGD-X is in flight, the cluster ends up on
+        connection manager (PgdproxyCM removes default_pgd_proxy_options
+        before PGD5PGDX runs), so description must not promise to add
+        read_listen_port even when the source cluster is PGD-Always-ON."""
+        x = BdrPackageVersion()
+        x._args = Namespace(
+            bdr_package_version="6.0.0",
+            target_architecture="PGD-X",
+        )
+        basic_pgd_cluster.vars["default_pgd_proxy_options"] = {"listen_port": 6432}
+        items = x.description(basic_pgd_cluster)._items
+        assert not any("read_listen_port" in item for item in items)
+
+
+class TestBDR4PGD5ReadListenPort:
+    """Integration: BDR4PGD5 + BdrPackageVersion produces a complete
+    default_pgd_proxy_options entry on conversion to PGD-Always-ON."""
+
+    def test_apply_queue_adds_both_ports(self, basic_bdr_cluster):
+        """Running the full apply queue against a BDR-Always-ON cluster
+        with a harp-proxy instance should produce a PGD-Always-ON config
+        in which default_pgd_proxy_options has listen_port (set by
+        BDR4PGD5) and read_listen_port (layered on by BdrPackageVersion)."""
+        basic_bdr_cluster.add_location("known")
+        basic_bdr_cluster.add_instance("hp", location_name="known")
+        basic_bdr_cluster.instances.with_name("hp").add_role("harp-proxy")
+        basic_bdr_cluster.add_instance("b", location_name="known")
+        basic_bdr_cluster.instances.with_name("b").add_role("bdr")
+
+        basic_bdr_cluster.vars.update(
+            {
+                "bdr_node_group": "basic",
+                "bdr_version": "4",
+                "postgres_flavour": "postgresql",
+                "edb_repositories": [],
+            }
+        )
+
+        tlist = transmogrifiers_from_args(
+            ["--architecture", "PGD-Always-ON", "--pgd-proxy-routing", "local"]
+        )
+        apply_queue(basic_bdr_cluster, tlist)
+
+        proxy_options = basic_bdr_cluster.vars["default_pgd_proxy_options"]
+        assert proxy_options["listen_port"] == 6432
+        assert proxy_options["read_listen_port"] == DEFAULT_READ_LISTEN_PORT

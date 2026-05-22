@@ -39,6 +39,7 @@ from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
 from ..exceptions import ConfigureError
 from ..transmogrifier import Transmogrifier
+from .bdr_package_version import BdrPackageVersion
 from .repositories import Repositories
 
 
@@ -54,16 +55,25 @@ class PGD5PGDX(Transmogrifier):
 
     def __init__(self):
         self.require(Repositories(default_repos=["postgres_distributed"]))
+        # BdrPackageVersion runs *after* us (it waits on cluster.architecture
+        # becoming PGD-X, which we do in apply()). We require it so it's
+        # included in the run; its own is_ready() handles the ordering.
+        self.require(BdrPackageVersion())
 
     def is_applicable(self, cluster):
         return self.args.target_architecture == "PGD-X"
 
     def is_ready(self, cluster):
-        # Wait for all required transmogrifiers (e.g. Repositories) to be
-        # applied before this one runs, since the framework's all_required()
-        # ordering may place this transmogrifier before its own dependencies
-        # in the apply queue.
-        return all(getattr(req, "_applied", False) for req in self.required)
+        # Wait for required transmogrifiers that genuinely need to apply
+        # before we do (e.g. Repositories sets up edb_repositories). We
+        # explicitly skip BdrPackageVersion here — it's listed in our
+        # requires for inclusion in the run, but its work happens after
+        # ours, gated on its own cluster-state check.
+        return all(
+            getattr(req, "_applied", False)
+            for req in self.required
+            if not isinstance(req, BdrPackageVersion)
+        )
 
     def _run_prerequisite_checks(self, cluster):
         """
@@ -228,7 +238,9 @@ Please run the following command to migrate it first:
             self._cleanup_deprecated_options(cluster)
 
         except KeyError as e:
-            raise ConfigureError(f"Configuration is missing a required key: {e}") from None
+            raise ConfigureError(
+                f"Configuration is missing a required key: {e}"
+            ) from None
         except (AttributeError, TypeError) as e:
             raise ConfigureError(
                 f"Configuration has an unexpected structure or data type. Error: {e}"
