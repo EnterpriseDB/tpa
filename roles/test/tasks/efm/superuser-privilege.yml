@@ -1,0 +1,31 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+- name: Query EFM user superuser status
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: "SELECT rolsuper FROM pg_roles WHERE rolname='efm'"
+  register: efm_superuser_check
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Assert EFM user is a superuser
+  assert:
+    that:
+      - efm_superuser_check.results[0].rolsuper == true
+    fail_msg: "EFM user should be a superuser when efm_user_is_superuser is true"
+
+- name: Query whether efm_role still exists
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: "SELECT 1 FROM pg_roles WHERE rolname='efm_role'"
+  register: efm_role_exists_check
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Assert efm_role does not exist
+  assert:
+    that:
+      - efm_role_exists_check.results | length == 0
+    fail_msg: "efm_role should not exist when efm_user_is_superuser is true"

@@ -1,0 +1,89 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+- name: Query EFM user roles
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: >-
+      SELECT rolsuper, rolreplication, rolcanlogin
+      FROM pg_roles WHERE rolname='efm'
+  register: efm_user_attrs
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Check update.physical.slots.period value from EFM configuration
+  shell: >-
+    grep "update.physical.slots.period" {{ efm_conf_dir }}/{{ cluster_name }}.properties | awk -F'=' '{print $2}'
+  register: slots_period_value
+  changed_when: false
+
+- name: Set expected replication attribute
+  set_fact:
+    _efm_expect_replication: "{{ slots_period_value.stdout|int > 0 }}"
+
+- name: Assert EFM user has the correct privileges
+  assert:
+    that:
+      - efm_user_attrs.results[0].rolsuper == false
+      - efm_user_attrs.results[0].rolcanlogin == true
+      - efm_user_attrs.results[0].rolreplication == (_efm_expect_replication | bool)
+    fail_msg: "EFM user does not have the expected roles"
+
+- name: Query efm_role attributes
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: >-
+      SELECT rolsuper, rolcanlogin
+      FROM pg_roles WHERE rolname='efm_role'
+  register: efm_role_attrs
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Assert efm_role exists and is NOSUPERUSER, NOLOGIN
+  assert:
+    that:
+      - efm_role_attrs.results | length == 1
+      - efm_role_attrs.results[0].rolsuper == false
+      - efm_role_attrs.results[0].rolcanlogin == false
+    fail_msg: "efm_role should exist and be NOSUPERUSER, NOLOGIN"
+
+- name: Query efm membership in efm_role
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: >-
+      SELECT m.rolname FROM pg_roles r
+        JOIN pg_auth_members am ON r.oid = am.member
+        JOIN pg_roles m         ON m.oid = am.roleid
+       WHERE r.rolname = 'efm'
+  register: efm_memberships
+  become_user: "{{ postgres_user }}"
+  become: yes
+
+- name: Assert EFM user is a member of efm_role
+  assert:
+    that:
+      - "'efm_role' in efm_memberships.results | map(attribute='rolname') | list"
+    fail_msg: "EFM user should be a member of efm_role"
+
+- name: Query efm_role predefined-role grants
+  postgresql_query:
+    conninfo: "{{ postgres_dsn }}"
+    query: >-
+      SELECT m.rolname FROM pg_roles r
+        JOIN pg_auth_members am ON r.oid = am.member
+        JOIN pg_roles m         ON m.oid = am.roleid
+       WHERE r.rolname = 'efm_role'
+       ORDER BY m.rolname
+  register: efm_role_grants
+  become_user: "{{ postgres_user }}"
+  become: yes
+  
+- name: Assert efm_role has exactly the expected predefined-role grants
+  assert:
+    that:
+      - efm_role_grants.results | map(attribute='rolname') | list
+        == ['pg_monitor', 'pg_read_all_settings', 'pg_read_all_stats']
+    fail_msg: >-
+      efm_role grants are {{ efm_role_grants.results | map(attribute='rolname') | list }},
+      expected ['pg_monitor', 'pg_read_all_settings', 'pg_read_all_stats']
