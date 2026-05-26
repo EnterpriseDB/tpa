@@ -63,12 +63,12 @@
       and 'pgd-proxy' in role
     block:
     - name: Check if harp-proxy is running
-      command: pgrep harp-proxy
+      command: systemctl is-active --quiet harp-proxy
       register: harp_proxy_check
-      ignore_errors: yes
+      failed_when: false
 
     - set_fact:
-        harp_proxy_still_running: "{{ harp_proxy_check.stdout != '' }}"
+        harp_proxy_still_running: "{{ harp_proxy_check.rc == 0 }}"
 
   - name: Check harp-proxy status
     include_role:

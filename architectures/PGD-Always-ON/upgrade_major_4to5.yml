@@ -390,13 +390,13 @@
       - harp_config.stat.exists
     block:
     - name: Check if harp-manager is running
-      command: pgrep harp-manager
+      command: systemctl is-active --quiet harp-manager
       register: harp_manager_check
-      ignore_errors: yes
+      failed_when: false
 
     - name: Set the cluster to unmanaged before stopping harp-manager
       when:
-        harp_manager_check.stdout != ''
+        harp_manager_check.rc == 0
       block:
 
       # In principle, we could run 'harpctl unmanage cluster' on any one
