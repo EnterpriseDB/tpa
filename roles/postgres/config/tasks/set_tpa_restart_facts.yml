@@ -77,3 +77,13 @@
   when:
     - postgres_version is version('18', '>=')
     - max_active_replication_origins is defined
+
+- name: Update postgres `huge_page_size` setting if necessary
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents:
+      huge_page_size: "{{ huge_page_size }}"
+  when:
+    huge_page_size|default(none) is not none

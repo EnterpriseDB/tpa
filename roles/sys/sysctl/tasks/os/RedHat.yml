@@ -10,6 +10,11 @@
 # The kernelopts we specify may end up in either /boot/grub2/grub.cfg or
 # /boot/grub2/grubenv, so we must check for them in both places before
 # we decide to run the command.
+#
+# When huge_page_size is the architecture default we reserve pages with
+# "hugepages=N", which targets the default pool. When a larger size is
+# requested we name the pool explicitly with "hugepagesz=X" so the
+# subsequent "hugepages=N" reserves N pages of that size.
 
 - name: Run grubby to update kernel command line
   shell: >
@@ -18,7 +23,7 @@
        ! ( test -f /boot/grub2/grubenv && \
            grep -q kernelopts=.*transparent_hugepage= /boot/grub2/grubenv && \
            grep -q kernelopts=.*hugepages= /boot/grub2/grubenv ); \
-    then grubby --update-kernel=ALL --args="hugepages={{ nr_hugepages }} transparent_hugepage=never";
+    then grubby --update-kernel=ALL --args="{{ _hugepage_cmdline }}";
     else echo unchanged;
     fi
   args:
@@ -26,8 +31,10 @@
   register: grubby
   changed_when: grubby.stdout != 'unchanged'
   vars:
-    sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
-    nr_hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
+    _hugepage_cmdline: >-
+      {%- if not _huge_page_size_is_default | bool -%}
+      hugepagesz={{ _huge_page_size_kernel }} {% endif -%}
+      hugepages={{ _nr_hugepages }} transparent_hugepage=never
   when:
     platform not in ['docker', 'lxd']
     and target_container_type is not defined

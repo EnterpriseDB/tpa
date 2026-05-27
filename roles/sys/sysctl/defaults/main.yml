@@ -4,6 +4,24 @@
 
 transparent_hugepage: never
 
+# By default, TPA reserves hugepages of the architecture's default size
+# (2MB on x86_64). To use a larger size, set huge_page_size to a
+# Postgres-style memory string such as "1GB". When set, TPA will reserve
+# pages of that size on the kernel command line, omit vm.nr_hugepages
+# from /etc/sysctl.conf (which targets only the architecture's default
+# size pool), and configure Postgres to use the chosen pool via the
+# huge_page_size GUC.
+
+huge_page_size: null
+
+# By default, the number of hugepages reserved is calculated from
+# shared_buffers plus 3% of total RAM, divided by the hugepage size.
+# Set nr_hugepages to override the calculation. For backwards
+# compatibility, sysctl_values['vm.nr_hugepages'] is honoured when
+# nr_hugepages is not set explicitly.
+
+nr_hugepages: null
+
 # The caller may supply sysctl_values, which will be merged with the
 # sysctl_defaults values described below:
 #
@@ -13,9 +31,6 @@ transparent_hugepage: never
 # writing them out in the background; writes should become synchronous
 # when we accumulate more than 4GB of dirty pages. Regardless of volume,
 # dirty pages should be written out every 10s at most.
-#
-# nr_hugepages is the size of shared_buffers plus 3% of total RAM,
-# divided by the size of a huge page (2MB on x86).
 
 sysctl_values: {}
 sysctl_defaults:
@@ -31,5 +46,42 @@ sysctl_defaults:
   vm.dirty_bytes: 4294967296
   vm.dirty_background_bytes: 268435456
   vm.dirty_expire_centisecs: 1000
-  vm.nr_hugepages: >-
-    {{ "%d"|format((shared_buffers_mb + ansible_memtotal_mb*0.03)/2) }}
+
+# Derived helpers. _huge_page_size_is_default is true when huge_page_size
+# is unset (i.e. we're using the architecture's default page size).
+# _huge_page_size_kb is the chosen page size in kilobytes (2048 when
+# defaulting). _huge_page_size_kernel is the form accepted by the kernel
+# command line (e.g. "1G"); it is empty when defaulting and unused in
+# that case. _nr_hugepages is the effective page count, honouring the
+# documented precedence (nr_hugepages, then sysctl_values, then a value
+# calculated from shared_buffers).
+
+_huge_page_size_is_default: "{{ huge_page_size is none }}"
+_huge_page_size_kb: >-
+  {%- if huge_page_size is none -%}
+    2048
+  {%- else -%}
+    {{ (huge_page_size | human_to_bytes(default_unit='M')) // 1024 }}
+  {%- endif -%}
+_huge_page_size_kernel: >-
+  {%- if huge_page_size is none -%}
+  {%- else -%}
+    {%- set kb = _huge_page_size_kb | int -%}
+    {%- if kb % 1048576 == 0 -%}
+      {{ kb // 1048576 }}G
+    {%- elif kb % 1024 == 0 -%}
+      {{ kb // 1024 }}M
+    {%- else -%}
+      {{ kb }}K
+    {%- endif -%}
+  {%- endif -%}
+_nr_hugepages: >-
+  {%- if nr_hugepages is not none -%}
+    {{ nr_hugepages }}
+  {%- elif sysctl_values.get('vm.nr_hugepages') is not none -%}
+    {{ sysctl_values['vm.nr_hugepages'] }}
+  {%- elif huge_page_size is none -%}
+    {{ "%d" | format((shared_buffers_mb + ansible_memtotal_mb * 0.03) / 2) }}
+  {%- else -%}
+    {{ ((shared_buffers_mb + ansible_memtotal_mb * 0.03) * 1024 / (_huge_page_size_kb | int)) | round(0, 'ceil') | int }}
+  {%- endif -%}

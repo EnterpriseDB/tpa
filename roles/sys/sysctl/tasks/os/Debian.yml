@@ -2,18 +2,23 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-# Add hugepages=N and transparent_hugepage=never to GRUB_CMDLINE_LINUX
-# in /etc/default/grub and run update-grub.
+# Add transparent_hugepage=never and hugepage reservation parameters to
+# GRUB_CMDLINE_LINUX in /etc/default/grub and run update-grub.
 #
 # Because it's fiddly to try to add to GRUB_CMDLINE_LINUX in place, and
 # because /etc/default/grub is documented to be a shell script that is
 # source'd, we can just add an extra line to it.
+#
+# When huge_page_size is the architecture default we reserve pages with
+# "hugepages=N", which targets the default pool. When a larger size is
+# requested we name the pool explicitly with "hugepagesz=X" so the
+# subsequent "hugepages=N" reserves N pages of that size.
 
 - name: Set kernel commandline in /etc/default/grub
   shell: >
     source /etc/default/grub;
     if ! [[ "$GRUB_CMDLINE_LINUX" =~ 'transparent_hugepage=' && "$GRUB_CMDLINE_LINUX" =~ 'hugepage=' ]];
-    then echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX hugepages={{ nr_hugepages }} transparent_hugepage={{ transparent_hugepage }}"' >> /etc/default/grub;
+    then echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX {{ _hugepage_cmdline }}"' >> /etc/default/grub;
     else echo unchanged;
     fi
   args:
@@ -21,8 +26,10 @@
   register: cmdline
   changed_when: cmdline.stdout != 'unchanged'
   vars:
-    sysctls: "{{ sysctl_defaults|combine(sysctl_values) }}"
-    nr_hugepages: "{{ sysctls['vm.nr_hugepages'] }}"
+    _hugepage_cmdline: >-
+      {%- if not _huge_page_size_is_default | bool -%}
+      hugepagesz={{ _huge_page_size_kernel }} {% endif -%}
+      hugepages={{ _nr_hugepages }} transparent_hugepage={{ transparent_hugepage }}
   when:
     platform not in ['docker', 'lxd']
     and target_container_type is not defined

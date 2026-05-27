@@ -14,6 +14,9 @@ unix_socket_directories = '{{ unix_socket_directories|join(", ") }}'
 max_connections = {{ max_connections }}
 
 shared_buffers = {{ shared_buffers|default(shared_buffers_mb~'MB') }}
+{% if huge_page_size|default(none) is not none %}
+huge_page_size = '{{ huge_page_size }}'
+{% endif %}
 max_prepared_transactions = {{ max_prepared_transactions|default(0) }}
 
 max_worker_processes = {{ max_worker_processes }}

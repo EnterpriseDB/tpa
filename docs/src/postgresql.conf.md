@@ -96,6 +96,13 @@ default by setting `shared_buffers_ratio: 0.35` to use a different proportion,
 or by setting `shared_buffers_mb: 796` to a specific number of MB, or by
 specifying an exact value directly, e.g., `shared_buffers: "2GB"`.
 
+## huge_page_size
+
+TPA reserves hugepages of the architecture's default size for Postgres
+to use. To use a different size, see [hugepages](sysctl_values.md#hugepages):
+setting `huge_page_size` reserves pages of that size on the kernel
+command line and sets `huge_page_size` in `postgresql.conf` accordingly.
+
 ## effective_cache_size
 
 By default, TPA will set `effective_cache_size` to 50% of the available
