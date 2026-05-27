@@ -1,0 +1,22 @@
+- summary: Support non-default hugepage sizes
+  description: |
+    TPA's hugepages settings previously assumed the architecture's default
+    page size (2MB on x86_64), so a configuration that wanted Postgres to
+    use 1GB hugepages required the user to set the kernel command line,
+    the `vm.nr_hugepages` sysctl, and the `huge_page_size` GUC by hand,
+    and the values TPA generated worked against them. TPA now supports a
+    `huge_page_size` variable (a Postgres-style memory string such as
+    `1GB`). When set, TPA reserves pages of that size on the kernel
+    command line with `hugepagesz=`, omits `vm.nr_hugepages` from
+    `/etc/sysctl.conf` (which only ever applies to the architecture's
+    default-size pool), and sets `huge_page_size` in `postgresql.conf`
+    so Postgres draws from the chosen pool. The page count can be
+    overridden with a new `nr_hugepages` variable; for backwards
+    compatibility, an existing `sysctl_values['vm.nr_hugepages']` is
+    still honoured when `nr_hugepages` is not set explicitly. Because
+    every reservation is taken out of normal memory at boot,
+    `huge_page_size` is usually best set on individual Postgres instances
+    rather than cluster-wide.
+  type: notable_change
+  jira_tickets:
+  - TPA-1515
