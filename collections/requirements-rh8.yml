@@ -8,7 +8,7 @@ collections:
   - name: community.postgresql
     version: 3.14.3
   - name: community.general
-    version: 11.4.5
+    version: 11.4.8
   - name: ansible.posix
     version: 2.2.0
   - name: community.docker
