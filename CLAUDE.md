@@ -1,12 +1,19 @@
 # CLAUDE.md - TPA Codebase Guide
 
-Detailed guides for working on this codebase are maintained on the
-`claude/agent-docs` branch. Read them without switching branches:
+**Start here.** Before any substantive work, read the full
+CLAUDE.md from the `claude/agent-docs` branch:
 
     git show claude/agent-docs:CLAUDE.md
-    git show claude/agent-docs:agent-docs/QUICK-REFERENCE.md
+
+It is deliberately kept short enough to be worth a full read up
+front, and carries general conventions and workflow that this
+minimal file does not duplicate.
+
+Additional topical guides live on the same branch. Read each as
+the work demands, via `git show claude/agent-docs:<path>` — for
+example:
+
     git show claude/agent-docs:agent-docs/PR-WORKFLOW.md
-    git show claude/agent-docs:agent-docs/VERIFICATION-GUIDE.md
 
 Available guides:
 
