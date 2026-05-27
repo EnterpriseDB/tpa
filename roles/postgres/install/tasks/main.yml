@@ -32,6 +32,16 @@
   when: >
     task_selector|permits('src')
 
+# Derive bdr_version_num from installed BDR/PGD packages so CAMO can
+# be configured correctly on initial deploys before Postgres is running.
+# See bdr-version-num.yml for details.
+
+- include_tasks: bdr-version-num.yml
+  when:
+    - "'bdr' in role"
+    - bdr_version_num is not defined
+    - postgres_installation_method == 'pkg'
+
 - name: Ensure git credential store is removed
   file:
     path: /etc/tpa/gitcredentials
