@@ -1,0 +1,15 @@
+- summary: Derive bdr_version_num automatically from installed BDR/PGD packages
+  description: |
+    TPA uses bdr_version_num to make precise decisions about CAMO
+    configuration. Previously this value was obtained only by querying
+    the running database, so on an initial deploy (when Postgres is not
+    yet running) parts of the CAMO configuration could not be rendered
+    correctly, and users had to set bdr_version_num manually in
+    config.yml as a workaround. TPA now derives bdr_version_num from
+    the version of the installed BDR or PGD package on each node, so no
+    manual setting is required. A value set in config.yml continues to
+    take precedence, and once the database is running the precise value
+    reported by bdr.bdr_version_num() remains authoritative.
+  type: bugfix
+  jira_tickets:
+  - TPA-896
