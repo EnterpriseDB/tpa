@@ -1,6 +1,6 @@
 collections:
   - name: community.crypto
-    version: 2.26.7
+    version: 2.26.8
   - name: community.aws
     version: 9.3.0
   - name: amazon.aws
