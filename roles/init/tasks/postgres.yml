@@ -263,6 +263,19 @@
     - "'bdr' in role"
     - postgres_flavour == 'pgextended'
 
+- name: Fail if pgbouncer and pgd-proxy are co-hosted with the same listen port
+  assert:
+    that:
+      - pgbouncer_port|int != pgd_proxy_options.listen_port|int
+    fail_msg: >-
+      Instance {{ inventory_hostname }} hosts both 'pgbouncer' and 'pgd-proxy'
+      with the same listen port ({{ pgbouncer_port }}). Set pgbouncer_port
+      (or pgd_proxy_options.listen_port) to a different value for this host
+      in config.yml.
+  when:
+    - "'pgbouncer' in role"
+    - "'pgd-proxy' in role"
+
 - name: Split extension from postgres_log_file
   set_fact:
     _postgres_log_file_last: "{{ postgres_log_file | splitext | last }}"
