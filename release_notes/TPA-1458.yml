@@ -1,0 +1,15 @@
+- summary: Improve restart and service excluded_tasks coverage
+  description: |
+    TPA now respects the `restart` and `service` values of `excluded_tasks`
+    across all roles that perform service restarts or systemd service
+    management, including Barman, beacon-agent, EFM, etcd, harp, Patroni,
+    PEM (agent and server), pgbackupapi, PgBouncer, PGD Proxy, Postgres,
+    repmgr (restart, switchover, replica final), rsyslog, and OpenVPN.
+
+    Previously, users excluding `restart` or `service` tasks could still
+    see unintended restarts in these areas during a deploy. With this
+    change, all restart and direct service operations are guarded
+    consistently, so excluded_tasks reliably suppresses them.
+  type: minor_change
+  jira_tickets:
+    - TPA-1458
