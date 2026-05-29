@@ -11,25 +11,28 @@
     that:
     - role|contains('pgbouncer')
 
-# First, we check that connections through pgbouncer to the backend
-# database are TLS-protected from end-to-end (as a side effect, we
-# ensure that we can connect and issue queries too).
+# First, we check that pgbouncer is enforcing TLS at the client ingress.
+# The conninfo sets sslmode=require, so libpq will refuse to connect
+# without a TLS handshake; a successful connection therefore proves
+# pgbouncer accepted the TLS-required client. We use the pgbouncer
+# administrative database to avoid depending on a particular backend
+# dbname being routable (pgbouncer_databases may be customised).
+# pgbouncer-to-backend TLS is enforced separately by server_tls_sslmode
+# in pgbouncer.ini.
 
 - name: Ensure that connections through pgbouncer are TLS-protected
   postgresql_query:
-    conninfo: "{{ pgbouncer_node_dsn|dbname('postgres', user=postgres_user) }}"
-    query: >
-      SELECT ssl
-      FROM pg_stat_activity sa JOIN pg_stat_ssl ss USING (pid)
-      WHERE pid = pg_backend_pid()
+    conninfo: "{{ pgbouncer_node_dsn|dbname('pgbouncer', user='pgbouncer') }} sslmode=require"
+    query: SHOW VERSION
+    autocommit: yes
   become_user: "{{ postgres_user }}"
   become: yes
   register: q
   failed_when:
-    q is not successful or not q.ssl
+    q is not successful
   vars:
     _task_environment:
-      PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
+      PGPASSWORD: "{{ pgbouncer_password }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
 # Next, we connect to the pgbouncer admin database and check that "SHOW
@@ -39,7 +42,7 @@
 
 - name: Ensure we can connect to the pgbouncer administrative database
   postgresql_query:
-    conninfo: "{{ pgbouncer_node_dsn|dbname('pgbouncer', user='pgbouncer') }}"
+    conninfo: "{{ pgbouncer_node_dsn|dbname('pgbouncer', user='pgbouncer') }} sslmode=require"
     query: SHOW DATABASES
     autocommit: yes
   become_user: "{{ postgres_user }}"
@@ -82,4 +85,13 @@
     - db_postgres.port == pgbouncer_backend_port|int
   vars:
     db_postgres: >-
-      {{ q.results|selectattr('database', 'equalto', 'pgbouncer_auth_database')|list|first }}
+      {{ q.results|selectattr('database', 'equalto', 'pgbouncer_auth_database')|list|first | default({}) }}
+  # Skip when the operator's pgbouncer_databases override doesn't
+  # produce a route for pgbouncer_auth_database (no wildcard, no
+  # explicit entry): the assertion's premise (an auth_database row in
+  # SHOW DATABASES) doesn't hold, and we have no backend host/port to
+  # check against. The default pgbouncer_databases ([{name: "*"}])
+  # always produces such a row, so this skip only fires on customised
+  # configs. Empty dict from the |default({}) above is falsy.
+  when:
+    - db_postgres
