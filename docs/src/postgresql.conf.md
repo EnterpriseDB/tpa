@@ -104,6 +104,30 @@ memory. You can override this default by setting
 `effective_cache_size_mb: 796` to a specific number of MB, or by specifying an
 exact value directly, e.g., `effective_cache_size: "8GB"`.
 
+## max_active_replication_origins
+
+PostgreSQL 18 introduced the `max_active_replication_origins` GUC to
+control the number of simultaneously active replication origins. Before
+PostgreSQL 18, this was implicitly limited by `max_replication_slots`.
+
+For PGD clusters on PostgreSQL 18 and above, TPA sets
+`max_active_replication_origins` to `3 * number_of_nodes + 3`. This stays
+comfortably above the "3 per peer node" minimum
+[recommended by the EDB PGD documentation](https://www.enterprisedb.com/docs/pgd/latest/postgres-configuration/#postgres-settings),
+leaving a safety margin for transient origins created during node join or
+sync operations.
+
+For non-PGD clusters, TPA leaves the PostgreSQL default (10) in place.
+
+You can override this by setting the variable directly:
+
+```yaml
+cluster_vars:
+  max_active_replication_origins: 50
+```
+
+This setting is ignored on PostgreSQL versions before 18.
+
 ## shared_preload_libraries
 
 TPA maintains an internal list of extensions that require entries in

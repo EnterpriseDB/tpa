@@ -66,3 +66,14 @@
   when:
     ('bdr' in role)
     or postgres_version is version('9.4', '>')
+
+- name: Update postgres `max_active_replication_origins` setting if necessary (PG18+)
+  include_role:
+    name: config/add_to_obj
+  vars:
+    object_varname: postgres_restart_config
+    object_contents:
+      max_active_replication_origins: "{{ max_active_replication_origins }}"
+  when:
+    - postgres_version is version('18', '>=')
+    - max_active_replication_origins is defined

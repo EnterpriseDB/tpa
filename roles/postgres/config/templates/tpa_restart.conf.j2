@@ -28,6 +28,9 @@ archive_mode = on
 
 max_wal_senders = {{ max_wal_senders|default(16) }}
 max_replication_slots = {{ max_replication_slots|default(16) }}
+{% if postgres_version is version('18', '>=') and max_active_replication_origins is defined %}
+max_active_replication_origins = {{ max_active_replication_origins }}
+{% endif %}
 {% if postgres_version is version('13', '>=') %}
 wal_keep_size = {{ wal_keep_size|default((wal_segment_size|default(16))*(wal_keep_segments|default(0))) }}
 {% else %}
