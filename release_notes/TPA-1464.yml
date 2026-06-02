@@ -1,0 +1,15 @@
+- summary: Fix automatic witness node addition for PGD-X clusters with even data nodes
+  description: |
+    When configuring a PGD-X cluster with an even number of
+    `--data-nodes-per-location`, `tpaexec configure` now correctly adds a
+    witness node to each location. This ensures Raft consensus can be
+    established without requiring the user to explicitly pass
+    `--add-witness-node-per-location`. The behaviour is now consistent with
+    the PGD-Always-ON architecture and the documented behaviour for PGD-X.
+    `tpaexec configure` now also rejects `--data-nodes-per-location` values
+    below 2, which previously produced an invalid cluster with no data nodes.
+  type: bugfix
+  jira_tickets:
+  - TPA-1464
+  support_tickets:
+  - CP59694
