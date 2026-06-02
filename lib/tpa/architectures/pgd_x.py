@@ -69,8 +69,27 @@ class PGDX(PGD):
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
         self._validate_camo(args)
+        self._validate_witness(args)
         if not self.args["location_names"]:
             self.args["location_names"] = self.default_location_names()
+
+    def _validate_witness(self, args):
+        data_nodes_per_location = args.get("data_nodes_per_location")
+        witness_node_per_location = args.get("witness_node_per_location")
+
+        if data_nodes_per_location < 2:
+            raise PGDXArchitectureError(
+                "--data-nodes-per-location cannot be less than 2"
+            )
+
+        if data_nodes_per_location % 2 == 0:
+            self.args["witness_node_per_location"] = True
+
+        if witness_node_per_location and data_nodes_per_location % 2 != 0:
+            raise PGDXArchitectureError(
+                "--add-witness-node-per-location can only be specified "
+                "with even number of data nodes per location"
+            )
 
     def _validate_camo(self, args):
         camo = args.get("enable_camo", False)

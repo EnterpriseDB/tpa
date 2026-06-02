@@ -332,6 +332,72 @@ class TestPGDXArchitecture:
         assert "enable_routing" in options
 
     @pytest.mark.parametrize(
+        "argv, expected_witness_count",
+        [
+            # Even data nodes: witness automatically added per location
+            (STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "2"], 1),
+            # Even data nodes with explicit flag: same result
+            (
+                STANDARD_PGDX_ARGV
+                + ["--data-nodes-per-location", "2", "--add-witness-node-per-location"],
+                1,
+            ),
+            # Odd data nodes (default 3): no witness
+            (STANDARD_PGDX_ARGV, 0),
+            # Even data nodes, multiple locations: one witness per location
+            (
+                STANDARD_PGDX_ARGV
+                + ["--data-nodes-per-location", "2", "--location-names", "dc1", "dc2"],
+                2,
+            ),
+        ],
+    )
+    def test_pgdx_witness_auto_added(self, argv, expected_witness_count, pgdx_cluster):
+        """Test that witness nodes are automatically added with even data nodes per location."""
+        instances = pgdx_cluster.instances
+        witness_instances = instances.with_role("bdr").with_role("witness")
+        assert (
+            len(witness_instances) == expected_witness_count
+        ), f"Expected {expected_witness_count} witness node(s), got {len(witness_instances)}"
+
+        # Verify witness nodes have correct roles
+        for witness in witness_instances:
+            assert "bdr" in witness.roles
+            assert "witness" in witness.roles
+
+    def test_pgdx_witness_rejected_with_odd_data_nodes(self):
+        """Test that --add-witness-node-per-location with odd data nodes raises error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.STANDARD_PGDX_ARGV + [
+            "--data-nodes-per-location",
+            "3",
+            "--add-witness-node-per-location",
+        ]
+
+        try:
+            with pytest.raises(
+                PGDXArchitectureError, match="even number of data nodes"
+            ):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
+
+    def test_pgdx_rejects_fewer_than_two_data_nodes(self):
+        """Test that --data-nodes-per-location below 2 raises an error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "1"]
+
+        try:
+            with pytest.raises(PGDXArchitectureError, match="cannot be less than 2"):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
+
+    @pytest.mark.parametrize(
         "argv, expected_repos",
         [
             (STANDARD_PGDX_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
@@ -357,7 +423,7 @@ class TestPGDXArchitecture:
             (STANDARD_PGDX_ARGV, 4),
             # 3 locations, 3 data + 1 barman each
             (STANDARD_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"], 12),
-            # 2 locations with a per-location witness node: (3 + 1 + 1) per location
+            # 2 locations with a per-location witness node: (2 + 1 + 1) per location
             (
                 STANDARD_PGDX_ARGV
                 + [
@@ -365,8 +431,10 @@ class TestPGDXArchitecture:
                     "dc1",
                     "dc2",
                     "--add-witness-node-per-location",
+                    "--data-nodes-per-location",
+                    "2",
                 ],
-                10,
+                8,
             ),
             # 3 locations with the third designated witness-only: 2 * 4 + 1
             (
@@ -395,10 +463,12 @@ class TestPGDXArchitecture:
                     "dc3",
                     "--witness-only-location",
                     "dc3",
+                    "--data-nodes-per-location",
+                    "2",
                     "--add-witness-node-per-location",
                     "--enable-pem",
                 ],
-                12,
+                10,
             ),
         ],
     )
