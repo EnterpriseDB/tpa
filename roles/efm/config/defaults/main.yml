@@ -10,7 +10,6 @@ efm_cluster_status_retries: 60
 efm_cluster_status_retry_delay: 5
 
 # User settings that give the EFM user the superuser role
-efm_user_is_superuser: true
 default_efm_role_attrs:
   - NOSUPERUSER
   - NOCREATEDB
