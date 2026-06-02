@@ -33,6 +33,15 @@
     that:
       postgres_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr', 'edbpge']
 
+- name: Ensure pgaudit is not requested on an EPAS cluster
+  assert:
+    msg: >-
+      Use EPAS's built-in audit features instead of pgaudit.
+    that:
+      - >-
+        postgres_flavour != 'epas'
+        or 'pgaudit' not in (extra_postgres_extensions|default([]))
+
 - name: Set postgres_data_dir
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
