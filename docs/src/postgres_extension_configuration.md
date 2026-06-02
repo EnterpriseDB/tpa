@@ -49,7 +49,7 @@ The following sections provide further information.
 - [Including shared preload entries for extensions](postgresql.conf.md#shared_preload_libraries)
 - [Installing Postgres-related packages](postgres_installation_method_pkg.md)
 
-## TPA recognized extensions
+## TPA recognised extensions
 The following list of extensions only require the extension name to be
 added in `config.yml` (either to `extra_postgres_extensions` OR to the
 `extensions` list of a database specified in `postgres_databases`) and

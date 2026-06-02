@@ -489,7 +489,7 @@ keyring. vault password can be displayed via `tpaexec show-vault
 Use the `--compliance stig` or `--compliance cis` options to generate
 a cluster with configuration suitable for complying with the STIG or CIS
 standard. See [Compliance](compliance.md) for details. Note that these
-options do not guarantee that the cluster fulfills the relevant
+options do not guarantee that the cluster fulfils the relevant
 standard; they only cause TPA to generate a configuration designed to
 comply with those aspects of the standard that can be controlled by TPA.
 
