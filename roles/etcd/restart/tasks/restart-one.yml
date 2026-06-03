@@ -28,8 +28,9 @@
         etcd_service_end_state == 'started'
         or etcd_health_check.rc == 0
 
-  when:
+  when: >
     etcd_service_end_state == 'restarted'
+    and task_selector|permits('service', 'restart')
 
 - name: Start or restart etcd service
   service:
@@ -49,5 +50,6 @@
   until: etcd_post_check.rc == 0
   retries: 3
   delay: 1
-  when:
+  when: >
     etcd_service_end_state == 'restarted'
+    and task_selector|permits('service', 'restart')
