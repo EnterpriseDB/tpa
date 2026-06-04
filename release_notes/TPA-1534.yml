@@ -1,0 +1,18 @@
+- summary: Fix PEM agent configuration failure against PEM 10.5
+  description: |
+    Configuring a PEM agent against a PEM 10.5 server used to fail because
+    TPA passed pemworker options that PEM 10.5 no longer accepts. Two
+    invocations were affected:
+
+    `pemworker --register-server` was called with `--cert-path`, which has
+    never been a valid option for that subcommand and is now removed
+    unconditionally.
+
+    `pemworker --enable-probe` was called with `--pem-user` and
+    `--pem-port`, which were silently required by PEM versions before
+    10.5 but are rejected by PEM 10.5 and later. TPA now omits these
+    arguments when `pem_agent_version` is 10.5.0 or newer, and continues
+    to pass them on older PEM versions where they remain necessary.
+  type: bugfix
+  jira_tickets:
+  - TPA-1534
