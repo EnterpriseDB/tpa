@@ -23,3 +23,12 @@
         }}"
     state: absent
   when: pem_is_v10_4_0_or_higher
+
+# Export the resolved wsgi package name as a host fact so downstream roles
+# (e.g. pem/server/config/webserver) can gate on it without needing the
+# pem/server/pkg role's defaults to be in scope.
+- set_fact:
+    pem_server_modwsgi_package_resolved: "{{
+          pem_server_modwsgi_package_name[202602251 if pem_is_v10_4_0_or_higher else 0]
+          [ansible_distribution][ansible_distribution_major_version]
+        }}"
