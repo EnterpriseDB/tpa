@@ -176,7 +176,8 @@ regenerate the inventory.
 ### Read the release notes
 
 Check the release notes for the target versions of every component you
-are upgrading. EDB's PGD and Postgres release notes occasionally call
+are upgrading but also the ones between current and target versions.
+EDB's PGD and Postgres release notes occasionally call
 out version-specific upgrade considerations: settings that must be
 changed before or after the upgrade, deprecations, and behaviour
 changes. The same applies to TPA's own release notes for any newer
@@ -382,6 +383,8 @@ EDB Support with:
 - The output of `tpaexec test <cluster>`.
 - A description of which instances completed the upgrade and which
   did not.
+- The config.yml used.
+- Optionally the EDB lasso report or any other meaningful logs.
 
 ## Common pitfalls
 
