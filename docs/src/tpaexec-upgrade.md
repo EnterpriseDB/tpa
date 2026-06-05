@@ -102,8 +102,8 @@ state. Run `tpaexec test <cluster>` to exercise the standard health
 checks. The upgrade process itself runs pre-upgrade health checks, but
 discovering a problem ahead of time gives you longer to address it.
 
-For PGD-Always-ON, PGD-S, and PGD-X clusters, also confirm that all
-nodes appear in BDR's catalogue:
+For any BDR enabled architecture, also confirm that all nodes appear in
+its catalogue:
 
 ```sql
 SELECT node_name, peer_state_name, peer_target_state_name
@@ -157,9 +157,9 @@ that is seriously behind before starting.
 
 ### Pin and review package versions
 
-For control over what is installed during the upgrade, set explicit
-package versions in `config.yml` before running `tpaexec upgrade`. The
-relevant variables are `postgres_package_version`,
+For control over what is installed during the upgrade, it is recommended
+that you explicitly set package versions  in `config.yml` before running
+`tpaexec upgrade`. The relevant variables are `postgres_package_version`,
 `bdr_package_version`, `pgd_proxy_package_version`,
 `pgdcli_package_version`, and the component-specific equivalents.
 
@@ -168,8 +168,10 @@ each component, which can result in an unintended major-version
 upgrade. See [Package version selection](#package-version-selection)
 for details.
 
+!!! Note
 After updating versions in `config.yml`, run `tpaexec provision` to
 regenerate the inventory.
+!!!
 
 ### Read the release notes
 
@@ -231,7 +233,7 @@ in turn, the upgrade:
 5. Restarts services and waits for them to come up.
 6. Unfences the instance.
 
-You should expect brief connection interruptions when each instance is
+You should expect brief connection interruptions whilst each instance is
 fenced and again when it returns to service. Applications using
 connection pooling and retry logic should typically not see
 client-visible errors during these transitions.
@@ -366,26 +368,6 @@ If `tpaexec upgrade` reports a failure, the cluster is left in a known
 state at whichever instance was being processed when the failure
 occurred. Subsequent instances are not touched.
 
-### Re-running tpaexec upgrade
-
-`tpaexec upgrade` is idempotent: re-running it picks up where the
-previous run left off. If the failure was transient (a network blip,
-a temporarily unavailable package repository), simply re-running the
-command is the right first response.
-
-Before re-running, check the Ansible log for the actual error message
-(`<cluster>/ansible.log`).
-
-### Recovering from a partial failure
-
-If the cluster is in a mixed-version state — some instances upgraded,
-others not — and re-running `tpaexec upgrade` does not resolve the
-problem, the most important thing is to keep traffic flowing through
-the unaffected instances whilst you address the root cause. For PGD
-clusters, the un-upgraded instances continue to serve reads, and the
-upgraded ones serve reads and writes; for M1 clusters, the
-un-upgraded primary continues to serve traffic.
-
 ### When to roll back, when to call EDB Support
 
 A roll-back is only safe before TPA has applied any non-reversible
@@ -417,18 +399,6 @@ desired version not installed.
 Fix: update `config.yml` to set the new desired version, then re-run
 `tpaexec provision` followed by `tpaexec upgrade`. See [Package
 version selection](#package-version-selection) for details.
-
-### Mixed BDR versions during a partial upgrade
-
-For PGD clusters, when an upgrade is running, some instances run the
-new BDR version whilst others still run the old one. This is intended
-and TPA's upgrade design handles it, but post-upgrade health checks
-expect a fully converged cluster. If you intentionally upgrade a
-subset of instances using `update_hosts`, the post-upgrade health
-checks may report warnings until all instances are upgraded.
-
-See [Best Practice for PGD-Always-ON/BDR-Always-ON](#best-practice-for-pgd-always-onbdr-always-on)
-for the recommended order of operations.
 
 ### Shared Barman or shared PEM clusters
 
