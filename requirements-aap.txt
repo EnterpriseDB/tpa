@@ -12,7 +12,7 @@ botocore==1.42.69
     # via
     #   boto3
     #   s3transfer
-certifi==2026.2.25
+certifi==2026.5.20
     # via
     #   -r requirements.in
     #   requests

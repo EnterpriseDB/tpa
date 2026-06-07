@@ -1,5 +1,5 @@
 # tox dependencies for test env
-certifi>=2023.7.22
+certifi>=2026.5.20
 coverage>=4.0.1
 PyYAML>=6
 pytest==4.6.5; python_version <= '3.4'
