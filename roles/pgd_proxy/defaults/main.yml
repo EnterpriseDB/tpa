@@ -4,3 +4,6 @@
 
 pgd_proxy_config_directory: /etc/edb/pgd-proxy
 pgd_proxy_home: /home/pgdproxy
+pgd_proxy_service_environment:
+  PGPASSFILE: '{{ pgd_proxy_home }}/.pgpass'
+  PGSSLMODE: 'require'
