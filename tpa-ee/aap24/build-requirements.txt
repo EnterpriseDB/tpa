@@ -35,7 +35,7 @@ cffi==2.0.0
     #   ansible-lint
     #   cryptography
     #   onigurumacffi
-click==8.4.0
+click==8.4.1
     # via black
 cryptography==48.0.0
     # via
@@ -45,7 +45,7 @@ distro==1.9.0
     # via
     #   ansible-lint
     #   bindep
-filelock==3.29.0
+filelock==3.29.1
     # via ansible-lint
 jinja2==3.1.6
     # via
@@ -87,7 +87,7 @@ pbr==7.0.3
     # via bindep
 pexpect==4.9.0
     # via ansible-runner
-platformdirs==4.9.6
+platformdirs==4.10.0
     # via black
 ptyprocess==0.7.0
     # via pexpect
@@ -113,7 +113,7 @@ referencing==0.37.0
     #   jsonschema-specifications
 resolvelib==1.2.1
     # via ansible-core
-rpds-py==0.30.0
+rpds-py==2026.5.1
     # via
     #   jsonschema
     #   referencing
