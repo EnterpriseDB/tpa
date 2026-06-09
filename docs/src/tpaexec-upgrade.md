@@ -183,17 +183,21 @@ changed before or after the upgrade, deprecations, and behaviour
 changes. The same applies to TPA's own release notes for any newer
 version of TPA you may be using to perform the upgrade.
 
-### Plan the maintenance window
+### Test the upgrade in a staging environment
 
 `tpaexec upgrade` processes the cluster instance-by-instance. The
 upgrade is rolling: at any one time only a single instance is fenced
 off. However, the total wall-clock time depends on the cluster size,
 the number of components being upgraded, and the storage and network
-characteristics of each instance.
+characteristics of each instance but also that the upgrade scenario
+goes through without issues.
 
-We recommend running the same upgrade against a staging copy of the
-cluster first to measure the duration, then choosing a maintenance
-window that covers that time with a comfortable buffer.
+We strongly recommend reproducing the upgrade in a non-production
+environment that matches your production cluster's architecture,
+Postgres flavour and version, package pinnings, and any custom hooks.
+This catches surprises (missing packages in your configured
+repository, unexpected configuration drift) before they affect live
+traffic.
 
 ### Disable scheduled jobs
 
@@ -207,14 +211,6 @@ window should be paused. Typical items:
 TPA itself stops the Barman WAL receiver before starting and restarts
 it afterwards; you do not need to disable Barman manually.
 
-### Test the upgrade in a staging environment
-
-We strongly recommend reproducing the upgrade in a non-production
-environment that matches your production cluster's architecture,
-Postgres flavour and version, package pinnings, and any custom hooks.
-This catches surprises (missing packages in your configured
-repository, unexpected configuration drift) before they affect live
-traffic.
 
 ## During the upgrade
 
@@ -245,33 +241,6 @@ leader itself is upgraded, a brief leader-election interruption
 occurs. PGD-S and PGD-X arrange for the write leader to be upgraded
 last; PGD-Always-ON upgrades nodes in inventory order, so a leader
 election occurs whenever the current leader's turn comes round.
-
-### Default order of upgrades
-
-By default, `tpaexec upgrade` visits affected hosts in **inventory
-order**, with one architecture-specific exception: PGD-S and PGD-X
-automatically upgrade the current write leader **last**.
-
-- **PGD-Always-ON, BDR-Always-ON, PGD-Lightweight:** all Postgres/BDR
-  nodes in inventory order (excluding PEM servers), then all
-  pgd-proxy nodes in inventory order.
-- **PGD-S, PGD-X:** all BDR data nodes except the current write
-  leader (inventory order), then the write leader.
-- **M1 with repmgr / EFM / Patroni:** replicas (and witnesses, for
-  repmgr) first in inventory order, then a switchover so the
-  original primary becomes a replica, then the original primary,
-  then a switchover back. For Patroni, etcd nodes and the Patroni
-  package itself are upgraded after the Postgres rolling phase.
-
-The M1 EFM upgrade itself always runs on every EFM node, regardless
-of `update_hosts`, because mixing EFM versions across data nodes is
-not supported.
-
-To restrict the upgrade to a subset of these hosts, or to sequence
-the upgrade across multiple invocations (for example, to upgrade
-shadow servers in one run and the active PGD primary in a later
-run), see [Controlling the upgrade
-process](#controlling-the-upgrade-process).
 
 ### What to watch from the application side
 
@@ -595,7 +564,7 @@ Upgrading a `PGD-Always-ON` cluster to `PGD-X` is a **significant
 architectural evolution**, involving changes beyond a simple **software
 update**. It is a _carefully orchestrated, multi-stage process_ that
 requires reconfiguring your cluster in distinct phases before the final
-software upgrade can take place. The procedure first modernises your
+software upgrade can take place. The procedure first modernizes your
 `PGD 5` cluster's connection handling by replacing `pgd-proxy` with the
 built-in `Connection Manager`–a step that currently requires manual
 operations on the live cluster but is planned for automation in a future
