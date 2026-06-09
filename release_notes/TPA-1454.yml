@@ -1,9 +1,0 @@
-- summary: Fix read_listen_port being added to config for BDR versions below 5.5
-  description: |
-    tpaexec configure added read_listen_port to default_pgd_proxy_options
-    even for older BDR versions. That's mostly because the version parser couldn't
-    handle embedded wildcards very well. Also add a deploy-time assertion to
-    catch missing read_listen_port when upgrading to PGD 5.5 or later.
-  type: bugfix
-  jira_tickets:
-  - TPA-1454
