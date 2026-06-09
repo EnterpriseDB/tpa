@@ -13,7 +13,7 @@
   A new variable called 'efm_user_is_superuser' has been introduced, where
   TPA deploys the EFM user as a Postgres SUPERUSER, or as a regular login user
   that is a member of 'efm_role', a role created by TPA with only the specific
-  catalog functions and predefined roles (pg_monitor,  pg_read_all_settings, 
+  catalog functions and predefined roles (pg_monitor,  pg_read_all_settings,
   pg_read_all_stats) that EFM requires (the variable is set to 'false' by default
   when creating new clusters via `tpaexec configure`, removing this variable from
   the configuration file would consider 'efm_user_is_superuser' as true).
@@ -70,13 +70,13 @@
   TPA is now tested with AAP 2.6. Existing execution environments are
   compatible with both AAP 2.4 and AAP 2.6 .
 
-  References: TPA-1439.
+  References: TPA-1440, TPA-1439, TPA-1438, TPA-1357.
 
 ### Minor changes
 
 - Add environment variable option to the repmgr service unit file
 
-  A new variable called 'repmgr_service_environment' has been added to the repmgr service unit template file for repmgr. 
+  A new variable called 'repmgr_service_environment' has been added to the repmgr service unit template file for repmgr.
   This variable allows users to specify custom environment variables that will be set for the repmgr service.
 
   The 'repmgr_service_environment' variable can be defined on the cluster configuration file, as a dictionary where the
@@ -149,7 +149,7 @@
 
 - Include missing flags in tpaexec help
 
-  'tpaexec help' was missing some flags that are actually supported. 
+  'tpaexec help' was missing some flags that are actually supported.
   This change adds those flags to the help output.
 
   References: TPA-1472.
@@ -215,8 +215,8 @@
 - Exclude standby nodes from being promoted to BDR primary candidates
 
   An issue was found where standby nodes could be selected as BDR primary candidates during deployment,
-  which could lead to unintended consequences in some cluster scenarios (e.g. when 
-  joining BDR node groups via standby nodes). 
+  which could lead to unintended consequences in some cluster scenarios (e.g. when
+  joining BDR node groups via standby nodes).
   This fix ensures that standby nodes are excluded from the list of potential BDR
   primary candidates.
 
@@ -226,7 +226,7 @@
 
   When selecting patroni as the failover manager with the EDBPGE/EPAS postgresql flavour, additional
   modules were lacking to install etcd-related packages, as well as some additional tweaks to make the deployment work correctly.
-  This fix ensures that the required packages are installed when deploying on SLES 15 with patroni 
+  This fix ensures that the required packages are installed when deploying on SLES 15 with patroni
   as the failover manager, alongside some minor adjustments.
 
   References: TPA-1428.
@@ -297,7 +297,7 @@
 - Fix custom rc-local service creation
 
   TPA creates a custom systemd service file to ensure rc-local script is running on startup
-  on distributions that don't support it out of the box.   
+  on distributions that don't support it out of the box.
   This fix changes the location of said service file to comply with conventions and avoid failures
   with missing parent folder that could happen with previous chosen path.
   This fix also ensure that this service file creation task is only applied when it is actually needed.
@@ -416,7 +416,7 @@
 
 - Include correct mod_wsgi module for PEM server version +10.4.0
 
-  This change ensures that the correct mod_wsgi module is included for PEM server 
+  This change ensures that the correct mod_wsgi module is included for PEM server
   versions 10.4.0 and higher, guaranteeing compatibility and proper functionality
   for older PEM server versions as well.
 
@@ -476,11 +476,11 @@
 - Introduce retry logic between BDR replication slots when upgrading
 
   When upgrading the postgresql package version in a BDR cluster, replication slots may take a few seconds to reconnect,
-  and the upgrade process can have an exit error due to not allocating enough time to the recovery process. 
-  The fix adds retry logic to the health check on the upgrade process to allow time for the slots to recover and avoid 
+  and the upgrade process can have an exit error due to not allocating enough time to the recovery process.
+  The fix adds retry logic to the health check on the upgrade process to allow time for the slots to recover and avoid
   timing-related failures.
 
-  References: TPA-1460.
+  References: TPA-1460, TPA-1471.
 
 - Support enable_proxy_monitoring for PGD 5 minor upgrades
 
@@ -556,11 +556,11 @@
 
 - Improve error output for `--primary-location` in `tpaexec configure`
 
-  An error in the argument parsing logic between the `--primary-location` and the 
+  An error in the argument parsing logic between the `--primary-location` and the
   `--location-names` arguments when the primary location is not found in the list
-  of locations caused a built-in Python error to be thrown, which could be 
+  of locations caused a built-in Python error to be thrown, which could be
   misleading to users, as it is not a TPA-related error.
-  This fix properly handles the mismatch between the provided 
+  This fix properly handles the mismatch between the provided
   primary location and the list of known locations, avoiding confusing error messages.
 
   References: TPA-1231.
@@ -714,8 +714,8 @@
 
 - Update OpenJDK version used in EFM SLES 15 deployments
 
-  The OpenJDK version used in EFM for SLES 15 deployments has been updated 
-  to a newer version (from version 11 to 21). 
+  The OpenJDK version used in EFM for SLES 15 deployments has been updated
+  to a newer version (from version 11 to 21).
   The reason behind is to ensure the availability of an OpenJDK version in
   the SLES 15 repositories used on the docker images.
 
@@ -725,9 +725,9 @@
 
   A change has been introduced to support distributions that do not have
   rc-local by default. The change includes creating a custom TPA rc-local
-  service and ensuring that it is enabled on the system's boot. 
-  This allows TPA to run /etc/tpa/rc.local at startup, providing a 
-  consistent way to execute TPA startup tasks across different 
+  service and ensuring that it is enabled on the system's boot.
+  This allows TPA to run /etc/tpa/rc.local at startup, providing a
+  consistent way to execute TPA startup tasks across different
   distributions.
 
   References: TPA-1361, TPA-1405.
@@ -1018,14 +1018,14 @@
 
 - Bypass "Record PEM server credentials" task during shared PEM deployment
 
-  Previously, when deploying a shared PEM server, the task "Record PEM server credentials" 
-  would fail because it required the 'postgres_password' attribute. This attribute is 
-  only defined when a node with the 'postgres' role is deployed alongside the shared 
-  PEM node. 
+  Previously, when deploying a shared PEM server, the task "Record PEM server credentials"
+  would fail because it required the 'postgres_password' attribute. This attribute is
+  only defined when a node with the 'postgres' role is deployed alongside the shared
+  PEM node.
 
-  This caused failures in specific scenarios, such as deploying an independent Barman 
-  node with shared PEM where no 'postgres' role exists, leading to a missing attribute 
-  error. The fix skips this task when shared PEM is in use, as the 'postgres_password' 
+  This caused failures in specific scenarios, such as deploying an independent Barman
+  node with shared PEM where no 'postgres' role exists, leading to a missing attribute
+  error. The fix skips this task when shared PEM is in use, as the 'postgres_password'
   is instead derived from the 'EDB_PEM_CREDENTIALS_FILE' in a subsequent step.
 
   References: TPA-1392.
@@ -1043,7 +1043,7 @@
 - tpaexec download-packages has refresh repository metadata option
 
   In order to ensure a way of covering upgrades in an air-gapped environment, a
-  new option has been included on the `tpaexec download-packages` command 
+  new option has been included on the `tpaexec download-packages` command
   (`--refresh-repository`, requires Docker & its corresponding Docker image to work).
   Prior to this commit, we relied on the user to have the commands required to manually
   recreate the local repository, depending on its cluster and OS.
@@ -1115,7 +1115,7 @@
 
   Previous versions of TPA automatically generate `ip_address` even if it is supplied in a hostnames file.
   This fix means TPA will only generate an IP address at configure time if one has not been specified already.
-  Note that TPA will not automatically select a cluster network that contains the provided IP addresses, 
+  Note that TPA will not automatically select a cluster network that contains the provided IP addresses,
   so the `--network` option should be used to specify a matching CIDR.
 
   References: TPA-407.
@@ -1123,24 +1123,24 @@
 - Fix downloader to ensure pgd-proxy and pgdcli package version matches  bdr_package_version when only bdr_package_version is set
 
   Selecting a 'bdr_package_version' on an air-gapped environment, downloads
-  the selected version for BDR, but not for PGD CLI and PGD Proxy, which 
-  later results on an error in 'tpaexec deploy', since there's a package 
-  mismatch. 
-  This is not the case for non air-gapped environments, where choosing a 
+  the selected version for BDR, but not for PGD CLI and PGD Proxy, which
+  later results on an error in 'tpaexec deploy', since there's a package
+  mismatch.
+  This is not the case for non air-gapped environments, where choosing a
   specific version of 'bdr_package_version' will also select the according
   versions for PGD CLI and PGD Proxy.
   This fix ensures that when executing 'tpaexec download-packages', we first
-  check if 'pgd_proxy_package_version' or 'pgdcli_package_version' are 
+  check if 'pgd_proxy_package_version' or 'pgdcli_package_version' are
   defined, and if not, we will reuse the 'bdr_package_version' variable
-  to download the same version specified, since BDR package mismatching can 
+  to download the same version specified, since BDR package mismatching can
   lead to critical issues in a production environment.
 
   References: TPA-1223.
 
 - Fix `--edb-repositories` in `tpaexec configure` command to correctly handle PGDG repositories
 
-  Using the `--edb-repositories` option in `tpaexec configure`, 
-  makes the code responsible for defining the `{apt,yum,suse}_repository_list` 
+  Using the `--edb-repositories` option in `tpaexec configure`,
+  makes the code responsible for defining the `{apt,yum,suse}_repository_list`
   variables to be wrongfully skipped. This generates incorrect configurations with
   both EDB and PGDG repositories defined, generating conflicts in packages
   resolution.
@@ -1173,10 +1173,10 @@
 
   When selecting 'basic' authentication for 'etcd_authentication_mode', the execution of the deployment
   would fail on the task that grants permissions to the 'patroni' role in etcd, responsible for making
-  calls to the etcd cluster. 
-  This was due to a fact variable not being properly defined in the scope of the task, causing the 
-  task's condition to fail and thus the permission not being granted. 
-  The fix involved ensuring that the fact variable is correctly set and accessible, allowing the 
+  calls to the etcd cluster.
+  This was due to a fact variable not being properly defined in the scope of the task, causing the
+  task's condition to fail and thus the permission not being granted.
+  The fix involved ensuring that the fact variable is correctly set and accessible, allowing the
   permission granting task to execute as intended when 'basic' authentication is selected.
 
   References: TPA-1266.
@@ -1241,7 +1241,7 @@
   into its automated calculations to prevent slot exhaustion in PGD 5
   clusters.
 
-  IMPORTANT: This change will result in postgres cluster restart on the next deploy 
+  IMPORTANT: This change will result in postgres cluster restart on the next deploy
   when using PGD version 5 and above, as TPA will apply the updated calculation results.
   To avoid downtime, verify and define the current value for `max_replication_slots` and
   `max_wal_senders` in your `cluster_vars`.
@@ -1278,7 +1278,7 @@
   version by specifying the component package version in `config.yml`
   or to the latest available when it is not provided. A list of components
   for upgrade can be passed to the `--components` flag as a comma-separated
-  list. If this flag is not passed, `postgres` will be updated. Specifying 
+  list. If this flag is not passed, `postgres` will be updated. Specifying
   `--components=all` will update all applicable software components.
 
   References: TPA-924.
@@ -1328,7 +1328,7 @@
   version by specifying the component package version in `config.yml`
   or to the latest available when it is not provided. A list of components
   for upgrade can be passed to the `--components` flag as a comma-separated
-  list. If this flag is not passed, `postgres` will be updated. Speciyfing 
+  list. If this flag is not passed, `postgres` will be updated. Speciyfing
   `--components=all` will update all applicable software components.
 
   References: TPA-925.
@@ -1339,7 +1339,7 @@
   version by specifying the component package version in `config.yml`
   or to the latest available when it is not provided. A list of components
   for upgrade can be passed to the `--components` flag as a comma-separated
-  list. If this flag is not passed, `postgres` will be updated. Specifying 
+  list. If this flag is not passed, `postgres` will be updated. Specifying
   `--components=all` will update all applicable software components.
 
   References: TPA-926.
@@ -1371,7 +1371,7 @@
   version by specifying the component package version in `config.yml`
   or to the latest available when it is not provided. A list of components
   for upgrade can be passed to the `--components` flag as a comma-separated
-  list. If this flag is not passed, `postgres` will be updated. Speciyfing 
+  list. If this flag is not passed, `postgres` will be updated. Speciyfing
   `--components=all` will update all applicable software components.
 
   References: TPA-927.
@@ -1384,7 +1384,7 @@
   The upgrade process checks cluster health and upgrades the nodes
   one at a time.
   This scenario supports the use of `update_hosts` variable to upgrade a subset of
-  the cluster when used accordingly to the best practice recommendations found 
+  the cluster when used accordingly to the best practice recommendations found
   in the documentation.
 
   References: TPA-1040.
@@ -1456,7 +1456,7 @@
   PEM 10.1 added `libpq5` as a dependency to fix `psycopg` errors related
   to `kerberos` authentication on RHEL 9 servers. A `postgres-server`
   package could be installed which already provides `libpq5` (as in
-  providing capability, not always a package with the exact name). 
+  providing capability, not always a package with the exact name).
   To ensure `libpq5` is installed, TPA now explicitly installs it on RHEL
   servers when the PEM server version is 10 or greater.
 
@@ -1474,7 +1474,7 @@
 - Add `efm-post-config` hook
 
   A new `efm-post-config` hook has been introduced to be able to execute
-  new tasks after the efm configuration has taken place. 
+  new tasks after the efm configuration has taken place.
   New documentation explaining how to use it has also been developed under
   the 'TPA hooks' section.
 
@@ -1561,13 +1561,13 @@
 
 - Added support for validity period in OpenSSL generated certificates
 
-  SSL certificates (OpenVPN, PEM and TPA itself) used in TPA don't come with a way of handling the 
+  SSL certificates (OpenVPN, PEM and TPA itself) used in TPA don't come with a way of handling the
   number of days before expiration.
   This change includes a variable called "openssl_certificate_validity" (default 3650 days), that can be
-  used to determine the number of days a SSL certificate will have before expiring. 
-  In order to force TPA to reload a new certificate with a new expiration date, you need to pass some 
-  variables on the deploy phase depending on what you want to renew (to renew the PEM SSL certificate: 
-  "tpaexec deploy (...) -e pem_web_server_renew_tls_certificates=true" and to renew the self-signed SSL 
+  used to determine the number of days a SSL certificate will have before expiring.
+  In order to force TPA to reload a new certificate with a new expiration date, you need to pass some
+  variables on the deploy phase depending on what you want to renew (to renew the PEM SSL certificate:
+  "tpaexec deploy (...) -e pem_web_server_renew_tls_certificates=true" and to renew the self-signed SSL
   certificate: "tpaexec deploy (...) -e tpa_tls_renew_tls_certificates=true").
 
   References: TPA-1175.
@@ -1584,8 +1584,8 @@
 
   Add mention of the parameter `postgres_port`  in
   the TPA documentation.
-  `postgres_port` is the variable allowing the customization of the listening port 
-  for postgres. This variable will ensure consistent use of the set value 
+  `postgres_port` is the variable allowing the customization of the listening port
+  for postgres. This variable will ensure consistent use of the set value
   across all components of the cluster relying on the information.
 
   References: TPA-1145.
@@ -1621,9 +1621,9 @@
 
 - Missing PGD CLI on proxy nodes when performing upgrade (3.7 to 5)
 
-  When performing a regular deploy, or an upgrade from a 'BDR-Always-ON' setup 
-  to 'PGD-Always-ON', the proxy nodes (previously deployed with the 'harp-proxy' 
-  role), will not come shipped with the PGD CLI when trying to install it with 
+  When performing a regular deploy, or an upgrade from a 'BDR-Always-ON' setup
+  to 'PGD-Always-ON', the proxy nodes (previously deployed with the 'harp-proxy'
+  role), will not come shipped with the PGD CLI when trying to install it with
   the 'pgd-proxy' role, necessary to perform the upgrade.
   This fix ensures that the PGD CLI will be installed on the proxy nodes and nodes
   with a 'bdr' role, also on the nodes featuring only the 'pgdcli' role.
@@ -1650,9 +1650,9 @@
 
 - Fix unwanted_packages to support 'common' key that applies to all distribution
 
-  When setting `unwanted_packages` using the `common` key was no supported, which differs 
-  from behavior from other package dictionary that can be set in config.yml unwanted_packages 
-  only supported choosing the specific distribution as key (i.e: RedHat, Debian, ...). 
+  When setting `unwanted_packages` using the `common` key was no supported, which differs
+  from behavior from other package dictionary that can be set in config.yml unwanted_packages
+  only supported choosing the specific distribution as key (i.e: RedHat, Debian, ...).
   This fix introduces the support for the `common` key, ensuring any package listed under this
   key will be removed if present on any distribution in use in the cluster.
 
@@ -1670,7 +1670,7 @@
 - tpaexec test does not remove entry after testing
 
   After deploying a cluster and running `tpaexec test` on
-  that cluster, creates an additional entry in 
+  that cluster, creates an additional entry in
   bdr.replication_set_table which is not later removed.
 
   The fix makes the test run on a temporary schema called
@@ -1721,7 +1721,7 @@
 
 - Remove TPA post-deploy check for pgbouncer_auth_function in pg_catalog.
 
-  TPA recently relocated the pgbouncer_auth_function used to authenticate users when pgbouncer is in 
+  TPA recently relocated the pgbouncer_auth_function used to authenticate users when pgbouncer is in
   use. This was done in an effort to better follow the best practices and avoid issues during upgrade
   where pg_catalog function would not be part of the dump of the database.
   TPA introduced a post deploy check to help user still relying on the auth function defined in
@@ -1735,8 +1735,8 @@
 
 - Barman not correctly configuring log_file parameter
 
-  When setting up a barman node, the variable 'barman_log_file' 
-  was not setting up an alternative directory to place the log 
+  When setting up a barman node, the variable 'barman_log_file'
+  was not setting up an alternative directory to place the log
   file. Instead, it used the default location (/var/log/barman/barman.log).
   Bug and fix reported by voxnyx (https://github.com/voxnyx).
 
@@ -1744,9 +1744,9 @@
 
 - Exclude BDR5 alter_node_option task for replicas
 
-  In a `BDR5` cluster with a BDR node that is also a physical replica, 
-  the upgrade process will fail during the `alter_node_option` task because 
-  a BDR node is expected to have `RAFT` enabled, but the physical replica 
+  In a `BDR5` cluster with a BDR node that is also a physical replica,
+  the upgrade process will fail during the `alter_node_option` task because
+  a BDR node is expected to have `RAFT` enabled, but the physical replica
   BDR node does not. Skipping this task on any node with the replica role
   avoids this issue and allows upgrade to complete successfuly.
 
@@ -1798,20 +1798,20 @@
 
 - Allow rsa key size to be set for certificates
 
-  Added a variable called 'postgres_rsa_key_size', (default value is 2048) that can 
+  Added a variable called 'postgres_rsa_key_size', (default value is 2048) that can
   configure the size of the RSA key size for self-signed TLS key and certificate later
   used on the docker clusters.
-  Added a variable called 'pem_rsa_key_size', (default value is 4096) that can 
+  Added a variable called 'pem_rsa_key_size', (default value is 4096) that can
   configure the size of the RSA key size for self-signed TLS key and certificate later
   used on the PEM Server.
-  Added a variable called 'pem_db_ca_certificate_key_size', (default value is 4096) that can 
+  Added a variable called 'pem_db_ca_certificate_key_size', (default value is 4096) that can
   configure the size of the database CA RSA key size used on the PEM Server.
-  Added a variable called 'ha_proxy_dhparams_key_size', (default value is 2048) that can 
+  Added a variable called 'ha_proxy_dhparams_key_size', (default value is 2048) that can
   configure the size of the RSA key size used for ssl-dh-param-file within haproxy.
-  Added a variable called 'openvpn_rsa_key_size', (default value is 4096) that can 
+  Added a variable called 'openvpn_rsa_key_size', (default value is 4096) that can
   configure the size of the RSA key size for self-signed TLS key and certificate later
   used on OpenVPN.
-  Added a variable called 'openvpn_dhparams_numbits_size', (default value is 2048) that can 
+  Added a variable called 'openvpn_dhparams_numbits_size', (default value is 2048) that can
   configure the number of the DH 'numbits' in 'dh2048.pem'.
 
   References: TPA-1143.
@@ -1819,7 +1819,7 @@
 - Global proxy routing not being setup correctly in PGD 5.9
 
   When creating a new configuration file via 'tpaexec configure -a PGD-Always-ON --pgd-proxy-routing global (...)',
-  the configuration by default will create a top group node with enable_proxy_routing & enable_raft equal to true, 
+  the configuration by default will create a top group node with enable_proxy_routing & enable_raft equal to true,
   and subgroups enable_proxy_routing & enable_raft equal to false.
   When creating a new configuration file via 'tpaexec configure -a PGD-Always-ON --pgd-proxy-routing local (...)',
   the configuration by default will create a top group node with enable_proxy_routing equal to false & enable_raft
@@ -1877,16 +1877,16 @@
 - Skip postgres/pgpass task on PEM-agent Barman nodes
 
   The `postgres/pgpass` task runs on pem-agent nodes in order to add the
-  `postgres_user` to the `.pgpass` file in this user's home directory. 
-  However, this task fails on barman nodes that are also pem-agents, since 
-  the directory does not exist. 
+  `postgres_user` to the `.pgpass` file in this user's home directory.
+  However, this task fails on barman nodes that are also pem-agents, since
+  the directory does not exist.
   This task is now excluded for barman nodes.
 
   References: TPA-1171, TPA-158.
 
 - Add `pgaudit` package names for `edbpge`
 
-  Previously, adding `pgaudit` to the list of Postgres extensions with 
+  Previously, adding `pgaudit` to the list of Postgres extensions with
   the `edbpge` Postgres flavour would fail because the dictionary for
   handling recognized extensions was missing an entry for `edbpge` and
   it's corresponding package names. This entry is added, and additional
@@ -1928,7 +1928,7 @@
 - Barman nodes always point to a BDR node
 
   When creating a new configuration for PGD 6, the barman nodes created wasn't used by any node.
-  This change ensures that when running "tpaexec configure" for PGD6 based architectures, each barman node configured 
+  This change ensures that when running "tpaexec configure" for PGD6 based architectures, each barman node configured
   will be used by a BDR node in the same location it is being defined in.
 
   References: TPA-1150.
@@ -1986,9 +1986,9 @@
 - Add `edb_stat_monitor` to recognized extensions
 
   When a user specifies `edb_stat_monitor` as an entry in either
-  `postgres_extensions` or the list of extensions named under 
+  `postgres_extensions` or the list of extensions named under
   `postgres_databases`, TPA will handle installing the correct
-  package, creating the extension and including it in the 
+  package, creating the extension and including it in the
   `shared_preload_libraries`.
 
   References: TPA-1059.
@@ -2152,7 +2152,7 @@
   Since PGD version 6 has a built-in Connection Manager which replaces
   PGD Proxy, the `pgdproxy` Postgres user should not be used in any DSNs.
   A new variable `bdr_connection_manager_route_dsn` is introduced for
-  defining connection strings to Connection Manager. User's can 
+  defining connection strings to Connection Manager. User's can
   additionally define `bdr_connection_manager_dsn_attributes` in their
   `config.yml` to specify additional connection paramters in the DSN.
 
@@ -2235,7 +2235,7 @@
   This is fixed by asserting that the `cluster_vars` dictionary is defined
   and non-empty when the configuration file is loaded. Also as a final
   bailout, the `cluster_vars` variable now no longer defaults to an empty
-  dictionary. This allows Ansible to throw an error when creating 
+  dictionary. This allows Ansible to throw an error when creating
   `group_vars` and terminate.
 
   References: TPA-895, TPA-1033.
@@ -2298,7 +2298,7 @@
   the network address of the range.
 
   Previously, any IP passed to the `--network` flag that contained host
-  bits would dump a stacktrace due to the raised ValueError. 
+  bits would dump a stacktrace due to the raised ValueError.
 
   That exception is now caught and an ArchitectureError is raised to
   display a clear message to the user about the `--network` parameter.
@@ -2367,7 +2367,7 @@
 
   The `repo` tag is available for exclusion, but previously would only
   skip tasks under the `sys/repositories` role. Now it also skips over
-  the initialization tasks which check which repositories to use and 
+  the initialization tasks which check which repositories to use and
   the verifies the credentials to access them are provided.
 
   References: TPA-959.
@@ -2454,13 +2454,13 @@
 - Create `pgbouncer_get_auth()` function in dedicated database
 
   The `pgbouncer_get_auth()` function was created in the `pg_catalog`
-  schema and execute granted to the `pgbouncer_auth_user`. This function 
+  schema and execute granted to the `pgbouncer_auth_user`. This function
   was created in every database, but this was not necessary for
   PgBouncer.
 
   A failure may be encountered during the `pgd node upgrade` process when
-  this function was created in the `pg_catalog` schema as it is not 
-  included in the dump created by `pg_dump`. A later task attempts to 
+  this function was created in the `pg_catalog` schema as it is not
+  included in the dump created by `pg_dump`. A later task attempts to
   run a `GRANT` on this function and fails, as the function is not
   restored since it was not originally dumped.
 
@@ -2473,9 +2473,9 @@
   define this function under the `pg_catalog` schema, as a future TPA
   release may remove the function from that schema.
 
-  The `pgbouncer_get_auth()` function itself used by PgBouncer `auth_query` 
-  has been updated to address `CVE-2025-2291`. This vulnerability allowed 
-  for authentication using expired passwords, potentially granting 
+  The `pgbouncer_get_auth()` function itself used by PgBouncer `auth_query`
+  has been updated to address `CVE-2025-2291`. This vulnerability allowed
+  for authentication using expired passwords, potentially granting
   unauthorized access because the auth_query mechanism did not consider
   the `VALID UNTIL` attribute set in PostgreSQL for user passwords.
 
@@ -2497,14 +2497,14 @@
 
   Physical replication of a `subscriber-only` node can be achieved in a `PGD`
   cluster by installing `repmgr` as a failover-manager and designating the
-  `subscriber-only` node as the `primary` and listing another BDR data node 
+  `subscriber-only` node as the `primary` and listing another BDR data node
   as the `backup`; this backup node is given the `replica` role.
 
   This configuration would result in the PGD upgrade process failing, since
   TPA expects BDR data nodes to have RAFT enabled, but the physical replica
   BDR data node (with both `replica` and `bdr` roles) by design does not.
 
-  As a fix, certain BDR-specific tasks in the upgrade process now skip any node that 
+  As a fix, certain BDR-specific tasks in the upgrade process now skip any node that
   has a `replica` role, allowing for a successful upgrade.
 
   References: TPA-961, RT46186.
@@ -2600,19 +2600,19 @@
 - Copy EFM config files if they are removed, even if no configuration changes
 
   If either the `efm.nodes` or `efm.properties` configuration files
-  do not exist in the top-level EFM directory, the `efm upgrade-conf` 
+  do not exist in the top-level EFM directory, the `efm upgrade-conf`
   command copies them from the `/raw` directory, even if there have
-  been no configuration changes. 
+  been no configuration changes.
 
-  This amends previous behavior that required a configuration change 
+  This amends previous behavior that required a configuration change
   before the `upgrade-conf` command would run and copy files.
 
   References: TPA-899.
 
 - Create only required slots when configuring patroni
 
-  When setting up a patroni cluster, a replication slot is created for 
-  each etcd-only node. This causes problems because the unused slots cause 
+  When setting up a patroni cluster, a replication slot is created for
+  each etcd-only node. This causes problems because the unused slots cause
   the WAL to accumulate. Slots are now only created for the DB servers.
 
   References: TPA-823.
@@ -2686,7 +2686,7 @@
   With this change, TPA is now able to create clusters locally and in AWS
   having ubuntu 24.04 as image.
 
-  NOTE: Support will become effective when each software gets released for ubuntu 24.04. 
+  NOTE: Support will become effective when each software gets released for ubuntu 24.04.
   Until then, Ubuntu 24.04 support is to be considered experimental.
 
   References: TPA-788.
@@ -2719,8 +2719,8 @@
 
 - Add `PGPORT` to the postgres user's `.bashrc` file installed by TPA
 
-  The `PGPORT` environment variable has been exported as part of the 
-  postgres user's `.bashrc` file. It defaults to the port value used by the 
+  The `PGPORT` environment variable has been exported as part of the
+  postgres user's `.bashrc` file. It defaults to the port value used by the
   selected `postgres_flavour`, or `postgres_port` if specified in the config file.
 
   References: TPA-811.
@@ -2736,7 +2736,7 @@
 - Support package version specifiers for all cluster comppnents
 
   All components must be able to specify the package version in `config.yml` in
-  order for `tpaexec upgrade` to support minor version upgrades so that the 
+  order for `tpaexec upgrade` to support minor version upgrades so that the
   desired version is known.
 
   The following software packages accept an `--xxx-package-version` option to the
@@ -2767,7 +2767,7 @@
 
 - Set up EDB repositories via setup script for RedHat and Debian
 
-  The repository manager provides a shell script that sets up the 
+  The repository manager provides a shell script that sets up the
   desired EDB repositories.
 
   This simplifies EDB repository setup on TPA nodes into a single task.
@@ -2784,12 +2784,12 @@
 
   Previously, documentation stated
   ```
-  You can use efm_conf_settings to set any parameters, whether recognised by TPA or not. 
+  You can use efm_conf_settings to set any parameters, whether recognised by TPA or not.
 
   Where needed, you need to quote the value exactly as it would appear in efm.properties
   ```
 
-  However, the `efm.properties.j2` template uses the values from `efm_conf_settings` as an Ansible dictionary, 
+  However, the `efm.properties.j2` template uses the values from `efm_conf_settings` as an Ansible dictionary,
   so the entries must be written in `key: value` form.
 
   ```yaml
@@ -2803,14 +2803,14 @@
 
 - Update `<clustername>.nodes` when new nodes are added to an existing EFM cluster
 
-  When a new EFM node is added to `config.yml`, it is not listed in the 
+  When a new EFM node is added to `config.yml`, it is not listed in the
   `Allowed node host list` on the existing EFM nodes in the cluster.
 
   The task which executes `efm upgrade-conf` and propagates the changes from
-  `/raw/<clustername>.properties` and `/raw/<clustername>.nodes` is now run 
+  `/raw/<clustername>.properties` and `/raw/<clustername>.nodes` is now run
   when EITHER of these files are changed.
 
-  This results in the new EFM node being written to the `<clustername>.nodes` 
+  This results in the new EFM node being written to the `<clustername>.nodes`
   file and `efm cluster-status` including it in the `Allowed node host list`.
 
   References: TPA-848.
@@ -2827,7 +2827,7 @@
 
 - Deploys fail for distributions which have no additional repository setup commands for extensions
 
-  When `postgis` is added to `extra_postgres_extensions` or the `extensions` 
+  When `postgis` is added to `extra_postgres_extensions` or the `extensions`
   list of a database in `postgres_databases`, deploys fail for Debian,
   SLES and Ubuntu because their list of `repository_setup_commands` is
   empty (only RHEL has an additional command to run`crb enable`).
@@ -2835,7 +2835,7 @@
   This empty list of commands looped over and passed to the `command` module,
   which fails with `no command given`, resulting in deployment failure.
 
-  As a result, the `Automatically run additional repository setup commands 
+  As a result, the `Automatically run additional repository setup commands
   for recognized extensions` task is now skipped if the distribution has
   no additional commands to run.
 
@@ -2857,7 +2857,7 @@
   In the case a cluster has installed pgd-proxy and/or pgd-cli and has
   configured `bdr_client_dsn_attributes` with parameters that the Go
   driver does *not* support, two new configuration variables must be
-  included: `pgd_proxy_dsn_attributes` and `pgd_cli_dsn_attributes`, 
+  included: `pgd_proxy_dsn_attributes` and `pgd_cli_dsn_attributes`,
   containing only additional DSN parameters that the Go driver
   supports.
 
@@ -2868,14 +2868,14 @@
 
   This amends unexpected behavior where the `pgd_proxy_dsn_attributes`
   and `pgd_cli_dsn_attributes` were defaulting to empty strings when
-  not defined, even though the user was expecting the parameters in 
+  not defined, even though the user was expecting the parameters in
   `bdr_client_dsn_attributes` to be used.
 
   References: TPA-897, TPA-820, RT44819.
 
 - Fix Postgres database creation
 
-  In order to remove modules (`CREATE EXTENSION` is not run, e.g. `pg_failover_slots`) 
+  In order to remove modules (`CREATE EXTENSION` is not run, e.g. `pg_failover_slots`)
   from the list of `extensions` specified for named databases under `postgres_databases`,
   the entire hash was modified. This introduced a bug, since a new hash was created
   that ONLY contained the database `name` and list of `extensions`, ignoring all other
@@ -2898,12 +2898,12 @@
 
 - Add ssh port flag to Barman configuration
 
-  The Barman configuration is now able to use custom ssh port set 
+  The Barman configuration is now able to use custom ssh port set
   via the `cluster_ssh_port` in `config.yml`, which defaults to
   22 if it is not set.
 
   The `-p`/`--port` flags are now included in the `ssh` command in
-  `barman.d.conf` and `barman-wal-restore`/`barman-wal-archive' 
+  `barman.d.conf` and `barman-wal-restore`/`barman-wal-archive'
   commands respectively.
 
   References: TPA-900.
@@ -2914,15 +2914,15 @@
 
 - Support PostgreSQL, EDB Postgres Extended, and EDB Postgres Advanced Server 17
 
-  Clusters can be configured to use PostgreSQL, EDB Postgres Extended and 
+  Clusters can be configured to use PostgreSQL, EDB Postgres Extended and
   EDB Postgres Advanced Server version 17.
 
-  Barman no longer needs to install the postgres server package to get 
-  the `pg_receivewal` binary when using EDB Postgres Advanced Server 17 or 
-  EDB Postgres Extended 17 since the binary has been added to the client 
+  Barman no longer needs to install the postgres server package to get
+  the `pg_receivewal` binary when using EDB Postgres Advanced Server 17 or
+  EDB Postgres Extended 17 since the binary has been added to the client
   package for these versions.
 
-  Raise an architecture error when a cluster is configured with `repmgr` 
+  Raise an architecture error when a cluster is configured with `repmgr`
   as the failover_manager as it is not available for Postgres 17.
 
   Updated documentation to reflect supported versions.
@@ -3012,7 +3012,7 @@
   The shared Barman instance is treated as a bare instance, so the required
   access, including the Barman user's access to the target PostgreSQL
   instances, must be already in place. Copying the Barman user's keys from
-  the original cluster to the new cluster can be used to achieve this, 
+  the original cluster to the new cluster can be used to achieve this,
   see the Barman section of the TPA documentation for detailed information.
 
   References: TPA-777, RT37792.
@@ -3020,16 +3020,16 @@
 - Only add nodes with `efm` role to cluster `efm.nodes` file
 
   A support ticket questioned why the `pemserver` and `barman` nodes are
-  added to the `Allowed node host list` in EFM when they are not 
+  added to the `Allowed node host list` in EFM when they are not
   relevant to EFM functions. Refactored the task that writes the `efm.node`
-  configuration to only include those nodes that have `efm` in their list 
+  configuration to only include those nodes that have `efm` in their list
   of roles.
 
   References: TPA-817, RT40645.
 
 - Remove deprecated `PermissionStartOnly` in postgres.service.j2 template
 
-  `PermissionsStartOnly` has been deprecated and is now achieved via 
+  `PermissionsStartOnly` has been deprecated and is now achieved via
   `ExecStartPost=+/bin/bash...` syntax
 
   References: TPA-762.
@@ -3044,11 +3044,11 @@
 
 - Enable EFM probes when a PEM agent is registered on an EFM node
 
-  The `--efm-install-path` and `--efm-cluster-name` flags are set when a 
-  PEM server is registered on an EFM node. 
+  The `--efm-install-path` and `--efm-cluster-name` flags are set when a
+  PEM server is registered on an EFM node.
 
-  The `Streaming Replication`, `Failover Manager Node Status` and 
-  `Failover Manager Cluster Info` probes are enabled when a PEM agent is 
+  The `Streaming Replication`, `Failover Manager Node Status` and
+  `Failover Manager Cluster Info` probes are enabled when a PEM agent is
   registered on an EFM node.
 
   References: TPA-586.
@@ -3062,11 +3062,11 @@
 
   The `barman_role` is created as part of the Barman tasks; if Barman is not
   used, this role will not be created. Therefore, the task that grants privileges
-  to this role is only executed if the `barman_role` username is in the list 
+  to this role is only executed if the `barman_role` username is in the list
   of Postgres users that are created.
 
-  The 'barman' user now has `NOSUPERUSER` explicitly specified as a role attribute. 
-  If a cluster was deployed with a previous TPA version (which created the 'barman' 
+  The 'barman' user now has `NOSUPERUSER` explicitly specified as a role attribute.
+  If a cluster was deployed with a previous TPA version (which created the 'barman'
   user as a superuser), deploying with this version will remove the `superuser`
   role attribute from the `barman` user.
 
@@ -3074,7 +3074,7 @@
 
 - Add `postgis` to list of recognized extensions
 
-  The PostGIS package will automatically be added when a user specifies 
+  The PostGIS package will automatically be added when a user specifies
   `postgis` as an entry in either `postgres_extensions` or the list of
   extensions named under `postgres_databases`.
 
@@ -3095,11 +3095,11 @@
 
   Expose a configurable `efm_user_password_encryption` variable which should
   be set to either `'md5'` or `'scram-sha-256'` depending on user requirements.
-  This controls the `auth-method` for the `efm` Postgres user in `pg_hba.conf` 
+  This controls the `auth-method` for the `efm` Postgres user in `pg_hba.conf`
   and the algorithm used for generating it's encrypted password.
 
   In clusters deployed with `compliance` configured to `stig`, the 'efm' Postgres
-  user's `auth-method` in `pg_hba.conf` will be set to `scram-sha-256` since 
+  user's `auth-method` in `pg_hba.conf` will be set to `scram-sha-256` since
   FIPS-enabled operating systems do not allow `md5` to be used.
 
   References: TPA-832, TPA-836.
@@ -3117,17 +3117,17 @@
 - `primary_slot_name` added for EFM compatibility interferes with `bdr_init_physical`
 
   Previously, the `primary_slot_name` configuration task runs when the
-  `failover_manager` is NOT `repmgr`; both `efm` and `patroni` 
-  use `pg_basebackup` which, unlike `repmgr`, does not configure a 
+  `failover_manager` is NOT `repmgr`; both `efm` and `patroni`
+  use `pg_basebackup` which, unlike `repmgr`, does not configure a
   `primary_slot_name` on the primary node when creating a replica.
-  This is to ensure the old primary uses a physical slot for replication 
+  This is to ensure the old primary uses a physical slot for replication
   during a switchover.
 
   However, this also caused the task to run when the `failover_manager` is `bdr`.
-  When `bdr_init_physical` was used on PGD cluster nodes, initialisation failed 
+  When `bdr_init_physical` was used on PGD cluster nodes, initialisation failed
   because it used a non-existent slot.
 
-  This is fixed by conditionally running the task which configures the `primary_slot_name` 
+  This is fixed by conditionally running the task which configures the `primary_slot_name`
   when the `failover_manager` is explicitly `efm` or `patroni` to avoid setting it unnecessarily.
 
   References: TPA-712, TPA-825, RT36064.
@@ -3157,22 +3157,22 @@
 - Add `pem-agent` role on barman nodes at most once for M1 architecture
 
   If `--enable-pem` and `--enable-pg-backup-api` are passed to `tpaexec configure`,
-  `pem-agent` is added twice to the `barman` node if it is also a `witness`. 
-  Fixed by by consolidating both `if` statements together to only evaluate 
+  `pem-agent` is added twice to the `barman` node if it is also a `witness`.
+  Fixed by by consolidating both `if` statements together to only evaluate
   the conditions once.
 
   References: TPA-793.
 
 - Download correct `bash-completion` package version
 
-  If the `pgdcli_package_version` is specified in `config.yml`, the 
-  `bash-completion` package is incorrectly named because the 
-  `packages_for` filter erroneously appends the `pgdcli_package_version` 
+  If the `pgdcli_package_version` is specified in `config.yml`, the
+  `bash-completion` package is incorrectly named because the
+  `packages_for` filter erroneously appends the `pgdcli_package_version`
   to the  package name. This results in an attempt to download a nonexistant
   package.
 
   The `bash-completion` package is now appended to the list after the
-  `packages_for` filter, since it's version is independent from the 
+  `packages_for` filter, since it's version is independent from the
   `pgdcli_package_version`.
 
   References: TPA-794, RT38773.
@@ -3184,8 +3184,8 @@
 - Running deploy after a switchover fails for nodes with `efm-witness` role
 
   The `upstream-primary` for EFM nodes is determined using the facts
-  gathered from Postgres. This fails for nodes with `efm-witness` roles 
-  since they do not have Postgres. The task to determine upstream-primary 
+  gathered from Postgres. This fails for nodes with `efm-witness` roles
+  since they do not have Postgres. The task to determine upstream-primary
   is now run only on nodes with `primary` or `replica` roles
 
   References: TPA-580, TPA-789, TPA-798.
@@ -3262,7 +3262,7 @@
 
 - Update upstream_primary after switchover
 
-  The `upstream_primary` is now correctly updated after switchover, 
+  The `upstream_primary` is now correctly updated after switchover,
   resulting in the correct `auto.reconfigure` setting be set on replicas.
   Standbys now follow the new primary.
 
@@ -3272,7 +3272,7 @@
 
   Users can include the names of the certificate and key pair for use on the PEM server in `config.yml`
   under the cluster_vars or pem-server instance vars `pem_server_ssl_certificate` and `pem_server_ssl_key`.
-  TPA will copy them from the `ssl/pemserver` directory of the cluster directory to the PEM server and 
+  TPA will copy them from the `ssl/pemserver` directory of the cluster directory to the PEM server and
   configure Apache/httpd accordingly.
 
   References: TPA-718, TPA-752, RT35811.
@@ -3310,9 +3310,9 @@
 
 - Remove EFM dependency for resolving upstream_primary
 
-  Previously, EFM was queried for the current primary on a deploy after 
-  a switchover. If EFM is not running, this will fail. 
-  Now the cluster_facts collected through Postgres are used to determine 
+  Previously, EFM was queried for the current primary on a deploy after
+  a switchover. If EFM is not running, this will fail.
+  Now the cluster_facts collected through Postgres are used to determine
   the current primary after a switchover, removing the dependency on EFM.
 
   References: TPA-789, TPA-580.
@@ -3348,9 +3348,9 @@
 
 - Set appropriate PEM agent parameters monitored servers
 
-  TPA broadly sets PEM agent parameters on all instances that are only 
+  TPA broadly sets PEM agent parameters on all instances that are only
   appropriate for the pemserver instance. This is fixed by conditionally
-  setting parameters in `agent.cfg.j2` based on whether or not the node 
+  setting parameters in `agent.cfg.j2` based on whether or not the node
   is a pem-server.
 
   References: TPA-744.
@@ -3417,9 +3417,9 @@
 - Change haproxy_bind_address when Patroni is failover_manager
 
   The default value of `haproxy_bind_address` (`127.0.0.1`) does not allow for
-  communication between Postgres nodes and haproxy nodes. 
+  communication between Postgres nodes and haproxy nodes.
   The bind address is now set to `0.0.0.0` when Patroni is the failover manager.
-  Users should change this value to something more restrictive and 
+  Users should change this value to something more restrictive and
   appropriate for their cluster networking.
 
   References: TPA-720.
@@ -3450,13 +3450,13 @@
 
 - Support configuring read-only endpoints on PGD proxy nodes
 
-  PGD version 5.5 allows for proxy nodes to be configured as read endpoints, 
-  which direct read-only queries to a shadow node. TPA supports this configuration 
-  option by setting a `read_listen_port` parameter under `default_pgd_proxy_options` 
-  and `pgd_proxy_options` in `config.yml`. This parameter is included by default when 
-  the PGD version is >= 5.5. 
+  PGD version 5.5 allows for proxy nodes to be configured as read endpoints,
+  which direct read-only queries to a shadow node. TPA supports this configuration
+  option by setting a `read_listen_port` parameter under `default_pgd_proxy_options`
+  and `pgd_proxy_options` in `config.yml`. This parameter is included by default when
+  the PGD version is >= 5.5.
 
-  Users can also specify the port numbers by passing `--proxy-listen-port` 
+  Users can also specify the port numbers by passing `--proxy-listen-port`
   and `proxy-read-listen-port` arguments to the `tpaexec configure` command.
 
   References: TPA-722.
