@@ -1,0 +1,24 @@
+- summary: Fix Postgres SSL certificate selection when services share a node
+  description: |
+    When an `etcd`, `haproxy`, `pgd-proxy` or other TLS-enabled service
+    shared a host with Patroni and Postgres, TPA could configure Postgres
+    and Patroni to use another service's certificate and key instead of
+    their own. This was most visible on an M1 cluster with Patroni where
+    etcd ran on the database nodes: the replicas were given the etcd
+    certificate (`/etc/tpa/etcd/etcd.crt`), which the postgres user cannot
+    read, so Postgres failed to start. Setting the certificate paths
+    explicitly in `config.yml` worked around the Postgres failure but then
+    left the Patroni REST API using the same unreadable etcd certificate.
+
+    The certificate role no longer routes per-service certificate paths
+    through the shared `ssl_cert_file`/`ssl_key_file` variables, so each
+    service now uses its own certificate regardless of how roles are
+    distributed across nodes. The documented `ssl_cert_file` and
+    `ssl_key_file` overrides for the Postgres server certificate continue
+    to work as before; clusters that do not set them use the default
+    Postgres certificate at `/etc/tpa/<cluster_name>.crt`.
+  type: bugfix
+  jira_tickets:
+  - TPA-1373
+  support_tickets:
+  - CP57402
