@@ -1,0 +1,18 @@
+- summary: Write boolean postgres_conf_settings values as on/off
+  description: |
+    YAML parses unquoted `off`, `on`, `yes` and `no` as booleans, so a
+    setting such as `bdr.default_streaming_mode: off` in
+    `postgres_conf_settings` reached TPA as a boolean and was written to
+    `postgresql.conf` as `False`. Postgres accepts that for genuine
+    boolean parameters, but rejects it for enum parameters whose valid
+    values include `off` or `on` (for example `bdr.default_streaming_mode`,
+    where the value was silently ignored and the parameter left at its
+    default).
+
+    TPA now writes boolean values in `postgres_conf_settings` as `on` or
+    `off`, which Postgres accepts both as boolean values and as enum
+    labels. Quoting values exactly as they should appear in
+    `postgresql.conf` remains the recommended practice.
+  type: bugfix
+  jira_tickets:
+  - TPA-1352
