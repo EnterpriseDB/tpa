@@ -376,6 +376,7 @@
     upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
   when: >
     'postgres' in role
+    and 'pem-server' not in role
 
 - block:
   - name: Allow physical replicas of BDR subscriber-only nodes
@@ -658,6 +659,7 @@
       }}"
   when: >
     'postgres' in role
+    and 'pem-server' not in role
 
 # If this is a PEM server instance, we need a database dedicated to PEM.
 
