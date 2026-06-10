@@ -1,9 +1,0 @@
-- summary: Normalise Postgres Extended to 'pgextended' & 'edbpge' based on architecture
-  description: |
-    A fix has been introduced to normalise Postgres Extended flavours based on architecture.
-    When choosing any Postgres Extended variant via 'tpaexec configure' (--pgextended, --edbpge, --edb-postgres-extended, or --postgres-flavour pgextended/edbpge),
-    BDR-Always-ON or older architectures now normalises to 'pgextended', whereas newer architectures normalise to 'edbpge'.
-    Trying to deploy a 'pgextended' flavour cluster on an incompatible architecture will result in an error, preventing misconfiguration.
-  type: bugfix
-  jira_tickets:
-  - TPA-1484

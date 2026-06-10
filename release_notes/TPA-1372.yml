@@ -1,8 +1,0 @@
-- summary: Remove deprecated `--cohost-proxies` & `--add-proxy-nodes-per-location` configure flags for PGD-X
-  description: |
-    The flags --cohost-proxies & --add-proxy-nodes-per-location flags in PGD-X have now
-    been removed and will no longer be a valid option in `tpaexec configure` for PGD-X architecture.
-    In PGD6 all proxies are cohosted, making both options obsolete.
-  type: bugfix
-  jira_tickets:
-  - TPA-1372

@@ -1,9 +1,0 @@
-- summary: Fix SLES 15 deployments when featuring patroni with EDBPGE and EPAS
-  description: |
-    When selecting patroni as the failover manager with the EDBPGE/EPAS postgresql flavour, additional
-    modules were lacking to install etcd-related packages, as well as some additional tweaks to make the deployment work correctly.
-    This fix ensures that the required packages are installed when deploying on SLES 15 with patroni 
-    as the failover manager, alongside some minor adjustments.
-  type: bugfix
-  jira_tickets:
-  - TPA-1428

@@ -1,9 +1,0 @@
-- summary: Introduce retry logic between BDR replication slots when upgrading
-  description: |
-    When upgrading the postgresql package version in a BDR cluster, replication slots may take a few seconds to reconnect,
-    and the upgrade process can have an exit error due to not allocating enough time to the recovery process. 
-    The fix adds retry logic to the health check on the upgrade process to allow time for the slots to recover and avoid 
-    timing-related failures.
-  type: bugfix
-  jira_tickets:
-  - TPA-1460

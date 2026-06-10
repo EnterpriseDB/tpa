@@ -1,9 +1,0 @@
-- summary: Add dedicated upgrade_minor_5.yml playbook for BDR 5.x minor upgrades
-  description: |
-    This new playbook handles all BDR 5.x minor upgrades. This uses the relevant
-    logic previously embedded in the monolithic upgrade_legacy.yml, making the upgrade
-    process easier to maintain. upgrade_legacy.yml should be deprecated and removed
-    in the near future after a few others changes.
-  type: notable_change
-  jira_tickets:
-  - TPA-567
