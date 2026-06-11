@@ -1,0 +1,11 @@
+- summary: Repeat TPA's deliberate warnings in a recap at the end of a run
+  description: |
+    Warnings that TPA raises on purpose to draw the operator's attention are
+    printed inline as a run proceeds, where they can scroll out of sight during
+    a long deploy. TPA's output now collects those deliberate warnings and
+    repeats them in a consolidated block after the PLAY RECAP, so they are not
+    missed. Warnings emitted by Ansible itself are left out of this recap, so it
+    stays focused on the messages TPA chose to raise.
+  type: minor_change
+  jira_tickets:
+  - TPA-1540
