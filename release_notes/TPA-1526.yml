@@ -1,0 +1,10 @@
+- summary: Ignore empty entries in an instance's role list
+  description: |
+    A dangling list item (a "- " with nothing after it) in an instance's
+    role: list parsed to an empty value and was carried through to the
+    generated inventory, where it produced a spurious role_None Ansible
+    group. Such empty entries are now dropped, and provision emits a warning
+    so a stray "-" left over from hand-editing config.yml is easy to spot.
+  type: bugfix
+  jira_tickets:
+  - TPA-1526
