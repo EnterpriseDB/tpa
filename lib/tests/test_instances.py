@@ -12,6 +12,7 @@ from ..filter_plugins.instances import (
     ensure_publication,
     ensure_subscription,
     set_instance_defaults,
+    normalize_roles,
 )
 
 # Each entry in this array represents input that validate_volume_for should
@@ -57,6 +58,23 @@ def test_set_instance_defaults_keeps_postgres_for_primary():
     instances = [{"Name": "node1", "role": ["primary", None]}]
     result = set_instance_defaults(instances, "testcluster", {}, [])
     assert result[0]["role"] == ["primary", "postgres"]
+
+
+# Each entry is (input role value, expected normalized list).
+normalize_roles_tests = [
+    (["harp-proxy", None, ""], ["harp-proxy"]),  # empty entries dropped
+    ("primary, replica", ["primary", "replica", "postgres"]),  # comma split
+    (["primary"], ["primary", "postgres"]),  # primary implies postgres
+    (["replica"], ["replica", "postgres"]),  # replica implies postgres
+    (["primary", "postgres"], ["primary", "postgres"]),  # no duplicate postgres
+    (["barman"], ["barman"]),  # untouched otherwise
+]
+
+
+@pytest.mark.parametrize("role,expected", normalize_roles_tests)
+def test_normalize_roles(role, expected):
+    """normalize_roles splits strings, drops empties, and tags postgres."""
+    assert normalize_roles(role, "anyname") == expected
 
 
 # Each entry in this array is a tuple whose first item represents the input to
