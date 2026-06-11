@@ -32,10 +32,20 @@ DOCUMENTATION = """
 """
 
 import inspect
+import os
 
 from ansible import constants as C
 from ansible.plugins.callback.default import CallbackModule as CallbackModule_default
 from ansible.utils.color import stringc
+
+# Marker that lib/tpa_warnings.py:tpa_warning() prepends to the warnings TPA
+# deliberately raises. Imported defensively: this callback is responsible for
+# all screen output, so a problem importing the helper must never break it --
+# we just lose the end-of-run recap.
+try:
+    from tpa_warnings import WARNING_MARKER
+except Exception:
+    WARNING_MARKER = None
 
 
 class CallbackModule(CallbackModule_default):
@@ -60,6 +70,51 @@ class CallbackModule(CallbackModule_default):
         self._super = super(CallbackModule, self)
         self._super.__init__()
         self.zero_everything()
+
+        # TPA's deliberate warnings (tagged by tpa_warning()) all funnel
+        # through the controller's Display.warning() -- including those raised
+        # in a forked worker, which Ansible forwards to the controller. Wrap it
+        # once to pick those out for the end-of-run recap, strip the marker so
+        # the inline output stays clean, and pass everything else through
+        # untouched. The collected list lives on the Display singleton, not on
+        # self: Ansible instantiates the stdout callback more than once, and the
+        # instance that wraps warning() need not be the one whose
+        # v2_playbook_on_stats() runs at the end, so the shared singleton is
+        # what keeps them in agreement.
+        if WARNING_MARKER is not None:
+            self._wrap_display_warning()
+
+    def _wrap_display_warning(self):
+        display = self._display
+        if getattr(display, "_tpa_warning_wrapped", False):
+            return
+
+        display._tpa_deliberate_warnings = []
+        original_warning = display.warning
+
+        # __init__ runs in the controller, before any worker is forked, so this
+        # is the controller's pid. Forked workers inherit this wrapped Display;
+        # we must only strip and record in the controller, otherwise a worker
+        # would consume the marker itself and forward stripped (unrecognisable)
+        # text to the controller, recording into a per-worker list that dies
+        # with the fork. In a worker we therefore pass the marked message
+        # straight through; Ansible forwards it to the controller, where this
+        # same wrapper -- now seeing its own pid -- records it.
+        controller_pid = os.getpid()
+
+        def capturing_warning(msg, formatted=False):
+            if (
+                os.getpid() == controller_pid
+                and isinstance(msg, str)
+                and msg.startswith(WARNING_MARKER)
+            ):
+                msg = msg.removeprefix(WARNING_MARKER)
+                if msg not in display._tpa_deliberate_warnings:
+                    display._tpa_deliberate_warnings.append(msg)
+            return original_warning(msg, formatted=formatted)
+
+        display.warning = capturing_warning
+        display._tpa_warning_wrapped = True
 
     def v2_playbook_on_include(self, included_file):
         # this is only called for non-role includes
@@ -129,6 +184,23 @@ class CallbackModule(CallbackModule_default):
             self._show_task_counters()
 
         self._super.v2_playbook_on_stats(stats)
+
+        self._show_warning_recap()
+
+    def _show_warning_recap(self):
+        # Re-display, as a consolidated block after the PLAY RECAP, the warnings
+        # that TPA deliberately raised via lib/tpa_warnings.py:tpa_warning().
+        # _wrap_display_warning() collects those on the Display singleton; the
+        # warnings Ansible itself emits are not in that list, so they don't
+        # clutter the recap. The default plugin shows its own output, so skip
+        # this when we've handed over to it.
+        warnings = getattr(self._display, "_tpa_deliberate_warnings", [])
+        if self._use_standard_plugin or not warnings:
+            return
+
+        self._display.banner("WARNINGS")
+        for msg in warnings:
+            self._display.display(f"[WARNING]: {msg}", color=C.COLOR_WARN, stderr=True)
 
     def v2_runner_on_start(self, host, task):
         if self._use_standard_plugin:
