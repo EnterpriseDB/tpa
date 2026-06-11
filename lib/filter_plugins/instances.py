@@ -13,6 +13,9 @@ suitably adjusted.
 import copy
 import re
 from ansible.errors import AnsibleFilterError
+from ansible.utils.display import Display
+
+display = Display()
 
 VOLUME_TRANSLATIONS = {
     "barman_data": {"mountpoint": "/var/lib/barman"},
@@ -111,6 +114,20 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
         role = new_instance.get("role", [])
         if not isinstance(role, list):
             role = [x.strip() for x in role.split(",")]
+
+        # Drop any empty entries. A dangling "- " in the role: list parses to
+        # None, which would otherwise propagate to the deploy-side group_by and
+        # create a spurious role_None group. Warn so a stray entry left over
+        # from hand-editing config.yml doesn't pass silently.
+
+        nonempty_role = [r for r in role if r]
+        if len(nonempty_role) != len(role):
+            display.warning(
+                "Ignoring empty role entry for instance %s; "
+                "check its role: list in config.yml for a stray '-'"
+                % new_instance.get("Name", new_instance.get("name", "?"))
+            )
+        role = nonempty_role
 
         # primary/replica instances must also be tagged 'postgres'.
 
