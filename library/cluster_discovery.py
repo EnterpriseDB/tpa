@@ -52,7 +52,10 @@
 
 from __future__ import absolute_import, division, print_function
 
-import os, io, pwd, grp
+import os
+import io
+import pwd
+import grp
 import traceback
 
 from ansible.module_utils.basic import AnsibleModule
@@ -103,9 +106,9 @@ def main():
 
     module = AnsibleModule(
         supports_check_mode=True,
-        argument_spec=dict(
-            conninfo=dict(default=""),
-        ),
+        argument_spec={
+            "conninfo": {"default": ""},
+        },
     )
 
     if not psycopg2_found:
@@ -128,7 +131,7 @@ def main():
 
 
 def cluster_discovery(module, conn):
-    m = dict()
+    m = {}
     cur = conn.cursor()
 
     # First, we discover postgres_version and its variants.
@@ -155,14 +158,13 @@ def cluster_discovery(module, conn):
     except psycopg2.Error as e:
         # if the param does not exist, that's OK; if there is some
         # other error, we need to let it propagate
-        if e.pgcode == '42704':
+        if e.pgcode == "42704":
             ebcm = None
             cur.execute("ROLLBACK")
         else:
             raise
     if ebcm is not None:
         settings["bdr.enable_builtin_connection_manager"] = ebcm[0]
-
 
     m["postgres_port"] = int(settings["port"])
     m["postgres_data_dir"] = settings["data_directory"]
@@ -174,22 +176,23 @@ def cluster_discovery(module, conn):
 
     cur.execute("SELECT pg_backend_pid()")
     pid = cur.fetchone()[0]
-    m["postgres_bin_dir"] = os.path.dirname(os.readlink("/proc/%d/exe" % pid))
+    m["postgres_bin_dir"] = os.path.dirname(os.readlink(f"/proc/{pid}/exe"))
 
-    for line in io.open("/proc/%d/status" % pid, "r"):
-        s = line.split()
+    with io.open(f"/proc/{pid}/status", "r", encoding="utf-8") as status_file:
+        for line in status_file:
+            s = line.split()
 
-        if not s:
-            continue
+            if not s:
+                continue
 
-        if s[0] == "Uid:":
-            ent = pwd.getpwuid(int(s[1]))
-            m["postgres_user"] = ent.pw_name
-            m["postgres_home"] = ent.pw_dir
+            if s[0] == "Uid:":
+                ent = pwd.getpwuid(int(s[1]))
+                m["postgres_user"] = ent.pw_name
+                m["postgres_home"] = ent.pw_dir
 
-        elif s[0] == "Gid:":
-            ent = grp.getgrgid(int(s[1]))
-            m["postgres_group"] = ent.gr_name
+            elif s[0] == "Gid:":
+                ent = grp.getgrgid(int(s[1]))
+                m["postgres_group"] = ent.gr_name
 
     # We're done with the basic system facts, so we move on to querying the
     # server to get an idea of its place in the world^Wcluster.
@@ -206,31 +209,31 @@ def cluster_discovery(module, conn):
 def major_version(version_num):
     v = str(int(version_num / 10000))
     if 10 > int(version_num) / 10000:
-        v = "%s.%s" % (v, str(int(version_num / 100) % 10))
+        v = f"{v}.{int(version_num / 100) % 10!s}"
 
     return v
 
 
 def catalog_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     required_catalogs = ["pg_stat_replication", "pg_replication_slots"]
     optional_catalogs = ["pg_stat_wal_receiver"]
 
     for cr in required_catalogs:
-        m.update({cr: query_results(conn, "SELECT * FROM pg_catalog.%s" % cr)})
+        m.update({cr: query_results(conn, f"SELECT * FROM pg_catalog.{cr}")})
 
     for cr in optional_catalogs:
         res = []
-        if relation_exists(conn, "pg_catalog.%s" % cr):
-            res = query_results(conn, "SELECT * FROM pg_catalog.%s" % cr)
+        if relation_exists(conn, f"pg_catalog.{cr}"):
+            res = query_results(conn, f"SELECT * FROM pg_catalog.{cr}")
         m.update({cr: res})
 
     return m
 
 
 def replica_discovery(module, conn, m0):
-    m = dict()
+    m = {}
     cur = conn.cursor()
 
     cur.execute("SELECT pg_is_in_recovery()")
@@ -267,8 +270,8 @@ def replica_discovery(module, conn, m0):
 
 
 def database_discovery(module, conn, m0):
-    m = dict()
-    m["databases"] = dict()
+    m = {}
+    m["databases"] = {}
     m["bdr_databases"] = []
 
     dbs = query_results(
@@ -285,7 +288,7 @@ def database_discovery(module, conn, m0):
         if datname in ("template0", "bdr_supervisordb"):
             continue
 
-        db_conn = psycopg2.connect(module.params["conninfo"] + " dbname=%s" % datname)
+        db_conn = psycopg2.connect(f"{module.params['conninfo']} dbname={datname}")
 
         results.update(schema_discovery(module, db_conn, m0))
         results.update(extension_discovery(module, db_conn, m0))
@@ -299,8 +302,8 @@ def database_discovery(module, conn, m0):
 
 
 def schema_discovery(module, conn, m0):
-    m = dict()
-    m["schemas"] = dict()
+    m = {}
+    m["schemas"] = {}
 
     schemas = query_results(
         conn, "SELECT nspname, nspowner, nspacl FROM pg_catalog.pg_namespace"
@@ -315,8 +318,8 @@ def schema_discovery(module, conn, m0):
 
 
 def extension_discovery(module, conn, m0):
-    m = dict()
-    m["extensions"] = dict()
+    m = {}
+    m["extensions"] = {}
 
     extensions = query_results(conn, "SELECT * FROM pg_catalog.pg_extension")
     for e in extensions:
@@ -329,7 +332,7 @@ def extension_discovery(module, conn, m0):
 
 
 def pglogical_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     if relation_exists(conn, "pglogical.node"):
         try:
@@ -338,7 +341,7 @@ def pglogical_discovery(module, conn, m0):
                 """SELECT pglogical.pglogical_version(),
                 pglogical.pglogical_version_num()""",
             )
-        except psycopg2.Error as _:
+        except psycopg2.Error:
             # Since pglogical.node exists, the version query should fail only if
             # the pglogical extension does not exist. This could happen if we've
             # removed it from shared_preload_libraries during an upgrade to BDR4
@@ -368,7 +371,7 @@ def get_shared_fields_config_bdr_5_6(conn):
 
 
 def bdr_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     bdr_major_version = 0
 
@@ -408,28 +411,28 @@ def bdr_discovery(module, conn, m0):
 
 
 def repmgr_discovery(module, conn, m0):
-    m = dict()
+    m = {}
 
     repmgr_conf = read_repmgr_conf(m0)
     if repmgr_conf is not None:
         m["repmgr_conf"] = repmgr_conf
 
     if "repmgr" in m0["databases"]:
-        repmgr_conn = psycopg2.connect(module.params["conninfo"] + " dbname=repmgr")
+        repmgr_conn = psycopg2.connect(f"{module.params['conninfo']} dbname=repmgr")
 
         repmgr_schema = repmgr_schema_name(repmgr_conn)
         if repmgr_schema is not None:
             m["repmgr_schema"] = repmgr_schema
             m["nodes"] = query_results(
-                repmgr_conn, 'SELECT * FROM "%s".nodes' % repmgr_schema
+                repmgr_conn, f'SELECT * FROM "{repmgr_schema}".nodes'
             )
 
     return {"repmgr": m} if m else {}
 
 
 def role_discovery(module, conn, m0):
-    m = dict()
-    m["roles"] = dict()
+    m = {}
+    m["roles"] = {}
 
     roles = query_results(
         conn,
@@ -450,8 +453,8 @@ def role_discovery(module, conn, m0):
     return m
 
 
-def parse_kv(str):
-    parts = [x.strip() for x in str.split("=", 1)]
+def parse_kv(text):
+    parts = [x.strip() for x in text.split("=", 1)]
 
     v = None
     if len(parts) == 2:
@@ -469,19 +472,20 @@ def parse_kv(str):
 
 def parse_conninfo(conninfo):
     settings = {}
-    for str in conninfo.split(" "):
-        settings.update(parse_kv(str.strip()))
+    for part in conninfo.split(" "):
+        settings.update(parse_kv(part.strip()))
 
     return settings
 
 
 def parse_kv_lines(filename):
-    m = dict()
+    m = {}
 
-    for line in io.open(filename, "r"):
-        line = line.strip()
-        if not (line == "" or line.startswith("#")):
-            m.update(parse_kv(line))
+    with io.open(filename, "r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not (line == "" or line.startswith("#")):
+                m.update(parse_kv(line))
 
     return m
 
@@ -496,7 +500,7 @@ def read_recovery_conf(m0):
 def read_repmgr_conf(m0):
     m = None
 
-    repmgr_conf = os.path.join("/etc/repmgr/%s/repmgr.conf" % m0["postgres_version"])
+    repmgr_conf = os.path.join(f"/etc/repmgr/{m0['postgres_version']}/repmgr.conf")
     try:
         m = parse_kv_lines(repmgr_conf)
     except (IOError, OSError):
@@ -508,7 +512,7 @@ def read_repmgr_conf(m0):
 def relation_exists(conn, relname):
     nspname = "public"
     if "." in relname:
-        (nspname, relname) = relname.split(".", 1)
+        nspname, relname = relname.split(".", 1)
 
     cur = conn.cursor()
     cur.execute(
@@ -524,7 +528,7 @@ def relation_exists(conn, relname):
 def function_exists(conn, proname):
     nspname = "public"
     if "." in proname:
-        (nspname, proname) = proname.split(".", 1)
+        nspname, proname = proname.split(".", 1)
 
     cur = conn.cursor()
     cur.execute(

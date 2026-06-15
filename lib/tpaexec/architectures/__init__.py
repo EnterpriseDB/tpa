@@ -34,7 +34,7 @@ class SelectArchitecture:
         try:
             return cls.ARCHITECTURES[name](*args, **kwargs)
         except KeyError:
-            raise ArchitectureError(f"Unknown architecture: {name}")
+            raise ArchitectureError(f"Unknown architecture: {name}") from None
 
 
 def configure(argv, tpa_dir=None):
@@ -58,7 +58,7 @@ def configure(argv, tpa_dir=None):
         tpa_dir = tpa_dir or os.environ.get("TPA_DIR", None)
         lib_dir = os.path.join(tpa_dir, "architectures", "lib")
     except TypeError:
-        raise EnvironmentError("TPA_DIR not defined")
+        raise EnvironmentError("TPA_DIR not defined") from None
 
     # Partially parse just the architecture argument to feed SelectArchitecture
     arch_parser = ArgumentParser(

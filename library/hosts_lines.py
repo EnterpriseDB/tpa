@@ -55,8 +55,8 @@ def hosts_lines(module):
     diff = {
         "before": "",
         "after": "",
-        "before_header": "%s (content)" % path,
-        "after_header": "%s (content)" % path,
+        "before_header": f"{path} (content)",
+        "after_header": f"{path} (content)",
     }
 
     # Given a list of lines that may include comments, blank lines (which don't
@@ -68,11 +68,11 @@ def hosts_lines(module):
     lines = set()
     to_replace = set()
 
-    for l in module.params.get("lines"):
-        lines.add(l)
+    for entry in module.params.get("lines"):
+        lines.add(entry)
 
-        if not l.lstrip().startswith("#"):
-            words = l.split()
+        if not entry.lstrip().startswith("#"):
+            words = entry.split()
             for n in words:
                 to_replace.add(n)
 
@@ -82,22 +82,22 @@ def hosts_lines(module):
 
     try:
         b_path = to_bytes(path, errors="surrogate_or_strict")
-        with open(b_path, "r") as f:
+        with open(b_path, "r", encoding="utf-8") as f:
             before_lines = f.readlines()
 
         for line in before_lines:
-            l = line.rstrip("\r\n")
+            stripped = line.rstrip("\r\n")
 
             # If a line we want is already there, we copy it to the output and
             # remove it from the list of lines to append. If the line contains
             # an address or name that overlaps with an entry we are adding, we
             # skip it. Otherwise we copy it over unmodified.
 
-            if l in lines:
-                lines.remove(l)
+            if stripped in lines:
+                lines.remove(stripped)
 
-            elif not l.lstrip().startswith("#"):
-                words = l.split()
+            elif not stripped.lstrip().startswith("#"):
+                words = stripped.split()
                 if set(words) & to_replace:
                     changes.append("skip")
                     continue
@@ -106,8 +106,8 @@ def hosts_lines(module):
 
         if lines:
             changes.append("append")
-            for l in lines:
-                after_lines.append(l + "\n")
+            for entry in lines:
+                after_lines.append(f"{entry}\n")
 
         # If we didn't need to skip any existing lines, we can just append the
         # new lines to /etc/hosts. Otherwise we must replace the file, which we
@@ -135,7 +135,7 @@ def hosts_lines(module):
 
             else:
                 m["operation"] = "append"
-                contents = to_bytes("".join(map(lambda l: l + "\n", lines)))
+                contents = to_bytes("".join(f"{entry}\n" for entry in lines))
                 with open(b_path, "ab") as f:
                     f.write(contents)
     except Exception as e:
@@ -151,12 +151,12 @@ def hosts_lines(module):
 
 def main():
     module = AnsibleModule(
-        argument_spec=dict(
-            path=dict(type="path", required=True),
-            lines=dict(type="list", required=True),
-            unsafe_writes=dict(type="bool"),
-            platform=dict(type="str"),
-        ),
+        argument_spec={
+            "path": {"type": "path", "required": True},
+            "lines": {"type": "list", "required": True},
+            "unsafe_writes": {"type": "bool"},
+            "platform": {"type": "str"},
+        },
         supports_check_mode=True,
     )
 

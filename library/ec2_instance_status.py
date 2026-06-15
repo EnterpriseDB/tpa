@@ -64,7 +64,7 @@ def get_instance_status(module, client):
 
     instance_id = module.params.get("instance_id")
 
-    status = dict()
+    status = {}
     status["failed"] = True
     ret = client.describe_instance_status(InstanceIds=[instance_id])
     status["results"] = ret
@@ -100,7 +100,7 @@ def get_instance_status(module, client):
 
 def main():
     argument_spec = ec2_argument_spec()
-    argument_spec.update(dict(instance_id=dict(required=True)))
+    argument_spec.update({"instance_id": {"required": True}})
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=False)
 

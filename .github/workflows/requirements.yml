@@ -162,6 +162,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changelog: ${{ steps.list-collections.outputs.changelog }}
+      changed: ${{ steps.list-collections.outputs.changed }}
     steps:
       - name: Checkout source repository
         id: checkout-source
@@ -183,7 +184,8 @@ jobs:
           COLLECTIONS=$(yq -r '.collections[] | .name' collections/requirements.yml)
           for col in $COLLECTIONS; do
             chmod 755 ./.github/scripts/check_one_collection.sh
-            ./.github/scripts/check_one_collection.sh $col collections/requirements.yml
+            PIN=$(yq ".main[\"$col\"] // \"\"" collections/pins.yml)
+            ./.github/scripts/check_one_collection.sh $col collections/requirements.yml "$PIN"
             if [ "$(cat $FLAG_FILE)" == "true" ]; then
               COLLECTION_UPDATE_FLAG="true"
             fi
@@ -251,6 +253,7 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: Download generated collections/requirements.yml
+        if: needs.list-collections.outputs.changed == 'true'
         uses: actions/download-artifact@v8
         with:
           name: collection-requirements.yml

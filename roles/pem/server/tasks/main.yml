@@ -33,6 +33,15 @@
     - task_selector|selects('pem-server', 'pkg')
     - pem_is_v10_or_higher | default(true)
 
+# Install PEM web server packages (WSGI) after the PEM version facts are set, as some of these packages
+# differ from one version to another.
+
+- include_role:
+    name: pem/server/pkg
+    tasks_from: webserver-packages.yml
+  when:
+    - task_selector|selects('pem-server', 'pem-webserver', 'pkg')
+
 - include_role:
     name: pem/server/config/webserver
   when: >

@@ -115,7 +115,7 @@ runs:
 
     - name: Upgrade the cluster
       working-directory: ${{ inputs.source_directory }}
-      run: ./bin/tpaexec upgrade "$CLUSTER" -vv
+      run: ./bin/tpaexec upgrade "$CLUSTER" -vv -e enable_proxy_monitoring=yes
       shell: bash
 
     - name: Test the cluster

@@ -14,6 +14,9 @@ unix_socket_directories = '{{ unix_socket_directories|join(", ") }}'
 max_connections = {{ max_connections }}
 
 shared_buffers = {{ shared_buffers|default(shared_buffers_mb~'MB') }}
+{% if huge_page_size|default(none) is not none %}
+huge_page_size = '{{ huge_page_size }}'
+{% endif %}
 max_prepared_transactions = {{ max_prepared_transactions|default(0) }}
 
 max_worker_processes = {{ max_worker_processes }}
@@ -28,6 +31,9 @@ archive_mode = on
 
 max_wal_senders = {{ max_wal_senders|default(16) }}
 max_replication_slots = {{ max_replication_slots|default(16) }}
+{% if postgres_version is version('18', '>=') and max_active_replication_origins is defined %}
+max_active_replication_origins = {{ max_active_replication_origins }}
+{% endif %}
 {% if postgres_version is version('13', '>=') %}
 wal_keep_size = {{ wal_keep_size|default((wal_segment_size|default(16))*(wal_keep_segments|default(0))) }}
 {% else %}

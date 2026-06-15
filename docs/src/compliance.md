@@ -133,6 +133,9 @@ extensions:
 extra_postgres_extensions: ["passwordcheck", "pgaudit"]
 ```
 
+On EPAS clusters, `pgaudit` is omitted from this list, because EPAS
+has built-in audit logging.
+
 The following entry is added to `cluster_vars` to set the umask for
 the postgres OS user:
 

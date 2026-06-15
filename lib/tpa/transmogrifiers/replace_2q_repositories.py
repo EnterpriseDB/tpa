@@ -68,7 +68,7 @@ class Replace2qRepositories(Transmogrifier):
 
         bdr_version = cluster.vars.get("bdr_version")
         if bdr_version is not None and bdr_version not in ("3", "4"):
-            cr.error(f"BDR version { bdr_version } cannot be upgraded (must be 3 or 4)")
+            cr.error(f"BDR version {bdr_version} cannot be upgraded (must be 3 or 4)")
 
         return cr
 

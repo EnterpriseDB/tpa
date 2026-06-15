@@ -20,8 +20,7 @@ except ImportError:
 
 def md5_password(password, username):
     return (
-        "md5%s"
-        % hashlib.md5(password.encode("utf-8") + username.encode("utf-8")).hexdigest()
+        f"md5{hashlib.md5(password.encode('utf-8') + username.encode('utf-8')).hexdigest()}"
     )
 
 
@@ -32,22 +31,19 @@ def md5_password(password, username):
 def scram_password(password, salt=None, rounds=4096):
     s = scram.using(rounds=rounds, salt=salt, algs="sha-1,sha-256").hash(password)
 
-    (salt, rounds, SaltedPassword) = scram.extract_digest_info(s, "sha-256")
+    salt, rounds, SaltedPassword = scram.extract_digest_info(s, "sha-256")  # noqa: N806
 
-    ClientKey = HMAC(
+    ClientKey = HMAC(  # noqa: N806
         SaltedPassword, "Client Key".encode("ascii"), hashlib.sha256
     ).digest()
-    ServerKey = HMAC(
+    ServerKey = HMAC(  # noqa: N806
         SaltedPassword, "Server Key".encode("ascii"), hashlib.sha256
     ).digest()
-    StoredKey = hashlib.sha256(ClientKey).digest()
+    StoredKey = hashlib.sha256(ClientKey).digest()  # noqa: N806
 
-    return "%s$%s:%s$%s:%s" % (
-        "SCRAM-SHA-256",
-        rounds,
-        base64.b64encode(salt).decode("ascii"),
-        base64.b64encode(StoredKey).decode("ascii"),
-        base64.b64encode(ServerKey).decode("ascii"),
+    return (
+        f"SCRAM-SHA-256${rounds}:{base64.b64encode(salt).decode('ascii')}"
+        f"${base64.b64encode(StoredKey).decode('ascii')}:{base64.b64encode(ServerKey).decode('ascii')}"
     )
 
 
@@ -61,7 +57,7 @@ def encrypted_password(
 ):
     if password_encryption == "md5":
         return md5_password(str(password), username)
-    elif password_encryption == "scram-sha-256":
+    if password_encryption == "scram-sha-256":
         salt = None
         rounds = None
 
@@ -71,20 +67,19 @@ def encrypted_password(
             )
 
         if existing_password and existing_password.startswith("SCRAM-SHA-256$"):
-            (_, info, _) = existing_password.split("$", 2)
-            (rounds, b64salt) = info.split(":", 1)
+            _, info, _ = existing_password.split("$", 2)
+            rounds, b64salt = info.split(":", 1)
             salt = base64.b64decode(b64salt)
             rounds = int(rounds)
 
         return scram_password(str(password), salt=salt, rounds=rounds)
 
     raise AnsibleFilterError(
-        "|encrypted_password does not recognise password_encryption scheme %s"
-        % password_encryption
+        f"|encrypted_password does not recognise password_encryption scheme {password_encryption}"
     )
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "encrypted_password": encrypted_password,

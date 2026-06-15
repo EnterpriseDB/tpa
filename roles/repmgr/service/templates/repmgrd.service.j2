@@ -8,6 +8,11 @@ Wants={{ postgres_service_name }}-monitor.service
 Type=simple
 User={{ postgres_user }}
 Group={{ postgres_group }}
+{% if repmgr_service_environment is defined and repmgr_service_environment is mapping %}
+{%   for k,v in repmgr_service_environment.items() %}
+Environment={{ k }}={{ v }}
+{%   endfor %}
+{% endif %}
 StandardOutput=syslog
 ExecStart={{ postgres_bin_dir }}/repmgrd -f {{ repmgr_conf_file }} --verbose {{ no_daemonize }}
 ExecStop=/bin/kill -TERM $MAINPID

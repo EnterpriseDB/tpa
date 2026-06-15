@@ -19,6 +19,15 @@
     _allow_package_upgrades: yes
   when: pem_is_v10_or_higher | default(true)
 
+# We check for web server package updates here, due to differences 
+# between PEM v10.4.0+ and earlier versions
+
+- include_role:
+    name: pem/server/pkg
+    tasks_from: webserver-packages.yml
+  when:
+    - task_selector|selects('pem-server', 'pkg')
+  
 - include_role:
     name: pem/server/config/webserver
 

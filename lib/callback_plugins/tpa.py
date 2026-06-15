@@ -66,7 +66,7 @@ class CallbackModule(CallbackModule_default):
         if self._use_standard_plugin:
             self._super.v2_playbook_on_include(included_file)
         else:
-            self._task_name += " " + included_file._filename.partition("roles/")[2]
+            self._task_name += f" {included_file._filename.partition('roles/')[2]}"
 
     def v2_playbook_on_task_start(self, task, is_conditional):
         if self._use_standard_plugin:
@@ -119,7 +119,7 @@ class CallbackModule(CallbackModule_default):
             if not name:
                 msg = "PLAY"
             else:
-                msg = "PLAY [%s]" % (name)
+                msg = f"PLAY [{name}]"
             self._current_play = play
 
             self._display.banner(msg)
@@ -141,9 +141,9 @@ class CallbackModule(CallbackModule_default):
             if result._task.action in C._ACTION_DEBUG:
                 self._clean_results(result._result, result._task.action)
                 self._output_lines.append(
-                    f"{result._host.get_name()} => { self._dump_results(result._result) }"
+                    f"{result._host.get_name()} => {self._dump_results(result._result)}"
                 )
-            if result._result.get('changed', False):
+            if result._result.get("changed", False):
                 self._changed += 1
             else:
                 self._ok += 1
@@ -155,11 +155,7 @@ class CallbackModule(CallbackModule_default):
             if not ignore_errors:
                 host_label = self.host_label(result)
                 self._errors.append(
-                    "fatal: [%s]: FAILED! => %s"
-                    % (
-                        host_label,
-                        self._dump_results(result._result),
-                    )
+                    f"fatal: [{host_label}]: FAILED! => {self._dump_results(result._result)}"
                 )
 
             self._failed += 1
@@ -176,11 +172,7 @@ class CallbackModule(CallbackModule_default):
         else:
             host_label = self.host_label(result)
             self._errors.append(
-                "fatal: [%s]: UNREACHABLE! => %s"
-                % (
-                    host_label,
-                    self._dump_results(result._result),
-                )
+                f"fatal: [{host_label}]: UNREACHABLE! => {self._dump_results(result._result)}"
             )
 
             self._failed += 1
@@ -251,7 +243,7 @@ class CallbackModule(CallbackModule_default):
         if not _suppress_task(self._task_name):
             self._pending_output_line = True
             indents = len(self._uuid_stack) * "  "
-            self._display.display("%s%s" % (indents, self._task_name), newline=False)
+            self._display.display(f"{indents}{self._task_name}", newline=False)
 
     def _show_task_counters(self):
         error_color = C.COLOR_WARN
@@ -262,22 +254,18 @@ class CallbackModule(CallbackModule_default):
         if self._pending_output_line:
             self._pending_output_line = False
             self._display.display(
-                " (%s/%s/%s/%s)"
-                % (
-                    stringc(str(self._ok), C.COLOR_OK),
-                    stringc(str(self._changed), C.COLOR_CHANGED),
-                    stringc(str(self._skipped), C.COLOR_SKIP),
-                    stringc(str(self._failed), error_color),
-                ),
+                f" ({stringc(str(self._ok), C.COLOR_OK)}"
+                f"/{stringc(str(self._changed), C.COLOR_CHANGED)}"
+                f"/{stringc(str(self._skipped), C.COLOR_SKIP)}"
+                f"/{stringc(str(self._failed), error_color)})",
                 screen_only=True,
             )
             self._display.display(
-                "%s %s ok, %s changed, %s skipped, %s failed"
-                % (indents, self._ok, self._changed, self._skipped, self._failed),
+                f"{indents} {self._ok} ok, {self._changed} changed, {self._skipped} skipped, {self._failed} failed",
                 log_only=True,
             )
 
         for error in self._errors:
-            self._display.display("%s%s" % (indents, error), C.COLOR_ERROR)
+            self._display.display(f"{indents}{error}", C.COLOR_ERROR)
         for line in self._output_lines:
-            self._display.display("%s%s" % (indents, line), C.COLOR_OK)
+            self._display.display(f"{indents}{line}", C.COLOR_OK)

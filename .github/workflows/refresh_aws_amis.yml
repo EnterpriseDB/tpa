@@ -1,0 +1,78 @@
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Refresh the default AWS AMIs in TPA's platform map.
+#
+# Runs weekly (Mondays 04:17 UTC) and on-demand. Queries AWS for the latest
+# AMI in each family and opens a draft PR if updates are needed. Does not
+# do any provision/SSH verification — that judgement stays with the human
+# reviewer (or the `aws-ami-refresh` skill if they want to verify).
+
+name: Refresh AWS AMIs
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    name: Refresh AWS AMIs and open PR if needed
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::629432531727:role/tpa_gh_aws_role
+          role-session-name: refresh-aws-amis
+          aws-region: eu-west-1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install boto3 black
+
+      - name: Refresh AMIs
+        run: python .github/scripts/refresh_aws_amis.py
+
+      - name: Black format check
+        run: black --check lib/tpa/platforms/aws.py lib/tpaexec/platforms/aws.py
+
+      - name: Open draft PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GH_SLONIK }}
+          branch: bot/refresh-aws-amis
+          base: main
+          title: Refresh AWS AMIs to currently-available images
+          body: |
+            Automated refresh of the default AWS AMIs in TPA's platform map.
+
+            ## What this is
+
+            Created by `.github/workflows/refresh_aws_amis.yml`. The
+            workflow queries AWS for the latest AMI in each family
+            (date-suffix or minor-floating) and rewrites both
+            `lib/tpa/platforms/aws.py` and `lib/tpaexec/platforms/aws.py`
+            if newer images are available.
+
+            **No provision/SSH verification has been performed.** If you
+            want to verify before merging, run the `aws-ami-refresh` skill
+            or follow the manual steps in `agent-docs/AWS-DEPLOYMENT.md`.
+          draft: true
+          delete-branch: true
+          commit-message: |
+            Refresh AWS AMIs to currently-available images
+
+            Automated refresh by .github/workflows/refresh_aws_amis.yml.

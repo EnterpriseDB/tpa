@@ -55,6 +55,15 @@ jobs:
           repository: EnterpriseDB/tpa-internal
           token: ${{ env.GITHUB_TOKEN }}
 
+      - name: Check for pin of ${{ matrix.collection }}
+        id: pin-check
+        run: |
+          PIN=$(yq ".main[\"${{ matrix.collection }}\"] // \"\"" collections/pins.yml)
+          if [[ -n "$PIN" ]]; then
+            echo "Found pin: $PIN"
+          fi
+          echo "PINNED_VERSION=$PIN" >> $GITHUB_ENV
+
       - name: Check for update of ${{ matrix.collection }}
         id: update-check
         run: |
@@ -62,7 +71,7 @@ jobs:
           export CHANGELOG_PATH="$RUNNER_TEMP/changelog"
 
           chmod 755 ./.github/scripts/check_one_collection.sh
-          ./.github/scripts/check_one_collection.sh "${{ matrix.collection }}" collections/requirements.yml
+          ./.github/scripts/check_one_collection.sh "${{ matrix.collection }}" collections/requirements.yml "$PINNED_VERSION"
 
           if [ $(cat $FLAG_FILE) == "true" ]; then
             echo "changelog=$(cat $CHANGELOG_PATH)" >> $GITHUB_OUTPUT
@@ -137,7 +146,7 @@ jobs:
       - name: Check for pin of ${{ matrix.collection }}
         id: pin-check
         run: |
-          PIN=$(yq ".[\"${{ matrix.collection }}\"] // \"\"" collections/rh8-pins.yml )
+          PIN=$(yq ".rh8[\"${{ matrix.collection }}\"] // \"\"" collections/pins.yml)
           if [[ -n "$PIN" ]]; then
             echo "Found pin: $PIN"
           fi

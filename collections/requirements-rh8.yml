@@ -1,15 +1,15 @@
 collections:
   - name: community.crypto
-    version: 2.26.7
+    version: 2.26.8
   - name: community.aws
     version: 9.3.0
   - name: amazon.aws
     version: 9.5.2
   - name: community.postgresql
-    version: 3.14.2
+    version: 3.14.3
   - name: community.general
-    version: 11.4.5
+    version: 11.4.8
   - name: ansible.posix
-    version: 2.1.0
+    version: 2.2.0
   - name: community.docker
     version: 4.8.7

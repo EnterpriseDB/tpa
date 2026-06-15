@@ -75,8 +75,8 @@ For more details:
 
 TPA will try to detect the distribution running on target instances,
 and fail if it is not supported. TPA currently supports Debian
-(10/11/12; or buster/bullseye/bookworm), Ubuntu (16.04/18.04/20.04/22.04; or
-xenial/bionic/focal/jammy), and RHEL/CentOS/Rocky/AlmaLinux (7.x/8.x) on `bare` instances.
+(11/12; or bullseye/bookworm), Ubuntu (22.04/24.04; or
+jammy/noble), and RHEL/Rocky/AlmaLinux (8.x/9.x) on `bare` instances.
 
 ## IP addresses
 

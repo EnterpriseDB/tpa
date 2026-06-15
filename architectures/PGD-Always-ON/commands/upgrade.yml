@@ -27,36 +27,20 @@
   import_playbook: "{{ tpa_dir }}/architectures/common/playbooks/check_upgrade_components.yml"
 
 # This command performs upgrades for PGD-Always-ON clusters, including
-# Postgres (minor versions only) and BDR (major: 4→5 or minor: 5.x→5.y)
-# upgrades.
+# Postgres (minor versions only) and BDR (major: 3→5, 4→5, or minor:
+# 5.x→5.y) upgrades.
 #
-# Upgrading from BDR v4 to v5 means changing the cluster's architecture
-# from BDR-Always-ON to PGD-Always-ON using `tpaexec reconfigure`, and
-# then running `tpaexec upgrade`. Minor-version upgrades don't require
-# any configuration changes.
+# This dispatcher detects the running BDR version on each node and
+# forks to the appropriate upgrade playbook:
 #
-# The overall process is similar either way:
+#   - upgrade_major_3to5.yml  (BDR 3 → PGD 5)
+#   - upgrade_major_4to5.yml  (BDR 4 → PGD 5)
+#   - upgrade_minor_5.yml     (PGD 5.x → 5.y)
 #
-# 1. Check that the cluster looks normal before doing anything.
-# 2. Then, for each Postgres instance:
-#    a. Fence the node (depending on the configuration)
-#    b. Stop, update, and restart Postgres
-#    c. Unfence the node if necessary
-#    d. Install and configure new packages (again, depending on the
-#       cluster's configuration)
-#    e. Wait for the cluster to settle before moving on
-# 3. Perform some additional tasks that are relevant only to major
-#    version upgrades:
-#    a. Repeat v5-specific BDR configuration, including:
-#       i. Set node_kind for each instance
-#       ii. Create node groups and set group options
-#       iii. Create and configure proxies
-#    b. Replace harp-proxy with pgd-proxy
-#    c. Completely remove harp
-# 4. Check that the cluster looks normal at the end
-#
-# Extra tasks relevant only to the BDR major version upgrade are made
-# conditional on "bdr_major_version_upgrade" throughout.
+# Upgrading from BDR v3/v4 to v5 requires changing the cluster's
+# architecture using `tpaexec reconfigure` before running
+# `tpaexec upgrade`. Minor-version upgrades don't require any
+# configuration changes.
 
 - name: Determine upgrade type for cluster {{ cluster_dir }}
   any_errors_fatal: true
@@ -158,12 +142,12 @@
         "{{ enable_proxy_monitoring|default(false) }}"
 
 # We now are ready to fork to the correct upgrade workflow
-- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_legacy.yml"
-  vars:
-    bdr_major_version_upgrade: "{{ bdr4_major_version_upgrade }}"
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_4to5.yml"
   when: >
     bdr4_major_version_upgrade
-    or
+
+- import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_minor_5.yml"
+  when: >
     bdr5_minor_version_upgrade
 
 - import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_3to5.yml"

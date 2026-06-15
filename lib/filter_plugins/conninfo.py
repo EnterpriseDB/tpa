@@ -7,14 +7,15 @@ from typing import Dict, List
 
 
 def parse_conninfo(conninfo: str, key: str = None) -> Dict[str, str]:
-    """
+    """Parse a conninfo string into a dict of settings.
+
     Takes a conninfo string and returns a dict of the settings it represents; or
     if given a key, returns the value if the key is specified, or None.
     """
 
     settings = {}
-    for str in conninfo.strip().split(" "):
-        parts = [x.strip() for x in str.strip().split("=", 1)]
+    for part_str in conninfo.strip().split(" "):
+        parts = [x.strip() for x in part_str.strip().split("=", 1)]
 
         v = None
         if len(parts) == 2:
@@ -35,7 +36,9 @@ def parse_conninfo(conninfo: str, key: str = None) -> Dict[str, str]:
 def conninfo_string(d: Dict[str, str]) -> str:
     """
     Returns a conninfo string assembled from the keys and values in the dict d.
+
     Values are single-quoted if needed.
+
     """
 
     def _quote(s):
@@ -45,12 +48,13 @@ def conninfo_string(d: Dict[str, str]) -> str:
 
     s = []
     for k, v in d.items():
-        s.append("%s=%s" % (k, _quote(str(v))))
+        s.append(f"{k}={_quote(str(v))}")
     return " ".join(s)
 
 
 def dbname(conninfo: str, dbname: str = "postgres", **kwargs) -> str:
-    """
+    """Return a conninfo string with dbname and other settings added.
+
     Given a conninfo string, a dbname, and optional additional key=value
     settings, returns a new conninfo string that includes the dbname and other
     settings.
@@ -63,7 +67,8 @@ def dbname(conninfo: str, dbname: str = "postgres", **kwargs) -> str:
 
 
 def multihost_conninfo(conninfos: List[str]) -> str:
-    """
+    """Merge a list of conninfo strings into a multi-host conninfo.
+
     Takes a list of conninfo strings and returns a conninfo with the host and
     port set to comma-separated strings of the hosts and ports in the original
     list (or port set to a single value if all conninfos have the same value),
@@ -128,14 +133,13 @@ def provider_dsn(sub, hostvars):
     publication = sub.get("publication")
     if not publication:
         raise AnsibleFilterError(
-            "Subscription %s does not specify .publication.name(+instance)"
-            % sub.get("name")
+            f"Subscription {sub.get('name')} does not specify .publication.name(+instance)"
         )
 
     name = publication.get("name")
     if not name:
         raise AnsibleFilterError(
-            "Subscription %s does not specify .publication.name" % sub.get("name")
+            f"Subscription {sub.get('name')} does not specify .publication.name"
         )
 
     providers = list(hostvars.keys())
@@ -145,20 +149,19 @@ def provider_dsn(sub, hostvars):
 
     matches = []
     for h in providers:
-        vars = hostvars.get(h, {})
-        publications = vars.get("publications", [])
+        host_vars = hostvars.get(h, {})
+        publications = host_vars.get("publications", [])
         for p in publications:
             if p.get("type") == "pglogical" and p.get("name") == name:
-                matches.append(dbname(vars.get("node_dsn"), p.get("database")))
+                matches.append(dbname(host_vars.get("node_dsn"), p.get("database")))
 
     if not matches:
         raise AnsibleFilterError(
-            "Publication %s (subscription=%s) not found" % (name, sub.get("name"))
+            f"Publication {name} (subscription={sub.get('name')}) not found"
         )
     if len(matches) != 1:
         raise AnsibleFilterError(
-            "Publication %s (subscription=%s) not unique; specify instance"
-            % (name, sub.get("name"))
+            f"Publication {name} (subscription={sub.get('name')}) not unique; specify instance"
         )
 
     return matches[0]

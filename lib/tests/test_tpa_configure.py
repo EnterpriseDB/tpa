@@ -13,7 +13,8 @@ from tpa.exceptions import ConfigureError, UnsupportedArchitectureError
 from tpa.cluster import Cluster
 from tpa.platform import Platform
 
-@pytest.fixture(scope='function')
+
+@pytest.fixture(scope="function")
 def cleanup_test_dir():
     """Fixture to ensure that the 'tests' directory is cleaned up"""
 
@@ -25,6 +26,7 @@ def cleanup_test_dir():
 
     if test_path.exists():
         shutil.rmtree(test_path)
+
 
 class BasicArchitecture(Architecture):
     """Basic architecture to test configure function"""
@@ -60,9 +62,12 @@ class BasicArchitecture(Architecture):
         self.platform = platform
         return cluster
 
+
 class BasicPlatform(Platform):
     """Basic platform"""
+
     pass
+
 
 all_architectures.update({"Basic": BasicArchitecture})
 

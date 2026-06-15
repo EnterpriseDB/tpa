@@ -96,6 +96,13 @@ default by setting `shared_buffers_ratio: 0.35` to use a different proportion,
 or by setting `shared_buffers_mb: 796` to a specific number of MB, or by
 specifying an exact value directly, e.g., `shared_buffers: "2GB"`.
 
+## huge_page_size
+
+TPA reserves hugepages of the architecture's default size for Postgres
+to use. To use a different size, see [hugepages](sysctl_values.md#hugepages):
+setting `huge_page_size` reserves pages of that size on the kernel
+command line and sets `huge_page_size` in `postgresql.conf` accordingly.
+
 ## effective_cache_size
 
 By default, TPA will set `effective_cache_size` to 50% of the available
@@ -103,6 +110,30 @@ memory. You can override this default by setting
 `effective_cache_size_ratio: 0.35` to use a different proportion, or by setting
 `effective_cache_size_mb: 796` to a specific number of MB, or by specifying an
 exact value directly, e.g., `effective_cache_size: "8GB"`.
+
+## max_active_replication_origins
+
+PostgreSQL 18 introduced the `max_active_replication_origins` GUC to
+control the number of simultaneously active replication origins. Before
+PostgreSQL 18, this was implicitly limited by `max_replication_slots`.
+
+For PGD clusters on PostgreSQL 18 and above, TPA sets
+`max_active_replication_origins` to `3 * number_of_nodes + 3`. This stays
+comfortably above the "3 per peer node" minimum
+[recommended by the EDB PGD documentation](https://www.enterprisedb.com/docs/pgd/latest/postgres-configuration/#postgres-settings),
+leaving a safety margin for transient origins created during node join or
+sync operations.
+
+For non-PGD clusters, TPA leaves the PostgreSQL default (10) in place.
+
+You can override this by setting the variable directly:
+
+```yaml
+cluster_vars:
+  max_active_replication_origins: 50
+```
+
+This setting is ignored on PostgreSQL versions before 18.
 
 ## shared_preload_libraries
 

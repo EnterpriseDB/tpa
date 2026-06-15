@@ -79,14 +79,308 @@ restarting services, and performing any runtime configuration changes,
 before moving on to do the same thing on the next instance. At any time
 during the process, only one of the cluster's nodes will be unavailable.
 
-When upgrading a cluster to PGD-Always-ON or upgrading an existing
-PGD-Always-ON cluster, you can enable monitoring of the status of your
+When upgrading a cluster to PGD-Always-ON, upgrading an existing
+PGD-Always-ON cluster, or performing a minor upgrade of a PGD-S or
+PGD-X cluster, you can enable monitoring of the status of your
 proxy nodes during the upgrade by adding the option
 `-e enable_proxy_monitoring=true` to your `tpaexec upgrade` command
 line. If enabled, this will create an extra table in the bdr database
 and write monitoring data to it while the upgrade takes place. The
 performance impact of enabling monitoring is very small and it is
 recommended that it is enabled.
+
+## Before you upgrade
+
+This section describes the checks you should perform on your cluster
+before running `tpaexec upgrade`. Working through these in order will
+catch most common problems before they affect a live cluster.
+
+### Verify cluster health
+
+The upgrade is easiest to perform on a cluster that is in a known-good
+state. Run `tpaexec test <cluster>` to exercise the standard health
+checks. The upgrade process itself runs pre-upgrade health checks, but
+discovering a problem ahead of time gives you longer to address it.
+
+For any BDR enabled architecture, also confirm that all nodes appear in
+its catalogue:
+
+```sql
+SELECT node_name, peer_state_name, peer_target_state_name
+  FROM bdr.node_summary;
+```
+
+Every entry should report `ACTIVE` (or `STANDBY` for read-only
+standbys). Investigate any other state before proceeding.
+
+For M1 clusters using repmgr, run `repmgr cluster show` on the primary
+and confirm every node is shown as running and connected.
+
+### Verify backups
+
+Before any upgrade, confirm that a recent Barman backup exists and is
+in a state from which you could restore. On the Barman host:
+
+```shell
+sudo -u barman barman list-backup <server>
+sudo -u barman barman check <server>
+```
+
+Any failed status here should be investigated before starting. Once
+the upgrade is underway, the Barman WAL receiver is stopped, so the
+backup landscape during the upgrade window is fixed at whatever
+existed beforehand.
+
+### Verify replication lag
+
+Whilst the cluster may be healthy at a high level, individual replicas
+may be lagging. The upgrade fences each instance in turn; if a replica
+is significantly behind, it will take longer to catch up after being
+unfenced, and the overall upgrade duration will grow.
+
+For PGD clusters:
+
+```sql
+SELECT slot_name, active, restart_lsn, write_lag, flush_lag, replay_lag
+  FROM bdr.node_slots;
+```
+
+For M1 clusters, on the primary:
+
+```sql
+SELECT application_name, state, write_lag, flush_lag, replay_lag
+  FROM pg_stat_replication;
+```
+
+Aim for lag measured in seconds, not minutes. Investigate any replica
+that is seriously behind before starting.
+
+### Pin and review package versions
+
+For control over what is installed during the upgrade, it is recommended
+that you explicitly set package versions  in `config.yml` before running
+`tpaexec upgrade`. The relevant variables are `postgres_package_version`,
+`bdr_package_version`, `pgd_proxy_package_version`,
+`pgdcli_package_version`, and the component-specific equivalents.
+
+Without an explicit pin, TPA installs the latest available package for
+each component, which can result in an unintended major-version
+upgrade. See [Package version selection](#package-version-selection)
+for details.
+
+!!! Note
+After updating versions in `config.yml`, run `tpaexec provision` to
+regenerate the inventory.
+!!!
+
+### Read the release notes
+
+Check the release notes for the target versions of every component you
+are upgrading but also the ones between current and target versions.
+EDB's PGD and Postgres release notes occasionally call
+out version-specific upgrade considerations: settings that must be
+changed before or after the upgrade, deprecations, and behaviour
+changes. The same applies to TPA's own release notes for any newer
+version of TPA you may be using to perform the upgrade.
+
+### Test the upgrade in a staging environment
+
+`tpaexec upgrade` processes the cluster instance-by-instance. The
+upgrade is rolling: at any one time only a single instance is fenced
+off. However, the total wall-clock time depends on the cluster size,
+the number of components being upgraded, and the storage and network
+characteristics of each instance but also that the upgrade scenario
+goes through without issues.
+
+We strongly recommend reproducing the upgrade in a non-production
+environment that matches your production cluster's architecture,
+Postgres flavour and version, package pinnings, and any custom hooks.
+This catches surprises (missing packages in your configured
+repository, unexpected configuration drift) before they affect live
+traffic.
+
+### Disable scheduled jobs
+
+Anything scheduled to run against the cluster during the upgrade
+window should be paused. Typical items:
+
+- Cron jobs that hit the database (analytics, reporting).
+- External backup tools that are not aware of the upgrade.
+- Long-running migrations or batch jobs.
+
+TPA itself stops the Barman WAL receiver before starting and restarts
+it afterwards; you do not need to disable Barman manually.
+
+
+## During the upgrade
+
+This section describes what to expect whilst `tpaexec upgrade` is
+running and what to watch for from outside TPA.
+
+### What to expect
+
+TPA processes the cluster one instance at a time. For each instance,
+in turn, the upgrade:
+
+1. Fences the instance off so the proxy or failover manager stops
+   sending it new connections.
+2. Stops the affected services on that instance.
+3. Installs the new packages.
+4. Updates configuration files where required.
+5. Restarts services and waits for them to come up.
+6. Unfences the instance.
+
+You should expect brief connection interruptions whilst each instance is
+fenced and again when it returns to service. Applications using
+connection pooling and retry logic should typically not see
+client-visible errors during these transitions.
+
+Whilst each non-leader node is being upgraded, write traffic
+continues through the current write leader. Each time the write
+leader itself is upgraded, a brief leader-election interruption
+occurs. PGD-S and PGD-X arrange for the write leader to be upgraded
+last; PGD-Always-ON upgrades nodes in inventory order, so a leader
+election occurs whenever the current leader's turn comes round.
+
+### What to watch from the application side
+
+Whilst the upgrade is running, a brief pause at each fence/unfence
+transition is normal. Sustained connection failures across multiple
+instances are not — if you see those, stop and investigate before TPA
+proceeds to the next instance.
+
+If an application is running against the cluster during the upgrade,
+monitor:
+
+- Application error rates: transient retries are expected; sustained
+  errors are not.
+- Connection pool metrics: brief drops in available connections are
+  expected.
+- Replication slot lag: may grow transiently as each instance catches
+  up post-upgrade.
+
+## After the upgrade
+
+This section describes the verification you should perform once
+`tpaexec upgrade` has completed.
+
+### Verify installed package versions
+
+Confirm that the new packages are installed on every instance. On
+RHEL-family hosts:
+
+```shell
+tpaexec cmd <cluster> all -m shell -a 'rpm -qa | grep -E "^(postgres|edb-)"'
+```
+
+On Debian / Ubuntu hosts:
+
+```shell
+tpaexec cmd <cluster> all -m shell -a 'dpkg -l | grep -E "(postgres|edb-)"'
+```
+
+The same package versions should be reported on every instance of the
+same role.
+
+### Verify services and replication
+
+Confirm that all services restarted cleanly:
+
+```shell
+tpaexec cmd <cluster> all -m shell -a 'systemctl is-active postgres'
+```
+
+For PGD clusters, confirm that BDR has fully reconverged:
+
+```sql
+SELECT node_name, peer_state_name FROM bdr.node_summary;
+```
+
+For M1 clusters with repmgr:
+
+```shell
+tpaexec cmd <cluster> role_primary -m shell -a 'repmgr -f /etc/repmgr.conf cluster show'
+```
+
+### Take a fresh backup
+
+After any non-trivial upgrade, take a fresh Barman backup of the
+cluster:
+
+```shell
+tpaexec cmd <cluster> role_barman -m shell -a 'sudo -u barman barman backup <server>'
+```
+
+This gives you a known-good restore point that reflects the
+post-upgrade state.
+
+### Re-enable scheduled jobs
+
+If you disabled cron jobs, batch jobs, or external scheduled tasks
+before the upgrade, re-enable them now. TPA's own Barman WAL receiver
+is restarted automatically.
+
+### Run tpaexec test
+
+As a final smoke check, run the standard test suite:
+
+```shell
+tpaexec test <cluster>
+```
+
+This exercises connectivity, replication, role mapping, and the
+component-specific checks that ran before the upgrade. A clean test
+run is the simplest end-to-end confirmation that the upgrade landed.
+
+## Recovering from a failed upgrade
+
+If `tpaexec upgrade` reports a failure, the cluster is left in a known
+state at whichever instance was being processed when the failure
+occurred. Subsequent instances are not touched.
+
+### When to roll back, when to call EDB Support
+
+A roll-back is only safe before TPA has applied any non-reversible
+catalogue change — typically the BDR-side configuration updates that
+occur in major-version upgrades. Once those changes are in place, the
+correct path is forward, not backward.
+
+If you are unsure whether to proceed or roll back, stop and contact
+EDB Support with:
+
+- The `ansible.log` from the failed run.
+- The output of `tpaexec test <cluster>`.
+- A description of which instances completed the upgrade and which
+  did not.
+- The config.yml used.
+- Optionally the EDB lasso report or any other meaningful logs.
+
+## Common pitfalls
+
+This section consolidates a few specific situations that have caught
+users out in the past.
+
+### Pinned package versions cause no-op upgrades
+
+If `postgres_package_version` (or any other `xxx_package_version`)
+already matches the installed package, `tpaexec upgrade` reports the
+components as "already at the desired version" and does nothing. The
+symptom is a run that completes quickly with no changes, and the
+desired version not installed.
+
+Fix: update `config.yml` to set the new desired version, then re-run
+`tpaexec provision` followed by `tpaexec upgrade`. See [Package
+version selection](#package-version-selection) for details.
+
+### Shared Barman or shared PEM clusters
+
+TPA does not currently support running `tpaexec upgrade` against
+clusters with shared Barman or shared PEM configurations. The
+restriction is enforced by the upgrade's preconditions, which abort
+early. Until support is added, upgrades for these cluster shapes
+need to be performed manually outside TPA — see [After a manual
+major-version Postgres upgrade](reconciling-local-changes.md#after-a-manual-major-version-postgres-upgrade)
+for how to reconcile the cluster afterwards.
 
 ## Component selection
 
@@ -573,3 +867,12 @@ support clusters running different versions across data nodes.
 ### Best Practice for PGD-Always-ON/BDR-Always-ON
 
 When performing a minor upgrade on a subset of PGD nodes, it is highly recommended to update the **RAFT leader nodes last**. This strategy avoids potential issues with post-upgrade checks while the cluster is running mixed versions of BDR.
+
+### PGD-S and PGD-X
+
+`tpaexec upgrade` arranges for the current write leader to be
+upgraded last in PGD-S and PGD-X clusters automatically: the
+Postgres/PGD rolling phase is split into two `serial: 1` plays, one
+for every BDR data node except the current write leader and one for
+the write leader itself. No additional steps are required to achieve
+the leader-last sequence on these architectures.

@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 import sys
 import os
-import io
 import uuid
 import subprocess
 import argparse
@@ -14,20 +13,21 @@ import yaml
 import re
 
 from typing import List
+from packaging.version import Version, InvalidVersion, parse
 
 from ansible.template import Templar
 from ansible.utils.vars import merge_hash
 from functools import reduce
 
 from .exceptions import ArchitectureError, ExternalCommandError
-from .net import Network, DEFAULT_SUBNET_PREFIX_LENGTH, DEFAULT_NETWORK_CIDR
+from .net import Network, DEFAULT_NETWORK_CIDR
 from .platforms import Platform
 from tpa import constants
 
 KEYRING_SUPPORTED_BACKENDS = ["system", "legacy"]
 
 
-class Architecture(object):
+class Architecture:
     """
     This is the base class for TPA architectures, and it knows how to generate a
     configuration based on architecture-specific defaults defined by subclasses,
@@ -55,9 +55,9 @@ class Architecture(object):
         self._args = None
         self._net = None
 
-    ##
-    ## Command-line parsing
-    ##
+    #
+    # Command-line parsing
+    #
 
     @property
     def args(self):
@@ -94,8 +94,7 @@ class Architecture(object):
         prog = "tpaexec configure"
         p = argparse.ArgumentParser(
             prog=prog,
-            usage="%s <cluster> --architecture %s [--help | …options…]"
-            % (prog, self.name),
+            usage=f"{prog} <cluster> --architecture {self.name} [--help | …options…]",
         )
         p.add_argument("cluster", help="path to cluster directory")
         self.add_options(p)
@@ -104,7 +103,8 @@ class Architecture(object):
 
     def add_options(self, p):
         """
-        Adds any relevant options to the parser object
+        Adds any relevant options to the parser object.
+
         """
         p.add_argument(
             "-v",
@@ -135,16 +135,15 @@ class Architecture(object):
             "--platform",
             default="aws",
             choices=self.supported_platforms(),
-            help="platforms supported by %s (selected: %s)"
-            % (self.name, self.platform.name),
+            help=f"platforms supported by {self.name} (selected: {self.platform.name})",
         )
 
         # Options relevant to this architecture
-        g = p.add_argument_group("%s architecture options" % self.name)
+        g = p.add_argument_group(f"{self.name} architecture options")
         self.add_architecture_options(p, g)
 
         # Options relevant to the selected platform
-        g = p.add_argument_group("%s platform options" % self.platform.name)
+        g = p.add_argument_group(f"{self.platform.name} platform options")
         self.platform.add_platform_options(p, g)
 
         g = p.add_argument_group("cluster options")
@@ -177,7 +176,7 @@ class Architecture(object):
             "--compliance",
             action="store",
             dest="compliance",
-            choices=['stig','cis'],
+            choices=["stig", "cis"],
             help="configure to assist with a compliance standard",
         )
 
@@ -222,7 +221,7 @@ class Architecture(object):
         g = p.add_argument_group("install from source options")
         g.add_argument("--install-from-source", nargs="+", metavar="NAME")
         for pkg in self.versionable_packages():
-            g.add_argument("--%s-package-version" % pkg, metavar="VER")
+            g.add_argument(f"--{pkg}-package-version", metavar="VER")
 
         g = p.add_argument_group("software selection")
         g.add_argument(
@@ -393,7 +392,7 @@ class Architecture(object):
 
         g = p.add_argument_group("volume sizes in GB")
         for vol in ["root", "barman", "postgres"]:
-            g.add_argument("--%s-volume-size" % vol, type=int, metavar="N")
+            g.add_argument(f"--{vol}-volume-size", type=int, metavar="N")
 
         g = p.add_argument_group("network and subnet selection")
         g.add_argument("--network", metavar="NET")
@@ -434,11 +433,11 @@ class Architecture(object):
         Adds architecture-specific options to the (relevant group in the) parser
         (subclasses are expected to override this).
         """
-        pass
 
     def set_defaults(self, p):
         """
-        Set default values for command-line options
+        Set default values for command-line options.
+
         """
         argument_defaults = self._argument_defaults()
         self.update_argument_defaults(argument_defaults)
@@ -446,7 +445,8 @@ class Architecture(object):
 
     def _argument_defaults(self):
         """
-        Returns a dict of defaults for the corresponding options
+        Returns a dict of defaults for the corresponding options.
+
         """
         return {
             "root_volume_size": 16,
@@ -456,9 +456,9 @@ class Architecture(object):
 
     def update_argument_defaults(self, defaults):
         """
-        Makes architecture-specific changes to argument_defaults if required
+        Makes architecture-specific changes to argument_defaults if required.
+
         """
-        pass
 
     def default_platform(self):
         """
@@ -469,19 +469,21 @@ class Architecture(object):
 
     def supported_platforms(self):
         """
-        Returns a list of platforms supported by this architecture
+        Returns a list of platforms supported by this architecture.
+
         """
         return Platform.all_platforms()
 
     def default_location_names(self):
         """
-        Returns a list of names for the locations used by the cluster
+        Returns a list of names for the locations used by the cluster.
+
         """
         return ["first", "second", "third", "fourth"]
 
-    ##
-    ## Cluster configuration
-    ##
+    # 
+    # Cluster configuration
+    #
 
     def validate_arguments(self, args):
         """
@@ -543,22 +545,27 @@ class Architecture(object):
                 raise ArchitectureError("STIG compliance requires RHEL version 8 or 9")
 
     def _validate_flavour_version(self, args):
-        """Verify postgres flavour, version and related arguments.
+        """
+        Verify postgres flavour, version and related arguments.
+
         By now, both postgres_flavour and postgres_version must be set,
         whether they were specified separately or through a shortcut like
         `--postgresql 14`.
+
         """
         flavour = args.get("postgres_flavour")
         version = args.get("postgres_version")
 
         if isinstance(flavour, tuple):
-            (flavour, v) = flavour
+            flavour, v = flavour
             if version and version != v:
                 # We don't need to worry about conflicts between
                 # `--postgres-flavour epas` and `--epas`, because they're in a
                 # mutually exclusive group.
                 raise ArchitectureError(
-                    f"You must select a single Postgres version, '--{flavour} {v}' conflicts with '--postgres-version {version}'"
+                    f"You must select a single Postgres version,"
+                    f" '--{flavour} {v}' conflicts with"
+                    f" '--postgres-version {version}'"
                 )
             args["postgres_flavour"] = flavour
             args["postgres_version"] = version = v
@@ -576,16 +583,18 @@ class Architecture(object):
         if flavour == "epas":
             if redwood is None:
                 raise ArchitectureError(
-                    "You must specify --redwood or --no-redwood to enable or disable Oracle compatibility features in EPAS"
+                    "You must specify --redwood or --no-redwood to enable"
+                    " or disable Oracle compatibility features in EPAS"
                 )
         elif redwood is not None:
             raise ArchitectureError(
                 "You can specify --redwood/--no-redwood only when using EPAS"
             )
 
-        # If you specify --edb-postgres-extended, we have to translate the value
-        # to pgextended or edbpge depending on architecture.
-        if flavour == "edb-postgres-extended":
+        # Translate between the two Postgres Extended flavours based on
+        # architecture: BDR-Always-ON (BDR 3/4) uses 'pgextended' (legacy 2Q
+        # packages), everything else uses 'edbpge' (new EDB packages).
+        if flavour in ("edb-postgres-extended", "edbpge", "pgextended"):
             if self.name == "BDR-Always-ON":
                 args["postgres_flavour"] = "pgextended"
             else:
@@ -597,8 +606,25 @@ class Architecture(object):
                 "PEM is not compatible with the BDR-Always-ON architecture and EDB Postgres Extended"
             )
 
+    def _package_version_at_least(self, version_string, minimum):
+        """
+        Return True if the major.minor in version_string >= minimum.
+
+        Handles wildcards (*5.3*), epoch prefixes (4:5.5.1).
+        Raises ArchitectureError for malformed version strings.
+        Must not be called with None or empty values — callers should
+        guard against that.
+
+        """
+        try:
+            cleaned = version_string.replace("*", "")
+            parts = cleaned.split(":", maxsplit=1)[-1].split(".")
+            return parse(f"{parts[0]}.{parts[1]}") >= Version(minimum)
+        except (InvalidVersion, AttributeError, IndexError, TypeError) as e:
+            raise ArchitectureError(f"Cannot parse package version '{version_string}'") from e
+
     def _validate_2q_repositories(self, args):
-        """Validate arguments to --2Q-repositories"""
+        """Validate arguments to --2Q-repositories."""
         repos = args.get("tpa_2q_repositories") or []
         for r in repos:
             errors = []
@@ -612,23 +638,22 @@ class Architecture(object):
                 raise ArchitectureError(*(f"repository '{r}' has {e}" for e in errors))
 
     def _2q_repo_exists(self, parts, errors):
-        """Ensure each part of a 2q repo is a valid input"""
-        (source, name, maturity) = parts
+        """Ensure each part of a 2q repo is a valid input."""
+        source, name, maturity = parts
         if source not in ["ci-spool", "products", "dl"]:
             errors.append(
-                "unknown source '%s' (try 'dl', 'products', or 'ci-spool')" % source
+                f"unknown source '{source}' (try 'dl', 'products', or 'ci-spool')"
             )
         if name not in self.product_repositories():
-            errors.append("unknown product name '%s'" % name)
+            errors.append(f"unknown product name '{name}'")
         if maturity not in ["snapshot", "testing", "release"]:
             errors.append(
-                "unknown maturity '%s' (try 'release', 'testing', or 'snapshot')"
-                % maturity
+                f"unknown maturity '{maturity}' (try 'release', 'testing', or 'snapshot')"
             )
         return errors
 
     def _validate_from_source(self, args):
-        """Validate arguments to --install-from-source"""
+        """Validate arguments to --install-from-source."""
 
         errors = []
         source_names = []
@@ -638,9 +663,9 @@ class Architecture(object):
             # We accept either something like 2ndqpostgres or
             # 2ndqpostgres:2QREL_11_STABLE_dev
             if ":" in name:
-                (name, _) = name.split(":", 1)
+                name, _ = name.split(":", 1)
             if name.lower() not in installable:
-                errors.append("doesn't know how to install '%s' from source" % name)
+                errors.append(f"doesn't know how to install '{name}' from source")
             source_names.append(name.lower())
         if "postgres" in source_names and "2ndqpostgres" in source_names:
             errors.append("cannot install both Postgres and 2ndQPostgres")
@@ -668,6 +693,13 @@ class Architecture(object):
 
         args["cluster_name"] = self.cluster_name()
 
+        # Keep this regex in sync with platforms/common/validate.yml.
+        if not re.match(r"^[_a-zA-Z0-9-]+$", args["cluster_name"]):
+            raise ArchitectureError(
+                f"Invalid cluster_name '{args['cluster_name']}': "
+                "may contain only letters, numbers, underscores, and minus signs"
+            )
+
         # If --overrides-from is specified, we load files one by one (treating
         # them as templates) and merge them recursively into args. This can be
         # used to set cluster_tags, add stuff to instance_vars etc. We don't do
@@ -680,10 +712,12 @@ class Architecture(object):
 
         # The architecture's num_instances() method should work by this point,
         # so that we can generate the correct number of hostnames.
-        (args["hostnames"], args["ip_addresses"], args["private_ip_addresses"]) = self.hostnames(self.num_instances())
+        args["hostnames"], args["ip_addresses"], args["private_ip_addresses"] = (
+            self.hostnames(self.num_instances())
+        )
         if args.get("cluster_prefixed_hostnames"):
             args["hostnames"] = [
-                re.sub("[^a-z0-9-]", "-", args["cluster_name"].lower()) + "-" + hostname
+                f"{re.sub('[^a-z0-9-]', '-', args['cluster_name'].lower())}-{hostname}"
                 for hostname in args["hostnames"]
             ]
 
@@ -700,7 +734,9 @@ class Architecture(object):
             for instance in args["instances"]:
                 if args["private_ip_addresses"][instance["node"]] is not None:
                     instance["public_ip"] = args["ip_addresses"][instance["node"]]
-                    instance["private_ip"] = args["private_ip_addresses"][instance["node"]]
+                    instance["private_ip"] = args["private_ip_addresses"][
+                        instance["node"]
+                    ]
 
                 elif args["ip_addresses"][instance["node"]] is not None:
                     instance["ip_address"] = args["ip_addresses"][instance["node"]]
@@ -712,12 +748,14 @@ class Architecture(object):
             args["subnets"] = self.subnets(self.num_subnets())
         except ValueError as e:
             raise ArchitectureError(
-                    f"--network {e}. The IP used in the CIDR should be the network address of the range, not a host address (i.e. XXX.XXX.XXX.{{0,16,32,48,64,...}}/28) "
-                )
-
+                f"--network {e}. The IP used in the CIDR should be"
+                " the network address of the range, not a host address"
+                " (i.e. XXX.XXX.XXX.{0,16,32,48,64,...}/28) "
+            ) from e
 
         locations = args.get("locations", [])
         if not locations:
+            self._check_location_names(args)
             self._init_locations(locations)
         self.update_locations(locations)
         self.platform.update_locations(locations, args)
@@ -773,7 +811,8 @@ class Architecture(object):
 
     def _apply_stig(self, args):
         """
-        Applies changes to config.yml required by STIG compliance
+        Applies changes to config.yml required by STIG compliance.
+
         """
         top = args.get("top_level_settings") or {}
         top.update({"compliance": "stig"})
@@ -811,14 +850,17 @@ class Architecture(object):
                 "hba_force_certificate_auth": True,
                 "hba_cert_authentication_map": "sslmap",
                 # EPAS-00-006200 and others
-                "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
-                + ["sql_protect"]
+                "extra_postgres_extensions": cluster_vars.get(
+                    "extra_postgres_extensions", []
+                )
+                + ["sql_protect"],
             }
         )
 
     def _apply_cis(self, args):
         """
-        Applies changes to config.yml required by CIS compliance
+        Applies changes to config.yml required by CIS compliance.
+
         """
         top = args.get("top_level_settings") or {}
         top.update({"compliance": "cis"})
@@ -840,6 +882,13 @@ class Architecture(object):
         )
         cluster_vars["postgres_conf_settings"] = pcs
 
+        # pgaudit packages exist for EPAS but install their files in
+        # locations EPAS doesn't load from, so we omit pgaudit on EPAS;
+        # EPAS provides built-in edb_audit for audit logging instead.
+        extra_extensions = ["passwordcheck"]
+        if args.get("postgres_flavour") != "epas":
+            extra_extensions.append("pgaudit")
+
         cluster_vars.update(
             {
                 # 3.1.20
@@ -850,27 +899,33 @@ class Architecture(object):
                 "extra_bash_rc_lines": cluster_vars.get("extra_bashrc_lines", [])
                 + ["umask 0077"],
                 # 3.2, 5.3
-                "extra_postgres_extensions": cluster_vars.get("extra_postgres_extensions", [])
-                + ["passwordcheck", "pgaudit"]
+                "extra_postgres_extensions": cluster_vars.get(
+                    "extra_postgres_extensions", []
+                )
+                + extra_extensions,
             }
         )
 
     def cluster_name(self):
         """
-        Returns a name for the cluster
+        Returns a name for the cluster.
+
         """
         return os.path.basename(self.cluster)
 
     def num_instances(self):
         """
-        Returns the number of instances required (which may be known beforehand,
+        Returns the number of instances required (which may be known beforehand,.
+
         or based on a --num-instances option, etc.)
+
         """
         return self.args["num_instances"]
 
     def num_locations(self):
         """
-        Returns the number of locations required by this architecture
+        Returns the number of locations required by this architecture.
+
         """
         locations = {}
         for i in self.args["instances"]:
@@ -889,7 +944,8 @@ class Architecture(object):
 
     def num_subnets(self):
         """
-        Returns the number of subnets required by this architecture
+        Returns the number of subnets required by this architecture.
+
         """
         if self.platform.name == "docker":
             return 1
@@ -923,18 +979,18 @@ class Architecture(object):
         if int(str(sys.version_info.major) + str(sys.version_info.minor)) >= 36:
             popen_params["encoding"] = sys.getdefaultencoding()
 
-        p = subprocess.Popen(
-            ["%s/hostnames" % self.lib, str(num)],
+        with subprocess.Popen(
+            [f"{self.lib}/hostnames", str(num)],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=env,
             **popen_params,
-        )
-        (stdout, stderr) = p.communicate()
+        ) as p:
+            stdout, stderr = p.communicate()
 
-        if p.returncode != 0:
-            raise ArchitectureError(stderr.strip())
+            if p.returncode != 0:
+                raise ArchitectureError(stderr.strip())
 
         names = []
         addresses = []
@@ -988,7 +1044,9 @@ class Architecture(object):
 
             # set platform-specific default subnet size if a non-None value has not been specified
             if self.args.get("subnet_prefix") is None:
-                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(self.num_instances())
+                self.args["subnet_prefix"] = self.platform.get_default_subnet_prefix(
+                    self.num_instances()
+                )
             net = Network(cidr, self.args["subnet_prefix"])
             self._net = net
         return self._net
@@ -1040,7 +1098,7 @@ class Architecture(object):
         values = []
         for dir_name in exclude_dirs:
             try:
-                with open(f"{dir_name}/config.yml") as exclude_config_yml:
+                with open(f"{dir_name}/config.yml", encoding="utf-8") as exclude_config_yml:
                     config_data = yaml.safe_load(exclude_config_yml)
                     for key in ("instances", "locations"):
                         values.extend(
@@ -1051,15 +1109,34 @@ class Architecture(object):
                     ).get("subnet")
                     if instance_default_subnet:
                         values.append(instance_default_subnet)
-            except FileNotFoundError:
+            except FileNotFoundError as e:
                 raise ArchitectureError(
                     f"Could not open a config.yml file in the provided path: {dir_name}"
-                )
+                ) from e
         return list(set(values))
+
+    def _check_location_names(self, args):
+        """
+        Raise ArchitectureError if --location-names doesn't match num_locations().
+
+        """
+        location_names = args.get("location_names")
+        if location_names is None:
+            return
+        if len(location_names) == self.num_locations():
+            return
+        layout = args.get("layout")
+        layout_clause = f" with --layout {layout}" if layout else ""
+        raise ArchitectureError(
+            f"This architecture{layout_clause} requires "
+            f"{self.num_locations()} locations, but {len(location_names)} "
+            f"were given via --location-names"
+        )
 
     def _init_locations(self, locations):
         """
-        Makes changes to locations applicable across architectures
+        Makes changes to locations applicable across architectures.
+
         """
         names = self.args.get("location_names") or self.default_location_names()
         for li in range(0, self.num_locations()):
@@ -1067,24 +1144,24 @@ class Architecture(object):
 
     def update_locations(self, locations):
         """
-        Makes architecture-specific changes to locations if required
+        Makes architecture-specific changes to locations if required.
+
         """
-        pass
 
     def update_cluster_tags(self, cluster_tags):
         """
-        Makes architecture-specific changes to cluster_tags if required
+        Makes architecture-specific changes to cluster_tags if required.
+
         """
-        pass
 
     def _init_top_level_settings(self):
-        """Add top level settings applicable accross all architectures"""
+        """Add top level settings applicable accross all architectures."""
         self._add_tower_settings()
 
         self._add_keyring_settings()
 
     def _add_tower_settings(self):
-        """Add top level settings for Tower"""
+        """Add top level settings for Tower."""
         if self.args.get("tower_api_url"):
             top = self.args.get("top_level_settings") or {}
             top.update({"use_ssh_agent": "true"})
@@ -1110,7 +1187,8 @@ class Architecture(object):
 
     def _init_cluster_vars(self, cluster_vars):
         """
-        Makes changes to cluster_vars applicable across architectures
+        Makes changes to cluster_vars applicable across architectures.
+
         """
         preferred_python_version = self.args["image"].get(
             "preferred_python_version", "python3"
@@ -1135,14 +1213,14 @@ class Architecture(object):
         self._add_source_install(cluster_vars)
 
     def _add_cluster_vars_args(self, cluster_vars):
-        """Add args that belongs to cluster_vars without any change or logic"""
+        """Add args that belongs to cluster_vars without any change or logic."""
         for k in self.cluster_vars_args():
             val = self.args.get(k)
             if val is not None:
                 cluster_vars[k] = cluster_vars.get(k, val)
 
     def _add_extra_packages(self, cluster_vars):
-        """Add extra packages lists to cluster_vars"""
+        """Add extra packages lists to cluster_vars."""
 
         package_option_vars = {
             "extra_packages": "packages",
@@ -1150,15 +1228,14 @@ class Architecture(object):
             "extra_postgres_packages": "extra_postgres_packages",
         }
 
-        for e in package_option_vars.keys():
+        for e, var in package_option_vars.items():
             packages = self.args.get(e)
             if packages is not None:
-                var = package_option_vars[e]
                 val = {"common": packages}
                 cluster_vars[var] = cluster_vars.get(var, val)
 
     def _add_source_install(self, cluster_vars):
-        """Add --install-from-source entries into cluster_vars"""
+        """Add --install-from-source entries into cluster_vars."""
         sources = self.args.get("install_from_source") or []
         install_from_source = []
         for name in sources:
@@ -1178,7 +1255,7 @@ class Architecture(object):
         installable_sources = self.installable_sources()
         ref = None
         if ":" in name:
-            (name, ref) = name.split(":", 1)
+            name, ref = name.split(":", 1)
         name = name.lower()
         entry = installable_sources[name]
 
@@ -1206,7 +1283,7 @@ class Architecture(object):
             install_from_source.append(entry)
 
     def _check_local_sources(self, name, ref):
-        """Check that we don't fix a ref when using local source"""
+        """Check that we don't fix a ref when using local source."""
         local_sources = self.args.get("local_sources") or {}
         if ref and name in local_sources:
             raise ArchitectureError(
@@ -1227,16 +1304,14 @@ class Architecture(object):
             if "yum_repositories" not in cluster_vars.keys():
                 cluster_vars["yum_repositories"] = {}
 
-            repo_name = "PGDG" + str.replace(self.args.get("postgres_version"), ".", "")
+            repo_name = f"PGDG{str.replace(self.args.get('postgres_version'), '.', '')}"
             cluster_vars["yum_repository_list"] = [
                 "PGDG",
                 "EPEL",
                 repo_name,
             ]
             cluster_vars["yum_repositories"][repo_name] = {
-                "description": "Archive Postgres {} Repo".format(
-                    self.args.get("postgres_version")
-                ),
+                "description": f"Archive Postgres {self.args.get('postgres_version')} Repo",
                 "baseurl": "https://yum-archive.postgresql.org/{}/redhat/rhel-$releasever-$basearch".format(
                     self.args.get("postgres_version")
                 ),
@@ -1250,25 +1325,26 @@ class Architecture(object):
                 cluster_vars["yum_repository_list"].append("EDB")
 
             if self.args.get("postgres_version") == "9.6":
-                DEBUGINFO_SUFFIX = "{}-debuginfo"
-                cluster_vars["yum_repositories"][DEBUGINFO_SUFFIX.format(repo_name)] = {
-                    "description": "Postgres Debug Info {} Repo".format(
-                        self.args.get("postgres_version")
+                debuginfo_suffix = "{}-debuginfo"
+                cluster_vars["yum_repositories"][debuginfo_suffix.format(repo_name)] = {
+                    "description": f"Postgres Debug Info {self.args.get('postgres_version')} Repo",
+                    "baseurl": (
+                        "https://download.postgresql.org/pub/repos/yum/debug"
+                        f"/{self.args.get('postgres_version')}"
+                        "/redhat/rhel-$releasever-$basearch"
                     ),
-                    "baseurl": "https://download.postgresql.org/pub/repos/yum/debug/{}/redhat/rhel-$releasever-$basearch".format(
-                        self.args.get("postgres_version")
-                    ),
-                    "file": DEBUGINFO_SUFFIX.format(repo_name),
+                    "file": debuginfo_suffix.format(repo_name),
                     "gpgkey": "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG",
                     "repo_gpgcheck": "yes",
                 }
                 cluster_vars["yum_repository_list"].append(
-                    DEBUGINFO_SUFFIX.format(repo_name)
+                    debuginfo_suffix.format(repo_name)
                 )
 
     def set_2q_repos(self, cluster_vars):
-        """Set 2q repos to be empty explicitly if we are on an OS/version combination
-        that they don't support."""
+        """
+        Set 2q repos to be empty explicitly if we are on an OS/version combination that they don't support.
+        """
 
         supported_combinations = [
             "RedHat:7",
@@ -1300,7 +1376,7 @@ class Architecture(object):
         if (
             distribution
             and os_version
-            and distribution + ":" + os_version not in supported_combinations
+            and f"{distribution}:{os_version}" not in supported_combinations
             and "tpa_2q_repositories" not in cluster_vars
         ):
             cluster_vars["tpa_2q_repositories"] = []
@@ -1333,7 +1409,9 @@ class Architecture(object):
             postgres_flavour == "postgresql"
             and self.args.get("failover_manager") != "efm"
             and self.name not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight")
-            and not (self.args.get("enable_pem") or self.args.get("enable_beacon_agent"))
+            and not (
+                self.args.get("enable_pem") or self.args.get("enable_beacon_agent")
+            )
         ):
             repos = []
 
@@ -1398,7 +1476,7 @@ class Architecture(object):
                 cluster_vars.update({"edb_repositories": []})
             else:
                 cluster_vars.update({"edb_repositories": edb_repositories})
-            
+
             # In general, if we're using EDB repositories at all, we don't want
             # packages from PGDG, unless we're using community360 as explained
             # above.
@@ -1413,20 +1491,18 @@ class Architecture(object):
                 )
         else:
             cluster_vars.update(
-                    {
-                        "edb_repositories": self.default_edb_repos(cluster_vars)
-                    }
-                )
-            # We double-check if we don't need EDB repositories, since we might 
+                {"edb_repositories": self.default_edb_repos(cluster_vars)}
+            )
+            # We double-check if we don't need EDB repositories, since we might
             # be having a setup that involves PGDG repositories
             if cluster_vars["edb_repositories"] != []:
                 cluster_vars.update(
-                        {
-                            "apt_repository_list": [],
-                            "yum_repository_list": ["EPEL"],
-                            "suse_repository_list": [],
-                        }
-                    )
+                    {
+                        "apt_repository_list": [],
+                        "yum_repository_list": ["EPEL"],
+                        "suse_repository_list": [],
+                    }
+                )
 
     def cluster_vars_args(self):
         """
@@ -1441,14 +1517,32 @@ class Architecture(object):
             "use_local_repo_only",
             "failover_manager",
             "enable_pg_backup_api",
-        ] + ["%s_package_version" % x.replace("-", "_") for x in self.versionable_packages()]
+        ] + [
+            f"{x.replace('-', '_')}_package_version"
+            for x in self.versionable_packages()
+        ]
 
     def versionable_packages(self):
         """
         Returns a list of packages for which --xxx-package-version options
         should be accepted
         """
-        return ["postgres", "repmgr", "barman", "pglogical", "bdr", "pgbouncer", "pgdcli", "pgd-proxy", "pg-backup-api", "patroni", "pem-server", "pem-agent", "etcd", "beacon-agent"]
+        return [
+            "postgres",
+            "repmgr",
+            "barman",
+            "pglogical",
+            "bdr",
+            "pgbouncer",
+            "pgdcli",
+            "pgd-proxy",
+            "pg-backup-api",
+            "patroni",
+            "pem-server",
+            "pem-agent",
+            "etcd",
+            "beacon-agent",
+        ]
 
     def product_repositories(self):
         """
@@ -1483,7 +1577,7 @@ class Architecture(object):
         --install-from-source to their corresponding build configuration
         """
         bdr_default_source_dir = "/opt/postgres/src/bdr"
-        bdr_build_commands = ["make -C %s -s install" % bdr_default_source_dir]
+        bdr_build_commands = [f"make -C {bdr_default_source_dir} -s install"]
 
         return {
             "postgres": {
@@ -1540,13 +1634,14 @@ class Architecture(object):
 
     def update_cluster_vars(self, cluster_vars):
         """
-        Makes architecture-specific changes to cluster_vars if required
+        Makes architecture-specific changes to cluster_vars if required.
+
         """
-        pass
 
     def update_cluster_vars_from_instances(self, cluster_vars, instances):
         """
         Makes architecture-specific changes to cluster_vars that depend on instance variables if required.
+
         """
         if self.args.get("enable_pem") and any(
             "barman" in self._instance_roles(x) for x in instances
@@ -1556,24 +1651,26 @@ class Architecture(object):
 
     def _init_instance_defaults(self, instance_defaults):
         """
-        Makes changes to instance_defaults applicable across architectures
+        Makes changes to instance_defaults applicable across architectures.
+
         """
         if instance_defaults.get("platform") is None:
             instance_defaults["platform"] = self.platform.name
-        vars = instance_defaults.get("vars", {})
-        if vars.get("ansible_user") is None and "tower_settings" not in self.args:
-            vars["ansible_user"] = self.args["image"].get("user", "root")
-            instance_defaults["vars"] = vars
+        instance_vars = instance_defaults.get("vars", {})
+        if instance_vars.get("ansible_user") is None and "tower_settings" not in self.args:
+            instance_vars["ansible_user"] = self.args["image"].get("user", "root")
+            instance_defaults["vars"] = instance_vars
 
     def update_instance_defaults(self, instance_defaults):
         """
-        Makes architecture-specific changes to instance_defaults if required
+        Makes architecture-specific changes to instance_defaults if required.
+
         """
-        pass
 
     def _init_instances(self, instances):
         """
-        Makes changes to instances applicable across architectures
+        Makes changes to instances applicable across architectures.
+
         """
         for instance in instances:
             location = instance.get("location", None)
@@ -1582,32 +1679,34 @@ class Architecture(object):
 
     def update_instances(self, instances):
         """
-        Makes architecture-specific changes to instances if required
-        """
-        pass
+        Makes architecture-specific changes to instances if required.
 
-    ##
-    ## Cluster directory creation
-    ##
+        """
+
+    # 
+    # Cluster directory creation
+    #
 
     def generate_configuration(self) -> str:
         """
-        Returns the final contents of config.yml
+        Returns the final contents of config.yml.
+
         """
         return self.expand_template("config.yml.j2", self.args)
 
     def write_configuration(self, configuration: str, force: bool = False) -> None:
         """
-        Creates the cluster directory and writes config.yml
+        Creates the cluster directory and writes config.yml.
+
         """
         try:
             os.makedirs(self.cluster, exist_ok=force)
             config_path = f"{self.cluster}/config.yml"
             if not os.path.exists(config_path) or force:
-                with open(config_path, "w") as cfg:
+                with open(config_path, "w", encoding="utf-8") as cfg:
                     cfg.write(configuration)
         except OSError as e:
-            raise ArchitectureError(f"Could not write cluster directory: {str(e)}")
+            raise ArchitectureError(f"Could not write cluster directory: {str(e)}") from e
 
     def setup_local_repo(self):
         """
@@ -1621,16 +1720,17 @@ class Architecture(object):
                     self.cluster, "local-repo", self.image()["os_family"], major_version
                 )
             )
-        except KeyError:
+        except KeyError as e:
             raise ArchitectureError(
                 f"Warning: Unable to detect OS family and version or image ({self.image().get('name', 'None')})\n"
                 f"Please create the '{self.cluster}/local-repo/<os_family>/<version>' directory yourself.\n"
                 f"(See docs/src/local-repo.md for details.)",
-            )
+            ) from e
 
     def after_configuration(self, force: bool = False) -> None:
         """
-        Performs additional actions after config.yml has been written
+        Performs additional actions after config.yml has been written.
+
         """
         self.create_links(force=force)
         if self.args.get("enable_local_repo"):
@@ -1643,16 +1743,16 @@ class Architecture(object):
             self.setup_git_repository()
 
     def run_external_command(self, command) -> None:
-        p = subprocess.Popen(
+        with subprocess.Popen(
             command,
             cwd=self.cluster,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
-        )
-        (_, errstr) = p.communicate()
-        if p.returncode != 0:
-            raise ExternalCommandError(errstr)
+        ) as p:
+            _, errstr = p.communicate()
+            if p.returncode != 0:
+                raise ExternalCommandError(errstr)
 
     def setup_git_repository(self) -> None:
         """
@@ -1666,7 +1766,7 @@ class Architecture(object):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-        except:
+        except Exception:
             return
 
         try:
@@ -1676,14 +1776,16 @@ class Architecture(object):
         except ExternalCommandError as ece:
             raise ArchitectureError(
                 f"Failed to initialise git repository: { ece.errstr }"
-            )
+            ) from ece
 
         try:
             self.run_external_command(
                 ["git", "checkout", "-b", self.args["cluster_name"]],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to check out git branch: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to check out git branch: { ece.errstr }"
+            ) from ece
 
         if self.args.get("tower_git_repository"):
             try:
@@ -1699,7 +1801,7 @@ class Architecture(object):
             except ExternalCommandError as ece:
                 raise ArchitectureError(
                     f"Failed to add remote repository: { ece.errstr }"
-                )
+                ) from ece
 
         files = [
             f
@@ -1712,7 +1814,9 @@ class Architecture(object):
                 ["git", "add"] + files,
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to add files to git: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to add files to git: { ece.errstr }"
+            ) from ece
 
         try:
             self.run_external_command(
@@ -1726,14 +1830,18 @@ class Architecture(object):
                 ],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to commit files to git: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to commit files to git: { ece.errstr }"
+            ) from ece
 
         try:
             self.run_external_command(
                 ["git", "notes", "add", "-m", "Created by TPA"],
             )
         except ExternalCommandError as ece:
-            raise ArchitectureError(f"Failed to create git note: { ece.errstr }")
+            raise ArchitectureError(
+                f"Failed to create git note: { ece.errstr }"
+            ) from ece
 
     def create_links(self, force: bool = False) -> None:
         """
@@ -1762,13 +1870,14 @@ class Architecture(object):
 
     def links_to_create(self) -> List[str]:
         """
-        Returns a list of targets to create_links() for
+        Returns a list of targets to create_links() for.
+
         """
         return ["deploy.yml", "commands", "tests", "playbooks"]
 
-    ##
-    ## Template processing
-    ##
+    # 
+    # Template processing
+    #
 
     def template_directories(self):
         """
@@ -1776,7 +1885,7 @@ class Architecture(object):
         current architecture: Architecture-Name/templates and lib/templates by
         default.
         """
-        return ["%s/templates" % x for x in [self.dir, self.lib]]
+        return [f"{x}/templates" for x in [self.dir, self.lib]]
 
     def layout_names(self):
         """
@@ -1802,21 +1911,23 @@ class Architecture(object):
         main_template = f"{template_dir}/main.yml.j2"
         if os.path.islink(main_template):
             return os.path.basename(os.readlink(main_template)).replace(".yml.j2", "")
+        return None
 
-    def load_yaml(self, filename, vars, loader=None):
+    def load_yaml(self, filename, template_vars, loader=None):
         """
         Takes a template filename and some vars, expands the template, parses
         the output as YAML, and returns the resulting data structure
         """
-        text = self.expand_template(filename, vars, loader)
+        text = self.expand_template(filename, template_vars, loader)
         return yaml.load(text, Loader=yaml.FullLoader)
 
-    def expand_template(self, filename, vars, loader=None):
+    def expand_template(self, filename, template_vars, loader=None):
         """
-        Takes a template filename and some args and returns the template output
+        Takes a template filename and some args and returns the template output.
+
         """
         loader = loader or self.loader()
-        templar = Templar(loader=loader, variables=vars)
+        templar = Templar(loader=loader, variables=template_vars)
         template = loader._tpaexec_get_template(filename)
         return templar.do_template(template)
 
@@ -1828,7 +1939,7 @@ class Architecture(object):
         the loader will return the contents of that template directly.
         """
 
-        class MinimalLoader(object):
+        class MinimalLoader:
             _basedirs = []
 
             def __init__(self, basedirs):
@@ -1839,11 +1950,13 @@ class Architecture(object):
 
             def _tpaexec_get_template(self, filename):
                 for d in self._basedirs:
-                    t = "%s/%s" % (d, filename)
+                    t = f"{d}/{filename}"
                     if os.path.exists(t):
-                        return io.open(t, "r", encoding="utf-8").read()
+                        with open(t, "r", encoding="utf-8") as f:
+                            return f.read()
                 if filename.startswith("/") and os.path.exists(filename):
-                    return io.open(filename, "r", encoding="utf-8").read()
+                    with open(filename, "r", encoding="utf-8") as f:
+                        return f.read()
                 return "{}"
 
         return MinimalLoader(basedirs or self.template_directories())
@@ -1863,7 +1976,7 @@ def update_symlinks_recursively(source, destination, force):
     """
     if not os.path.exists(source):
         return
-    elif os.path.isdir(source):
+    if os.path.isdir(source):
         if not os.path.exists(destination):
             os.mkdir(destination)
         for ls_link in os.listdir(source):
@@ -1874,7 +1987,7 @@ def update_symlinks_recursively(source, destination, force):
         if force:
             try:
                 os.unlink(destination)
-            except:
+            except Exception:
                 pass
 
         os.symlink(source, destination)

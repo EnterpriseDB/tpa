@@ -17,8 +17,17 @@
           |packages_for(ansible_os_family)
         }}"
 
+# This step is just a patch to allow the downloader role to add the web server packages to the 
+# list of packages to be installed, as the PEM version facts are not set at the time 
+# the downloader role runs. In case we add/remove dependencies for specific PEM versions in the future
+# this will need to be updated 
   - include_role: name=pkg/add_to_list
     vars:
       list_contents: "{{
-          pem_server_webserver_packages|packages_for(ansible_os_family)
+          pem_server_webserver_packages[0 if pem_server_package_version is defined 
+          and pem_server_package_version is version('10.4.0', '<') 
+          else 202602251]
+          |packages_for(ansible_os_family)
         }}"
+    when: >
+      'downloader' in role

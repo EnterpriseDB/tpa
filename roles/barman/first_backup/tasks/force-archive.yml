@@ -33,7 +33,7 @@
     dest: /tmp/lock.py
     mode: "0755"
     content: |
-      #!/usr/bin/env python
+      #!{{ script_python_interpreter }}
 
       import sys
       from barman.lockfile import LockFile

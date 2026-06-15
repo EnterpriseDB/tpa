@@ -15,6 +15,7 @@ nav:
     - Provisioning: tpaexec-provision.md
     - Deployment: tpaexec-deploy.md
     - Testing: tpaexec-test.md
+    - Evaluate: tpaexec-eval.md
   - Architectures:
     - BDR-Always-ON (PGD 3.7 & 4): architecture-BDR-Always-ON.md
     - M1 (Primary/Standby): architecture-M1.md
@@ -60,7 +61,7 @@ plugins:
   - with-pdf:
       author: EDB
       cover_title: TPA
-      cover_subtitle: "Version 23.43.0 (2026-03-18)"
+      cover_subtitle: "Version 23.44.0 (2026-06-10)"
       toc_level: 3
       output_path: tpaexec.pdf
       copyright: © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.

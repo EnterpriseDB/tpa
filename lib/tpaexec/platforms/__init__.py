@@ -24,12 +24,13 @@ class Platform:
     @staticmethod
     def load(args, arch):
         """
-        Returns an object of the desired Platform subclass
+        Returns an object of the desired Platform subclass.
+
         """
         name = Platform.guess_platform(args) or arch.default_platform()
-        module = "tpaexec.platforms.%s" % name
+        module = f"tpaexec.platforms.{name}"
         if not importlib.util.find_spec(module):
-            raise PlatformError("Unknown platform: %s" % name)
+            raise PlatformError(f"Unknown platform: {name}")
 
         p = getattr(__import__(module, fromlist=[name]), name)
         return p(name, arch)
@@ -48,7 +49,8 @@ class Platform:
     @staticmethod
     def all_platforms():
         """
-        Returns a list of all platform names
+        Returns a list of all platform names.
+
         """
         return ["aws", "bare", "docker"]
 
@@ -61,13 +63,12 @@ class Platform:
         Adds platform-specific options to the (relevant group in the) parser
         (subclasses are expected to override this).
         """
-        pass
 
     def validate_arguments(self, args):
         """
         Performs any platform-specific argument validation required.
+
         """
-        pass
 
     def supported_distributions(self):
         """
@@ -79,66 +80,70 @@ class Platform:
     def default_distribution(self):
         """
         Returns the platform's default distribution, if any.
+
         """
         return None
 
     def image(self, label, **kwargs):
         """
-        Returns image parameters corresponding to the given label for a platform
+        Returns image parameters corresponding to the given label for a platform.
+
         """
         return {}
 
     def setup_local_repo(self):
         """
-        Performs necessary platform specific setup for package repository
+        Performs necessary platform specific setup for package repository.
+
         """
-        pass
 
     def update_cluster_tags(self, cluster_tags, args, **kwargs):
         """
-        Makes platform-specific changes to cluster_tags
+        Makes platform-specific changes to cluster_tags.
+
         """
-        pass
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
         """
-        Makes platform-specific changes to cluster_vars
+        Makes platform-specific changes to cluster_vars.
+
         """
-        pass
 
     def update_locations(self, locations, args, **kwargs):
         """
-        Makes platform-specific changes to locations
+        Makes platform-specific changes to locations.
+
         """
-        pass
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         """
-        Makes platform-specific changes to instance_defaults
+        Makes platform-specific changes to instance_defaults.
+
         """
-        pass
 
     def update_instances(self, instances, args, **kwargs):
         """
-        Makes platform-specific changes to instances
+        Makes platform-specific changes to instances.
+
         """
-        pass
 
     def process_arguments(self, args):
         """
-        Makes platform-specific changes to args
+        Makes platform-specific changes to args.
+
         """
-        pass
 
     def argument_defaults(self):
         """
         Make platform-specific changes to argument defaults.
+
         """
         return {}
 
     def get_default_subnet_prefix(self, num_instances=None):
         """
         Make platform-specific changes the subnet prefix used if none is specified by the user.
+
         """
         return DEFAULT_SUBNET_PREFIX_LENGTH
 
@@ -200,11 +205,11 @@ class CloudPlatform(Platform):
         cluster_rules = args.get("cluster_rules", [])
         if not cluster_rules and "vpn_network" not in args["cluster_vars"]:
             cluster_rules.append(
-                dict(proto="tcp", from_port=22, to_port=22, cidr_ip="0.0.0.0/0")
+                {"proto": "tcp", "from_port": 22, "to_port": 22, "cidr_ip": "0.0.0.0/0"}
             )
             for sn in args.get("subnets", []):
                 cluster_rules.append(
-                    dict(proto="tcp", from_port=0, to_port=65535, cidr_ip=sn)
+                    {"proto": "tcp", "from_port": 0, "to_port": 65535, "cidr_ip": sn}
                 )
         if cluster_rules:
             settings["cluster_rules"] = cluster_rules

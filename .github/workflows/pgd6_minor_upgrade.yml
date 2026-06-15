@@ -1,13 +1,13 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-name: PGD6 various Upgrade tests
+name: PGD minor Upgrade tests
 run-name:
-  PGD6 various Upgrade tests using ${{ github.event.inputs.matrix_key }} matrix key
+  PGD minor Upgrade tests using ${{ github.event.inputs.matrix_key }} matrix key
 on:
   workflow_dispatch:
     inputs:
-      bdr6_base_version:
-        description: "BDR 6 package version to upgrade from"
+      bdr_base_version:
+        description: "BDR package version to upgrade from (use '*5.3*' if testing BDR5)"
         required: false
         default: "*6.1.1*"
       matrix_key:
@@ -18,6 +18,7 @@ on:
         options:
           - all_flavours
           - pgd6_versions
+          - pgd5_versions
       tpa_os_image:
         description: "TPA OS image"
         required: true
@@ -82,7 +83,7 @@ jobs:
       ${{ matrix.tpa_architecture }}
       ${{ matrix.tpa_os_image }}
       ${{ matrix.tpa_postgres_flavour }}-${{ matrix.tpa_postgres_version }}
-      from ${{ github.event.inputs.bdr6_base_version }} to latest
+      from ${{ github.event.inputs.bdr_base_version }} to latest
     needs: load-matrix
     strategy:
       fail-fast: false
@@ -125,5 +126,5 @@ jobs:
         tpa_postgres_flavour: ${{ env.POSTGRES_FLAVOUR }}
         tpa_postgres_version: ${{ env.POSTGRES_VERSION }}
         upgrade_component_name: "bdr"
-        upgrade_component_base_version: ${{ github.event.inputs.bdr6_base_version }}
+        upgrade_component_base_version: ${{ github.event.inputs.bdr_base_version }}
         cluster: ${{ inputs.cluster }}

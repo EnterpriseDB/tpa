@@ -1,9 +1,67 @@
 pep257:
   disable:
+    - D104
+    - D105
+    - D107
+    - D200
     - D202
     - D203
     - D212
+    - D213
+    - D301
+    - D404
     - D406
     - D407
+    - D411
+    - D413
+    - D417
+    - D419
+
+mccabe:
+  run: false
+
+pylint:
+  disable:
+    - consider-iterating-dictionary
+    - consider-using-dict-items
+    - consider-using-f-string
+    - consider-using-with
+    - django-not-available
+    - function-redefined
+    - import-error
+    - import-outside-toplevel
+    - inconsistent-return-statements
+    - no-else-continue
+    - no-else-raise
+    - no-else-return
+    - possibly-used-before-assignment
+    - protected-access
+    - redefined-builtin
+    - super-with-arguments
+    - too-many-arguments
+    - too-many-boolean-expressions
+    - too-many-branches
+    - too-many-locals
+    - too-many-positional-arguments
+    - too-many-statements
+    - trailing-newlines
+    - unnecessary-pass
+    - unused-argument
+    - use-implicit-booleaness-not-comparison
+    - useless-object-inheritance
+    - useless-return
+    - wrong-import-position
+
+pep8:
+  disable:
+    - E201
+    - E202
+    - E402
+    - E741
+    - N801
+    - N812
+    - W291
+    - W391
+
 ignore-patterns:
   - platforms/.*/inventory/.*.py

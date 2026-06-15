@@ -4,10 +4,9 @@
 
 from .bdr import BDR
 from ..exceptions import ArchitectureError
-from typing import List, Tuple, Union
+from typing import List, Tuple
 import re
 from argparse import SUPPRESS
-from packaging.version import Version, InvalidVersion, parse
 
 
 class PGD_Always_ON(BDR):
@@ -144,8 +143,6 @@ class PGD_Always_ON(BDR):
         witness_only_location = self.args["witness_only_location"]
         data_nodes_per_location = self.args["data_nodes_per_location"]
         witness_node_per_location = self.args["witness_node_per_location"]
-        self.args["pgd_proxy_routing"]
-
         if data_nodes_per_location < 2:
             errors.append("--data-nodes-per-location cannot be less than 2")
 
@@ -171,8 +168,7 @@ class PGD_Always_ON(BDR):
 
         if witness_only_location and witness_only_location not in location_names:
             errors.append(
-                "--witness-only-location '%s' must be included in location list"
-                % witness_only_location
+                f"--witness-only-location '{witness_only_location}' must be included in location list"
             )
 
         if errors:
@@ -243,11 +239,8 @@ class PGD_Always_ON(BDR):
         )
 
         bdr_package_version = cluster_vars.get("bdr_package_version")
-        sanitized_version, includes_wildcard = self._sanitize_version(
-            version_string=bdr_package_version
-        )
-        if self._is_above_minimum(
-            sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard
+        if not bdr_package_version or self._package_version_at_least(
+            bdr_package_version, self.BDR_WITH_READ_LISTEN_PORT
         ):
             cluster_vars.update(
                 {
@@ -272,19 +265,19 @@ class PGD_Always_ON(BDR):
 
     def update_instances(self, instances):
         """
-        Update instances with bdr node and proxy configuration specific
+        Update instances with bdr node and proxy configuration specific.
+
         to PGD-Always-ON.
+
         """
         super().update_instances(instances)
 
         # Map location names to the corresponding barman instances.
-        barman_instances_by_location = dict(
-            [
-                (x["location"], x)
-                for x in instances
-                if "barman" in self._instance_roles(x)
-            ]
-        )
+        barman_instances_by_location = {
+            x["location"]: x
+            for x in instances
+            if "barman" in self._instance_roles(x)
+        }
 
         # Map BDR group names to a list of instances in the group.
         bdr_primaries_by_group = {}
@@ -381,6 +374,7 @@ class PGD_Always_ON(BDR):
     def _sub_group_name(self, loc):
         """
         Returns a name for the BDR subgroup in the given location.
+
         """
         loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"
@@ -391,25 +385,3 @@ class PGD_Always_ON(BDR):
         and false otherwise.
         """
         return location == self.args.get("witness_only_location")
-
-    def _sanitize_version(
-        self, version_string
-    ) -> Union[Tuple[Version, bool], Tuple[None, bool]]:
-        try:
-            version_parts = version_string.split(":", maxsplit=1)[-1].split(".")
-            if version_parts[1] == "*":
-                return parse(version_parts[0]), True
-            else:
-                return parse(f"{version_parts[0]}.{version_parts[1]}"), False
-        except (InvalidVersion, AttributeError) as e:
-            return None, False
-
-    def _is_above_minimum(
-        self, x: Union[Version, None], y: Version, includes_wildcard: bool
-    ) -> bool:
-        if x is None:
-            return True
-        elif includes_wildcard:
-            return x.major >= y.major
-        else:
-            return x >= y

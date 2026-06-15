@@ -7,17 +7,6 @@ description: Known issues in TPA and their workarounds.
 This page lists known issues affecting the current version of TPA.
 Where one is known, a workaround for each issue is provided.
 
-## The Barman user cannot connect to the database after running `deploy` (TPA-1218)
-
-### Details
-If you use TPA 23.35 or later to deploy to a PGD/BDR cluster created
-with an earlier version of TPA, the `barman` user's superuser permissions will be
-revoked. Consequently, any attempts by this user to connect to the `postgres` database will fail. This will cause the Barman
-`check` command to report a failure. 
-
-### Workaround
-Use a post-deploy hook to grant superuser to `barman`.
-
 ## EFM clusters with more than one location are missing inter-location HBA rules (TPA-1247)
 
 ### Details
@@ -50,68 +39,6 @@ postgres_hba_settings:
   - hostssl replication replication 192.168.58.13/32 md5
 ```
 
-## Deploy fails on Debian-like instances when a non-current `pem_server_package_version` is specified (TPA-1178)
-
-### Details
-TPA installs the PEM server by installing the `edb-pem` metapackage.
-On Debian-like systems, using a version specifier with
-this package can cause the package manager to attempt an unresolvable
-combination of installs resulting in the error:
-`Some packages could not be installed. This may mean that you have, requested an impossible situation...`
-
-### Workaround
-Consider using the latest version of PEM. If however, you need a
-specific version, you can specify the exact versions of the PEM packages
-required to allow your package manager to resolve them correctly.
-
-Specify the PEM server and agent version as normal
-Then include the full set of PEM packages as `packages` under the instance variables.
-
-```yaml
-cluster_vars:
-  ...
-  pem_server_package_version: '10.2.0-1.bookworm'
-  pem_agent_package_version: '10.2.0-1.bookworm'
-
-  ...
-
-  instances:
-  ...
-  - Name: pemserver
-    ...
-    vars:
-      packages:
-        Debian:
-          - edb-pem=10.2.0-1.bookworm
-          - edb-pem-agent=10.2.0-1.bookworm
-          - edb-pem-server=10.2.0-1.bookworm
-          - edb-pem-cli=10.2.0-1.bookworm
-```
-
-If you require PEM 9, you should also include the docs package.
-
-```yaml
-cluster_vars:
-  ...
-  pem_server_package_version: '9.8.0-1.bookworm'
-  pem_agent_package_version: '9.8.0-1.bookworm'
-
-  ...
-
-  instances:
-  ...
-  - Name: pemserver
-    ...
-    vars:
-      packages:
-        Debian:
-          - edb-pem=9.8.0-1.bookworm
-          - edb-pem-agent=9.8.0-1.bookworm
-          - edb-pem-server=9.8.0-1.bookworm
-          - edb-pem-cli=9.8.0-1.bookworm
-          - edb-pem-docs=9.8.0-1.bookworm
-```
-
 ## PGD clusters deployed with TPA 23.34 or earlier have primary_slot_name set preventing bdr_init_physical from working (TPA-1229)
 
 ### Details
@@ -126,3 +53,88 @@ on `Waiting for PostgreSQL to accept connections...`, the logs will show a fatal
 ### Workaround
 You can manually remove this incorrect setting from each Postgres node in your cluster by deleting the file `/opt/postgres/data/conf.d/8901-primary_slot_name.conf` and reloading Postgres.
 As long as you are now using TPA 23.35 or later, it will not be reinstated.
+
+## SSH configuration templating error in clusters using  `forward_ssh_agent: true`
+
+### Details
+
+TPA 23.43 changed the templating for the ssh_config file in the cluster
+directory and introduced a bug whereby if `forward_ssh_agent` is set to
+True, the generated config file will be invalid. The default for this
+setting is False, and it is usually only set to True when installing
+components of the cluster from source code for testing.
+
+### Workaround
+After running `tpaexec provision` to generate the ssh_config file, edit
+the file in a text editor. Find the line reading `IdentitiesOnly yes
+ForwardAgent yes`, usually line 7 in the file, and split it two lines by
+adding a newline after the first "yes". The file will be overwritten by
+`tpaexec provision` so it must be re-edited after provisioning when a
+change is made to config.yml.
+
+## PEM agent registration options provided by `pemagent_registration_opts` are not reflected in `agent.cfg` and therefore do not take effect (TPA-1376)
+
+### Details
+
+The `pemagent_registration_opts` option is used to pass additional
+command line options to the pemworker utility during PEM agent
+registration. Some of these options affect the immediate act of
+registration, some affect the data written to the PEM database, and
+others affect the content of the generated `agent.cfg` file which is
+used to determine agent behaviour. In TPA's current implementation, the
+`agent.cfg` file is overwritten immediately after registration with a
+templated version, meaning any changes made to this file as a result of
+`pemagent_registration_opts` are lost.
+
+### Workaround
+
+Avoid using `pemagent_registration_opts` unless you are sure the options
+you specify do not interact with `agent.cfg`. Apply any changes required
+to `agent.cfg` using a post-deploy hook.
+
+## PEM 10.4.x web application shows "Internal Server Error" when deployed using TPA (TPA-1415)
+
+### Details
+
+PEM 10.4 uses a newer Python version than previous PEM versions on most
+operating systems. TPA installs the required Python version because it
+is a package dependency of PEM, but still installs the `mod_wsgi`
+modules for the previous version, meaning the web application cannot
+run.
+
+### Workaround
+
+The most complete workaround is to explicitly add the required
+`mod_wsgi` package to your PEM server instance. You can find the
+required package in the [PEM documentation](/pem/latest/installing/dependencies/).
+For example for RHEL 9:
+
+```yaml
+instances:
+...
+- name: pem-server
+  ...
+  packages:
+    RedHat:
+    - edb-python312-mod-wsgi
+```
+
+## TPA does not configure `max_active_replication_origins` on Postgres 18 leading to deploy failures for PGD clusters (TPA-1467)
+
+### Details
+
+Postgres 18 introduced the parameter `max_active_replication_origins`.
+The default setting of 10 is not sufficient for some PGD clusters, but
+TPA does not automatically pick a better value.
+
+### Workaround
+
+Set this parameter manually to a value of at least three times the
+number of peer nodes as [recommended by the EDB PGD documentation](/pgd/latest/postgres-configuration/#postgres-settings).
+
+```yaml
+cluster_vars:
+  ...
+  postgres_conf_settings:
+    max_active_replication_origins: 24
+```

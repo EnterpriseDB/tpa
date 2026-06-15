@@ -6,7 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import os, sys
+import os
+import sys
 import traceback
 import argparse
 
@@ -15,16 +16,17 @@ from tpaexec.test_compiler import TestCompiler
 
 def main():
     """
-    Given an input file and an output directory, this program tries to compile
-    the input and write the compiled output to files under the output directory
-    starting with index.yml, otherwise prints an error message and exits with a
-    non-zero status.
+    Given an input file and an output directory, compile and write output.
+
+    This program tries to compile the input and write the compiled output
+    to files under the output directory starting with index.yml, otherwise
+    prints an error message and exits with a non-zero status.
     """
 
     prog = os.path.basename(sys.argv[0])
     p = argparse.ArgumentParser(
         prog=prog,
-        usage="%s infile.t.yml /output/dir [options…]" % prog,
+        usage=f"{prog} infile.t.yml /output/dir [options…]",
     )
 
     p.add_argument(
@@ -57,14 +59,14 @@ def main():
 
     except Exception as e:
         error = str(e)
-        if "'%s'" % args.infile not in error:
-            error = "%s: %s" % (args.infile, error)
-        print("ERROR: %s" % error, file=sys.stderr)
+        if f"'{args.infile}'" not in error:
+            error = f"{args.infile}: {error}"
+        print(f"ERROR: {error}", file=sys.stderr)
         if args.verbosity:
-            type, obj, tb = sys.exc_info()
+            tb = sys.exc_info()[2]
             tb = traceback.extract_tb(tb)[-1]
-            print("From %s:%s (in %s)" % (tb[0], tb[1], tb[2]))
-            print("\t%s" % tb[3])
+            print(f"From {tb[0]}:{tb[1]} (in {tb[2]})")
+            print(f"\t{tb[3]}")
         sys.exit(-1)
 
 

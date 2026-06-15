@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 """Tests for location object."""
+
 import pytest
 
 from tpa.location import Location

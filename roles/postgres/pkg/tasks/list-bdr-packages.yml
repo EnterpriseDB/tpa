@@ -56,6 +56,23 @@
             bdr4_debug_packages[postgres_family_extended])
           |packages_for(ansible_distribution, bdr_package_version)
         }}"
+  # Record the primary BDR package name so other roles (e.g.
+  # postgres/install via bdr-version-num.yml) can derive
+  # bdr_version_num from package_facts without re-doing this selection.
+  # Split into two tasks because Jinja's ternary filter evaluates both
+  # arms eagerly, and bdr_packages/bdr4_packages don't share keys.
+  - name: Record primary BDR3 package name
+    set_fact:
+      _bdr_primary_package: "{{
+          bdr_packages[postgres_family][ansible_os_family]|first
+        }}"
+    when: bdr_version is version('4', '<')
+  - name: Record primary BDR4/5 package name
+    set_fact:
+      _bdr_primary_package: "{{
+          bdr4_packages[postgres_family_extended][ansible_os_family]|first
+        }}"
+    when: bdr_version is version('4', '>=')
 
 - when: "'postgres' in role and need_bdr_packages and bdr_version|int == 6"
   block:
@@ -65,3 +82,8 @@
     loop:
       - "{{ bdr6_debug_packages[postgres_family_extended] }}"
       - "{{ bdr6_packages[postgres_family_extended] }}"
+  - name: Record primary BDR/PGD package name
+    set_fact:
+      _bdr_primary_package: "{{
+          bdr6_packages[postgres_family_extended][ansible_os_family]|first
+        }}"

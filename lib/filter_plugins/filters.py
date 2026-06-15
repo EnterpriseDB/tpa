@@ -31,13 +31,13 @@ def try_subkey(container, keys, default=None):
                 else:
                     # Can't index a list by a non-integer, and can't call .get
                     # on lists below either.
-                    raise
+                    raise TypeError(f"Cannot index list with non-integer key: {key}")
             else:
                 v = v.get(key, default)
         if isinstance(v, StrictUndefined):
             v = default
         return v
-    except:
+    except Exception:
         return default
 
 
@@ -45,8 +45,8 @@ def try_subkey(container, keys, default=None):
 # the string to '\"'. Caveat emptor.
 
 
-def doublequote(str):
-    return '"%s"' % str.replace('"', '"')
+def doublequote(text):
+    return '"%s"' % text.replace('"', '"')
 
 
 # Given a hostname and hostvars, returns the name of the earliest ancestor that
@@ -94,12 +94,12 @@ def instance_with_backup_of(hosts, primary, somehost, hostvars):
 def remove_keys(d, keys):
     if not isinstance(d, dict):
         raise AnsibleFilterError(
-            "|remove_keys takes a dict as its first argument, got " + type(d)
+            f"|remove_keys takes a dict as its first argument, got {type(d)}"
         )
 
     if not isinstance(keys, list):
         raise AnsibleFilterError(
-            "|remove_keys takes a list as its second argument, got " + type(keys)
+            f"|remove_keys takes a list as its second argument, got {type(keys)}"
         )
 
     d2 = copy.deepcopy(d)
@@ -117,12 +117,12 @@ def remove_keys(d, keys):
 def extract_keys(d, keys):
     if not isinstance(d, Mapping):
         raise AnsibleFilterError(
-            "|extract_keys takes a dict as its first argument, got " + type(d)
+            f"|extract_keys takes a dict as its first argument, got {type(d)}"
         )
 
     if not isinstance(keys, list):
         raise AnsibleFilterError(
-            "|extract_keys takes a list as its second argument, got " + type(keys)
+            f"|extract_keys takes a list as its second argument, got {type(keys)}"
         )
 
     d2 = {}
@@ -146,7 +146,7 @@ def packages_for(packages, os, version=None):
             sep = "="
             if os == "RedHat":
                 sep = "-"
-            p = "%s%s%s" % (p, sep, version)
+            p = f"{p}{sep}{version}"
         ret.append(p)
 
     return ret
@@ -162,7 +162,9 @@ def packages_for(packages, os, version=None):
 # role_c (as if there were a group named 'role_a_but_not_b_or_c').
 
 
-def members_of(groups, group, not_in=[]):
+def members_of(groups, group, not_in=None):
+    if not_in is None:
+        not_in = []
     members = set(groups.get(group, []))
     excluded = set()
     for g in not_in:
@@ -210,10 +212,10 @@ def pyformat_attr(container, attr, **kwargs):
 # x.keys()|map('apply_format', '{0} := %s')|list
 
 
-def apply_format(input, format_string, *more):
-    args = [input]
-    if isinstance(input, list):
-        args = input
+def apply_format(input_data, format_string, *more):
+    args = [input_data]
+    if isinstance(input_data, list):
+        args = input_data
     if more:
         args.append(*more)
     return format_string.format(*args)
@@ -288,7 +290,7 @@ def cmdline(playbook_dir):
         sq = shlex.quote(x)
 
         if x != sq:
-            dq = '"' + x.replace('"', '"') + '"'
+            dq = f"\"{x.replace('\"', '\"')}\""
             x = dq if len(dq) < len(sq) else sq
 
         return x
@@ -316,8 +318,8 @@ def sort_by_node(hosts, hostvars):
 
 def dict_format(d, format_string, **kwargs):
     results = []
-    for k in d:
-        results.append(format_string.format(key=k, value=d[k], **kwargs))
+    for k, v in d.items():
+        results.append(format_string.format(key=k, value=v, **kwargs))
     return results
 
 
@@ -447,19 +449,21 @@ def index_list_of_dicts(obj, key=None, recursive=False):
 
 
 def pyformat_hostvars(hostname, format_str, hostvars):
-    """
+    """Format a string with references to hostvars for a given hostname.
+
     Takes a hostname, hostvars, and a string with {references} to attributes in
-    hostvars, and returns the .format()ed string
+    hostvars, and returns the .format()ed string.
     """
     return format_str.format(**hostvars.get(hostname, {}))
 
 
 def expected_replication_slots(replica_list, inventory_hostname):
-    """
+    """Return expected replication slots for a given inventory hostname.
+
     Deep copy a variable inside a clean dict to ensure the variable is correctly
     formatted as dict. This filter is added due to an issue while switching to
-    aws_ec2 inventory plugin. hostvars were not returned corectly. this would
-    result in expected replication slots to be returned as "" or "\n".
+    aws_ec2 inventory plugin. hostvars were not returned correctly. This would
+    result in expected replication slots to be returned as "" or "\\n".
     """
     expected_slots = []
     for replica in replica_list:
@@ -471,7 +475,8 @@ def expected_replication_slots(replica_list, inventory_hostname):
 
 
 def select_by_hostvar(hostnames, hostvars, varname, value):
-    """
+    """Select hostnames where a given hostvar matches a specified value.
+
     Takes a list of hostnames, hostvars, the name of a variable, and a value to
     compare with, and returns those hostnames for which the variable is set to
     the given value in hostvars.
@@ -485,7 +490,7 @@ def select_by_hostvar(hostnames, hostvars, varname, value):
     return results
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "try_subkey": try_subkey,

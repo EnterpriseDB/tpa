@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-import os, re, subprocess, sys, yaml
+import os
+import re
+import subprocess
+import sys
+import yaml
 import shutil
 import textwrap
 
@@ -10,12 +14,12 @@ p = argparse.ArgumentParser(
         Creates links from the cluster directory into the tpa directory
     """,
     usage=textwrap.dedent(
-        """
+        f"""
         tpaexec relink clustername [--force]
 
         Tries to repair any dangling or missing symbolic links within a cluster
         directory (e.g., deploy.yml) by making them point to the correct
-        $TPA_DIR when appropriate. (TPA_DIR=%s)
+        $TPA_DIR when appropriate. (TPA_DIR={os.environ.get("TPA_DIR", "<unset>")})
 
         This command is useful if a cluster was configured on one machine and
         moved to another system with TPA installed in a different location,
@@ -27,8 +31,7 @@ p = argparse.ArgumentParser(
         With --force, removes links or files if they already exist.
 
                           """
-    )
-    % os.environ.get("TPA_DIR", "<unset>"),
+    ),
 )
 p.add_argument("--force", help="remove existing files", action="store_true")
 p.add_argument("--verbose", "-v", action="store_true")
@@ -57,7 +60,7 @@ def repair_dangling_symlink(link, target):
     # We can't repair links that don't point to TPA_DIR
     if not re.findall("/(TPA|tpaexec)/", target):
         if v:
-            print("%s: <ignored; unrecognised target>" % link)
+            print(f"{link}: <ignored; unrecognised target>")
         return
 
     new_target = re.sub("^.*/(TPA|tpaexec)/", "", target)
@@ -71,11 +74,11 @@ def repair_dangling_symlink(link, target):
         os.unlink(link)
         os.symlink(new_target, link)
         if v:
-            print("%s: %s => %s" % (link, target, new_target))
+            print(f"{link}: {target} => {new_target}")
     else:
         os.unlink(link)
         if v:
-            print("%s: <removed>" % link)
+            print(f"{link}: <removed>")
 
 
 # Now we can look for dangling symlinks somewhere under the current directory
@@ -94,18 +97,18 @@ for subdir, dirs, files in os.walk("."):
 # (The cluster configuration may have been generated long before the current
 # TPA release.)
 
-with open(r"./config.yml") as config_file:
+with open(r"./config.yml", encoding="utf-8") as config_file:
     try:
         config = yaml.safe_load(config_file)
         architecture = config["architecture"]
-    except:
+    except Exception:
         sys.exit("Failed to read 'architecture' from config.yml")
 
     # In theory, the architecture may return something else from
     # links_to_create(), but we ignore that possibility for now.
 
     for s in ["deploy.yml", "commands", "tests", "playbooks"]:
-        target = "%s/architectures/%s/%s" % (TPA_DIR, architecture, s)
+        target = f"{TPA_DIR}/architectures/{architecture}/{s}"
 
         if os.path.isfile(target):
             if args.get("force") and os.path.isfile(s):
@@ -120,15 +123,15 @@ with open(r"./config.yml") as config_file:
                     os.symlink(target, s)
                 modified_paths.append(s)
                 if v:
-                    print("%s: %s" % (s, target))
+                    print(f"{s}: {target}")
 
         elif os.path.isdir(target):
             if not os.path.exists(s):
                 os.mkdir(s)
 
-            for l in os.listdir(target):
-                link = "%s/%s" % (s, l)
-                dest = "%s/%s" % (target, l)
+            for entry in os.listdir(target):
+                link = f"{s}/{entry}"
+                dest = f"{target}/{entry}"
                 if args.get("force") and os.path.isfile(link):
                     os.remove(link)
                 if not os.path.exists(link):
@@ -141,7 +144,7 @@ with open(r"./config.yml") as config_file:
                         os.symlink(dest, link)
                     modified_paths.append(link)
                     if v:
-                        print("%s: %s" % (link, dest))
+                        print(f"{link}: {dest}")
 
 if os.path.exists(".git") and modified_paths:
     try:
@@ -150,12 +153,14 @@ if os.path.exists(".git") and modified_paths:
             shell=True,
             stdout=subprocess.PIPE,
             universal_newlines=True,
+            check=False,
         )
         if cp.stdout.rstrip() == "Created by TPA":
             cp = subprocess.run(
                 ["git", "add", *modified_paths],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
+                check=False,
             )
             if v:
                 print(cp.stdout)
@@ -163,8 +168,9 @@ if os.path.exists(".git") and modified_paths:
                 ["git", "commit", "-m", "Relink files to the correct $TPA_DIR"],
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
+                check=False,
             )
             if v:
                 print(cp.stdout)
     except subprocess.CalledProcessError as cpe:
-        print("Failed to git commit: %s" % cpe.stderr)
+        print(f"Failed to git commit: {cpe.stderr}")

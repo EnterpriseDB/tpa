@@ -243,3 +243,65 @@ So simply removing the lines from `config.yml` will not remove the
 extension. It is necessary to perform this operation manually then
 reconcile the change.
 !!!
+
+### After a manual major-version Postgres upgrade
+
+When you have used `pg_upgrade`, [`pgd node upgrade`](https://www.enterprisedb.com/docs/pgd/latest/upgrades/bdr_pg_upgrade/#pgd-node-upgrade-command-line),
+or another out-of-band procedure to upgrade Postgres on the cluster,
+TPA does not automatically update `config.yml` to reflect the new
+version. Subsequent `tpaexec deploy` runs will continue to behave as
+if the cluster were still on the previous version, and any deploy-time
+settings that depend on the Postgres version (such as
+`shared_preload_libraries` choices or version-conditional Ansible
+tasks) will not be re-evaluated.
+
+To reconcile `config.yml` with the cluster's new state:
+
+1. **Update the version variables in `config.yml`.** At minimum, set:
+
+   ```yaml
+   cluster_vars:
+     postgres_version: '<new-major>'
+     postgres_package_version: '<new-package-version>'
+   ```
+
+   For PGD clusters, also update `bdr_version` and
+   `bdr_package_version` if BDR was upgraded as part of the same
+   procedure.
+
+2. Re-run `tpaexec provision` so the new versions are written into
+   the inventory:
+
+   ```shell
+   tpaexec provision <cluster>
+   ```
+
+3. Re-run `tpaexec deploy` so any version-conditional configuration
+   is regenerated:
+
+   ```shell
+   tpaexec deploy <cluster>
+   ```
+
+   `tpaexec deploy` does not perform any package install or upgrade
+   itself — it refuses to install a different version of a package
+   that is already installed. It does, however, refresh configuration
+   files, `shared_preload_libraries` entries, and version-conditional
+   settings that depend on `postgres_version`.
+
+4. Verify TPA's view of the cluster matches reality:
+
+   ```shell
+   tpaexec cmd <cluster> all -m shell -a 'psql -tAc "SELECT version()"'
+   tpaexec test <cluster>
+   ```
+
+   Every instance should report the new Postgres version, and
+   `tpaexec test` should pass.
+
+!!! Note
+This reconciliation procedure assumes the manual upgrade left every
+instance in a consistent, running state. If only some instances were
+upgraded, or if any instance is in a partial state, address that
+first before running `tpaexec deploy`.
+!!!

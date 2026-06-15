@@ -33,6 +33,15 @@
     that:
       postgres_flavour in ['postgresql', 'pgextended', 'epas', 'postgresql-bdr', 'edbpge']
 
+- name: Ensure pgaudit is not requested on an EPAS cluster
+  assert:
+    msg: >-
+      Use EPAS's built-in audit features instead of pgaudit.
+    that:
+      - >-
+        postgres_flavour != 'epas'
+        or 'pgaudit' not in (extra_postgres_extensions|default([]))
+
 - name: Set postgres_data_dir
   set_fact:
     postgres_data_dir: "{{ postgres_data_dir|default(default_postgres_data_dir) }}"
@@ -239,16 +248,42 @@
       {%- else -%}xlog
       {%- endif -%}
 
-- name: Ensure pgextended is not used with PGD 4 or later
+- name: Ensure read_listen_port is configured for BDR 5.5 and later
   assert:
     msg: >-
-      The pgextended flavour is not supported with PGD version 4 or later.
+      BDR 5.5 and later require read_listen_port to be set in
+      default_pgd_proxy_options in config.yml.
+    that:
+      - "'read_listen_port' in pgd_proxy_options"
+  run_once: true
+  when:
+    - groups['role_pgd-proxy']|default([]) is not empty
+    - bdr_package_version|default('') is match('.*[0-9]+\.[0-9]+')
+    - bdr_package_version|regex_search('[0-9]+\.[0-9]+') is version('5.5', '>=')
+
+- name: Ensure pgextended is not used with PGD 5 or later
+  assert:
+    msg: >-
+      The pgextended flavour is not supported with PGD version 5 or later.
       Use edbpge instead.
     that:
-      - postgres_flavour != 'pgextended'
-        or bdr_version is version('4', '<')
+      - bdr_version is version('5', '<')
   when:
     - "'bdr' in role"
+    - postgres_flavour == 'pgextended'
+
+- name: Fail if pgbouncer and pgd-proxy are co-hosted with the same listen port
+  assert:
+    that:
+      - pgbouncer_port|int != pgd_proxy_options.listen_port|int
+    fail_msg: >-
+      Instance {{ inventory_hostname }} hosts both 'pgbouncer' and 'pgd-proxy'
+      with the same listen port ({{ pgbouncer_port }}). Set pgbouncer_port
+      (or pgd_proxy_options.listen_port) to a different value for this host
+      in config.yml.
+  when:
+    - "'pgbouncer' in role"
+    - "'pgd-proxy' in role"
 
 - name: Split extension from postgres_log_file
   set_fact:
@@ -760,6 +795,16 @@
     multiplier: "{{ ('bdr' in role)|ternary(writers_per_subscription, 1) }}"
     _max_replication_slots: "{{ max_replication_slots|default(twice_postgres_instances * multiplier|int + 3|int) }}"
     _max_wal_senders: "{{ max_wal_senders|default(_max_replication_slots) }}"
+
+# https://www.enterprisedb.com/docs/pgd/latest/postgres-configuration/#postgres-settings
+# recommends at least 3 origins per peer node on PG18+. We count the current
+# node too and add +3 as a safety net for transient origins during join/sync.
+- name: Set default value for max_active_replication_origins (PG18+ PGD)
+  set_fact:
+    max_active_replication_origins: "{{ max_active_replication_origins|default(3 * num_postgres_instances + 3) }}"
+  when:
+    - postgres_version is version('18', '>=')
+    - "'bdr' in role"
 
 # “The formula for the correct minimal number of workers is: one per
 # PostgreSQL instance + one per database on that instance + two per BDR

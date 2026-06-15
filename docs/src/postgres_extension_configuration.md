@@ -34,7 +34,8 @@ with a different entry for extension and library name.
 cluster_vars:
   [...]
   extra_postgres_packages:
-    - postgresql-17-my-extension
+    common:
+      - postgresql-17-my-extension
   extra_postgres_extensions:
     - my-extension
   preload_extensions:
@@ -48,7 +49,7 @@ The following sections provide further information.
 - [Including shared preload entries for extensions](postgresql.conf.md#shared_preload_libraries)
 - [Installing Postgres-related packages](postgres_installation_method_pkg.md)
 
-## TPA recognized extensions
+## TPA recognised extensions
 The following list of extensions only require the extension name to be
 added in `config.yml` (either to `extra_postgres_extensions` OR to the
 `extensions` list of a database specified in `postgres_databases`) and

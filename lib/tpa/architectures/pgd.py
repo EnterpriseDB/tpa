@@ -19,6 +19,7 @@ class PGD(Architecture):
     def bdr_major_versions(self) -> List[str]:
         """
         Returns a list of BDR major versions supported by this architecture.
+
         """
         return list(set(map(lambda t: t[1], self.supported_versions())))
 
@@ -84,7 +85,6 @@ class PGD(Architecture):
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
 
-        arch = self.args["architecture"]
         default_bdr_versions = {
             "13": "6",
             "14": "6",
@@ -147,10 +147,12 @@ class PGD(Architecture):
         if bdr_node_group_options != {}:
             cluster_vars.update(
                 {
-                    "bdr_node_groups": [{
-                        "name": self.bdr_safe_name(self.cluster_name()),
-                        "options": bdr_node_group_options,
-                    }]
+                    "bdr_node_groups": [
+                        {
+                            "name": self.bdr_safe_name(self.cluster_name()),
+                            "options": bdr_node_group_options,
+                        }
+                    ]
                 }
             )
 
@@ -167,6 +169,7 @@ class PGD(Architecture):
     def _sub_group_name(self, loc):
         """
         Returns a name for the BDR subgroup in the given location.
+
         """
         loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"
@@ -175,7 +178,7 @@ class PGD(Architecture):
         self._update_instance_pem(cluster)
         self._update_instance_beacon(cluster)
         self._update_instance_barman(cluster)
-    
+
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
 
@@ -217,6 +220,7 @@ class PGD(Architecture):
         At this stage, a BDR primary would not have "primary" in its role, so it
         is a BDR instance that has none of the roles that would identify it as a
         not-primary instance.
+
         """
         roles = self._instance_roles(instance)
         return "bdr" in roles and not roles & self._readonly_bdr_roles
@@ -228,6 +232,7 @@ class PGD(Architecture):
         If --enable-pem is specified, we add the 'pem-agent' role to BDR and
         Barman instances, and add a dedicated 'pemserver' instance to host the
         PEM server.
+
         """
         if self.args.get("enable_pem", False):
             for instance in cluster.instances:
@@ -237,19 +242,20 @@ class PGD(Architecture):
                 ):
                     instance.add_role("pem-agent")
             pemserver_name = (
-                "%s-pemserver" % self.args["cluster_name"]
+                f"{self.args['cluster_name']}-pemserver"
                 if self.args.get("cluster_prefixed_hostnames")
                 else "pemserver"
             )
             pemserver = cluster.add_instance(
-                instance_name = pemserver_name,
-                location_name = cluster.locations[0].name,
+                instance_name=pemserver_name,
+                location_name=cluster.locations[0].name,
             )
             pemserver.add_role("pem-server")
 
     def _update_instance_beacon(self, cluster):
         """
-        Add beacon-agent to instance roles where applicable
+        Add beacon-agent to instance roles where applicable.
+
         """
         if self.args.get("enable_beacon_agent"):
             for instance in cluster.instances:
@@ -264,7 +270,9 @@ class PGD(Architecture):
         for location in cluster.locations:
 
             # Data nodes for the given location
-            data_nodes = cluster.instances.with_bdr_node_kind("data").in_location(location.name)
+            data_nodes = cluster.instances.with_bdr_node_kind("data").in_location(
+                location.name
+            )
             # Barman nodes for the given location
             barman = cluster.instances.with_role("barman").in_location(location.name)
 

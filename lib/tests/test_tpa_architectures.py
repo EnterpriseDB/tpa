@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 """Tests for lib/tpa architecture module (PGD-X and PGD-S)."""
+
 import shutil
 import os
 
@@ -11,7 +12,6 @@ import pytest
 from tpa.architectures.pgd_x import PGDX
 from tpa.architectures.pgd_s import PGDS
 from tpa.commands.configure import configure
-
 
 CONFIG_PATH = {
     "PGDX": "lib/tests/config/cluster-PGDX",
@@ -170,7 +170,9 @@ class TestPGDXArchitecture:
         # Check subgroup routing setting (if subgroups exist)
         if len(bdr_node_groups) > 1:
             sub_group = bdr_node_groups[1]
-            assert sub_group["options"]["enable_routing"] == expected_sub["enable_routing"]
+            assert (
+                sub_group["options"]["enable_routing"] == expected_sub["enable_routing"]
+            )
 
     @pytest.mark.parametrize(
         "argv",
@@ -192,9 +194,18 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv, expected_repos",
         [
-            (MINIMUM_PGDX_ARGV + ["--postgresql", "16"], ["standard", "postgres_distributed"]),
-            (MINIMUM_PGDX_ARGV + ["--edbpge", "16"], ["standard", "postgres_distributed"]),
-            (MINIMUM_PGDX_ARGV + ["--epas", "16", "--no-redwood"], ["enterprise", "postgres_distributed"]),
+            (
+                MINIMUM_PGDX_ARGV + ["--postgresql", "16"],
+                ["standard", "postgres_distributed"],
+            ),
+            (
+                MINIMUM_PGDX_ARGV + ["--edbpge", "16"],
+                ["standard", "postgres_distributed"],
+            ),
+            (
+                MINIMUM_PGDX_ARGV + ["--epas", "16", "--no-redwood"],
+                ["enterprise", "postgres_distributed"],
+            ),
         ],
     )
     def test_pgdx_repositories(self, argv, expected_repos, pgdx_cluster):
@@ -224,24 +235,34 @@ class TestPGDXArchitecture:
         bdr_instances = instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "pem-agent" in instance.roles, f"BDR instance {instance.name} should have pem-agent role"
+            assert (
+                "pem-agent" in instance.roles
+            ), f"BDR instance {instance.name} should have pem-agent role"
 
         # Check that pemserver instance was created
         pemserver_instances = instances.with_role("pem-server")
-        assert len(pemserver_instances) == 1, "Should have exactly one pemserver instance"
+        assert (
+            len(pemserver_instances) == 1
+        ), "Should have exactly one pemserver instance"
         assert pemserver_instances[0].name == "pemserver"
 
         # Check barman instances when --enable-pg-backup-api is specified
         if check_barman:
             barman_instances = instances.with_role("barman")
             for instance in barman_instances:
-                assert "pem-agent" in instance.roles, f"Barman instance {instance.name} should have pem-agent role"
+                assert (
+                    "pem-agent" in instance.roles
+                ), f"Barman instance {instance.name} should have pem-agent role"
 
     @pytest.mark.parametrize(
         "argv, expected_project_id",
         [
             (STANDARD_PGDX_ARGV + ["--enable-beacon-agent"], None),
-            (STANDARD_PGDX_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"], "prj_test123"),
+            (
+                STANDARD_PGDX_ARGV
+                + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test123"],
+                "prj_test123",
+            ),
         ],
     )
     def test_pgdx_enable_beacon_agent(self, argv, expected_project_id, pgdx_cluster):
@@ -253,16 +274,25 @@ class TestPGDXArchitecture:
         bdr_instances = pgdx_cluster.instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "beacon-agent" in instance.roles, f"BDR instance {instance.name} should have beacon-agent role"
+            assert (
+                "beacon-agent" in instance.roles
+            ), f"BDR instance {instance.name} should have beacon-agent role"
 
         # Check project_id when specified
         if expected_project_id:
-            assert pgdx_cluster.cluster_vars.get("beacon_agent_project_id") == expected_project_id
+            assert (
+                pgdx_cluster.cluster_vars.get("beacon_agent_project_id")
+                == expected_project_id
+            )
 
     @pytest.mark.parametrize(
         "argv, option_name, expected_value",
         [
-            (STANDARD_PGDX_ARGV + ["--read-write-port", "7432"], "read_write_port", 7432),
+            (
+                STANDARD_PGDX_ARGV + ["--read-write-port", "7432"],
+                "read_write_port",
+                7432,
+            ),
             (STANDARD_PGDX_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
             (STANDARD_PGDX_ARGV + ["--http-port", "8080"], "http_port", 8080),
             (STANDARD_PGDX_ARGV + ["--use-https"], "use_https", True),
@@ -277,7 +307,8 @@ class TestPGDXArchitecture:
     @pytest.mark.parametrize(
         "argv",
         [
-            STANDARD_PGDX_ARGV + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
+            STANDARD_PGDX_ARGV
+            + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
         ],
     )
     def test_pgdx_combined_cm_ports(self, argv, pgdx_cluster):
@@ -285,7 +316,9 @@ class TestPGDXArchitecture:
         bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
 
         # Should only have one top-level group (not duplicates)
-        top_level_groups = [g for g in bdr_node_groups if not g.get("parent_group_name")]
+        top_level_groups = [
+            g for g in bdr_node_groups if not g.get("parent_group_name")
+        ]
         assert len(top_level_groups) == 1, "Should have exactly one top-level group"
 
         top_group = top_level_groups[0]
@@ -299,10 +332,79 @@ class TestPGDXArchitecture:
         assert "enable_routing" in options
 
     @pytest.mark.parametrize(
+        "argv, expected_witness_count",
+        [
+            # Even data nodes: witness automatically added per location
+            (STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "2"], 1),
+            # Even data nodes with explicit flag: same result
+            (
+                STANDARD_PGDX_ARGV
+                + ["--data-nodes-per-location", "2", "--add-witness-node-per-location"],
+                1,
+            ),
+            # Odd data nodes (default 3): no witness
+            (STANDARD_PGDX_ARGV, 0),
+            # Even data nodes, multiple locations: one witness per location
+            (
+                STANDARD_PGDX_ARGV
+                + ["--data-nodes-per-location", "2", "--location-names", "dc1", "dc2"],
+                2,
+            ),
+        ],
+    )
+    def test_pgdx_witness_auto_added(self, argv, expected_witness_count, pgdx_cluster):
+        """Test that witness nodes are automatically added with even data nodes per location."""
+        instances = pgdx_cluster.instances
+        witness_instances = instances.with_role("bdr").with_role("witness")
+        assert (
+            len(witness_instances) == expected_witness_count
+        ), f"Expected {expected_witness_count} witness node(s), got {len(witness_instances)}"
+
+        # Verify witness nodes have correct roles
+        for witness in witness_instances:
+            assert "bdr" in witness.roles
+            assert "witness" in witness.roles
+
+    def test_pgdx_witness_rejected_with_odd_data_nodes(self):
+        """Test that --add-witness-node-per-location with odd data nodes raises error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.STANDARD_PGDX_ARGV + [
+            "--data-nodes-per-location",
+            "3",
+            "--add-witness-node-per-location",
+        ]
+
+        try:
+            with pytest.raises(
+                PGDXArchitectureError, match="even number of data nodes"
+            ):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
+
+    def test_pgdx_rejects_fewer_than_two_data_nodes(self):
+        """Test that --data-nodes-per-location below 2 raises an error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "1"]
+
+        try:
+            with pytest.raises(PGDXArchitectureError, match="cannot be less than 2"):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
+
+    @pytest.mark.parametrize(
         "argv, expected_repos",
         [
             (STANDARD_PGDX_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
-            (STANDARD_PGDX_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"], ["test_repo1", "test_repo2"]),
+            (
+                STANDARD_PGDX_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"],
+                ["test_repo1", "test_repo2"],
+            ),
             (STANDARD_PGDX_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
@@ -313,6 +415,250 @@ class TestPGDXArchitecture:
         """
         edb_repos = pgdx_cluster.cluster_vars.get("edb_repositories", [])
         assert edb_repos == expected_repos
+
+    @pytest.mark.parametrize(
+        "argv, expected_total",
+        [
+            # default: 1 location, 3 data + 1 barman
+            (STANDARD_PGDX_ARGV, 4),
+            # 3 locations, 3 data + 1 barman each
+            (STANDARD_PGDX_ARGV + ["--location-names", "dc1", "dc2", "dc3"], 12),
+            # 2 locations with a per-location witness node: (2 + 1 + 1) per location
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--location-names",
+                    "dc1",
+                    "dc2",
+                    "--add-witness-node-per-location",
+                    "--data-nodes-per-location",
+                    "2",
+                ],
+                8,
+            ),
+            # 3 locations with the third designated witness-only: 2 * 4 + 1
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--location-names",
+                    "dc1",
+                    "dc2",
+                    "dc3",
+                    "--witness-only-location",
+                    "dc3",
+                ],
+                9,
+            ),
+            # --enable-pem adds a single pemserver instance
+            (STANDARD_PGDX_ARGV + ["--enable-pem"], 5),
+            # custom data-nodes-per-location
+            (STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "5"], 6),
+            # combo: 3 locations (one witness-only) + per-location witness + pem
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--location-names",
+                    "dc1",
+                    "dc2",
+                    "dc3",
+                    "--witness-only-location",
+                    "dc3",
+                    "--data-nodes-per-location",
+                    "2",
+                    "--add-witness-node-per-location",
+                    "--enable-pem",
+                ],
+                10,
+            ),
+        ],
+    )
+    def test_pgdx_instance_count(self, argv, expected_total, pgdx_cluster):
+        """Pin the instance count produced by each PGD-X configuration.
+
+        Documents the topology and flags surprises if the template changes.
+        The num_instances()-vs-len(instances) invariant is enforced
+        separately, inside process_arguments().
+        """
+        assert len(pgdx_cluster.instances) == expected_total
+
+    PGDX_BASE_ARGV = [
+        CONFIG_PATH["PGDX"],
+        "--architecture",
+        "PGD-X",
+        "--no-git",
+        "--pgd-routing",
+        "local",
+    ]
+
+    @pytest.mark.parametrize(
+        "argv, expected",
+        [
+            (PGDX_BASE_ARGV + ["--pgextended", "16"], "edbpge"),
+            (PGDX_BASE_ARGV + ["--edbpge", "16"], "edbpge"),
+            (PGDX_BASE_ARGV + ["--edb-postgres-extended", "16"], "edbpge"),
+            (
+                PGDX_BASE_ARGV
+                + ["--postgres-flavour", "edbpge", "--postgres-version", "16"],
+                "edbpge",
+            ),
+            (
+                PGDX_BASE_ARGV
+                + ["--postgres-flavour", "pgextended", "--postgres-version", "16"],
+                "edbpge",
+            ),
+        ],
+    )
+    def test_pgdx_normalises_to_edbpge(self, argv, expected):
+        """Verify that all ways of requesting Postgres Extended produce 'edbpge'
+        for non-BDR-Always-ON architectures (PGD-X, PGD-S)."""
+        cleanup(CONFIG_PATH["PGDX"])
+        cluster_path = CONFIG_PATH["PGDX"]
+        try:
+            configured = ConfiguredCluster(PGDX, argv, cluster_path)
+            assert configured.cluster_vars["postgres_flavour"] == expected
+        finally:
+            cleanup(cluster_path)
+
+    def test_pgdx_overrides_from_merges_into_cluster(self, tmp_path):
+        """Regression test for TPA-1462: --overrides-from must not crash and
+        the override values must be merged into the cluster configuration.
+
+        Before commit 67c31f29b, lib/tpa/architecture.py was missing imports
+        for `reduce` (functools) and `merge_hash` (ansible.utils.vars), so
+        configuring any cluster with --overrides-from raised
+        `NameError: name 'reduce' is not defined`.
+        """
+        override_file = tmp_path / "overrides.yml"
+        override_file.write_text("cluster_tags:\n  tpa_1462_marker: regression\n")
+        argv = self.STANDARD_PGDX_ARGV + [
+            "--overrides-from",
+            str(override_file),
+        ]
+        cleanup(CONFIG_PATH["PGDX"])
+        cluster_path = CONFIG_PATH["PGDX"]
+        try:
+            configured = ConfiguredCluster(PGDX, argv, cluster_path)
+            assert (
+                configured.cluster.settings["cluster_tags"]["tpa_1462_marker"]
+                == "regression"
+            )
+        finally:
+            cleanup(cluster_path)
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            STANDARD_PGDX_ARGV + ["--data-nodes-per-location", "2"],
+            STANDARD_PGDX_ARGV
+            + [
+                "--data-nodes-per-location",
+                "2",
+                "--location-names",
+                "west",
+                "east",
+            ],
+            STANDARD_PGDX_ARGV
+            + [
+                "--data-nodes-per-location",
+                "2",
+                "--location-names",
+                "west",
+                "mid",
+                "east",
+                "--witness-only-location",
+                "mid",
+            ],
+        ],
+    )
+    def test_pgdx_two_data_nodes_without_camo(self, argv, pgdx_cluster):
+        """Test that --data-nodes-per-location 2 without --enable-camo does NOT
+        enable CAMO. No instance should have bdr_node_camo_partner set, and no
+        bdr_commit_scopes should be created.
+
+        This is a regression test: previously _update_instance_camo() was called
+        unconditionally, causing CAMO to be configured whenever a location had
+        exactly 2 data nodes.
+        """
+        for instance in pgdx_cluster.instances:
+            assert (
+                "bdr_node_camo_partner" not in instance.host_vars
+            ), f"Instance {instance.name} should not have bdr_node_camo_partner without --enable-camo"
+
+        assert (
+            "bdr_commit_scopes" not in pgdx_cluster.cluster_vars
+        ), "bdr_commit_scopes should not be set without --enable-camo"
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            MINIMUM_PGDX_ARGV
+            + [
+                "--edbpge",
+                "16",
+                "--data-nodes-per-location",
+                "2",
+                "--enable-camo",
+            ],
+        ],
+    )
+    def test_pgdx_camo_enabled(self, argv, pgdx_cluster):
+        """Test that --enable-camo with --data-nodes-per-location 2 and a
+        compatible flavour correctly configures CAMO partners and commit scopes.
+        """
+        bdr_instances = pgdx_cluster.instances.with_role("bdr")
+        data_instances = bdr_instances.with_bdr_node_kind("data")
+
+        # Each data instance should have a CAMO partner
+        for instance in data_instances:
+            assert (
+                "bdr_node_camo_partner" in instance.host_vars
+            ), f"Data instance {instance.name} should have bdr_node_camo_partner"
+
+        # Commit scopes should be created
+        commit_scopes = pgdx_cluster.cluster_vars.get("bdr_commit_scopes", [])
+        assert (
+            len(commit_scopes) > 0
+        ), "bdr_commit_scopes should be set with --enable-camo"
+        assert commit_scopes[0]["name"] == "camo"
+
+    def test_pgdx_camo_requires_compatible_flavour(self):
+        """Test that --enable-camo with postgresql flavour raises an error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.STANDARD_PGDX_ARGV + [
+            "--data-nodes-per-location",
+            "2",
+            "--enable-camo",
+        ]
+
+        try:
+            with pytest.raises(
+                PGDXArchitectureError, match="Postgres Extended or EPAS"
+            ):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
+
+    def test_pgdx_camo_requires_two_data_nodes(self):
+        """Test that --enable-camo with data-nodes-per-location != 2 raises an error."""
+        from tpa.exceptions import PGDXArchitectureError
+
+        cleanup(CONFIG_PATH["PGDX"])
+        argv = self.MINIMUM_PGDX_ARGV + [
+            "--edbpge",
+            "16",
+            "--data-nodes-per-location",
+            "3",
+            "--enable-camo",
+        ]
+
+        try:
+            with pytest.raises(
+                PGDXArchitectureError, match="different than 2 data nodes"
+            ):
+                ConfiguredCluster(PGDX, argv, CONFIG_PATH["PGDX"])
+        finally:
+            cleanup(CONFIG_PATH["PGDX"])
 
 
 # @patch.object(Architecture, "expand_template", expand_template)
@@ -381,11 +727,31 @@ class TestPGDSArchitecture:
         "argv, expected_total, expected_data, expected_barman, expected_subscriber",
         [
             (MINIMUM_PGDS_ARGV, 4, 3, 1, 0),  # 3 data + 1 barman
-            (MINIMUM_PGDS_ARGV + ["--layout", "near-far"], 4, 3, 1, 0),  # 3 data + 1 barman
-            (MINIMUM_PGDS_ARGV + ["--add-subscriber-only-nodes", "2"], 6, 3, 1, 2),  # 3 data + 1 barman + 2 subscriber
+            (
+                MINIMUM_PGDS_ARGV + ["--layout", "near-far"],
+                4,
+                3,
+                1,
+                0,
+            ),  # 3 data + 1 barman
+            (
+                MINIMUM_PGDS_ARGV + ["--add-subscriber-only-nodes", "2"],
+                6,
+                3,
+                1,
+                2,
+            ),  # 3 data + 1 barman + 2 subscriber
         ],
     )
-    def test_pgds_instances(self, argv, expected_total, expected_data, expected_barman, expected_subscriber, pgds_cluster):
+    def test_pgds_instances(
+        self,
+        argv,
+        expected_total,
+        expected_data,
+        expected_barman,
+        expected_subscriber,
+        pgds_cluster,
+    ):
         """Test PGD-S instance count calculation"""
         instances = pgds_cluster.instances
 
@@ -436,24 +802,34 @@ class TestPGDSArchitecture:
         bdr_instances = instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "pem-agent" in instance.roles, f"BDR instance {instance.name} should have pem-agent role"
+            assert (
+                "pem-agent" in instance.roles
+            ), f"BDR instance {instance.name} should have pem-agent role"
 
         # Check that pemserver instance was created
         pemserver_instances = instances.with_role("pem-server")
-        assert len(pemserver_instances) == 1, "Should have exactly one pemserver instance"
+        assert (
+            len(pemserver_instances) == 1
+        ), "Should have exactly one pemserver instance"
         assert pemserver_instances[0].name == "pemserver"
 
         # Check barman instances when --enable-pg-backup-api is specified
         if check_barman:
             barman_instances = instances.with_role("barman")
             for instance in barman_instances:
-                assert "pem-agent" in instance.roles, f"Barman instance {instance.name} should have pem-agent role"
+                assert (
+                    "pem-agent" in instance.roles
+                ), f"Barman instance {instance.name} should have pem-agent role"
 
     @pytest.mark.parametrize(
         "argv, expected_project_id",
         [
             (MINIMUM_PGDS_ARGV + ["--enable-beacon-agent"], None),
-            (MINIMUM_PGDS_ARGV + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test456"], "prj_test456"),
+            (
+                MINIMUM_PGDS_ARGV
+                + ["--enable-beacon-agent", "--beacon-agent-project-id", "prj_test456"],
+                "prj_test456",
+            ),
         ],
     )
     def test_pgds_enable_beacon_agent(self, argv, expected_project_id, pgds_cluster):
@@ -465,16 +841,25 @@ class TestPGDSArchitecture:
         bdr_instances = pgds_cluster.instances.with_role("bdr")
         assert len(bdr_instances) > 0, "Should have BDR instances"
         for instance in bdr_instances:
-            assert "beacon-agent" in instance.roles, f"BDR instance {instance.name} should have beacon-agent role"
+            assert (
+                "beacon-agent" in instance.roles
+            ), f"BDR instance {instance.name} should have beacon-agent role"
 
         # Check project_id when specified
         if expected_project_id:
-            assert pgds_cluster.cluster_vars.get("beacon_agent_project_id") == expected_project_id
+            assert (
+                pgds_cluster.cluster_vars.get("beacon_agent_project_id")
+                == expected_project_id
+            )
 
     @pytest.mark.parametrize(
         "argv, option_name, expected_value",
         [
-            (MINIMUM_PGDS_ARGV + ["--read-write-port", "7432"], "read_write_port", 7432),
+            (
+                MINIMUM_PGDS_ARGV + ["--read-write-port", "7432"],
+                "read_write_port",
+                7432,
+            ),
             (MINIMUM_PGDS_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
             (MINIMUM_PGDS_ARGV + ["--http-port", "8080"], "http_port", 8080),
             (MINIMUM_PGDS_ARGV + ["--use-https"], "use_https", True),
@@ -490,7 +875,8 @@ class TestPGDSArchitecture:
     @pytest.mark.parametrize(
         "argv",
         [
-            MINIMUM_PGDS_ARGV + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
+            MINIMUM_PGDS_ARGV
+            + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
         ],
     )
     def test_pgds_combined_cm_ports(self, argv, pgds_cluster):
@@ -511,7 +897,10 @@ class TestPGDSArchitecture:
         "argv, expected_repos",
         [
             (MINIMUM_PGDS_ARGV + ["--edb-repositories", "test_repo"], ["test_repo"]),
-            (MINIMUM_PGDS_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"], ["test_repo1", "test_repo2"]),
+            (
+                MINIMUM_PGDS_ARGV + ["--edb-repositories", "test_repo1", "test_repo2"],
+                ["test_repo1", "test_repo2"],
+            ),
             (MINIMUM_PGDS_ARGV + ["--edb-repositories", "none"], []),
         ],
     )
@@ -536,10 +925,17 @@ class TestPGDSArchitecture:
         from tpa.exceptions import PGDArchitectureError
 
         cleanup(CONFIG_PATH["PGDS"])  # Ensure clean state before test
-        argv = self.MINIMUM_PGDS_ARGV + ["--layout", layout, "--location-names"] + locations
+        argv = (
+            self.MINIMUM_PGDS_ARGV
+            + ["--layout", layout, "--location-names"]
+            + locations
+        )
 
         try:
-            with pytest.raises(PGDArchitectureError, match=f"{layout} requires exactly {expected_count} locations"):
+            with pytest.raises(
+                PGDArchitectureError,
+                match=f"{layout} requires exactly {expected_count} locations",
+            ):
                 ConfiguredCluster(PGDS, argv, CONFIG_PATH["PGDS"])
         finally:
             cleanup(CONFIG_PATH["PGDS"])
@@ -600,7 +996,9 @@ class TestPGDCommon:
         ]
 
         for version in required_versions:
-            assert version in supported, f"Expected {version} to be in supported versions"
+            assert (
+                version in supported
+            ), f"Expected {version} to be in supported versions"
 
     @pytest.mark.parametrize(
         "postgres_version, expected_bdr",
@@ -635,7 +1033,10 @@ class TestPGDCommon:
 
         try:
             if expected_bdr is None:
-                with pytest.raises(PGDArchitectureError, match=f"Postgres {postgres_version} with BDR .* is not supported"):
+                with pytest.raises(
+                    PGDArchitectureError,
+                    match=f"Postgres {postgres_version} with BDR .* is not supported",
+                ):
                     ConfiguredCluster(PGDS, argv, CONFIG_PATH["PGDS"])
             else:
                 configured = ConfiguredCluster(PGDS, argv, CONFIG_PATH["PGDS"])
@@ -673,3 +1074,24 @@ class TestPGDCommon:
 
         assert arch.bdr_safe_name(name) == expected
 
+
+class TestClusterNameValidation:
+    def test_invalid_cluster_name_rejected(self):
+        from tpa.exceptions import ArchitectureError
+
+        bad_path = "lib/tests/config/cluster.bad"
+        argv = [
+            bad_path,
+            "--architecture",
+            "PGD-X",
+            "--no-git",
+            "--pgd-routing",
+            "local",
+            "--postgresql",
+            "16",
+        ]
+        try:
+            with pytest.raises(ArchitectureError, match="Invalid cluster_name"):
+                configure(argv, tpa_dir=".")
+        finally:
+            cleanup(bad_path)

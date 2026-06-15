@@ -74,6 +74,8 @@
       service:
           name: "{{ pem_web_server_service_name[ansible_os_family] }}"
           state: restarted
+      when: >
+        task_selector|permits('service', 'restart')
   when: >
     ansible_os_family == 'Debian'
     and pem_version is version('9.0','>=')

@@ -1,0 +1,54 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Verifies that a script installed by TPA, with a shebang derived from
+# script_python_interpreter, can import psycopg2. This exercises the
+# kernel's shebang-resolution path under the postgres user — the same
+# context that runs /etc/tpa/postgres-monitor — so it catches the class
+# of failure where the shebang-resolved Python lacks the psycopg2 the
+# rest of TPA has installed.
+
+- name: Install psycopg2 import canary script
+  template:
+    src: psycopg2_import_check.py.j2
+    dest: /etc/tpa/psycopg2-import-check
+    owner: root
+    group: root
+    mode: "0555"
+
+- name: Run psycopg2 import canary as postgres user
+  command: /etc/tpa/psycopg2-import-check
+  become_user: "{{ postgres_user }}"
+  become: yes
+  register: psycopg2_canary
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+# Remove the canary regardless of outcome — the diagnostic message
+# below uses psycopg2_canary.stderr captured in the register above,
+# so we don't need the file on disk past this point.
+
+- name: Remove psycopg2 import canary script
+  file:
+    path: /etc/tpa/psycopg2-import-check
+    state: absent
+
+- name: Fail with diagnostic if psycopg2 could not be imported
+  fail:
+    msg: |
+      A canary script with the same shebang as TPA's installed Python
+      scripts could not import psycopg2 on this host.
+
+        script_python_interpreter: {{ script_python_interpreter }}
+        rc: {{ psycopg2_canary.rc }}
+        stderr: {{ psycopg2_canary.stderr }}
+
+      The Python interpreter that the shebang resolves to does not have
+      psycopg2 available. To fix this, either set script_python_interpreter
+      in cluster_vars to the absolute path of an interpreter that does
+      have psycopg2, or ensure the {{ python_pkg_prefix }}-psycopg2
+      package (or an equivalent) is installed for the interpreter the
+      current shebang resolves to.
+  when: psycopg2_canary.rc != 0

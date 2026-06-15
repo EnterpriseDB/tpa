@@ -30,32 +30,35 @@ class Group:
 
     @property
     def name(self):
-        """The name of this group"""
+        """The name of this group."""
         return self._name
 
     @property
     def subgroups(self):
-        """The children of this group"""
+        """The children of this group."""
         return self._subgroups
 
     @property
     def group_vars(self):
-        """The inventory vars for this group"""
+        """The inventory vars for this group."""
         return self._group_vars
 
     def add_subgroup(self, g):
-        """Adds the group object g as a child of this group"""
+        """Adds the group object g as a child of this group."""
         self._subgroups.append(g)
 
     def add_to_group_vars(self, new_vars: dict):
         """Adds the supplied vars, overwriting existing ones if
-           there are conflicts"""
-        for k,v in new_vars.items():
+        there are conflicts"""
+        for k, v in new_vars.items():
             self._group_vars[k] = v
 
-    def remove_from_group_vars(self, vars: list):
-        """Removes the vars with the supplied keys from the group"""
-        """Given a list of variable names, removes those variables from
-           the group"""
-        for k in vars:
+    def remove_from_group_vars(self, var_names: list):
+        """Removes the vars with the supplied keys from the group.
+
+        Given a list of variable names, removes those variables from
+        the group.
+
+        """
+        for k in var_names:
             self._groups_vars.pop(k, None)

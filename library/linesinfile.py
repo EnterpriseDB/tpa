@@ -51,18 +51,18 @@ def linesinfile(module):
     diff = {
         "before": "",
         "after": "",
-        "before_header": "%s (content)" % path,
-        "after_header": "%s (content)" % path,
+        "before_header": f"{path} (content)",
+        "after_header": f"{path} (content)",
     }
 
     lines = {}
     b_lines = []
     a_lines = []
-    for l in module.params.get("lines"):
-        lines[l] = 1
+    for entry in module.params.get("lines"):
+        lines[entry] = 1
 
     try:
-        with open(path, "a+") as f:
+        with open(path, "a+", encoding="utf-8") as f:
             f.seek(0)
             for line in f:
                 b_lines.append(line)
@@ -73,10 +73,10 @@ def linesinfile(module):
 
             if lines:
                 m["changed"] = True
-                for l in lines:
+                for entry in lines:
                     if not module.check_mode:
-                        f.write(l + "\n")
-                    a_lines.append(l + "\n")
+                        f.write(f"{entry}\n")
+                    a_lines.append(f"{entry}\n")
     except Exception as e:
         module.fail_json(msg=str(e), exception=traceback.format_exc())
 
@@ -89,10 +89,10 @@ def linesinfile(module):
 
 def main():
     module = AnsibleModule(
-        argument_spec=dict(
-            path=dict(type="path", required=True),
-            lines=dict(type="list", required=True),
-        ),
+        argument_spec={
+            "path": {"type": "path", "required": True},
+            "lines": {"type": "list", "required": True},
+        },
         supports_check_mode=True,
     )
 

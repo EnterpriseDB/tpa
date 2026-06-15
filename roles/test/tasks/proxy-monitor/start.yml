@@ -5,9 +5,9 @@
 # Starts the proxy-monitor against the given list of conninfo strings
 # (conninfos must be defined).
 
-- name: Copy proxy-monitor to instance
-  copy:
-    src: proxy-monitor.py
+- name: Install proxy-monitor on instance
+  template:
+    src: proxy-monitor.py.j2
     dest: /etc/tpa/proxy-monitor
     owner: root
     group: root

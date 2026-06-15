@@ -16,9 +16,13 @@
     name: pgbouncer
     enabled: no
     daemon_reload: "{{ unit is changed }}"
+  when: >
+    task_selector|permits('service')
 
 - name: Enable pgbouncer service
   systemd:
     name: pgbouncer
     enabled: yes
     daemon_reload: "{{ unit is changed }}"
+  when: >
+    task_selector|permits('service')

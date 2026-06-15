@@ -36,32 +36,63 @@ pem_server_sslutils_packages:
     Debian: *edbpge_sslutils_package
     SUSE: *edbpge_sslutils_package
 
+# On PEM version 10.4.0 and later, the mod_wsgi package is built with Python 3.12,
+# so in order to keep track of the correct package name, the schema is used to 
+# determine the correct package name based on the PEM version.
+
 pem_server_modwsgi_package_name:
-  RedHat:
-    "9": python3-mod_wsgi
-    "8": edb-python310-mod-wsgi
-  Debian:
-    "12": libapache2-mod-wsgi-py3
-    "11": edb-python310-mod-wsgi
-  Ubuntu:
-    "24": libapache2-mod-wsgi-py3
-    "22": libapache2-mod-wsgi-py3
-    "20": edb-python310-mod-wsgi
-  SLES:
-    "15": edb-python310-mod-wsgi
+  202602251:
+    RedHat:
+      "9": edb-python312-mod-wsgi
+      "8": edb-python312-mod-wsgi
+    Debian:
+      "12": edb-python312-mod-wsgi
+      "11": edb-python312-mod-wsgi
+    Ubuntu:
+      "24": libapache2-mod-wsgi-py3
+      "22": edb-python312-mod-wsgi
+      "20": edb-python312-mod-wsgi
+    SLES:
+      "15": edb-python312-mod-wsgi
+  0:
+    RedHat:
+      "9": python3-mod_wsgi
+      "8": edb-python310-mod-wsgi
+    Debian:
+      "12": libapache2-mod-wsgi-py3
+      "11": edb-python310-mod-wsgi
+    Ubuntu:
+      "24": libapache2-mod-wsgi-py3
+      "22": libapache2-mod-wsgi-py3
+      "20": edb-python310-mod-wsgi
+    SLES:
+      "15": edb-python310-mod-wsgi
 
 pem_server_webserver_packages:
-  RedHat:
-    - httpd
-    - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"
-    - mod_ssl
-  Debian:
-    - apache2
-    - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"
-  SUSE:
-    - apache2
-    - "{{'apache2-utils' if ansible_distribution_version >= '15.6' }}"
-    - "{{ pem_server_modwsgi_package_name[ansible_distribution][ansible_distribution_major_version] }}"
+  202602251:
+    RedHat:
+      - httpd
+      - "{{ pem_server_modwsgi_package_name[202602251][ansible_distribution][ansible_distribution_major_version] }}"
+      - mod_ssl
+    Debian:
+      - apache2
+      - "{{ pem_server_modwsgi_package_name[202602251][ansible_distribution][ansible_distribution_major_version] }}"
+    SUSE:
+      - apache2
+      - "{{'apache2-utils' if ansible_distribution_version >= '15.6' }}"
+      - "{{ pem_server_modwsgi_package_name[202602251][ansible_distribution][ansible_distribution_major_version] }}"
+  0:
+    RedHat:
+      - httpd
+      - "{{ pem_server_modwsgi_package_name[0][ansible_distribution][ansible_distribution_major_version] }}"
+      - mod_ssl
+    Debian:
+      - apache2
+      - "{{ pem_server_modwsgi_package_name[0][ansible_distribution][ansible_distribution_major_version] }}"
+    SUSE:
+      - apache2
+      - "{{'apache2-utils' if ansible_distribution_version >= '15.6' }}"
+      - "{{ pem_server_modwsgi_package_name[0][ansible_distribution][ansible_distribution_major_version] }}"
 
 pem_server_v10_required_packages:
   RedHat:

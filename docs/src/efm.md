@@ -71,6 +71,22 @@ cluster_vars:
 If you make changes to values under `efm_conf_settings`, TPA will always
 restart EFM to activate the changes.
 
+## efm_user_is_superuser
+
+By default, when deploying on a cluster, TPA creates the `efm` user with superuser privileges.
+You can disable this behaviour by adding the `efm_user_is_superuser` option to `cluster_vars`
+in `config.yml`:
+
+```yaml
+cluster_vars:
+  efm_user_is_superuser: false
+```
+
+This way, EFM will create the `efm` user with the minimum privileges required for EFM to operate (see [the EFM 
+documentation](https://www.enterprisedb.com/docs/efm/latest/installing/prerequisites/#ensure-that-the-database-user-has-sufficient-privileges)).
+You can change EFM's user privileges by switching this variable from `true` to `false` and viceversa
+via `tpaexec deploy`.
+
 ### EFM witness
 
 TPA will install and configure EFM as witness on instances whose `role`

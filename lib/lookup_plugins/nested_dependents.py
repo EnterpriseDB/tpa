@@ -56,7 +56,7 @@ class LookupModule(LookupBase):
     def accumulate(self, v, items, current_term, terms):
         v.update({"item": items})
 
-        list = []
+        term_list = []
         results = []
 
         try:
@@ -67,19 +67,19 @@ class LookupModule(LookupBase):
                 expr = expr.strip()
                 convert_bare = True
 
-            list = self._templar.template(
+            term_list = self._templar.template(
                 expr, cache=False, fail_on_undefined=False, convert_bare=convert_bare
             )
 
-            if isinstance(list, str) or not isinstance(list, Iterable):
-                list = [list]
+            if isinstance(term_list, str) or not isinstance(term_list, Iterable):
+                term_list = [term_list]
         except UndefinedError as e:
-            raise AnsibleUndefinedVariable("Couldn't evaluate loop expression: %s" % e)
+            raise AnsibleUndefinedVariable(f"Couldn't evaluate loop expression: {e}") from None
 
         if len(terms) == 0:
-            results = [[i] for i in list]
+            results = [[i] for i in term_list]
         else:
-            for item in list:
+            for item in term_list:
                 sublist = self.accumulate(v, items + [item], terms[0], terms[1:])
                 results += [[item] + t for t in sublist]
 

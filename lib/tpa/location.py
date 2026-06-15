@@ -33,22 +33,22 @@ class Location:
 
     @property
     def name(self):
-        """The name of this location"""
+        """The name of this location."""
         return self._name
 
     @property
     def group(self):
-        """The group associated with this location"""
+        """The group associated with this location."""
         return self._group
 
     @property
     def settings(self):
-        """The settings for this location"""
+        """The settings for this location."""
         return self._settings
 
     @property
     def witness_only(self):
-        """The location is witness only"""
+        """The location is witness only."""
         return self._witness_only
 
     @property

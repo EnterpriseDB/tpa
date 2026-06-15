@@ -9,6 +9,9 @@ import re
 
 
 class BDR(Architecture):
+    # Minimum BDR version that requires read_listen_port in proxy options
+    BDR_WITH_READ_LISTEN_PORT = "5.5"
+
     def supported_versions(self) -> List[Tuple[str, str]]:
         """
         Returns a list of (postgres_version, bdr_version) tuples that this
@@ -19,6 +22,7 @@ class BDR(Architecture):
     def bdr_major_versions(self) -> List[str]:
         """
         Returns a list of BDR major versions supported by this architecture.
+
         """
         return list(set(map(lambda t: t[1], self.supported_versions())))
 
@@ -65,7 +69,6 @@ class BDR(Architecture):
         postgres_flavour = self.args.get("postgres_flavour")
         postgres_version = self.args.get("postgres_version")
         bdr_version = self.args.get("bdr_version")
-        harp_enabled = self.args.get("failover_manager") == "harp"
 
         arch = self.args["architecture"]
         default_bdr_versions = {
@@ -88,9 +91,9 @@ class BDR(Architecture):
                 f"Postgres {postgres_version} with BDR {bdr_version} is not supported"
             )
 
-        if postgres_flavour == "pgextended" and int(bdr_version) >= 4:
+        if postgres_flavour == "pgextended" and int(bdr_version) > 4:
             raise BDRArchitectureError(
-                "The pgextended flavour is not supported with PGD version 4 or later."
+                "The pgextended flavour is not supported with PGD version 5 or later."
                 " Use edbpge instead."
             )
 
@@ -174,6 +177,7 @@ class BDR(Architecture):
         At this stage, a BDR primary would not have "primary" in its role, so it
         is a BDR instance that has none of the roles that would identify it as a
         not-primary instance.
+
         """
         roles = self._instance_roles(instance)
         return "bdr" in roles and not roles & self._readonly_bdr_roles
@@ -230,6 +234,7 @@ class BDR(Architecture):
         If --enable-pem is specified, we add the 'pem-agent' role to BDR and
         Barman instances, and add a dedicated 'pemserver' instance to host the
         PEM server.
+
         """
         if self.args.get("enable_pem", False):
             for instance in instances:
@@ -240,7 +245,7 @@ class BDR(Architecture):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
             pemserver_name = (
-                "%s-pemserver" % self.args["cluster_name"]
+                f"{self.args['cluster_name']}-pemserver"
                 if self.args.get("cluster_prefixed_hostnames")
                 else "pemserver"
             )
@@ -255,7 +260,8 @@ class BDR(Architecture):
 
     def _update_instance_beacon(self, instances):
         """
-        Add beacon-agent to instance roles where applicable
+        Add beacon-agent to instance roles where applicable.
+
         """
         if self.args.get("enable_beacon_agent"):
             for instance in instances:

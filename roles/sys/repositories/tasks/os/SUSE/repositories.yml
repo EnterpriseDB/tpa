@@ -110,9 +110,10 @@
 
 - include_tasks: extension-repositories.yml
 
-- when: > 
-    postgres_flavour == 'epas' or 
-    'pem-agent' in role or 'pem-server' in role
+- when: >
+    postgres_flavour == 'epas' or
+    'pem-agent' in role or 'pem-server' in role or
+    (failover_manager == 'patroni' and postgres_flavour == 'edbpge')
   block:
   - name: Install SUSEConnect
     zypper:
@@ -135,14 +136,31 @@
     - name: Register system with SUSEConnect
       command:
         cmd: SUSEConnect -r {{ lookup('env', 'SLES_REG_TOKEN') }}
-  
-  # This step is required to install dependencies for PEM, or EPAS, as some of the dependencies are only available in PackageHub
+
+  # These steps are required to install dependencies for PEM and EPAS
   - name: Install extra repositories from PackageHub
     command:
       cmd: SUSEConnect -p {{ package_hub_repo }}
     vars:
       package_hub_repo: "PackageHub/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
     when: package_hub_repo not in registration_status.stdout
+
+  - when: >
+      postgres_flavour == 'epas'
+    block:
+    - name: Install extra repositories from sle-module-desktop-applications
+      command:
+        cmd: SUSEConnect -p {{ sle_module_desktop_applications_repo }}
+      vars:
+        sle_module_desktop_applications_repo: "sle-module-desktop-applications/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
+      when: sle_module_desktop_applications_repo not in registration_status.stdout
+
+    - name: Install extra repositories from sle-module-development-tools
+      command:
+        cmd: SUSEConnect -p {{ sle_module_development_tools_repo }}
+      vars:
+        sle_module_development_tools_repo: "sle-module-development-tools/{{ ansible_distribution_version }}/{{ ansible_architecture }}"
+      when: sle_module_development_tools_repo not in registration_status.stdout
 
 # PGDG extras repository provides packages like etcd
 - name: Enable PGDG extras

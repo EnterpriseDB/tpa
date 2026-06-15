@@ -121,5 +121,5 @@ def write_output(cluster: Cluster, output_file: str) -> None:
             backup_file = f"{output_file}.~{counter}~"
         shutil.copyfile(output_file, backup_file)
 
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write(cluster.to_yaml())

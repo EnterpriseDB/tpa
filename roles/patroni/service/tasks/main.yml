@@ -22,6 +22,8 @@
     name: "{{ patroni_service_name }}"
     enabled: "{{ failover_manager == 'patroni' }}"
     daemon_reload: "{{ unit is changed }}"
+  when: >
+    task_selector|permits('service')
 
 - name: Disable the generic patroni systemd service unit
   service:

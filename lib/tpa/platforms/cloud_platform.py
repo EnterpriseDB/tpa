@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
-import argparse
 import copy
-import importlib.util
 
-from ..exceptions import PlatformError
 from ..platform import Platform
-from ..net import DEFAULT_SUBNET_PREFIX_LENGTH
 
 
 class CloudPlatform(Platform):
@@ -51,7 +47,7 @@ class CloudPlatform(Platform):
                 if size is not None:
                     v["volume_size"] = size
                 # instance["volumes"] = volumes + [v]
-                instance.set_settings({ "volumes": volumes + [v]})
+                instance.set_settings({"volumes": volumes + [v]})
 
     @staticmethod
     def set_cluster_rules(args, cluster, settings):
@@ -68,11 +64,11 @@ class CloudPlatform(Platform):
         cluster_rules = args.get("cluster_rules", [])
         if not cluster_rules and "vpn_network" not in cluster.group.group_vars:
             cluster_rules.append(
-                dict(proto="tcp", from_port=22, to_port=22, cidr_ip="0.0.0.0/0")
+                {"proto": "tcp", "from_port": 22, "to_port": 22, "cidr_ip": "0.0.0.0/0"}
             )
             for sn in args.get("subnets", []):
                 cluster_rules.append(
-                    dict(proto="tcp", from_port=0, to_port=65535, cidr_ip=sn)
+                    {"proto": "tcp", "from_port": 0, "to_port": 65535, "cidr_ip": sn}
                 )
         if cluster_rules:
             settings["cluster_rules"] = cluster_rules

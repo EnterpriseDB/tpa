@@ -13,6 +13,13 @@
   when: >
     task_selector|selects('sys')
 
+- name: Verify TPA-installed Python scripts can import psycopg2
+  include_tasks:
+    file: script-python-psycopg2.yml
+  when: >
+    'postgres' in role
+    and task_selector|selects('postgres')
+
 - name: Run postgres tests
   include_tasks:
     file: postgres.yml
@@ -20,6 +27,14 @@
     'postgres' in role
     and pgdata_initialised
     and task_selector|selects('postgres')
+
+- name: Run EFM tests
+  include_tasks:
+    file: efm.yml
+  when: >
+    'efm' in role
+    and task_selector|selects('efm')
+    and 'postgres' in role
 
 - name: Run barman tests
   include_tasks:

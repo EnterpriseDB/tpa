@@ -62,7 +62,7 @@ class docker(Platform):
                 try:
                     os.mkdir(ccache)
                 except OSError as e:
-                    raise DockerPlatformError(f"--shared-ccache: {str(e)}")
+                    raise DockerPlatformError(f"--shared-ccache: {str(e)}") from None
         else:
             # We don't have access to the cluster name here (it's set only
             # in process_arguments), so we leave a '%s' to be filled in by
@@ -118,7 +118,15 @@ class docker(Platform):
         return local_sources, errors
 
     def supported_distributions(self):
-        return ["AlmaLinux", "Debian", "RedHat", "Rocky", "SLES", "OracleLinux", "Ubuntu"]
+        return [
+            "AlmaLinux",
+            "Debian",
+            "RedHat",
+            "Rocky",
+            "SLES",
+            "OracleLinux",
+            "Ubuntu",
+        ]
 
     def default_distribution(self):
         return "Rocky"
@@ -144,7 +152,6 @@ class docker(Platform):
         """
         image = {}
         name, _, version = label.partition(":")
-        _, _, img = name.rpartition("/")
 
         known_images = {
             "tpa/almalinux": {
@@ -153,7 +160,16 @@ class docker(Platform):
                 "os_family": "RedHat",
             },
             "tpa/debian": {
-                "versions": ["stretch", "buster", "bullseye", "bookworm", "9", "10", "11", "12"],
+                "versions": [
+                    "stretch",
+                    "buster",
+                    "bullseye",
+                    "bookworm",
+                    "9",
+                    "10",
+                    "11",
+                    "12",
+                ],
                 "os": "Debian",
             },
             "tpa/redhat": {
@@ -179,7 +195,16 @@ class docker(Platform):
                 "os_family": "RedHat",
             },
             "tpa/ubuntu": {
-                "versions": ["bionic", "focal", "jammy", "noble", "18.04", "20.04", "22.04", "24.04"],
+                "versions": [
+                    "bionic",
+                    "focal",
+                    "jammy",
+                    "noble",
+                    "18.04",
+                    "20.04",
+                    "22.04",
+                    "24.04",
+                ],
                 "os": "Ubuntu",
             },
         }
@@ -214,7 +239,7 @@ class docker(Platform):
             image = known_images[image_name]
             version = valid_version(image_name, version)
             image["version"] = version
-            label = image_name + ":" + version
+            label = f"{image_name}:{version}"
             image.setdefault("os_family", image.get("os"))
 
         image["name"] = label
@@ -240,11 +265,13 @@ class docker(Platform):
 
     def update_instances(self, instances, args, **kwargs):
         # Generate a Network from the first (and only) random subnet
-        docker_network = net.Network(args['subnets'][0])
+        docker_network = net.Network(args["subnets"][0])
         # Check that it's big enough
         if docker_network.net.num_addresses - 1 < self.arch.num_instances():
-            raise DockerPlatformError(f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
-                                      f"Use `subnet-prefix` to specify a larger subnet.")
+            raise DockerPlatformError(
+                f"The subnet '{args['subnets'][0]}' is too small for the specified cluster. "
+                f"Use `subnet-prefix` to specify a larger subnet."
+            )
 
         # Get an iterator that provides IP addresses
         host_ips = docker_network.net.hosts()
@@ -256,19 +283,18 @@ class docker(Platform):
             for v in volumes:
                 if "volume_type" in v and v["volume_type"] == "none":
                     continue
-                else:
-                    newvolumes.append(v)
+                newvolumes.append(v)
             if volumes:
                 i["volumes"] = newvolumes
                 if not i["volumes"]:
                     del i["volumes"]
 
             # If ip_address is not yet set, we take one from our iterator.
-            # We need this check because ip_address can be set already 
-            # if the user has provided IPs via `--hostnames-from`, 
+            # We need this check because ip_address can be set already
+            # if the user has provided IPs via `--hostnames-from`,
             # in which case we don't want to ignore them.
-            if not i.get('ip_address', None):
-                i['ip_address'] = str(next(host_ips))
+            if not i.get("ip_address", None):
+                i["ip_address"] = str(next(host_ips))
 
     def process_arguments(self, args):
         s = args.get("platform_settings") or {}
@@ -278,13 +304,19 @@ class docker(Platform):
             s["docker_images"] = docker_images
 
         # Declare a user-defined Docker network using the name of the cluster as the network name
-        s["docker_networks"] = [{"ipam_config": [{"subnet": args["subnets"][0]}], "name": args["cluster_name"]}]
+        s["docker_networks"] = [
+            {
+                "ipam_config": [{"subnet": args["subnets"][0]}],
+                "name": args["cluster_name"],
+            }
+        ]
 
         args["platform_settings"] = s
 
     def get_default_subnet_prefix(self, num_instances=None) -> int:
         """
-        Return a subnet prefix large enough to fit all the instances
+        Return a subnet prefix large enough to fit all the instances.
+
         """
         if num_instances is None:
             return net.DEFAULT_SUBNET_PREFIX_LENGTH
@@ -295,4 +327,3 @@ class docker(Platform):
         best_size = min(x for x in subnet_sizes.keys() if x >= num_instances)
 
         return subnet_sizes[best_size]
-

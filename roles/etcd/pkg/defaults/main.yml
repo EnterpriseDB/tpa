@@ -19,7 +19,9 @@ etcd_packages:
       - etcd-server
     RedHat: &default_rpm_etcd_packages
       - etcd
-    SUSE: *default_rpm_etcd_packages
+    SUSE:
+      - etcd
+      - "{% if postgres_flavour in ('edbpge', 'epas') %}etcdctl{% endif %}"
   patroni: *default_etcd_packages
   harp:
     Debian:

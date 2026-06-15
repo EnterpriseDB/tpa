@@ -212,6 +212,8 @@
       "{{ (agent_cfg is not changed)|ternary('started', 'restarted') }}"
     enabled: yes
     daemon_reload: yes
+  when: >
+    task_selector|permits('service', 'restart')
 
 - name: Enable probes for PEM agents registered on EFM nodes
   command: >
@@ -225,4 +227,4 @@
   - "failover manager node status"
   - "failover manager cluster info"
   when: >
-    'efm' in role
+    'efm' in role and pem_agent_version is version("9.6",">=")

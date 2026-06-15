@@ -4,10 +4,9 @@
 
 from .bdr import BDR
 from ..exceptions import ArchitectureError
-from typing import List, Tuple, Union
+from typing import List, Tuple
 import re
 from argparse import SUPPRESS
-from packaging.version import Version, InvalidVersion, parse
 
 
 class Lightweight(BDR):
@@ -133,11 +132,8 @@ class Lightweight(BDR):
         )
 
         bdr_package_version = cluster_vars.get("bdr_package_version")
-        sanitized_version, includes_wildcard = self._sanitize_version(
-            version_string=bdr_package_version
-        )
-        if self._is_above_minimum(
-            sanitized_version, Version("5.5"), includes_wildcard=includes_wildcard
+        if not bdr_package_version or self._package_version_at_least(
+            bdr_package_version, self.BDR_WITH_READ_LISTEN_PORT
         ):
             cluster_vars.update(
                 {
@@ -224,8 +220,7 @@ class Lightweight(BDR):
         scope = "lightweight_scope"
 
         commit_scopes = [
-            (s["name"], s["origin"])
-            for s in cluster_vars["bdr_commit_scopes"]
+            (s["name"], s["origin"]) for s in cluster_vars["bdr_commit_scopes"]
         ]
         if (scope, group) not in commit_scopes:
             cluster_vars["bdr_commit_scopes"].append(
@@ -242,7 +237,6 @@ class Lightweight(BDR):
                 g.setdefault("options", {})
                 g["options"]["default_commit_scope"] = scope
 
-
     def _instance_bdr_group(self, instance):
         """Returns the name of the node group that this instance is (or rather,
         will be) a member of."""
@@ -252,28 +246,7 @@ class Lightweight(BDR):
     def _sub_group_name(self, loc):
         """
         Returns a name for the BDR subgroup in the given location.
+
         """
         loc = re.sub("[^a-z0-9_]", "_", loc.lower())
         return f"{loc}_subgroup"
-
-    def _sanitize_version(
-        self, version_string
-    ) -> Union[Tuple[Version, bool], Tuple[None, bool]]:
-        try:
-            version_parts = version_string.split(":", maxsplit=1)[-1].split(".")
-            if version_parts[1] == "*":
-                return parse(version_parts[0]), True
-            else:
-                return parse(f"{version_parts[0]}.{version_parts[1]}"), False
-        except (InvalidVersion, AttributeError) as e:
-            return None, False
-
-    def _is_above_minimum(
-        self, x: Union[Version, None], y: Version, includes_wildcard: bool
-    ) -> bool:
-        if x is None:
-            return True
-        elif includes_wildcard:
-            return x.major >= y.major
-        else:
-            return x >= y

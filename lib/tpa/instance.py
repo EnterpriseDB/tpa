@@ -20,7 +20,9 @@ class Instance:
         host_vars=None,
     ):
         def _next_node_id(cluster):
-            nodes = (i.settings["node"] for i in cluster.instances if "node" in i.settings)
+            nodes = (
+                i.settings["node"] for i in cluster.instances if "node" in i.settings
+            )
             return max(nodes, default=0) + 1
 
         self._name: str = name
@@ -42,34 +44,39 @@ class Instance:
 
     @property
     def name(self):
-        """The name of this instance"""
+        """The name of this instance."""
         return self._name
 
     @property
     def roles(self):
-        """A list of roles set anywhere in the cluster for this instance"""
+        """A list of roles set anywhere in the cluster for this instance."""
         return self.get_setting("role", [])
 
     @property
     def location(self):
-        """The location that this instance belongs to"""
+        """The location that this instance belongs to."""
         return self._location
 
     @property
     def settings(self):
-        """This instance's settings
+        """
+        This instance's settings.
 
         These are the settings specified directly for this instance, not
-        anything inherited through its location or instance_defaults."""
+        anything inherited through its location or instance_defaults.
+
+        """
 
         return self._settings
 
     @property
     def host_vars(self):
-        """This instance's inventory variables
+        """This instance's inventory variables.
 
         These are the inventory variables specified directly for this instance,
-        not including anything inherited through group membership."""
+        not including anything inherited through group membership.
+
+        """
 
         return self._host_vars
 
@@ -103,7 +110,7 @@ class Instance:
             self.settings, self._cluster.instance_defaults, self.location.settings or {}
         )
         return v.get(key, default)
-    
+
     def set_hostvar(self, key, val):
         """Sets the given key=val on the instance."""
         self.host_vars[key] = val
@@ -116,25 +123,25 @@ class Instance:
             self._settings[k] = v
 
     def remove_setting(self, setting):
-        """Deletes a setting entirely"""
+        """Deletes a setting entirely."""
 
         if setting in self._settings:
             del self._settings[setting]
 
     def add_role(self, r):
-        """Adds the given role to this instance's roles"""
+        """Adds the given role to this instance's roles."""
         self._settings.setdefault("role", []).append(r)
 
     def remove_role(self, r):
-        """Removes the given role from this instance's roles"""
+        """Removes the given role from this instance's roles."""
         self._settings.setdefault("role", []).remove(r)
 
     def to_yaml_dict(self):
-        d = {
+        result = {
             "Name": self.name,
             "location": self.location.name or "",
             **self.settings,
         }
         if self.host_vars:
-            d.update({"vars": self.host_vars})
-        return d
+            result.update({"vars": self.host_vars})
+        return result

@@ -1,196 +1,167 @@
-import sys
-import textwrap
-from string import Template
+"""Reconcile per-architecture hashes into the main requirements files.
+
+Invoked by the CI action at
+``.github/actions/update-requirements/action.yml`` after pip-compile has
+produced architecture-specific files for ppc64le and s390x. For each
+(name, version) match the script unions the per-arch hash set into the
+main ``requirements{,-rh8}.txt`` entry so that every platform's hashes
+are present in a single locked file.
+
+Mismatches (missing dep or version skew between arch and main) are
+printed to stdout; the action fails the workflow step when stdout is
+non-empty.
+"""
+
+import re
+from pathlib import Path
 
 
-def main(actuals):
+# The regexes below encode the pip-compile --generate-hashes output
+# format we expect to consume:
+#  - a leading run of "#"-only lines is the auto-generated header;
+#  - each dep starts on its own line as "name==version \" and is
+#    followed by one or more "    --hash=sha256:HEX" lines;
+#  - every hash line except the last for a given dep ends with " \"
+#    (line continuation), hence the trailing "\\?" in DEP_BLOCK_RE;
+#  - "    # via ..." comments may follow the last hash;
+#  - sha256 is the only algorithm we support (pip-compile's default).
+HEADER_RE = re.compile(r"\A(?:#[^\n]*\n)+")
+DEP_BLOCK_RE = re.compile(
+    r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)==(?P<version>\S+)\s*\\\s*\n"
+    r"(?P<hashes>(?:[ \t]+--hash=sha256:[a-f0-9]+\s*\\?\s*\n)+)"
+    r"(?P<comments>(?:[ \t]+#[^\n]*\n?)*)",
+    re.MULTILINE,
+)
+HASH_RE = re.compile(r"--hash=sha256:([a-f0-9]+)")
+
+
+def main():
+    for infix in ["", "-rh8"]:
+        add_hashes(infix)
+
+
+def add_hashes(infix):
+    """Merge per-architecture hashes into the main requirements file.
+
+    Reads the ppc64le and s390x variants for the given infix ("" or
+    "-rh8"), parses the main requirements file, and unions any missing
+    hashes whose dependency name and version match. Writes the merged
+    result back via _render_template. If a target dependency cannot be
+    matched in the actuals (missing entry or version mismatch), prints
+    a diagnostic to stdout so the caller can fail the workflow step.
     """
-    Verify that all target requirements entries can be match (version and hash)
-    inside the actual requirement files that should be updated right before the
-    script is run.
 
-    Will try to reconcile the actual requirement file by adding the missing
-    hash in the correct dependency entry hash list when the version is
-    matching.
-
-    Otherwise will output in stdout the failed dependency and the missing hash
-    in order to log the failure.
-
-    Args:
-        actuals (list[str]): list of filename to check target deps against.
-
-    """
-
-    # List of files holding dependencies we want to ensure are still being used.
-    TARGETS = [
-        "requirements-ppc64le.txt",
-        "requirements-s390x.txt",
+    targets = [
+        f"requirements-ppc64le{infix}.txt",
+        f"requirements-s390x{infix}.txt",
     ]
+    actuals = [f"requirements{infix}.txt"]
 
-    # parse the files and generate both target and actual deps dicts
-    target_deps = parse_requirements(TARGETS)
+    target_deps = parse_requirements(targets)
     actual_deps = parse_requirements(actuals)
 
-    # walk through target deps entries (version and hash_set)
-    for t_file in target_deps.keys():
-        for t_dep in target_deps[t_file]["deps"].keys():
-            ret = False
-            # walk through actual deps entries
-            for a_file in actual_deps.keys():
-                for a_dep in actual_deps[a_file]["deps"].keys():
+    for t_data in target_deps.values():
+        for name, target_info in t_data["deps"].items():
+            if not _merge_into_actuals(name, target_info, actual_deps):
+                _report_unmatched(name, target_info, actual_deps)
 
-                    # comparing set of hashes, verify that target is a subset of actual dep's hash list
-                    # otherwise we compare target version strings and add the hash to the list if version matches.
-                    if t_dep == a_dep and (
-                        actual_deps[a_file]["deps"][a_dep]["version"]
-                        == target_deps[t_file]["deps"][t_dep]["version"]
-                    ):
-                        # ensure the hash is present in the actual file hash_set
-                        actual_deps[a_file]["deps"][a_dep]["hash_set"] = actual_deps[
-                            a_file
-                        ]["deps"][a_dep]["hash_set"].union(
-                            target_deps[t_file]["deps"][t_dep]["hash_set"]
-                        )
-                        ret = True
-
-            # if we reach this and ret is still False the dep is not in the actual files
-            # we need to output the failed dependency name and hash.
-            if not ret:
-                print(
-                    textwrap.dedent(
-                        f"""
-                                    {t_dep}:{target_deps[t_file]["deps"][t_dep]['version']}
-                                    with hashes: {target_deps[t_file]["deps"][t_dep]['hash_set']}
-                                    could not be matched in files {actual_deps.keys()}.
-                                    """
-                    )
-                )
     _render_template(actual_deps)
-    exit()
 
 
-def parse_requirements(files: list):
-    """Takes a list of filename and generate a dict of dependencies
-    as follow:
-    {
-    filename: {
-        'comment_header': ['#comment line 1', 'comment line 2'],
-        'deps': {
-            dep_name: {
-                'version': 'a.b.c'
-                'hash_set': {'hash_value_a','hash_value_b'}
-                'comment': ['# via requirements.in']
-            },
-            ...
-        },
-    },
-    filename: {
-        'comment_header': ['#comment line 1', 'comment line 2'],
-        'deps': {
-            dep_name: {
-                'version': 'a.b.c'
-                'hash_set': {'hash_value_a','hash_value_b'}
-                'comment': ['# via requirements.in']
-            },
-            ...
-        },
-    },
-    ...
-    }
+def _merge_into_actuals(name, target_info, actual_deps):
+    """Union the target hash set into every matching actual dependency.
 
-    Args:
-        files (list[str]): list of filenames to read and extract deps from.
+    A match requires the same dependency name and the same version
+    string. Returns True if at least one actual dep was matched.
+    """
+    matched = False
+    # A dep can appear in more than one actual file; merge into every
+    # match rather than stopping at the first so the loop stays correct
+    # if `actuals` ever grows beyond a single file.
+    for a_data in actual_deps.values():
+        actual = a_data["deps"].get(name)
+        if actual and actual["version"] == target_info["version"]:
+            actual["hash_set"] |= target_info["hash_set"]
+            matched = True
+    return matched
 
-    Returns:
-        dict: returns a dict of all the dep with their version and hash_set per file.
+
+def _report_unmatched(name, target_info, actual_deps):
+    """Print a diagnostic for a target dep that couldn't be reconciled.
+
+    Output mimics pip-compile's ``name==version`` + indented ``--hash``
+    layout so the message reads as a snippet of the file a reviewer
+    might paste in. The CI step captures stdout into the bot-generated
+    PR body, so the format must stay human-readable when rendered as
+    markdown (the four-space-indented hash lines render as a code
+    block).
+    """
+    hash_lines = "\n".join(
+        f"    --hash=sha256:{h}" for h in sorted(target_info["hash_set"])
+    )
+    files = ", ".join(actual_deps)
+    print(
+        f"\n{name}=={target_info['version']}\n"
+        f"{hash_lines}\n"
+        f"could not be matched in {files}"
+    )
+
+
+def parse_requirements(files):
+    """Parse pip-compile output into a dict keyed by filename.
+
+    For each input file, the returned mapping contains the leading
+    header comments and a per-dependency entry of the form
+    ``{name, version, hash_set, comment}``. Hashes are collected into a
+    set; the trailing ``# via ...`` lines are captured as a list of
+    stripped comment strings.
     """
     dependencies = {}
     for file in files:
-        file_dependencies = {file: {"header_comment": [], "deps": {}}}
-        with open(file) as f:
-            hash_set = set()
-            comment = []
-            header = []
-            for entry in f:
-                # first lines of the file are header comments
-                if (
-                    file_dependencies[file]["deps"] == {}
-                    and not hash_set
-                    and entry.startswith("#")
-                ):
-                    header.append(entry)
-                # starting line of a dependency dep==a.b.c \
-                elif "==" in entry:
-                    # if we already added something in hash_set
-                    # it means we have a dep ready to be added to the dict
-                    if hash_set:
-                        _add_dep(
-                            file, name, version, hash_set, comment, file_dependencies
-                        )
-
-                    # save the new dependency name and version
-                    name, version = entry.split()[0].split("==")
-                    # reset the hash_set
-                    hash_set = set()
-                    comment = []
-                # new hash entry
-                # --hash=sha256:asdlkfjasdlfjkasdl \
-                # or --hash=sha256:asdlkfjasdlfjkasdl
-                elif entry.strip().startswith("--"):
-                    hash_set.add(entry.strip().strip("\\").split(":")[1].strip())
-                elif entry.strip().startswith("#") and hash_set:
-                    comment.append(entry.strip().strip("\n"))
-
-            # once the loop over the file ends, we still have the last dep to add
-            _add_dep(file, name, version, hash_set, comment, file_dependencies)
-            _add_header(file, header, file_dependencies)
-        # add the entire file_dependencies to the main dict
-        dependencies.update(file_dependencies)
+        text = Path(file).read_text()
+        header_match = HEADER_RE.match(text)
+        header = (
+            header_match.group(0).splitlines(keepends=True) if header_match else []
+        )
+        deps = {
+            m["name"]: {
+                "name": m["name"],
+                "version": m["version"],
+                "hash_set": set(HASH_RE.findall(m["hashes"])),
+                "comment": [
+                    line.strip() for line in m["comments"].splitlines() if line.strip()
+                ],
+            }
+            for m in DEP_BLOCK_RE.finditer(text)
+        }
+        dependencies[file] = {"comment_header": header, "deps": deps}
     return dependencies
 
 
-def _add_header(file, header, file_dependencies):
-    file_dependencies[file]["comment_header"] = header
-
-
-def _add_dep(file, name, version, hash_set, comment, file_dependencies):
-
-    _dep = {
-        name: {
-            "name": name,
-            "version": version,
-            "hash_set": hash_set,
-            "comment": comment,
-        }
-    }
-    file_dependencies[file]["deps"].update(_dep)
-
-
 def _render_template(actual_deps):
+    """Write each requirements file with its dependency entries rebuilt
+    from parsed data.
 
-    with open(".github/actions/update-requirements/template.txt", "r") as f:
-        src = Template(f.read())
-        for a_file in actual_deps.keys():
-            result = "".join(actual_deps[a_file]["comment_header"]).strip()
-            for a_dep in actual_deps[a_file]["deps"].keys():
-                format_actual_dep = {
-                    a_dep: {
-                        "name": actual_deps[a_file]["deps"][a_dep]["name"],
-                        "version": actual_deps[a_file]["deps"][a_dep]["version"],
-                        "hash_set": "\t--hash=sha256:".expandtabs(4)
-                        + " \\\n\t--hash=sha256:".expandtabs(4).join(
-                            actual_deps[a_file]["deps"][a_dep]["hash_set"]
-                        ),
-                        "comment": "\t".expandtabs(4)
-                        + "\n\t".expandtabs(4).join(
-                            actual_deps[a_file]["deps"][a_dep]["comment"]
-                        ),
-                    }
-                }
-                result += "\n" + src.substitute(format_actual_dep[a_dep])
-            with open(a_file, "w") as o:
-                o.write(result)
+    Hashes are emitted alphabetically for deterministic output. Layout
+    mirrors what pip-compile produces (four-space indent for hash and
+    `via` comment lines).
+    """
+    for a_file, file_data in actual_deps.items():
+        # Header is stripped, each dep block carries no trailing newline,
+        # and the final join leaves no trailing newline at EOF — matching
+        # what pip-compile writes, so this script's output round-trips
+        # against a fresh pip-compile run without spurious diffs.
+        chunks = ["".join(file_data["comment_header"]).strip()]
+        for dep in file_data["deps"].values():
+            hashes = " \\\n    --hash=sha256:".join(sorted(dep["hash_set"]))
+            comment = "\n    ".join(dep["comment"])
+            chunks.append(
+                f"{dep['name']}=={dep['version']} \\\n"
+                f"    --hash=sha256:{hashes}\n"
+                f"    {comment}"
+            )
+        Path(a_file).write_text("\n".join(chunks))
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main(sys.argv[1:])
+    main()

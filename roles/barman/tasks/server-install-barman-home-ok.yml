@@ -27,3 +27,4 @@
   when: >
     barman_home_ok is changed and
     platform in ['docker']
+    and task_selector|permits('service', 'restart')

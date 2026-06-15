@@ -49,3 +49,5 @@
     and patroni_restart_api_output.status not in [200, 503]
   retries: 5
   delay: 10
+  when: >
+    task_selector|permits('service', 'restart')

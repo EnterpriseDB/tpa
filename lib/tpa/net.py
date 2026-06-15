@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 """IP network operations."""
 
-
 from argparse import ArgumentParser
 from ipaddress import IPv4Network, ip_network
 from random import shuffle
@@ -67,7 +66,9 @@ class Subnets:
     MIN_PREFIX = 23
     MAX_PREFIX = 29
 
-    def __init__(self, cidr: str, limit: int = 1, new_prefix: int = DEFAULT_SUBNET_PREFIX_LENGTH) -> None:
+    def __init__(
+        self, cidr: str, limit: int = 1, new_prefix: int = DEFAULT_SUBNET_PREFIX_LENGTH
+    ) -> None:
         """
         Supply initial values for calculating number of subnets and their sizes for the given network.
 

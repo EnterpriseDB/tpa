@@ -50,24 +50,6 @@
     when:
       inventory_hostname == first_bdr_primary
 
-- name: Check pgrep is installed where needed
-  any_errors_fatal: true
-  max_fail_percentage: 0
-  environment: "{{ target_environment }}"
-  hosts: role_bdr:role_harp-proxy:role_pgd-proxy:role_pgbouncer
-  tasks:
-
-  - name: Check for pgrep
-    command: pgrep -V
-    register: pgrep_check
-    ignore_errors: yes
-
-  - name: Stop if pgrep check failed
-    fail:
-        msg: "Install pgrep with 'tpaexec command <clustername> {{ inventory_hostname }} -m package -a name=procps' to continue"
-    when: pgrep_check.rc == 2
-
-
 - name: Set upgrade facts for all hosts
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -108,11 +90,12 @@
       and 'pgd-proxy' in role
     block:
     - name: Check if harp-proxy is running
-      command: pgrep harp-proxy
+      command: systemctl is-active --quiet harp-proxy
       register: harp_proxy_check
+      failed_when: false
 
     - set_fact:
-        harp_proxy_still_running: "{{ harp_proxy_check.stdout != '' }}"
+        harp_proxy_still_running: "{{ harp_proxy_check.rc == 0 }}"
 
   - name: Check harp-proxy status
     include_role:
@@ -263,6 +246,7 @@
       name: "/var/run/postgresql/.s.PGSQL.{{ postgres_port }}"
       src: "/var/run/edb-pge/.s.PGSQL.{{ postgres_port }}"
       state: "link"
+      force: true
     when: >
       postgres_flavour == 'edbpge'
       and 'bdr' in role
@@ -351,8 +335,8 @@
       inventory_hostname == first_bdr_primary
 
   - name: Wait for write leader elections to complete
-    command:
-      pgd show-groups -o json
+    command: >
+      {{ pgdcli_bin }} show-groups -o json
     register: pgd_show_groups
     become_user: "{{ postgres_user }}"
     become: yes
@@ -500,12 +484,13 @@
       - harp_config.stat.exists
     block:
     - name: Check if harp-manager is running
-      command: pgrep harp-manager
+      command: systemctl is-active --quiet harp-manager
       register: harp_manager_check
+      failed_when: false
 
     - name: Set the cluster to unmanaged before stopping harp-manager
       when:
-        harp_manager_check.stdout != ''
+        harp_manager_check.rc == 0
       block:
 
       # In principle, we could run 'harpctl unmanage cluster' on any one

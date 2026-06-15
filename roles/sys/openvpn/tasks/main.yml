@@ -70,6 +70,7 @@
     state: "{{ openvpn_service_end_state|default('started') }}"
   when: >
     'openvpn-server' not in role
+    and task_selector|permits('service', 'restart')
 
 # Now that openvpn is up and running, we override the main IP address
 # for the instances so that the correct IP shows up in /etc/hosts.

@@ -119,6 +119,7 @@ removed:
 | barman_post_backup_retry_script |                            |
 | barman_post_backup_script       |                            |
 | barman_streaming_wals_directory |                            |
+| barman_path_prefix              | _backed up node's postgres bin dir_ |
 | backup_name                     | _backed up instance's name_|
 
 ## Backup scheduling
@@ -234,6 +235,54 @@ your `instance_defaults` contains a setting such as `type` which is only
 valid for `platform: aws` you must move that setting out of
 `instance_defaults` and into only the instances which use the AWS platform.
 !!!
+
+### Backing up nodes at different PostgreSQL versions
+
+A single Barman server can back up Postgres instances that run different
+PostgreSQL major versions from itself.
+
+The per-server configuration file in `/etc/barman.d/<backup>.conf` sets
+`path_prefix` from the backed up node's own `postgres_bin_dir`, so Barman
+uses the correct client binaries (such as `pg_basebackup` and
+`pg_receivewal`) for each node it backs up. The global `path_prefix` in
+`/etc/barman.conf` continues to point at the Barman host's own bin
+directory and serves as the default for same-version scenarios.
+
+When the backed up node's `postgres_version` differs from the Barman
+host's, TPA installs the matching Postgres client packages on the Barman
+host automatically (via `delegate_to`), so the per-server `path_prefix`
+resolves to real binaries.
+
+For this to work the Barman host must have package repository access for
+the additional PostgreSQL version. EDB enterprise repositories
+(`edb_repositories: ["enterprise"]`) carry all supported major versions
+and satisfy this requirement; in PGDG-only deployments you must enable
+the corresponding `pgdgNN` repository entry on the Barman host yourself,
+because TPA's `sys/repositories` role disables PGDG entries for every
+major version other than the host's own `postgres_version`.
+
+To override the resolved path on a particular node, set
+`barman_path_prefix` in that node's `vars` (see the variables table above).
+
+#### Air-gapped clusters
+
+In an air-gapped cluster (`use_local_repo_only: true`), the
+cross-version client install on the Barman host requires the matching
+Postgres client packages to already exist in the Barman cluster's
+`local-repo`. `tpaexec download-packages` fetches packages for a single
+Postgres major per cluster, so by default the additional-major client
+packages are not pre-fetched.
+
+If you intend to back up nodes at additional Postgres majors in an
+air-gapped Shared Barman setup, copy the additional-major client
+packages into the Barman cluster's `local-repo` before deploying the
+cluster that introduces the additional version.
+
+See [Managing clusters in a disconnected or air-gapped
+environment](air-gapped.md) for the directory layout and the
+[`tpaexec download-packages`
+reference](tpaexec-download-packages.md) for how to populate a
+`local-repo`.
 
 ### Special considerations for shared Barman servers
 

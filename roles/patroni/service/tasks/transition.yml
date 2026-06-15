@@ -21,6 +21,7 @@
   when:
     - to_state|default('started') == 'restarted'
     - "'primary' in role"
+    - task_selector|permits('service', 'restart')
 
 # Receiving HTTP status 409 means Patroni was not able to communicate with the DCS.
 # Besides that, receiving anything other than 200 means the request failed. So, if it's
@@ -31,6 +32,7 @@
   when:
     - to_state|default('started') == 'restarted'
     - "'primary' in role"
+    - task_selector|permits('service', 'restart')
     - patroni_config_api_output.status != 200
     - patroni_config_api_output.status != 409
   block:
@@ -57,12 +59,15 @@
   service:
     name: "{{ patroni_service_name }}"
     state: "{{ to_state|default('started') }}"
+  when: >
+    task_selector|permits('service', 'restart')
 
 - include_role:
     name: patroni/api
     tasks_from: readiness
   when: >
     to_state|default('started') != 'stopped'
+    and task_selector|permits('service', 'restart')
 
 # Now that the agents were restarted, we are fine to use the REST API again without
 # expecting any issues, as there is no chance of stale DCS configuration values at this
@@ -78,3 +83,4 @@
   when:
     - to_state|default('started') == 'restarted'
     - "'primary' in role"
+    - task_selector|permits('service', 'restart')

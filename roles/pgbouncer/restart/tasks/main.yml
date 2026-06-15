@@ -12,3 +12,4 @@
   become: yes
   when: >
     'pgbouncer' in role
+    and task_selector|permits('service', 'restart')

@@ -3,7 +3,12 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 # Set any sysctl values specified by the caller, which may augment or
-# override the default values defined in by this role.
+# override the default values defined in by this role. When the chosen
+# hugepage size is the architecture default we include vm.nr_hugepages
+# here so the kernel sees it on boot. For a non-default size that
+# sysctl is meaningless (it only ever applies to the default-size pool)
+# so we omit it from /etc/sysctl.conf and reserve pages on the kernel
+# command line instead.
 
 - name: Set sysctl values
   linesinfile:
@@ -14,10 +19,23 @@
     sysctl_conf_settings:
       "{{ sysctl_defaults
           |combine(_ip_forward)
-          |combine(sysctl_values) }}"
+          |combine(_user_sysctls)
+          |combine(_hugepages_sysctl) }}"
     _ip_forward:
       "{{ ('openvpn-server' in role)
           |ternary({'net.ipv4.ip_forward': 1}, {}) }}"
+    _user_sysctls: >-
+      {%- if _huge_page_size_is_default | bool -%}
+        {{ sysctl_values }}
+      {%- else -%}
+        {{ sysctl_values | dict2items | rejectattr('key', 'equalto', 'vm.nr_hugepages') | list | items2dict }}
+      {%- endif -%}
+    _hugepages_sysctl: >-
+      {%- if _huge_page_size_is_default | bool -%}
+        {{ {'vm.nr_hugepages': _nr_hugepages | int} }}
+      {%- else -%}
+        {}
+      {%- endif -%}
   when:
     platform not in ['docker', 'lxd']
     and target_container_type is not defined

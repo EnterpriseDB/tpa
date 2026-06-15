@@ -60,13 +60,13 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr:role_pgd-proxy:&g_update_hosts
   tasks:
   - when:
     - upgrade_selector|strict_selects('pgdcli') or upgrade_selector|strict_selects('all')
     - (('bdr' in role  or 'pgd-proxy' in role) and bdrdb_major_version is version('5', '<=')) or 'pgdcli' in role
     block:
-    - name: Define pdgcli package version if not defined in config.yml
+    - name: Define pgdcli package version if not defined in config.yml
       set_fact:
         pgdcli_package_version: "{{ bdr_package_version }}"
       when:
@@ -88,7 +88,7 @@
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr:role_pgd-proxy:&g_update_hosts
   tasks:
   - include_role: name=pgdcli/update
     when: 

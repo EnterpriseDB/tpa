@@ -3,7 +3,6 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from tpa.exceptions import PGDXArchitectureError
-from ..architecture import Architecture
 from .pgd import PGD
 from typing import List, Tuple
 
@@ -15,7 +14,8 @@ class PGDX(PGD):
     @property
     def name(self):
         """
-        The name of this architecture as it goes in config.yml
+        The name of this architecture as it goes in config.yml.
+
         """
         return "PGD-X"
 
@@ -29,20 +29,39 @@ class PGDX(PGD):
         ]
 
     def num_instances(self):
+        """Count instances built by the PGD-X topology template.
+
+        Sum of data, witness, and barman nodes across every non-witness-only
+        location, plus the single extra witness instance in a witness-only
+        location if one is configured, plus a pemserver if requested. Mirrors
+        architectures/PGD-X/templates/main.yml.j2 and PGD._update_instance_pem.
         """
-        Should do a calculation here - temporarily, we just return a
-        big enough number
-        """
-        return 16
+        per_location = (
+            self.args["data_nodes_per_location"]
+            + (1 if self.args.get("witness_node_per_location") else 0)
+            + 1  # barman
+        )
+        witness_only = self.args.get("witness_only_location")
+        data_locations = [
+            loc for loc in self.args["location_names"] if loc != witness_only
+        ]
+        total = len(data_locations) * per_location
+        if witness_only:
+            total += 1
+        if self.args.get("enable_pem", False):
+            total += 1
+        return total
 
     def default_edb_repos(self, cluster_vars) -> List[str]:
-        """PGD-X requires the postgres_distributed repository.
+        """
+        PGD-X requires the postgres_distributed repository.
 
         This is added to whatever repositories have already been determined
         by the parent class ('standard' or 'enterprise', depending on flavour
         or in principle on other requested software)
+
         """
-        return super().default_edb_repos(cluster_vars) + ['postgres_distributed']
+        return super().default_edb_repos(cluster_vars) + ["postgres_distributed"]
 
     def default_location_names(self):
         return ["first"]
@@ -50,10 +69,28 @@ class PGDX(PGD):
     def validate_arguments(self, args, platform):
         super().validate_arguments(args, platform)
         self._validate_camo(args)
+        self._validate_witness(args)
         if not self.args["location_names"]:
             self.args["location_names"] = self.default_location_names()
-    
-    
+
+    def _validate_witness(self, args):
+        data_nodes_per_location = args.get("data_nodes_per_location")
+        witness_node_per_location = args.get("witness_node_per_location")
+
+        if data_nodes_per_location < 2:
+            raise PGDXArchitectureError(
+                "--data-nodes-per-location cannot be less than 2"
+            )
+
+        if data_nodes_per_location % 2 == 0:
+            self.args["witness_node_per_location"] = True
+
+        if witness_node_per_location and data_nodes_per_location % 2 != 0:
+            raise PGDXArchitectureError(
+                "--add-witness-node-per-location can only be specified "
+                "with even number of data nodes per location"
+            )
+
     def _validate_camo(self, args):
         camo = args.get("enable_camo", False)
         data_nodes = args.get("data_nodes_per_location")
@@ -64,7 +101,7 @@ class PGDX(PGD):
                 )
             if data_nodes != 2:
                 raise PGDXArchitectureError(
-                    "Cannot enable CAMO with --data-nodes-per-location " \
+                    "Cannot enable CAMO with --data-nodes-per-location "
                     "different than 2 data nodes"
                 )
 
@@ -80,14 +117,21 @@ class PGDX(PGD):
 
         Requires postgres_flavour to be edbpge or epas.
         """
+        if not self.args.get("enable_camo", False):
+            return
+
         cluster.set_var("bdr_commit_scopes", [])
         subgroups = []
         scope = "camo"
 
-        # Here we set all the BDR Primary nodes found per location, group them by pairs and then 
+        # Here we set all the BDR Primary nodes found per location, group them by pairs and then
         # define their own CAMO "bdr_commit_scope"
         for location in cluster.locations:
-            bdr_primaries = cluster.instances.in_location(location.name).with_bdr_node_kind("data").select(lambda i: "bdr_node_camo_partner" not in i.host_vars)
+            bdr_primaries = (
+                cluster.instances.in_location(location.name)
+                .with_bdr_node_kind("data")
+                .select(lambda i: "bdr_node_camo_partner" not in i.host_vars)
+            )
             if len(bdr_primaries) != 2:
                 continue
             a, b = bdr_primaries[0], bdr_primaries[1]
@@ -104,7 +148,7 @@ class PGDX(PGD):
                     "rule": f"ALL ({subgroup}) ON durable CAMO DEGRADE ON (timeout = 60s, require_write_lead = true) TO ASYNC",
                 }
             )
-        
+
         # Set the "default_commit_scope" option to "camo" inside "bdr_node_groups"
         for node_group in cluster.group.group_vars["bdr_commit_scopes"]:
             if node_group["name"] in subgroups:
@@ -169,7 +213,8 @@ class PGDX(PGD):
         super().add_architecture_options(p, g)
         g.add_argument(
             "--pgd-routing",
-            help="configure Connection Manager to route connections to a globally-elected write leader (global) or a write leader within its own location (local)",
+            help="configure Connection Manager to route connections to a globally-elected "
+            "write leader (global) or a write leader within its own location (local)",
             choices=["global", "local"],
             dest="pgd_routing",
             default=None,
@@ -196,24 +241,12 @@ class PGDX(PGD):
             default=None,
         )
         g.add_argument(
-            "--cohost-proxies",
-            action="store_const",
-            const=0,
-            dest="proxy_nodes_per_location",
-            help="not needed; pgd-proxy runs on the data nodes by default",
-        )
-        g.add_argument(
-            "--add-proxy-nodes-per-location",
-            type=int,
-            dest="proxy_nodes_per_location",
-            help="number of separate PGD-Proxy nodes to add in each location",
-        )
-        g.add_argument(
             "--enable-pgd-probes",
             choices=["http", "https"],
             nargs="?",
             default=SUPPRESS,
-            help="Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health",
+            help="Enable http(s) api endpoints for pgd-proxy "
+            "such as `health/is-ready` to allow probing proxy's health",
         )
         g.add_argument(
             "--enable-camo",

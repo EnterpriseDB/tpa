@@ -5,6 +5,7 @@
 """
 This transmogrifier changes a PGD-Always-ON cluster running PGD version 5 to a
 PGD-X cluster running PGD version 6.
+
 """
 
 # --- Rationale and Migration Strategy ---
@@ -34,12 +35,10 @@ PGD-X cluster running PGD version 6.
 #   intentionally preserved by the `pgdproxy_cm` transmogrifier for backward
 #   compatibility during the intermediate migration phase.
 
-import sys
-
 from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
 from ..exceptions import ConfigureError
-from ..transmogrifier import Transmogrifier, opt
+from ..transmogrifier import Transmogrifier
 from .repositories import Repositories
 
 
@@ -50,6 +49,7 @@ class PGD5PGDX(Transmogrifier):
     This transmogrifier handles the configuration changes required for the
     major version upgrade, such as updating version numbers and removing
     deprecated keys. It is activated by the --architecture PGD-X option.
+
     """
 
     def __init__(self):
@@ -58,9 +58,17 @@ class PGD5PGDX(Transmogrifier):
     def is_applicable(self, cluster):
         return self.args.target_architecture == "PGD-X"
 
+    def is_ready(self, cluster):
+        # Wait for all required transmogrifiers (e.g. Repositories) to be
+        # applied before this one runs, since the framework's all_required()
+        # ordering may place this transmogrifier before its own dependencies
+        # in the apply queue.
+        return all(getattr(req, "_applied", False) for req in self.required)
+
     def _run_prerequisite_checks(self, cluster):
         """
         Runs a series of checks to ensure the cluster is in a valid state for the upgrade.
+
         """
         # Alright, before we touch anything, let's make sure this cluster
         # configuration is actually in the right state for this upgrade. If
@@ -131,6 +139,7 @@ Please run the following command to migrate it first:
     def _cleanup_deprecated_options(self, cluster):
         """
         Iterates through the configuration and removes any deprecated keys.
+
         """
         bdr_node_groups = cluster.vars.get("bdr_node_groups")
 
@@ -219,11 +228,13 @@ Please run the following command to migrate it first:
             self._cleanup_deprecated_options(cluster)
 
         except KeyError as e:
-            raise ConfigureError(f"Configuration is missing a required key: {e}")
+            raise ConfigureError(
+                f"Configuration is missing a required key: {e}"
+            ) from None
         except (AttributeError, TypeError) as e:
             raise ConfigureError(
                 f"Configuration has an unexpected structure or data type. Error: {e}"
-            )
+            ) from None
 
     def description(self, cluster):
         items = [

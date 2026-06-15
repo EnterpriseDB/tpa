@@ -16,6 +16,28 @@
 # Finally, we add the upstream backed up barman and streaming_barman
 # users password to the ~barman/.pgpass file.
 
+# When a backed-up instance runs a different postgres version than the barman
+# host (e.g. mixed-version cluster), ensure the matching client binaries are
+# installed on the barman host so path_prefix works.
+- name: Build list of postgres {{ postgres_version }} client packages for cross-version barman
+  include_role:
+    name: postgres/pkg
+    tasks_from: list-client-packages.yml
+  vars:
+    list_varname: _barman_cross_version_packages
+  when: postgres_version != hostvars[this_barman].postgres_version | default(postgres_version)
+
+# We call `package` directly (rather than via pkg/install) with an explicit
+# `use:` so we don't depend on ansible_facts.pkg_mgr being populated on the
+# delegated host — TPA's minimal_setup only sets the legacy ansible_pkg_mgr.
+- name: Install postgres {{ postgres_version }} client packages on the barman host
+  package:
+    name: "{{ _barman_cross_version_packages }}"
+    state: present
+    use: "{{ hostvars[this_barman].ansible_pkg_mgr }}"
+  delegate_to: "{{ this_barman }}"
+  when: _barman_cross_version_packages is defined
+
 - name: Check if Barman backup directory exists
   stat:
     path: "{{ _barman_backup_directory }}"

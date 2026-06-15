@@ -1,0 +1,41 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# After BDR/PGD packages are installed, derive bdr_version_num from the
+# installed package version. This is needed on initial deploys because
+# conf.d/3334-camo.conf gates GUCs on bdr_version_num, but Postgres is
+# not yet running, so cluster_discovery cannot supply the value from
+# bdr.bdr_version_num(). On a later pass, postgres/bdr/tasks/version.yml
+# overwrites this fact with the precise value reported by the running
+# database, which remains authoritative.
+#
+# The primary BDR/PGD package name was selected and exported as
+# _bdr_primary_package by roles/postgres/pkg/tasks/list-bdr-packages.yml,
+# colocated with the existing selection logic to avoid duplication.
+
+- name: Gather installed package facts
+  package_facts:
+
+# We assign via from_json so that bdr_version_num is a real int,
+# matching the type set later by roles/postgres/bdr/tasks/version.yml
+# (and the type that camo.conf.j2 expects for numeric comparisons).
+- name: Derive bdr_version_num from installed BDR/PGD package version
+  action: set_fact
+  args: >
+    {{
+      ('{"bdr_version_num": %d}' % (
+        (parts[0]|int) * 10000
+        + (parts[1]|default('0')|int) * 100
+        + (parts[2]|default('0')|int)
+      ))|from_json
+    }}
+  vars:
+    _pkg_version: >-
+      {{ ansible_facts.packages[_bdr_primary_package][0].version
+         | default('') | split('-') | first }}
+    parts: "{{ _pkg_version.split('.') }}"
+  when:
+    - _bdr_primary_package is defined
+    - _bdr_primary_package in ansible_facts.packages
+    - ansible_facts.packages[_bdr_primary_package][0].version|default('') != ''

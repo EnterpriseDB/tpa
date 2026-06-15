@@ -59,6 +59,8 @@
     name: "{{ apache_conf[ansible_os_family]['service'] }}"
     enabled: yes
     state: started
+  when: >
+    task_selector|permits('service')
 
 - name: Switch off port 80
   lineinfile:

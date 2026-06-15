@@ -4,8 +4,6 @@
 
 import argparse
 
-from typing import List
-
 from ..architecture import Architecture
 from ..exceptions import ArchitectureError
 
@@ -132,8 +130,7 @@ class M1(Architecture):
     def all_locations(self):
         if self.args.get("location_names"):
             return self.args.get("location_names").copy()
-        else:
-            return self.default_location_names()
+        return self.default_location_names()
 
     def validate_arguments(self, args):
         super().validate_arguments(args)
@@ -173,7 +170,8 @@ class M1(Architecture):
         if args.get("primary_location"):
             if args["primary_location"] not in locations:
                 raise ArchitectureError(
-                    f"Location {args.get['primary_location']} unknown"
+                    f"Location {args['primary_location']} unknown.\n"
+                    f"Please ensure that primary location is included in --location-names"
                 )
             if args["primary_location"] != locations[0]:
                 locations.remove(args["primary_location"])
@@ -259,13 +257,14 @@ class M1(Architecture):
             for instance in instances:
                 ins_defs = self.args["instance_defaults"]
                 role = instance.get("role", ins_defs.get("role", []))
-                if set(["primary", "replica", "witness"]).intersection(set(role)) or (
-                    "barman" in role and self.args["cluster_vars"].get("enable_pg_backup_api", False)
+                if {"primary", "replica", "witness"}.intersection(set(role)) or (
+                    "barman" in role
+                    and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
             n = instances[-1].get("node")
             pemserver_name = (
-                "%s-pemserver" % self.args["cluster_name"]
+                f"{self.args['cluster_name']}-pemserver"
                 if self.args.get("cluster_prefixed_hostnames")
                 else "pemserver"
             )
@@ -305,6 +304,7 @@ class M1(Architecture):
         :param instances: the instances which belong to this TPA cluster. We are
             interested in the ones with role ``etcd``, so we can configure PGDG repos
             for them.
+
         """
         if self.args.get("failover_manager") == "patroni":
             for repo_var_name in ["yum_repository_list", "suse_repository_list"]:
@@ -315,7 +315,7 @@ class M1(Architecture):
 
                 repo_list = set(self.args["cluster_vars"].get(repo_var_name, []))
                 # An empty repo_list means we will add both EPEL and PGDG by default
-                if repo_list != set([]):
+                if repo_list != set():
                     repo_list.add("PGDG")
                     repo_list = list(repo_list)
 
@@ -334,6 +334,7 @@ class M1(Architecture):
         the configured repositories.
 
         :param cluster_vars: cluster variables to be inspected.
+
         """
         # If the user explicitly set the flavour, use that.
         ret = self.args.get("patroni_package_flavour")
@@ -369,13 +370,16 @@ class M1(Architecture):
         Use value configured by the user, if any, otherwise get the default
 
         :param cluster_vars: cluster variables to be inspected.
+
         """
         if self.args.get("efm_version"):
             return self.args.get("efm_version")
+        return None
 
     def update_cluster_vars(self, cluster_vars):
         """
-        Makes architecture-specific changes to cluster_vars if required
+        Makes architecture-specific changes to cluster_vars if required.
+
         """
         failover_manager = self.args.get("failover_manager")
         cluster_vars.update(
@@ -385,10 +389,13 @@ class M1(Architecture):
         )
 
         if failover_manager == "efm":
-            cluster_vars["efm_version"] = self._set_efm_version(cluster_vars,)
+            cluster_vars["efm_version"] = self._set_efm_version(
+                cluster_vars,
+            )
             cluster_vars.update(
                 {
                     "efm_user_password_encryption": "scram-sha-256",
+                    "efm_user_is_superuser": False,
                 }
             )
 

@@ -6,6 +6,7 @@
 This transmogrifier changes a PGD-Always-ON cluster running PGD version 5
 from using pgd-proxy to Connection Manager(PGD 5.9+)
 """
+
 # --- Rationale and Migration Strategy ---
 #
 # This transmogrifier handles the complex task of migrating a PGD 5 cluster's
@@ -52,8 +53,6 @@ from using pgd-proxy to Connection Manager(PGD 5.9+)
 #   `enable_raft: false`, it forces `enable_raft` to `true`.
 # - It detects per-instance overrides, prints a clear WARNING, and safely
 #   removes the obsolete instance-level keys.
-import sys
-
 from ..changedescription import ChangeDescription
 from ..checkresult import CheckResult
 from ..exceptions import ConfigureError
@@ -342,7 +341,7 @@ class PgdproxyCM(Transmogrifier):
         except (KeyError, AttributeError, TypeError) as e:
             raise ConfigureError(
                 f"Configuration has an unexpected structure or data type. Error: {e}"
-            )
+            ) from None
 
     def description(self, cluster):
         items = [

@@ -1,0 +1,118 @@
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+name: Build TPA Execution Environment image for AAP
+description: Build TPA EE image
+inputs:
+  tag:
+    description: "Tag to apply to the image"
+    required: true
+    default: "test"
+    type: string
+  environment_file:
+    description: "environment file to use"
+    type: string
+    required: true
+    default: "execution-environment.yml"
+  GH_SLONIK: 
+    description: GitHub Slonik token
+    type: string
+    required: true
+  RH_TPA_USERNAME:
+    description: RedHat username
+    type: string
+    required: true
+  RH_TPA_TOKEN:
+    description: RedHat password
+    type: string
+    required: true
+  base-image:
+    description: "base image (rhel, alpine)"
+    type: choice
+    default: rhel
+    options:
+    - rhel
+    - alpine
+  tpa-internal-ref:
+    description: "ref used for tpa-internal repo"
+    type: string
+    required: false
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Checkout tpa-internal
+      id: checkout-tpa-internal
+      uses: actions/checkout@v6
+      with:
+        repository: EnterpriseDB/tpa-internal
+        token: ${{ inputs.GH_SLONIK }}
+        ref: ${{ inputs.tpa-internal-ref || github.ref }}
+
+    # setup python
+    - name: setup python
+      uses: ./.github/actions/install-requirements
+
+    # install requirements needed for build
+    - name: Install python build requirements
+      shell: bash
+      working-directory: ${{ github.workspace }}/tpa-ee/aap24/${{ inputs.base-image }}
+      run: |
+        python3 -m pip install -r ../build-requirements.txt
+
+    # verify build environment
+    - name: Verify build Environment
+      run: |
+        python --version
+        docker --version
+        ansible-builder --version
+        ansible-navigator --version
+      shell: bash
+
+    # login to redhat registry to pull minimal EE image on redhat9
+    - name: Login to RedHat Container Registry
+      if: ${{ inputs.base-image == 'rhel' }}
+      uses: docker/login-action@v4
+      with:
+        registry: registry.redhat.io
+        username: ${{ inputs.RH_TPA_USERNAME }}
+        password: ${{ inputs.RH_TPA_TOKEN }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v4
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ inputs.GH_SLONIK }}
+
+    - name: Build Execution Environment
+      shell: bash
+      working-directory: ${{ github.workspace }}/tpa-ee/aap24/${{ inputs.base-image }}
+      env:
+        IMAGE_NAME: "tpa-ee-${{ inputs.base-image }}"
+      run: |
+        ansible-builder \
+        build \
+        --container-runtime docker \
+        --tag ghcr.io/enterprisedb/tpa/${{ env.IMAGE_NAME }}:${{ inputs.tag }} \
+        -f ${{ inputs.environment_file }} \
+        -c ../../../ \
+        --verbosity 3 \
+        --no-cache \
+        --squash new
+
+    - name: Archive build folder
+      uses: actions/upload-artifact@v7
+      with:
+        name: build_artifact_${{ inputs.base-image }}
+        path: ./tpa-ee/aap24/${{ inputs.base-image }}
+
+    - name: Push to ghcr.io/enterprisedb/tpa
+      shell: bash
+      working-directory: ./tpa-ee/aap24/${{ inputs.base-image }}
+      env:
+        IMAGE_NAME: "tpa-ee-${{ inputs.base-image }}"
+      run: |
+        docker \
+        push \
+        ghcr.io/enterprisedb/tpa/${{ env.IMAGE_NAME }}:${{ inputs.tag }}

@@ -102,3 +102,5 @@
   service:
     name: rsyslog
     state: "{{ rsyslog_service_end_state|default('started') }}"
+  when: >
+    task_selector|permits('service', 'restart')

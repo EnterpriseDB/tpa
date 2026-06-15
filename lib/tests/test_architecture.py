@@ -3,6 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 """Tests for the main architecture module."""
+
 import shutil
 from unittest.mock import patch
 
@@ -13,7 +14,6 @@ from tpaexec.architecture import Architecture
 from tpaexec.architectures import M1, BDR_Always_ON, PGD_Always_ON
 from tpaexec.exceptions import ArchitectureError
 from tpaexec.platforms import Platform, PlatformError
-
 
 CONFIG_PATH = {
     "BASIC": "lib/tests/config/cluster-basic",
@@ -124,6 +124,28 @@ class TestBarePlatform:
             architecture_bare.setup_local_repo()
 
 
+class TestClusterNameValidation:
+    def test_invalid_cluster_name_rejected(self):
+        bad_path = "lib/tests/config/cluster.bad"
+        d = BasicArchitecture(
+            directory="lib/tests/architectures/basic",
+            lib="lib/tests/architectures/lib",
+            argv=[
+                bad_path,
+                "--architecture",
+                "basic",
+                "--network",
+                "10.33.0.0/24",
+                "--no-git",
+                "--postgresql",
+                "14",
+            ],
+        )
+        with pytest.raises(ArchitectureError, match="Invalid cluster_name"):
+            d.configure(force=True)
+        cleanup(bad_path)
+
+
 @pytest.fixture
 def architecture_m1(argv):
     yield M1(
@@ -228,18 +250,18 @@ def bdr_architecture(argv):
 
 @patch.object(Architecture, "expand_template", expand_template)
 class TestBDRArchitecture:
-    MINIMUM_BDR_ARGV = [
+    BASE_BDR_ARGV = [
         CONFIG_PATH["BDR"],
         "--architecture",
         "BDR-Always-ON",
         "--no-git",
-        "--postgresql",
-        "14",
         "--layout",
         "bronze",
         "--harp-consensus-protocol",
         "etcd",
     ]
+
+    MINIMUM_BDR_ARGV = BASE_BDR_ARGV + ["--postgresql", "14"]
 
     @pytest.mark.parametrize(
         "argv, error, expected",
@@ -272,6 +294,94 @@ class TestBDRArchitecture:
             with pytest.raises(error):
                 assert bdr_architecture.args["cluster_vars"]["harp_http_options"]
 
+    @pytest.mark.parametrize(
+        "version_string, expected",
+        [
+            ("*5.8*", True),
+            ("*6.1.1*", True),
+            ("5.5*", True),
+            ("5.5.1", True),
+            ("6.1.1", True),
+            ("4:5.5.1", True),
+            ("4:5.8.0", True),
+            ("*5.3*", False),
+            ("5.1.0", False),
+            ("5.4.2", False),
+            ("4:5.4.2", False),
+        ],
+    )
+    def test_package_version_at_least(self, version_string, expected):
+        min_ver = BDR_Always_ON.BDR_WITH_READ_LISTEN_PORT
+        assert (
+            Architecture._package_version_at_least(object(), version_string, min_ver)
+            is expected
+        )
+
+    @pytest.mark.parametrize(
+        "version_string",
+        ["latest", "abc", "not-a-version", None, ""],
+    )
+    def test_package_version_at_least_malformed_raises_error(self, version_string):
+        min_ver = BDR_Always_ON.BDR_WITH_READ_LISTEN_PORT
+        with pytest.raises(ArchitectureError):
+            Architecture._package_version_at_least(object(), version_string, min_ver)
+
+    @pytest.mark.parametrize(
+        "argv, error, expected",
+        [
+            (BASE_BDR_ARGV + ["--pgextended", "14"], None, "pgextended"),
+            (BASE_BDR_ARGV + ["--edbpge", "14"], None, "pgextended"),
+            (BASE_BDR_ARGV + ["--edb-postgres-extended", "14"], None, "pgextended"),
+            (
+                BASE_BDR_ARGV
+                + ["--postgres-flavour", "edbpge", "--postgres-version", "14"],
+                None,
+                "pgextended",
+            ),
+            (
+                BASE_BDR_ARGV
+                + ["--postgres-flavour", "pgextended", "--postgres-version", "14"],
+                None,
+                "pgextended",
+            ),
+        ],
+    )
+    def test_bdr_always_on_normalises_to_pgextended(
+        self, argv, error, expected, bdr_architecture
+    ):
+        """
+        Verify that all ways of requesting Postgres Extended produce
+        'pgextended' for BDR-Always-ON.
+        """
+        bdr_architecture.configure(force=True)
+        if error is None:
+            assert bdr_architecture.args["cluster_vars"]["postgres_flavour"] == expected
+        else:
+            with pytest.raises(error):
+                bdr_architecture.args["cluster_vars"]["postgres_flavour"]
+
+    @pytest.mark.parametrize(
+        "argv, error_match",
+        [
+            (
+                MINIMUM_BDR_ARGV + ["--location-names", "dc"],
+                "requires 2 locations, but 1",
+            ),
+            (
+                MINIMUM_BDR_ARGV + ["--location-names", "a", "b", "c"],
+                "requires 2 locations, but 3",
+            ),
+            (MINIMUM_BDR_ARGV + ["--location-names", "a", "b"], None),
+        ],
+    )
+    def test_bdr_location_name_count(self, argv, error_match, bdr_architecture):
+        if error_match is not None:
+            with pytest.raises(ArchitectureError, match=error_match):
+                bdr_architecture.configure(force=True)
+        else:
+            bdr_architecture.configure(force=True)
+            assert len(bdr_architecture.args["locations"]) == 2
+
 
 @pytest.fixture
 def pgd_architecture(argv):
@@ -285,16 +395,16 @@ def pgd_architecture(argv):
 
 @patch.object(Architecture, "expand_template", expand_template)
 class TestPGDArchitecture:
-    MINIMUM_PGD_ARGV = [
+    BASE_PGD_ARGV = [
         CONFIG_PATH["PGD"],
         "--architecture",
         "PGD-Always-ON",
         "--no-git",
-        "--postgresql",
-        "14",
         "--pgd-proxy-routing",
         "local",
     ]
+
+    MINIMUM_PGD_ARGV = BASE_PGD_ARGV + ["--postgresql", "14"]
 
     @pytest.mark.parametrize(
         "argv, error, expected",
@@ -324,3 +434,37 @@ class TestPGDArchitecture:
         else:
             with pytest.raises(error):
                 pgd_architecture.args["cluster_vars"]["pgd_http_options"]
+
+    @pytest.mark.parametrize(
+        "argv, error, expected",
+        [
+            (BASE_PGD_ARGV + ["--pgextended", "14"], None, "edbpge"),
+            (BASE_PGD_ARGV + ["--edbpge", "14"], None, "edbpge"),
+            (BASE_PGD_ARGV + ["--edb-postgres-extended", "14"], None, "edbpge"),
+            (
+                BASE_PGD_ARGV
+                + ["--postgres-flavour", "edbpge", "--postgres-version", "14"],
+                None,
+                "edbpge",
+            ),
+            (
+                BASE_PGD_ARGV
+                + ["--postgres-flavour", "pgextended", "--postgres-version", "14"],
+                None,
+                "edbpge",
+            ),
+        ],
+    )
+    def test_pgd_always_on_normalises_to_edbpge(
+        self, argv, error, expected, pgd_architecture
+    ):
+        """
+        Verify that all ways of requesting Postgres Extended produce
+        'edbpge' for PGD-Always-ON.
+        """
+        pgd_architecture.configure(force=True)
+        if error is None:
+            assert pgd_architecture.args["cluster_vars"]["postgres_flavour"] == expected
+        else:
+            with pytest.raises(error):
+                pgd_architecture.args["cluster_vars"]["postgres_flavour"]

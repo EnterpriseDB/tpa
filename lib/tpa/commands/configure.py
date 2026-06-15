@@ -4,14 +4,14 @@
 
 import os
 import sys
-from argparse import ArgumentParser,ArgumentError
+from argparse import ArgumentParser, ArgumentError
 
 from ..cluster import Cluster
 from ..platform import Platform
 
 from ..architectures import all_architectures
 
-from ..exceptions import ConfigureError,UnsupportedArchitectureError
+from ..exceptions import ConfigureError, UnsupportedArchitectureError
 
 
 def configure(argv, tpa_dir=None):
@@ -27,7 +27,7 @@ def configure(argv, tpa_dir=None):
         tpa_dir = tpa_dir or os.environ.get("TPA_DIR", None)
         lib_dir = os.path.join(tpa_dir, "architectures", "lib")
     except TypeError:
-        raise EnvironmentError("TPA_DIR not defined")
+        raise EnvironmentError("TPA_DIR not defined") from None
 
     p = ArgumentParser(
         "tpaexec configure",
@@ -43,8 +43,7 @@ def configure(argv, tpa_dir=None):
     try:
         parsed_args, _ = p.parse_known_args(argv)
     except ArgumentError:
-        raise UnsupportedArchitectureError
-
+        raise UnsupportedArchitectureError from None
 
     # to create the Architecture object, we need to determine the cluster
     # directory
@@ -57,9 +56,8 @@ def configure(argv, tpa_dir=None):
         arch_dir = None
 
     arch = all_architectures[parsed_args.architecture](
-        directory=arch_dir,
-        lib=lib_dir,
-        argv=argv)
+        directory=arch_dir, lib=lib_dir, argv=argv
+    )
 
     # The architecture gets to decide which platforms are supported, so we
     # reparse the options once we know what the available choices are.
@@ -92,8 +90,6 @@ def configure(argv, tpa_dir=None):
         print(e)
         sys.exit(1)
 
-
-
     # the cluster object is now complete and we can write it
     yaml_configuration = cluster.to_yaml()
 
@@ -101,11 +97,10 @@ def configure(argv, tpa_dir=None):
         os.makedirs(cluster_dir)
         config_path = f"{cluster_dir}/config.yml"
         if not os.path.exists(config_path):
-            with open(config_path, "w") as cfg:
+            with open(config_path, "w", encoding="utf-8") as cfg:
                 cfg.write(yaml_configuration)
     except OSError as e:
-        raise ConfigureError(f"Could not write cluster directory: {str(e)}")
-
+        raise ConfigureError(f"Could not write cluster directory: {str(e)}") from None
 
     arch.after_configuration(cluster)
 
