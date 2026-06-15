@@ -4,7 +4,7 @@ PyYAML>=6
 cryptography
 python-dateutil
 netaddr
-boto3>=1.5.31
+boto3>=1.43.29
 # certifi is an indirect dependency coming from
 # docker -> requests -> certifi and by default
 # it pulls a pretty old version. So adding it
