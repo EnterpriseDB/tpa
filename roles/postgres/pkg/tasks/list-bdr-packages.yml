@@ -64,13 +64,13 @@
   - name: Record primary BDR3 package name
     set_fact:
       _bdr_primary_package: "{{
-          bdr_packages[postgres_family][ansible_os_family]|first
+          (bdr_packages[postgres_family]|packages_for(ansible_distribution))|first
         }}"
     when: bdr_version is version('4', '<')
   - name: Record primary BDR4/5 package name
     set_fact:
       _bdr_primary_package: "{{
-          bdr4_packages[postgres_family_extended][ansible_os_family]|first
+          (bdr4_packages[postgres_family_extended]|packages_for(ansible_distribution))|first
         }}"
     when: bdr_version is version('4', '>=')
 
@@ -85,5 +85,5 @@
   - name: Record primary BDR/PGD package name
     set_fact:
       _bdr_primary_package: "{{
-          bdr6_packages[postgres_family_extended][ansible_os_family]|first
+          (bdr6_packages[postgres_family_extended]|packages_for(ansible_distribution))|first
         }}"
