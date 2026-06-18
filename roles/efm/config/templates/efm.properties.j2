@@ -73,6 +73,9 @@ release.vip.post.wait={{ efm_conf_settings['release.vip.post.wait']|default(0) }
 {% if efm_version is version('5.2', '>=') %}
 auto.basebackup={{ efm_conf_settings['auto.basebackup']|default(false) }}
 {% endif %}
+{% if efm_version is version('5.4', '>=') %}
+primary.health.check.port={{ efm_conf_settings['primary.health.check.port']|default('') }}
+{% endif %}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}
 reconfigure.sync.primary={{ efm_conf_settings['reconfigure.sync.primary']|default(false) | bool }}
