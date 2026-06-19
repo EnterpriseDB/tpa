@@ -14,8 +14,9 @@
     labels. Quoting values exactly as they should appear in
     `postgresql.conf` remains the recommended practice.
 
-    On clusters which used unquoted boolean values in `postgres_conf_settings`,
-    postgres will be restarted on the next run of `tpaexec deploy`.
+    WARNING: on clusters which used unquoted boolean values in
+    `postgres_conf_settings`, postgres will be restarted on the next run
+    of `tpaexec deploy`.
   type: bugfix
   jira_tickets:
   - TPA-1352
