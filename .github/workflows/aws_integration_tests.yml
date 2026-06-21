@@ -29,7 +29,7 @@ jobs:
     outputs:
       json: ${{ steps.load-yaml.outputs.json }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         token: ${{ env.GITHUB_TOKEN }}
 
@@ -70,7 +70,7 @@ jobs:
 
       - name: Checkout source repository
         id: checkout-source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{ env.GITHUB_TOKEN }}
