@@ -11,7 +11,7 @@ boto3>=1.5.31
 # here explicitly so we pull the latest always.
 # We can safely remove it after we upgrade to
 # Python >=3.9 as part of edb-python package.
-certifi>=2023.7.22
+certifi>=2026.6.17
 docker
 passlib
 psutil
