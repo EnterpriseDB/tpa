@@ -116,13 +116,13 @@ jobs:
     steps:
       - name: Checkout source repository
         id: checkout-source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: EnterpriseDB/tpa-internal
           token: ${{ env.GITHUB_TOKEN }}
 
       - name: Checkout foundation repository branch/tag ${{ env.FOUNDATION_VER }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: EnterpriseDB/foundation-packaging
           ref: ${{ env.FOUNDATION_VER }}
