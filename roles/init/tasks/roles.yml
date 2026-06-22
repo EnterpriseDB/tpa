@@ -58,6 +58,15 @@
   when: >
     'openvpn-server' in role
 
+- assert:
+    that:
+      - "'pem-server' in role"
+    fail_msg: |
+      The pem_shared variable is defined on an instance without the pem-server role.
+      pem_shared must be set on the same instance that has 'pem-server' in its role.
+  when: >
+    (pem_shared|default(false)) is true
+
 - name: Record if there are any PEM server instance(s) in the cluster
   set_fact:
     pem_server_enabled: "{{ groups['role_pem-server']|default([]) is not empty}}"

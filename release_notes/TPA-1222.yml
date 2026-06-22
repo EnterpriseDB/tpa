@@ -1,0 +1,9 @@
+- summary: Assert pem_shared is only set on pem-server instances
+  description: |
+    Add a deploy-time assertion that fails early if the pem_shared variable
+    is defined on an instance that does not have the 'pem-server' role.
+    Previously the misconfiguration could pass silently and lead to
+    confusing downstream errors.
+  type: bugfix
+  jira_tickets:
+  - TPA-1222
