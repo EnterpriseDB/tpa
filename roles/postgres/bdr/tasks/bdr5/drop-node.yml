@@ -1,0 +1,88 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Part a BDR node from the cluster and drop it (drop can be skipped with _part_only)
+# from both the cluster catalog and the node's local catalog.
+# Expects to run on the node being parted; delegates cluster-side operations to first_bdr_primary.
+
+- name: Check node state in cluster catalog
+  postgresql_query:
+    conninfo: "{{ hostvars[first_bdr_primary].bdr_node_dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT peer_state_name FROM bdr.node_summary WHERE node_name = %s
+        args:
+          - "{{ bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  delegate_to: "{{ first_bdr_primary }}"
+  register: _node_state
+
+- name: Part node from the cluster
+  postgresql_query:
+    conninfo: "{{ hostvars[first_bdr_primary].bdr_node_dsn|dbname(bdr_database) }}"
+    queries:
+      - text: "SELECT bdr.part_node(node_name := %s)"
+        args:
+          - "{{ bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  delegate_to: "{{ first_bdr_primary }}"
+  when:
+    _node_state.peer_state_name|default('') not in ['', 'PARTED']
+
+- name: Wait for node to reach PARTED state
+  postgresql_query:
+    conninfo: "{{ hostvars[first_bdr_primary].bdr_node_dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT peer_state_name FROM bdr.node_summary WHERE node_name = %s
+        args:
+          - "{{ bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  delegate_to: "{{ first_bdr_primary }}"
+  register: _part_status
+  until: _part_status.peer_state_name|default('') == 'PARTED'
+  retries: 60
+  delay: 2
+  when:
+    _node_state.peer_state_name|default('') not in ['', 'PARTED']
+
+- name: Drop parted node from catalogs
+  when: not _part_only|default(false)
+  block:
+  - name: Drop node from the cluster catalog
+    postgresql_query:
+      conninfo: "{{ hostvars[first_bdr_primary].bdr_node_dsn|dbname(bdr_database) }}"
+      queries:
+        - text: "SELECT bdr.drop_node(node_name := %s)"
+          args:
+            - "{{ bdr_node_name }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
+    delegate_to: "{{ first_bdr_primary }}"
+    when:
+      _node_state.peer_state_name|default('') != ''
+
+  - name: Check if local node exists
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      queries:
+        - text: "SELECT node_id FROM bdr.local_node"
+    become_user: "{{ postgres_user }}"
+    become: yes
+    register: _local_node
+
+  - name: Drop parted node from local catalog
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      queries:
+        - text: "SELECT bdr.drop_node(node_name := %s)"
+          args:
+            - "{{ bdr_node_name }}"
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when:
+      _local_node.rowcount|default(0)|int > 0

@@ -1,0 +1,56 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Rejoin a BDR node to its node group. Expects to run on the node being
+# joined; delegates the ACTIVE state check to first_bdr_primary.
+# The node must have already been created with create-node.yml.
+
+- name: Check if node is already in the BDR group
+  postgresql_query:
+    conninfo: "{{ hostvars[first_bdr_primary].bdr_node_dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT peer_state_name FROM bdr.node_summary WHERE node_name = %s
+        args:
+          - "{{ bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  delegate_to: "{{ first_bdr_primary }}"
+  register: _node_group_state
+
+- name: Rejoin node to the BDR group
+  postgresql_query:
+    conninfo: "{{ dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT bdr.join_node_group(
+            join_target_dsn := %s,
+            node_group_name := %s,
+            pause_in_standby := false
+          )
+        args:
+          - "{{ hostvars[first_bdr_primary].bdr_node_dsn }}"
+          - "{{ bdr_node_group }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    _node_group_state.peer_state_name|default('') != 'ACTIVE'
+
+- name: Wait for node to reach ACTIVE state
+  postgresql_query:
+    conninfo: "{{ hostvars[first_bdr_primary].bdr_node_dsn|dbname(bdr_database) }}"
+    queries:
+      - text: >
+          SELECT peer_state_name FROM bdr.node_summary WHERE node_name = %s
+        args:
+          - "{{ bdr_node_name }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  delegate_to: "{{ first_bdr_primary }}"
+  register: _rejoin_state
+  until: _rejoin_state.peer_state_name|default('') == 'ACTIVE'
+  retries: 120
+  delay: 2
+  when:
+    _node_group_state.peer_state_name|default('') != 'ACTIVE'
