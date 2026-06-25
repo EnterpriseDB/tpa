@@ -152,6 +152,39 @@
   changed_when: >
     dnfmod.stdout.strip() == 'ok'
 
+# RHEL/Rocky/AlmaLinux 10 removed DNF modularity, so the module-disable task
+# above is a no-op there. Their AppStream repo now ships postgresqlNN-server
+# packages directly, but the unit those install is the unversioned
+# postgresql.service rather than the postgresql-NN.service that PGDG/EDB
+# packages provide. If AppStream is allowed to satisfy postgresqlNN-server,
+# later tasks looking for postgresql-NN.service fail. Exclude postgres (and
+# barman/repmgr) from the OS repos so those packages come from PGDG/EDB.
+
+- name: Exclude postgresql packages from OS repositories on EL >= 10
+  ini_file:
+    dest: "/etc/yum.repos.d/{{ item.file }}"
+    create: no
+    section: "{{ item.section }}"
+    option: exclude
+    value: "postgresql* barman* repmgr*"
+  with_items: "{{ el_os_repos[ansible_distribution_id]|default([]) }}"
+  loop_control:
+    label: "{{ item.file }} [{{ item.section }}]"
+  register: el_os_exclude
+  failed_when: el_os_exclude is not successful and el_os_exclude.rc != 257
+  when: ansible_distribution_major_version|int >= 10
+  vars:
+    el_os_repos:
+      rocky:
+      - {file: rocky.repo, section: baseos}
+      - {file: rocky.repo, section: appstream}
+      almalinux:
+      - {file: almalinux-baseos.repo, section: baseos}
+      - {file: almalinux-appstream.repo, section: appstream}
+      centos:
+      - {file: centos.repo, section: baseos}
+      - {file: centos.repo, section: appstream}
+
 # The PGDG repo RPM installs a pgdg-redhat-all.repo file that contains
 # entries for all available repositories for every version of Postgres,
 # with multiple repositories enabled by default.
