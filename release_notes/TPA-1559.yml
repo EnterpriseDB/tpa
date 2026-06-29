@@ -1,8 +1,0 @@
-- summary: Fix pem_web_server_name to point to the correct path in the pem.conf file
-  description: |
-    A bug was found in the pem.conf file where the pem_web_server_name was pointing to an incorrect path.
-    This has been corrected to ensure the right path is referenced where it is needed.
-    This fix has been committed by skrzyzok (https://github.com/skrzyzok).
-  type: bugfix
-  jira_tickets:
-  - TPA-1559
