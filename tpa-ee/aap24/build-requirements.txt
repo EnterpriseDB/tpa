@@ -10,7 +10,7 @@ ansible-builder==3.1.1
     #   ansible-navigator
 ansible-compat==26.3.0
     # via ansible-lint
-ansible-core==2.21.0
+ansible-core==2.21.1
     # via
     #   ansible-compat
     #   ansible-lint
@@ -28,16 +28,16 @@ bindep==2.14.0
     # via ansible-builder
 black==26.5.1
     # via ansible-lint
-bracex==2.6
+bracex==2.7
     # via wcmatch
 cffi==2.0.0
     # via
     #   ansible-lint
     #   cryptography
     #   onigurumacffi
-click==8.4.1
+click==8.4.2
     # via black
-cryptography==48.0.0
+cryptography==49.0.0
     # via
     #   ansible-core
     #   ansible-lint
@@ -45,7 +45,7 @@ distro==1.9.0
     # via
     #   ansible-lint
     #   bindep
-filelock==3.29.1
+filelock==3.29.4
     # via ansible-lint
 jinja2==3.1.6
     # via
