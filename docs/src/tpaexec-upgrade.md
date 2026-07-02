@@ -394,6 +394,24 @@ By default, `tpaexec upgrade` will update Postgres alone if the `--components` f
 tpaexec upgrade ~/clusters/speedy
 ```
 
+!!! Note upgrade_components default for a BDR 3/4 → PGD 5 reconfigure
+Reconfiguring a BDR 3/4 cluster to PGD 5 writes
+`upgrade_components: postgres, pgd-proxy, pgdcli` into `config.yml` (unless you
+have already set `upgrade_components` yourself). This is because that upgrade
+must do more than update Postgres — it migrates harp-proxy to pgd-proxy in the
+same run, and moves pgdcli onto the PGD 5 line — and these three components must
+be upgraded together. If you want to upgrade Postgres alone, set
+`upgrade_components: postgres` explicitly in `config.yml` (or pass
+`--components=postgres`); note that a major BDR 3/4 → PGD 5 upgrade refuses to
+upgrade some but not all of `postgres`, `pgd-proxy` and `pgdcli`.
+
+This default is written only by the BDR 3/4 → PGD 5 reconfigure. A cluster
+configured directly as PGD 5 does not set `upgrade_components`, so a routine
+minor PGD 5 upgrade uses the default of `postgres` and upgrades Postgres only;
+add `pgd-proxy` and `pgdcli` (or set `upgrade_components: all`) if you also want
+to keep the proxy and CLI current.
+!!!
+
 To select specific components to update, the `--components` flag takes a comma-separated list
 
 ```shell
@@ -557,6 +575,27 @@ the ansible inventory. The upgrade process does the following:
     - Stops harp-proxy.
     - Starts pgd-proxy.
 6. Removes harp-proxy and its support files.
+
+!!! Note Resuming an interrupted BDR 4 → PGD 5 upgrade
+If a BDR 4 → PGD 5 upgrade is interrupted partway through (for example by a
+network or package-repository blip), you can recover simply by re-running
+`tpaexec upgrade`. TPA detects a cluster whose data nodes have already reached
+PGD 5 but whose harp-proxy has not yet been replaced by pgd-proxy, and resumes
+the migration from where it left off rather than mistaking it for a minor
+upgrade. No manual workaround is required.
+
+Because the harp → pgd-proxy migration must run in the same job that upgrades
+the data nodes, a BDR 3/4 → PGD 5 upgrade requires `postgres, pgd-proxy, pgdcli`
+(or `all`) to be included in `upgrade_components` — which is the default written
+by the reconfigure to PGD 5. These three must be upgraded together; if you have
+explicitly narrowed `upgrade_components` so that it includes some but not all of
+them, `tpaexec upgrade` stops before making any changes with:
+
+> A major BDR 3/4 → PGD 5 upgrade migrates harp-proxy to pgd-proxy and must keep
+> postgres, pgd-proxy and pgdcli on the same version, so these three components
+> must be upgraded together. Add all of 'postgres', 'pgd-proxy' and 'pgdcli'
+> (or 'all') to upgrade_components, or none of them.
+!!!
 
 ## Upgrading from PGD-Always-ON to PGD-X
 
@@ -781,6 +820,18 @@ software versions, the upgrade process does the following:
    agents/PEM server (according to the node's roles)
 7. Starts the Barman WAL-receiver if required and runs post-upgrade health checks for all components
    (as applicable to the cluster)
+
+!!! Note
+pgd-proxy configuration is refreshed during the upgrade. When pgd-proxy is
+upgraded, TPA stops the service, installs the new package, re-renders the
+pgd-proxy configuration file and systemd unit, and then starts the service
+again. This ensures that if a newer pgd-proxy ships a changed
+configuration-file layout or systemd unit, the upgraded service starts against
+freshly rendered files rather than stale ones. On a steady-state minor upgrade
+where nothing has changed, re-rendering them is a harmless no-op. (Proxy
+routing settings such as listen ports are held in the PGD catalog rather than
+in this file, and are managed separately during the upgrade.)
+!!!
 
 ## BDR-Always-ON
 
