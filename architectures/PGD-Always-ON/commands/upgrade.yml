@@ -176,6 +176,44 @@
       enable_proxy_monitoring:
         "{{ enable_proxy_monitoring|default(false) }}"
 
+# A BDR 3/4 → PGD 5 major upgrade performs the harp → pgd-proxy migration in
+# the same job that upgrades the data nodes, and must keep postgres, pgd-proxy
+# and pgdcli on the same version — pgdcli in particular has to move to the
+# PGD 5 line, as the v1 CLI shipped with BDR 4 lacks the subcommands TPA uses
+# for post-upgrade health checks. Splitting these leaves the cluster in the
+# half-migrated state this dispatcher has to recover from, so refuse to start a
+# major upgrade that upgrades some but not all of the three. Selecting none of
+# them (e.g. a deliberate barman-only or pgbouncer-only run) is still allowed.
+- name: Major upgrades must upgrade postgres, pgd-proxy and pgdcli together
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  run_once: true
+  tasks:
+  - vars:
+      pgd_migration_components: [postgres, pgd-proxy, pgdcli]
+    assert:
+      that:
+        # Either everything is selected ('all'), or postgres/pgd-proxy/pgdcli
+        # are all present, or all absent. A partial selection (e.g. postgres
+        # and pgd-proxy but not pgdcli) is rejected.
+        - "'all' in upgrade_components_list
+           or pgd_migration_components|difference(upgrade_components_list)|length == 0
+           or pgd_migration_components|intersect(upgrade_components_list)|length == 0"
+      fail_msg: >-
+        A major BDR 3/4 → PGD 5 upgrade migrates harp-proxy to pgd-proxy and
+        must keep postgres, pgd-proxy and pgdcli on the same version, so these
+        three components must be upgraded together. Add all of 'postgres',
+        'pgd-proxy' and 'pgdcli' (or 'all') to upgrade_components, or none of
+        them. Detected dispatch:
+        bdr3_major_version_upgrade={{ bdr3_major_version_upgrade }},
+        bdr4_major_version_upgrade={{ bdr4_major_version_upgrade }}.
+    when:
+      bdr3_major_version_upgrade or bdr4_major_version_upgrade
+
 # We now are ready to fork to the correct upgrade workflow
 - import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_4to5.yml"
   when: >

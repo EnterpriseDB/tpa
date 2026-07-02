@@ -468,3 +468,18 @@ class TestPGDArchitecture:
         else:
             with pytest.raises(error):
                 pgd_architecture.args["cluster_vars"]["postgres_flavour"]
+
+    @pytest.mark.parametrize("argv", [MINIMUM_PGD_ARGV])
+    def test_pgd_always_on_configure_does_not_default_upgrade_components(
+        self, argv, pgd_architecture
+    ):
+        """
+        Configuring a fresh PGD-Always-ON cluster must not set
+        upgrade_components: a PGD-Always-ON cluster is always at PGD 5, so a
+        plain `tpaexec upgrade` is a minor upgrade and keeps the
+        cross-architecture 'postgres' default. The harp→pgd-proxy migration
+        default belongs to the BDR 4 → PGD 5 reconfigure path only
+        (see lib/tpa/transmogrifiers/bdr4pgd5.py).
+        """
+        pgd_architecture.configure(force=True)
+        assert "upgrade_components" not in pgd_architecture.args["cluster_vars"]

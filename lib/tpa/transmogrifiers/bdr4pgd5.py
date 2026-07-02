@@ -101,6 +101,17 @@ class BDR4PGD5(Transmogrifier):
 
         cluster.vars["failover_manager"] = "pgd"
 
+        # The subsequent 'tpaexec upgrade' must run the harp->pgd-proxy
+        # migration and keep postgres, pgd-proxy and pgd-cli on the same
+        # version: pgdcli in particular must move to the PGD 5 line, as the
+        # v1 CLI shipped with BDR 4 lacks the subcommands TPA uses for
+        # post-upgrade health checks. Default upgrade_components to those three
+        # so the migration has the components it needs, without dragging in
+        # unrelated components the way 'all' would. Don't override an explicit
+        # operator setting.
+        if "upgrade_components" not in cluster.vars:
+            cluster.vars["upgrade_components"] = "postgres, pgd-proxy, pgdcli"
+
         # Change postgres_flavour from pgextended to edbpge.
 
         if cluster.vars.get("postgres_flavour") == "pgextended":
@@ -331,6 +342,7 @@ class BDR4PGD5(Transmogrifier):
             "Change harp-proxy instances to pgd-proxy",
             "Change failover_manager to pgd",
             "Define proxy routing local or global",
+            "Default upgrade_components to postgres, pgd-proxy, pgdcli",
         ]
 
         if cluster.instances.with_hostvar("bdr_node_camo_partner"):
