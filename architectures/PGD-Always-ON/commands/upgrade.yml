@@ -96,6 +96,41 @@
     set_fact:
       bdr5_minor_version_upgrade: "{{ not (bdr3_major_version_upgrade or bdr4_major_version_upgrade) }}"
 
+# A BDR 4→PGD 5 major upgrade that was interrupted after the data nodes
+# reached v5 but before harp-proxy was replaced with pgd-proxy looks, from the
+# BDR catalog's perspective, like a minor v5 upgrade. Detect the half-migrated
+# state (harp-proxy still running on a host that carries both proxy roles) so
+# we can reclassify it below and let the major playbook finish the migration.
+- import_playbook: "{{ tpa_dir }}/architectures/lib/upgrade/detect-harp-proxy-state.yml"
+
+- name: Reclassify resumed major upgrades misdetected as minor
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+  - set_fact:
+      any_harp_proxy_still_running:
+        "{{ groups['role_harp-proxy']|default([])
+            |map('extract', hostvars, 'harp_proxy_still_running')
+            |select('defined')
+            |contains(true) }}"
+
+  # Route the unfinished migration through upgrade_major_4to5.yml. Once the
+  # catalog is at v5 the remaining work (the harp→pgd-proxy migration) is
+  # identical whether the upgrade originally started from BDR 3 or 4, so
+  # 4to5 is a correct resume target for both; the not-bdr3 guard simply leaves
+  # a genuine, still-at-v3 resumption on the 3to5 path.
+  - name: Treat a half-migrated cluster as a major BDR 4→5 upgrade
+    set_fact:
+      bdr4_major_version_upgrade: True
+      bdr5_minor_version_upgrade: False
+    when:
+      - any_harp_proxy_still_running
+      - not bdr3_major_version_upgrade
+
 - name: Set upgrade facts for all hosts
   any_errors_fatal: true
   max_fail_percentage: 0
