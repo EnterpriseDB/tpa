@@ -232,7 +232,7 @@ class BDR(Architecture):
         Add pem-agent to instance roles where applicable.
 
         If --enable-pem is specified, we add the 'pem-agent' role to BDR and
-        Barman instances, and add a dedicated 'pemserver' instance to host the
+        Barman instances, and add a dedicated PEM server instance to host the
         PEM server.
 
         """
@@ -243,20 +243,6 @@ class BDR(Architecture):
                     and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
-            n = instances[-1].get("node")
-            pemserver_name = (
-                f"{self.args['cluster_name']}-pemserver"
-                if self.args.get("cluster_prefixed_hostnames")
-                else "pemserver"
-            )
-            instances.append(
-                {
-                    "node": n + 1,
-                    "Name": pemserver_name,
-                    "role": ["pem-server"],
-                    "location": self.args["locations"][0]["Name"],
-                }
-            )
 
     def _update_instance_beacon(self, instances):
         """

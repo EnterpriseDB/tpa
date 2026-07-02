@@ -241,16 +241,6 @@ class PGD(Architecture):
                     and self.args.get("enable_pg_backup_api", False)
                 ):
                     instance.add_role("pem-agent")
-            pemserver_name = (
-                f"{self.args['cluster_name']}-pemserver"
-                if self.args.get("cluster_prefixed_hostnames")
-                else "pemserver"
-            )
-            pemserver = cluster.add_instance(
-                instance_name=pemserver_name,
-                location_name=cluster.locations[0].name,
-            )
-            pemserver.add_role("pem-server")
 
     def _update_instance_beacon(self, cluster):
         """

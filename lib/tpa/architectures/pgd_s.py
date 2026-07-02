@@ -155,3 +155,14 @@ class PGDS(PGD):
                     "node": n,
                 },
             )
+
+        if self.args.get("enable_pem", False):
+            n = 5 + args["subscriber_only_nodes"]
+            cluster.add_instance(
+                instance_name=args["hostnames"][n],
+                location_name=args["location_names"][0],
+                roles=["pem-server"],
+                settings={
+                    "node": n,
+                },
+            )

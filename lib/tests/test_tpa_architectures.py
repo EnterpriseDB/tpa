@@ -232,7 +232,6 @@ class TestPGDXArchitecture:
         assert (
             len(pemserver_instances) == 1
         ), "Should have exactly one pemserver instance"
-        assert pemserver_instances[0].name == "pemserver"
 
         # Check barman instances when --enable-pg-backup-api is specified
         if check_barman:
