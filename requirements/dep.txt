@@ -8,7 +8,7 @@ packaging==26.2 \
     --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e \
     --hash=sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661
     # via pipdeptree
-pipdeptree==3.1.0 \
-    --hash=sha256:52ecadd6e0dd95aaf61e83ed2810a9ba6af3154482583149d0e8bb0c1b6d7c46 \
-    --hash=sha256:8b525aa1d0ef96dbe8a95b9f526984ed6d055a9c2035a48d33c8bb57bbfc585a
+pipdeptree==3.1.1 \
+    --hash=sha256:1873ba077ae8faf656257357dbe88b9e09f85d63891355b48b93600ab819f479 \
+    --hash=sha256:a986376399e52c9ec7515ef69df7a2dbda0bae0be1cec90dcae23a4ba6262c89
     # via -r requirements/dep.in
