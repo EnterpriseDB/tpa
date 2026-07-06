@@ -6,6 +6,53 @@
 
 ### Bugfixes
 
+- Write boolean postgres_conf_settings values as on/off
+
+  YAML parses unquoted `off`, `on`, `yes` and `no` as booleans, so a
+  setting such as `bdr.default_streaming_mode: off` in
+  `postgres_conf_settings` reached TPA as a boolean and was written to
+  `postgresql.conf` as `False`. Postgres accepts that for genuine
+  boolean parameters, but rejects it for enum parameters whose valid
+  values include `off` or `on` (for example `bdr.default_streaming_mode`,
+  where the value was silently ignored and the parameter left at its
+  default).
+
+  TPA now writes boolean values in `postgres_conf_settings` as `on` or
+  `off`, which Postgres accepts both as boolean values and as enum
+  labels. Quoting values exactly as they should appear in
+  `postgresql.conf` remains the recommended practice.
+
+  WARNING: on clusters which used unquoted boolean values in
+  `postgres_conf_settings`, postgres will be restarted on the next run
+  of `tpaexec deploy`.
+
+  References: TPA-1352
+
+- Resume an interrupted BDR 4 to PGD 5 upgrade instead of aborting
+
+  A BDR 4 to PGD 5 upgrade that was interrupted after the data nodes
+  reached PGD 5 but before harp-proxy was replaced with pgd-proxy used
+  to be misdetected as a minor PGD 5 upgrade on the next run, and would
+  abort trying to stop a pgd-proxy service that had never been installed.
+  `tpaexec upgrade` now recognises this half-migrated state and resumes
+  the harp to pgd-proxy migration, so a failed upgrade can be recovered
+  simply by re-running the command.
+
+  To make this reliable, reconfiguring a BDR 3/4 cluster to PGD 5 now
+  defaults `upgrade_components` to `postgres, pgd-proxy, pgdcli` (unless
+  you have already set it), so the upgrade migrates the data nodes,
+  replaces harp-proxy with pgd-proxy, and moves pgd-cli onto the PGD 5
+  line in the same run. These three components must be upgraded together,
+  and a major BDR 3/4 to PGD 5 upgrade that would upgrade some but not all
+  of them now stops before making any changes.
+
+  Upgrading pgd-proxy now also re-renders its configuration file and
+  systemd unit between installing the new package and restarting the
+  service, so a newer pgd-proxy that changes its configuration layout or
+  service unit starts cleanly against freshly rendered files.
+
+  References: TPA-1527
+
 - Fix EPAS package resolution failure on RHEL 9.7+ by dropping server-devel
 
   On RHEL 9 minor versions 9.7 and later, ABI-breaking changes mean the EPAS
