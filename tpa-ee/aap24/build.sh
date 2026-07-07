@@ -8,7 +8,7 @@ available options:
     --tag, -t TAG
         tag to use for the image, default to "tpa-ee:latest"
 
-    --base-image -b {"rhel", "alpine"}
+    --base-image -b {"rhel", "alpine", "echo"}
         image to use as base image, defaults to "RHEL"
 
     -v
