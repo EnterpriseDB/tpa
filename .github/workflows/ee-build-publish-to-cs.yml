@@ -20,14 +20,16 @@ on:
         type: string
         required: false
       ee_images_list:
-        description: "Select what EE images to build (comma-separated: rhel, alpine)"
+        description: "Select what EE images to build (comma-separated: rhel, alpine, echo)"
         required: false
         type: choice
         default: "['rhel','alpine']"
         options:
           - "['rhel']"
           - "['alpine']"
+          - "['echo']"
           - "['rhel','alpine']"
+          - "['rhel','alpine','echo']"
       maturity:
         description: "Select maturity of the EE images (snapshot, release)"
         type: choice
@@ -88,6 +90,7 @@ jobs:
           GH_SLONIK: ${{ secrets.GH_SLONIK }}
           RH_TPA_USERNAME: ${{ secrets.RH_TPA_USERNAME }}
           RH_TPA_TOKEN: ${{ secrets.RH_TPA_TOKEN }}
+          ECHOHQ_TOKEN: ${{ secrets.ECHOHQ_TOKEN }}
     
   foundation-prepare:
     runs-on: ubuntu-latest
