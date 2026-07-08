@@ -1,10 +1,15 @@
 {# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved. #}
 Host *
     Port {{ ansible_port }}
+{# Under Ansible Tower the SSH key is supplied by a Tower machine #}
+{# credential, so we must not pin our own identity here: doing so #}
+{# (especially with IdentitiesOnly) prevents Tower's key from being used. #}
+{% if not ansible_tower %}
     IdentityFile "{{ ssh_key_file }}"
+{% endif %}
     UserKnownHostsFile known_hosts tpa_known_hosts
     ServerAliveInterval 60
-{% if not use_ssh_agent|default(False) %}
+{% if not ansible_tower and not use_ssh_agent|default(False) %}
     IdentitiesOnly yes
 {% endif %}
 {% if forward_ssh_agent is defined %}
