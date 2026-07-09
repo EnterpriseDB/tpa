@@ -1,0 +1,18 @@
+- summary: Fix DDL failures during BDR3/BDR4 to PGD5 and PGD5 to PGD6 major version upgrades
+  description: |
+    During a BDR3→PGD5, BDR4→PGD5, or PGD5→PGD6 (PGD-X) major version
+    upgrade, TPA could run Postgres user and role DDL (creating users,
+    granting roles) on a node immediately after restarting it, before
+    BDR Raft consensus had stabilized and before the node was unfenced.
+    This could cause replicated DDL to fail with errors such as
+    "failed to get a DDL epoch" or "consensus request timed out".
+
+    TPA now waits for Raft consensus to stabilize before running this
+    DDL, and only unfences the node afterwards, matching the correct
+    sequence: fence, stop/update/restart Postgres, wait for consensus,
+    run DDL, unfence.
+  type: bugfix
+  jira_tickets:
+  - TPA-1563
+  support_tickets:
+  - '61496'
