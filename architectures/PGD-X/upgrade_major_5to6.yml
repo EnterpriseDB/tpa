@@ -196,16 +196,22 @@
         upgrade_from: 5
     - include_role: name=postgres/user
     - include_role: name=postgres/config
-    - include_role: name=postgres/final
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: started
     when: >
       'postgres' in role
 
-  # We need Raft consensus restored before refreshing cluster_facts:
-  # bdr.alter_node_option() (called by fence.yml above) is Raft-replicated,
-  # so until this node has rejoined consensus after its restart, its local
-  # bdr.node_config may not yet reflect the fence change. Without that, the
-  # fact refresh would re-cache the pre-fence value and unfence.yml's
-  # idempotency guard would still skip the SQL.
+  # We need Raft consensus restored before running DDL and before
+  # refreshing cluster_facts:
+  # - Running DDL (e.g. user/role grants) while consensus has not been
+  #   restored can fail with "failed to get a DDL epoch".
+  # - bdr.alter_node_option() (called by fence.yml above) is
+  #   Raft-replicated, so until this node has rejoined consensus after
+  #   its restart, its local bdr.node_config may not yet reflect the
+  #   fence change. Without that, the fact refresh would re-cache the
+  #   pre-fence value and unfence.yml's idempotency guard would still
+  #   skip the SQL.
   - name: Wait for bdr nodes to reach consensus before unfence
     postgresql_query:
       conninfo: "{{ dsn|dbname(bdr_database) }}"
@@ -220,6 +226,12 @@
     when:
     - "'bdr' in role"
     - "'replica' not in role"
+
+  - name: Run DDL on {{ inventory_hostname }}
+    block:
+    - include_role: name=postgres/final
+    when: >
+      'postgres' in role
 
   - name: Refresh cluster facts before unfence
     include_role: name=postgres/facts
