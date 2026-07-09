@@ -1,8 +1,0 @@
-- summary: Fix PEM server privileges on EFM deployment 
-  description: |
-    This fix ensures that PEM servers are excluded from cluster-replication tasks
-    when choosing EFM as the failover manager, which previously caused issues
-    with the replication topology and EFM role delegation on deployment process.
-  type: bugfix
-  jira_tickets:
-    - TPA-1537

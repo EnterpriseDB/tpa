@@ -1,9 +1,0 @@
-- summary: Fix the default value of `efm_user_is_superuser`
-  description: |
-    This fix ensures the default value of `efm_user_is_superuser` is `true` when
-    `efm_user_is_superuser` is not present on the configuration file of the cluster.
-    This prevents pre-existing clusters from being re-deployed and not being to resolve
-    this variable.
-  type: bugfix
-  jira_tickets:
-  - TPA-1529
