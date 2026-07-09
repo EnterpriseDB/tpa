@@ -27,6 +27,10 @@
       EOF
     args:
       executable: /bin/bash
+    # raw ignores environment, but this task inherits the play-level
+    # environment above; override it to empty so Ansible doesn't warn that raw
+    # does not support the environment keyword. No behavioural effect.
+    environment: {}
     become_user: root
     become: yes
     vars:
