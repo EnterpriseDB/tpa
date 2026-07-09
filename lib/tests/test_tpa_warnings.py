@@ -14,6 +14,7 @@ from ansible.utils.display import Display
 
 from ..tpa_warnings import tpa_warning, WARNING_MARKER
 from ..callback_plugins.tpa import CallbackModule
+from ..filter_plugins.instances import normalize_roles
 
 
 @pytest.fixture
@@ -43,6 +44,16 @@ def test_plain_warning_is_not_recorded(wrapped_display):
     wrapped_display.warning("a benign ansible warning")
 
     assert wrapped_display._tpa_deliberate_warnings == []
+
+
+def test_empty_role_warning_reaches_the_recap(wrapped_display):
+    # The empty-role warning from TPA-1526 is raised via tpa_warning(), so it
+    # must land in the recap list rather than only printing inline.
+    normalize_roles(["primary", None], "node1")
+
+    assert any(
+        "empty role entry" in w for w in wrapped_display._tpa_deliberate_warnings
+    )
 
 
 def test_duplicate_deliberate_warnings_are_deduplicated(wrapped_display):

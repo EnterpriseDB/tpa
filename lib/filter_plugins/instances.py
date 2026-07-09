@@ -13,9 +13,8 @@ suitably adjusted.
 import copy
 import re
 from ansible.errors import AnsibleFilterError
-from ansible.utils.display import Display
 
-display = Display()
+from tpa_warnings import tpa_warning
 
 VOLUME_TRANSLATIONS = {
     "barman_data": {"mountpoint": "/var/lib/barman"},
@@ -144,7 +143,7 @@ def normalize_roles(role, instance_name):
 
     nonempty_role = [r for r in role if r]
     if len(nonempty_role) != len(role):
-        display.warning(
+        tpa_warning(
             "Ignoring empty role entry for instance %s; "
             "check its role: list in config.yml for a stray '-'" % instance_name
         )
