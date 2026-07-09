@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements-aap.txt requirements.in
 #
-ansible-core==2.16.19
+ansible-core==2.21.1
     # via -r requirements.in
 boto3==1.43.36
     # via -r requirements.in

@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements-rh8.txt requirements-rh8.in
 #
-ansible-core==2.16.19 \
-    --hash=sha256:5125f26412039ffb99a3a7723618535ab80e6ef38944aa2453997350388f4ef4 \
-    --hash=sha256:d7a32ba0f96f9c6582b7ff159a4a6f0e694662cfc4840497c88fed63bf58cd14
+ansible-core==2.21.1 \
+    --hash=sha256:1403ff56bb69484ef90788126d06c65b4e28e8d2dcdcfb7f027d4c1495052d7e \
+    --hash=sha256:a5536ece95be84de15212b3644cdbbe9cbd9efd62e4e8a544cd6b0b27a083039
     # via -r requirements-rh8.in
 boto3==1.43.36 \
     --hash=sha256:42942dde254673abcbc9e6e60017c88341a4f49d99d24e1f2e290fb38138c26f \
