@@ -13,6 +13,9 @@ suitably adjusted.
 import copy
 import re
 from ansible.errors import AnsibleFilterError
+from ansible.utils.display import Display
+
+display = Display()
 
 VOLUME_TRANSLATIONS = {
     "barman_data": {"mountpoint": "/var/lib/barman"},
@@ -105,20 +108,12 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
                 new_instance[t] = tags[t]
                 del tags[t]
 
-        # The role tag should be a list, so we convert comma-separated
-        # strings if that's what we're given.
+        # Normalise the role list (split comma-separated strings, drop empty
+        # entries, and tag primary/replica instances as postgres).
 
-        role = new_instance.get("role", [])
-        if not isinstance(role, list):
-            role = [x.strip() for x in role.split(",")]
-
-        # primary/replica instances must also be tagged 'postgres'.
-
-        if "primary" in role or "replica" in role:
-            if "postgres" not in role:
-                role = role + ["postgres"]
-
-        new_instance["role"] = role
+        new_instance["role"] = normalize_roles(
+            new_instance.get("role", []), new_instance["Name"]
+        )
         new_instance["tags"] = tags
 
         # Name and node should be in tags, but we'll add them in when we're
@@ -131,6 +126,34 @@ def set_instance_defaults(old_instances, cluster_name, instance_defaults, locati
         instances.append(new_instance)
 
     return instances
+
+
+def normalize_roles(role, instance_name):
+    """Return an instance's role setting as a clean list of role names.
+
+    Comma-separated strings are split into a list; empty entries (such as a
+    dangling "- " in the YAML, which parses to None and would otherwise
+    propagate to the deploy-side group_by as a spurious role_None group) are
+    dropped, with a warning so a stray entry left over from hand-editing
+    config.yml doesn't pass silently; and primary/replica instances are
+    additionally tagged 'postgres'.
+    """
+
+    if not isinstance(role, list):
+        role = [x.strip() for x in role.split(",")]
+
+    nonempty_role = [r for r in role if r]
+    if len(nonempty_role) != len(role):
+        display.warning(
+            "Ignoring empty role entry for instance %s; "
+            "check its role: list in config.yml for a stray '-'" % instance_name
+        )
+    role = nonempty_role
+
+    if ("primary" in role or "replica" in role) and "postgres" not in role:
+        role = role + ["postgres"]
+
+    return role
 
 
 def update_instance_location(instance, locations, locations_map=None):

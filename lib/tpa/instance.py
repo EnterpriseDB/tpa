@@ -130,6 +130,8 @@ class Instance:
 
     def add_role(self, r):
         """Adds the given role to this instance's roles."""
+        if not r:
+            return
         self._settings.setdefault("role", []).append(r)
 
     def remove_role(self, r):

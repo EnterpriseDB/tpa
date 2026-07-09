@@ -32,8 +32,7 @@
       {% if monitoring_server_owner is defined %}
       --owner "{{ monitoring_server_owner }}" \
       {% endif %}
-      --config-dir "{{ pem_agent_config_path|dirname }}"               \
-      --cert-path "{{ pem_agent_certificate_directory }}"              \
+      --config-dir "{{ pem_agent_config_path|dirname }}" \
       {% for option in efm_options if 'efm' in role %} {{ option }} {% endfor %}
 
       

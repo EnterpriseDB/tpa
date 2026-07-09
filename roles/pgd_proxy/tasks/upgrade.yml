@@ -14,6 +14,19 @@
     vars:
       allow_package_upgrades: yes
 
+  # Refresh the config file and service unit between the package upgrade and
+  # the restart, so that if a newer pgd-proxy changes the config-file layout or
+  # the systemd unit, the upgraded service starts against freshly rendered
+  # files rather than stale ones. This also lets the minor-upgrade playbook
+  # drop its separate "Set up pgd-proxy" step (see upgrade_minor_5.yml). Both
+  # includes are idempotent no-ops when the rendered content is unchanged.
+  # (Proxy listen ports, including read_listen_port, are not stored in this
+  # file; they are BDR catalog options applied separately by the BDR
+  # configuration-update step.)
+  - include_role: name=pgd_proxy/config
+
+  - include_role: name=pgd_proxy/service
+
   - include_role: name=pgd_proxy/restart
     vars:
       pgd_proxy_service_end_state: started

@@ -2,6 +2,43 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+# Enable the edb-python3-mod-wsgi module *before* any other apache2_module task
+# below, using a2dismod/a2enmod directly rather than the apache2_module module.
+#
+# apache2_module runs `apache2ctl -M` to read the current module state before it
+# does anything — even for state=absent. That parses the whole config. On upgrade
+# the existing sites-enabled/edb-pem.conf already references WSGIScriptAlias while
+# the previous wsgi package has just been removed (see pem/server/pkg
+# webserver-packages.yml), so that parse fails with "Invalid command
+# 'WSGIScriptAlias'" before the module can be touched — which is why enabling wsgi
+# via apache2_module here (even first) cannot work: the pre-read fails too.
+#
+# a2dismod/a2enmod only manage the mods-enabled symlinks and never run a config
+# test, so they succeed while the config is temporarily invalid. Once the symlink
+# exists mod_wsgi loads on the next parse, making the config valid for the
+# apache2_module add-on tasks below. The service restart that activates everything
+# stays at the end of this file.
+- name: Enable edb-python3-mod-wsgi
+  block:
+    - name: Disable the generic mod_wsgi
+      command: a2dismod -q wsgi
+      register: a2dismod_wsgi
+      changed_when: a2dismod_wsgi.rc == 0
+      # Tolerate the module already being gone (e.g. its package was just
+      # removed on upgrade) but still surface any other failure.
+      failed_when: >
+        a2dismod_wsgi.rc != 0
+        and 'does not exist' not in a2dismod_wsgi.stderr
+
+    - name: Enable edb-python3-mod-wsgi
+      command: a2enmod -q edb-python3-mod-wsgi
+      register: a2enmod_wsgi
+      changed_when: "'Enabling' in a2enmod_wsgi.stdout"
+  when: >
+    ansible_os_family == 'Debian'
+    and pem_version is version('9.0','>=')
+    and 'edb-python' in (pem_server_modwsgi_package_resolved | default(''))
+
 - name: "Configure Add-ons for {{ pem_web_server_name[ansible_os_family] }}..."
   block:
     - name: Check the mod_ssl
@@ -52,35 +89,12 @@
         name: access_compat
   when: ansible_os_family == 'SUSE'
 
-- name: Enable edb-python3-mod-wsgi
-  block:
-    - name: Disabling mod_wsgi
-      apache2_module:
-        state: absent
-        name: wsgi
-      ignore_errors: true
-
-    # Enabling mod_edb-python3-mod-wsgi results in the stdout getting following message:
-    # "stdout": "Enabling module edb-python3-mod-wsgi.\nTo activate the new configuration, you need to run:\n  systemctl restart apache2\n"
-    # so we set ignore_errors to 'yes' to avoid a failure here. And we do an 'apache2'
-    # service restart right after to do exactly what was suggested.
-    - name: Enabling mod_edb-python3-mod-wsgi
-      apache2_module:
-        state: present
-        name: edb-python3-mod-wsgi
-      ignore_errors: true
-
-    - name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
-      service:
-          name: "{{ pem_web_server_service_name[ansible_os_family] }}"
-          state: restarted
-      when: >
-        task_selector|permits('service', 'restart')
+- name: "Restart httpd service - {{ pem_web_server_service_name[ansible_os_family] }}"
+  service:
+      name: "{{ pem_web_server_service_name[ansible_os_family] }}"
+      state: restarted
   when: >
     ansible_os_family == 'Debian'
     and pem_version is version('9.0','>=')
-    and (
-         (ansible_distribution == 'Debian' and ansible_distribution_major_version == '10')
-      or (ansible_distribution == 'Debian' and ansible_distribution_major_version == '11' and pem_version is version("9.1",">="))
-      or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '20' and pem_version is version("9.1",">="))
-    )
+    and 'edb-python' in (pem_server_modwsgi_package_resolved | default(''))
+    and task_selector|permits('service', 'restart')

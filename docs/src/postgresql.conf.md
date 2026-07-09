@@ -67,11 +67,11 @@ would appear in `postgresql.conf`:
 cluster_vars:
   effective_cache_size: 2GB
   postgres_conf_settings:
-    effective_cache_size: 4GB
-    authentication_timeout: 1min
+    effective_cache_size: '4GB'
+    authentication_timeout: '1min'
     synchronous_standby_names: >-
       'any 2 ("first", "second", "third")'
-    bdr.global_lock_statement_timeout: 60s
+    bdr.global_lock_statement_timeout: '60s'
 ```
 
 This is most useful with settings that TPA does not recognise

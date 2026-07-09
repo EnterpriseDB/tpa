@@ -1,0 +1,40 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Detect the unambiguous fingerprint of a half-finished BDR 4→PGD 5 migration:
+# a proxy host that carries BOTH harp-proxy and pgd-proxy in its role, with the
+# harp-proxy systemd unit still active.
+#
+# This happens when a previous BDR 4→5 major upgrade was interrupted after the
+# data nodes were upgraded to v5 but before harp-proxy was replaced with
+# pgd-proxy. From the BDR catalog's perspective the cluster then looks like a
+# minor v5 upgrade, but the harp→pgd-proxy migration is incomplete.
+#
+# Sets harp_proxy_still_running (per proxy host). Consumed by:
+#   - architectures/PGD-Always-ON/commands/upgrade.yml (dispatch reclassification)
+#   - architectures/PGD-Always-ON/upgrade_minor_5.yml
+
+- name: Detect proxy hosts with harp-proxy still running
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_harp-proxy:role_pgd-proxy
+  tasks:
+  - set_fact:
+      harp_proxy_still_running: false
+
+  - name: Check for unreplaced harp-proxy processes
+    when: >
+      'harp-proxy' in role
+      and 'pgd-proxy' in role
+    block:
+    - name: Check if harp-proxy is running
+      command: systemctl is-active --quiet harp-proxy
+      register: harp_proxy_check
+      failed_when: false
+
+    - set_fact:
+        harp_proxy_still_running: "{{ harp_proxy_check.rc == 0 }}"

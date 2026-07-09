@@ -36,6 +36,21 @@
     cluster_vars: "{{ cluster_vars }}"
     ansible_tower: "{{ ansible_tower|default({}) }}"
 
+# Volumes are per-instance properties, not cluster_vars; they belong in
+# instance_defaults (as default_volumes) or on individual instances. If
+# set in cluster_vars they are silently ignored, so reject them here.
+
+- name: Ensure volumes are not set in cluster_vars
+  assert:
+    msg: >-
+      Please move 'volumes'/'default_volumes' out of cluster_vars in
+      {{ config_file }}: volumes are per-instance settings and must be set
+      under instance_defaults (as 'default_volumes') or on individual
+      instances. Volumes set in cluster_vars are ignored.
+    that:
+      - "'volumes' not in cluster_vars"
+      - "'default_volumes' not in cluster_vars"
+
 - name: Ensure cluster_name is specified
   assert:
     msg: "Please define cluster_name in {{ config_file }}"

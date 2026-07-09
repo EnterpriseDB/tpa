@@ -512,11 +512,52 @@ class TestBDR4PGD5:
         else:
             x.apply(basic_bdr_cluster)
 
+    def test_bdr4pgd5_apply_defaults_upgrade_components(self, basic_bdr_cluster):
+        """apply() defaults upgrade_components to the migration triple.
+
+        A BDR 4 -> PGD 5 reconfigure defaults upgrade_components to
+        'postgres, pgd-proxy, pgdcli' so the subsequent 'tpaexec upgrade'
+        runs the harp->pgd-proxy migration and moves pgdcli onto the PGD 5
+        line, rather than refusing to start or leaving the v1 CLI in place.
+        """
+        x = BDR4PGD5()
+        x._args = Namespace(
+            target_architecture="PGD-Always-ON", pgd_proxy_routing="local"
+        )
+        basic_bdr_cluster.vars.update({"bdr_node_group": "basic", "bdr_version": "4"})
+        x.apply(basic_bdr_cluster)
+        assert (
+            basic_bdr_cluster.vars["upgrade_components"]
+            == "postgres, pgd-proxy, pgdcli"
+        )
+
+    def test_bdr4pgd5_apply_preserves_explicit_upgrade_components(
+        self, basic_bdr_cluster
+    ):
+        """An operator's explicit upgrade_components is not overridden."""
+        x = BDR4PGD5()
+        x._args = Namespace(
+            target_architecture="PGD-Always-ON", pgd_proxy_routing="local"
+        )
+        basic_bdr_cluster.vars.update(
+            {
+                "bdr_node_group": "basic",
+                "bdr_version": "4",
+                "upgrade_components": "postgres",
+            }
+        )
+        x.apply(basic_bdr_cluster)
+        assert basic_bdr_cluster.vars["upgrade_components"] == "postgres"
+
     def test_bdr4pgd5_description(self, basic_bdr_cluster):
         """test description function"""
         x = BDR4PGD5()
         camo_msg = "Define a commit scope to enable CAMO"
         assert camo_msg not in x.description(basic_bdr_cluster)._items
+        assert (
+            "Default upgrade_components to postgres, pgd-proxy, pgdcli"
+            in x.description(basic_bdr_cluster)._items
+        )
 
         basic_bdr_cluster.add_location("known")
         basic_bdr_cluster.add_instance(

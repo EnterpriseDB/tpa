@@ -47,10 +47,14 @@
   when:
     not selfsigned
 
-- name: Set paths to SSL key and certificate
-  set_fact:
-    ssl_key_file: "{{ ssl_key_file|default(privatekey_path) }}"
-    ssl_cert_file: "{{ ssl_cert_file|default(certificate_path) }}"
+# This role is invoked once per service that needs a server certificate
+# (etcd, patroni, haproxy, …), often several times on the same host. The
+# per-service key and certificate are always certificate_path/privatekey_path
+# (derived from the caller's ssl_dir/ssl_service); we export them below under
+# service-specific names. We deliberately do not read or write the generic
+# ssl_key_file/ssl_cert_file facts here: those are the user-facing Postgres
+# override documented in postgresql.conf.md, and routing per-service certs
+# through them lets colocated services clobber each other's paths (TPA-1373).
 
 - include_role:
     name: sys/ssl
@@ -66,8 +70,6 @@
     name: sys/ssl
     tasks_from: verify
   vars:
-    privatekey_path: "{{ ssl_key_file }}"
-    certificate_path: "{{ ssl_cert_file }}"
     ca_path: "{{ ssl_ca_file|default(None) }}"
 
 - name: Bail if certificate does not pass verification checks
@@ -77,8 +79,9 @@
       Please run with verbose flags to determine the reason.
   when: not cert_verify_passed
 
-# Calls to sys/ssl roles will overwrite these variables, so we
-# export them, so they can be used by the caller as more specific names
+# Export this service's certificate paths under a service-specific name so
+# the caller can consume them without colliding with any other service that
+# shares the host.
 
 - name: Set SSL file locations
   action: set_fact
@@ -88,8 +91,8 @@
       }}"
     "{{ check_result_varname }}_ssl_crl_file": "{{ ssl_crl_file|default('') }}"
     "{{ check_result_varname }}_ssl_cert_file": "{{
-        legacy_ssl_enabled|ternary('/etc/tpa/' + cluster_name + '.crt', ssl_cert_file)
+        legacy_ssl_enabled|ternary('/etc/tpa/' + cluster_name + '.crt', certificate_path)
       }}"
     "{{ check_result_varname }}_ssl_key_file": "{{
-        legacy_ssl_enabled|ternary('/etc/tpa/' + cluster_name + '.key', ssl_key_file)
+        legacy_ssl_enabled|ternary('/etc/tpa/' + cluster_name + '.key', privatekey_path)
       }}"

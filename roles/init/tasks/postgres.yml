@@ -221,6 +221,7 @@
     efm_bin_dir: "{{ efm_bin_dir|default(default_efm_bin_dir) }}"
     efm_bind_port: "{{ efm_bind_port|default(default_efm_bind_port) }}"
     efm_conf_dir: "{{ efm_conf_dir|default(default_efm_conf_dir) }}"
+    efm_user_is_superuser: "{{ efm_user_is_superuser|default(default_efm_user_is_superuser) }}"
     efm_user_password_encryption: "{{ efm_user_password_encryption|default(default_efm_user_password_encryption) }}"
     pem_base_dir: "{{ pem_base_dir|default(default_pem_base_dir) }}"
     pem_agent_base_dir: "{{ pem_agent_base_dir|default(default_pem_agent_base_dir) }}"
@@ -375,6 +376,7 @@
     upstream_primary: "{{ inventory_hostname|upstream_root(hostvars) }}"
   when: >
     'postgres' in role
+    and 'pem-server' not in role
 
 - block:
   - name: Allow physical replicas of BDR subscriber-only nodes
@@ -657,6 +659,7 @@
       }}"
   when: >
     'postgres' in role
+    and 'pem-server' not in role
 
 # If this is a PEM server instance, we need a database dedicated to PEM.
 

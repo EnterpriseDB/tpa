@@ -65,6 +65,15 @@ class TestInstance:
         assert basic_instance.roles == ["test"]
 
     @pytest.mark.parametrize("location_name", ["known"])
+    def test_instance_add_role_ignores_empty(self, basic_instance):
+        """add_role should drop None/empty values rather than store them"""
+
+        assert basic_instance.roles == []
+        assert basic_instance.add_role(None) is None
+        assert basic_instance.add_role("") is None
+        assert basic_instance.roles == []
+
+    @pytest.mark.parametrize("location_name", ["known"])
     def test_instance_to_yaml_dict(self, basic_instance):
         """test to_yaml function"""
 
@@ -276,7 +285,6 @@ class TestInstances:
         "input",
         [
             "test_role",
-            None,
         ],
     )
     def test_instances_add_role(self, basic_instances, input):
@@ -285,6 +293,14 @@ class TestInstances:
         assert basic_instances.with_role(input).get_names() == []
         assert basic_instances.add_role(input)
         assert basic_instances.with_role(input).get_names() == ["a", "b"]
+
+    @pytest.mark.parametrize("input", [None, ""])
+    def test_instances_add_role_ignores_empty(self, basic_instances, input):
+        """add_role should drop None/empty values across all instances"""
+
+        assert basic_instances.with_role(input).get_names() == []
+        basic_instances.add_role(input)
+        assert basic_instances.with_role(input).get_names() == []
 
     def test_instances_only(self, basic_cluster, basic_instances):
         """test only function"""

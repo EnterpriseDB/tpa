@@ -2,6 +2,210 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+## v23.44.1 (2026-07-07)
+
+### Bugfixes
+
+- Fix EPAS package resolution failure on RHEL 9.7+ by dropping server-devel
+
+  On RHEL 9 minor versions 9.7 and later, ABI-breaking changes mean the EPAS
+  '-server-devel' package now requires clang-devel/llvm-devel versions that
+  are not available in the repositories. As a result, 'tpaexec
+  download-packages' and package installation during deploy failed for EPAS
+  clusters on RedHat and SLES, with errors such as "nothing provides
+  (llvm-devel >= 20 with llvm-devel < 21) needed by edb-asNN-server-devel".
+
+  The '-server-devel' package has been removed from the default EPAS package
+  list for RedHat and SLES. These packages are only needed to build Postgres
+  extensions from source and are not required by EDB products, so normal
+  deployments are unaffected. If you still need them, you can add them
+  explicitly via 'postgres_packages' in the cluster configuration.
+
+  References: TPA-1531, CP61967.
+
+- Fix an issue where PEM server installation or upgrade would fail or leave the PEM application in a failed state.
+
+  Changes made in TPA 23.44.0 to bump the versions of `edb-python` and
+  `edb-python-mod_wsgi` to meet the requirements of PEM 10.4 did not
+  ensure that the new WSGI module was enabled resulting in the Apache
+  web server being unable to start on Debian-like platforms, where
+  explicit activation is required. This fix resolves that issue by
+  using the same fact for both package installation and module
+  activation. This fix also resolves a related issue where PEM server
+  upgrade could fail because the Apache configuration was transiently
+  invalid between the removal of an old WSGI module and the activation
+  of a new one.
+
+  References: TPA-1533.
+
+- Fix pgbouncer TLS-protection test failure during upgrade and test runs
+
+  The `Ensure that connections through pgbouncer are TLS-protected`
+  task (in `roles/test/tasks/pgbouncer/basic.yml`) connected to
+  pgbouncer without an `sslmode` attribute. TPA configures pgbouncer
+  with `client_tls_sslmode = require`, which rejects any client that
+  does not initiate the SSL handshake. The task therefore failed
+  with `FATAL: SSL required` on every pgbouncer-bearing cluster
+  whenever an upgrade or `tpaexec test` run reached it, preventing
+  upgrades from completing.
+
+  The TLS check now connects to the pgbouncer administrative database
+  with `sslmode=require`. A successful connection is itself the proof
+  that pgbouncer accepted a TLS-required client, and the test no
+  longer depends on the operator's `pgbouncer_databases` containing a
+  particular routable backend dbname.
+
+  The same test also verifies pgbouncer's backend host and port by
+  looking up the `pgbouncer_auth_database` route in `SHOW DATABASES`.
+  On clusters where the operator's `pgbouncer_databases` doesn't
+  include that route — neither via the wildcard `*` nor an explicit
+  entry — the lookup returned nothing and the test crashed. It now
+  skips that check gracefully when the route isn't present, so
+  upgrades can complete. To keep the check active on a customised
+  configuration, add an explicit `pgbouncer_auth_database` entry to
+  `pgbouncer_databases`.
+
+  References: TPA-1524.
+
+- Fix BDR/PGD deploys failing on SLES with a "'dict object' has no attribute 'SUSE'" error
+
+  Deploying a BDR or PGD cluster on SLES 15 aborted with "The task includes
+  an option with an undefined variable. The error was: 'dict object' has no
+  attribute 'SUSE'" while recording the primary BDR/PGD package name. The
+  tasks that record this package name looked it up by OS family ("SUSE")
+  instead of by distribution ("SLES"), the key actually used in TPA's package
+  lists, so the lookup failed and the play stopped before any BDR package was
+  installed. These tasks now resolve the package name the same way as the rest
+  of the package selection, and SLES deploys proceed as they do on RHEL and
+  Debian.
+
+  References: TPA-1558, 62347.
+
+- Fix Postgres SSL certificate selection when services share a node
+
+  When an `etcd`, `haproxy`, `pgd-proxy` or other TLS-enabled service
+  shared a host with Patroni and Postgres, TPA could configure Postgres
+  and Patroni to use another service's certificate and key instead of
+  their own. This was most visible on an M1 cluster with Patroni where
+  etcd ran on the database nodes: the replicas were given the etcd
+  certificate (`/etc/tpa/etcd/etcd.crt`), which the postgres user cannot
+  read, so Postgres failed to start. Setting the certificate paths
+  explicitly in `config.yml` worked around the Postgres failure but then
+  left the Patroni REST API using the same unreadable etcd certificate.
+
+  The certificate role no longer routes per-service certificate paths
+  through the shared `ssl_cert_file`/`ssl_key_file` variables, so each
+  service now uses its own certificate regardless of how roles are
+  distributed across nodes. The documented `ssl_cert_file` and
+  `ssl_key_file` overrides for the Postgres server certificate continue
+  to work as before; clusters that do not set them use the default
+  Postgres certificate at `/etc/tpa/<cluster_name>.crt`.
+
+  References: TPA-1373, CP57402.
+
+- Fix pem_web_server_name to point to the correct path in the pem.conf file
+
+  A bug was found in the pem.conf file where the pem_web_server_name was pointing to an incorrect path.
+  This has been corrected to ensure the right path is referenced where it is needed.
+  This fix has been committed by skrzyzok (https://github.com/skrzyzok).
+
+  References: TPA-1559.
+
+- Ignore empty entries in an instance's role list
+
+  A dangling list item (a "- " with nothing after it) in an instance's
+  role: list parsed to an empty value and was carried through to the
+  generated inventory, where it produced a spurious role_None Ansible
+  group. Such empty entries are now dropped, and provision emits a warning
+  so a stray "-" left over from hand-editing config.yml is easy to spot.
+
+  References: TPA-1526.
+
+- Fix PEM server privileges on EFM deployment
+
+  This fix ensures that PEM servers are excluded from cluster-replication tasks
+  when choosing EFM as the failover manager, which previously caused issues
+  with the replication topology and EFM role delegation on deployment process.
+
+  References: TPA-1537.
+
+- Fix PEM agent configuration failure against PEM 10.5
+
+  Configuring a PEM agent against a PEM 10.5 server used to fail because
+  TPA passed pemworker options that PEM 10.5 no longer accepts. Two
+  invocations were affected:
+
+  `pemworker --register-server` was called with `--cert-path`, which has
+  never been a valid option for that subcommand and is now removed
+  unconditionally.
+
+  `pemworker --enable-probe` was called with `--pem-user` and
+  `--pem-port`, which were silently required by PEM versions before
+  10.5 but are rejected by PEM 10.5 and later. TPA now omits these
+  arguments when `pem_agent_version` is 10.5.0 or newer, and continues
+  to pass them on older PEM versions where they remain necessary.
+
+  References: TPA-1534.
+
+- Synchronize database users to witness nodes during BDR 4 to PGD 5 upgrade
+
+  During a BDR 4 to PGD 5 upgrade, the pgdproxy user and other database
+  roles created on data nodes are not propagated to witness nodes. This
+  happens because DDL replication does not reach witness nodes once
+  node_kind='witness' is set, and the upgrade path does not create the
+  roles locally on the witness as a fresh PGD 5 deployment would.
+
+  The upgrade process now parts the witness after the data node upgrade loop
+  and rejoins it afterwards to sync the full catalog from the data nodes,
+  ensuring the witness has the same database user list as a fresh PGD 5 deployment.
+
+  References: TPA-1142.
+
+- Reject volume definitions placed in cluster_vars
+
+  Volumes are per-instance settings and must be defined under
+  `instance_defaults` (as `default_volumes`) or on individual
+  instances. When `volumes` or `default_volumes` were set in
+  `cluster_vars` they were silently ignored, which on AWS resulted
+  in instances being created with the default AMI root volume
+  instead of the intended one. TPA now detects this misconfiguration
+  and fails early with a message explaining where volumes should be
+  defined.
+
+  References: TPA-1492.
+
+- Assert pem_shared is only set on pem-server instances
+
+  Add a deploy-time assertion that fails early if the pem_shared variable
+  is defined on an instance that does not have the 'pem-server' role.
+  Previously the misconfiguration could pass silently and lead to
+  confusing downstream errors.
+
+  References: TPA-1222.
+
+- Fix the default value of `efm_user_is_superuser`
+
+  This fix ensures the default value of `efm_user_is_superuser` is `true` when
+  `efm_user_is_superuser` is not present on the configuration file of the cluster.
+  This prevents pre-existing clusters from being re-deployed and not being to resolve
+  this variable.
+
+  References: TPA-1529.
+
+- Warn when PEM agents are configured without a PEM server
+
+  TPA now checks if the configuration file used to create the cluster
+  has a complete PEM role configuration when detected with at least
+  one pem-server role applied and at least one pem-agent role applied
+  within the config.yml.
+  In case the user wants to allow partial PEM configuration, they can set
+  the `pem-role-check` task selector on the list of excluded tasks in the
+  cluster configuration file, which will bypass the check and let the
+  deployment continue even for a broken PEM configuration, this expose to
+  potential failure later in the deployment.
+
+  References: TPA-989.
+
 ## v23.44.0 (2026-06-10)
 
 ### Notable changes

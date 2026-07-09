@@ -21,6 +21,7 @@
   with_items:
   - log-server
   - pem-server
+  - pem-agent
   - openvpn-server
   changed_when: false
 
@@ -57,30 +58,56 @@
   when: >
     'openvpn-server' in role
 
-- set_fact:
-    pem_enabled: false
-
-- name: Record if we have PEM instance(s) in the cluster
-  set_fact:
-    pem_enabled: true
+- assert:
+    that:
+      - "'pem-server' in role"
+    fail_msg: |
+      The pem_shared variable is defined on an instance without the pem-server role.
+      pem_shared must be set on the same instance that has 'pem-server' in its role.
   when: >
-    groups['role_pem-server']|default([]) is not empty
-    or groups['role_pem-agent']|default([]) is not empty
+    (pem_shared|default(false)) is true
+
+- name: Record if there are any PEM server instance(s) in the cluster
+  set_fact:
+    pem_server_enabled: "{{ groups['role_pem-server']|default([]) is not empty}}"
+
+- name: Record if there are any PEM agent instance(s) in the cluster
+  set_fact:
+    pem_agent_enabled: "{{ groups['role_pem-agent']|default([]) is not empty}}"
 
 # If any instance has 'pem-server' in its role, we set the first one as
 # pem_server for all instance where the value is not set. instances with
 # 'pem-server' role define themselves as 'pem_server' to avoid registering
 # to a different 'pem-server' if multiple ones are defined.
 
+- assert:
+    that: >
+      (pem_server_enabled and pem_agent_enabled) or
+      (not pem_server_enabled and not pem_agent_enabled)
+    fail_msg: |
+      PEM roles definition is not complete, please verify that you have at least 1 
+      pem-server and 1 pem-agent role applied to your instances if you want to
+      enable pem monitoring.
+      If you are confident your partial PEM configuration is as expected, you can
+      bypass this check by setting `pem-role-check` in the list of excluded tasks.  
+  when: >
+    task_selector|permits('pem-role-check')
 
 - name: Set a valid pem_server for the cluster
   set_fact:
     pem_server: "{{ ('pem-server' in role)|ternary(inventory_hostname, groups[ps][0]) }}"
-  when: >
-    pem_server is not defined
-    and groups[ps]|default([]) is not empty
+  when: pem_server_enabled
   vars:
     ps: 'role_pem-server'
+
+- name: Warn if PEM agent instances are defined but no PEM server is found
+  debug:
+    msg: >
+      No PEM server found for PEM agent instances. Please consider adding a 
+      PEM server to your cluster or removing the PEM agent role from your instances.
+  when: >
+    not pem_server_enabled
+    and pem_agent_enabled
 
 # PEM servers also need to run Postgres.
 

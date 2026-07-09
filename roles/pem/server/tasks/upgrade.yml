@@ -26,8 +26,16 @@
     name: pem/server/pkg
     tasks_from: webserver-packages.yml
   when:
-    - task_selector|selects('pem-server', 'pkg')
-  
+    - task_selector|selects('pem-server', 'pem-webserver', 'pkg')
+
+# This gate must stay in lockstep with the webserver-packages.yml include above:
+# configure_httpd_module.yml reads the pem_server_modwsgi_package_resolved fact
+# that webserver-packages.yml sets, so the (pkg-gated) producer must run whenever
+# this consumer does. Hence 'pkg' here even though it's a config role — without
+# it, an upgrade that excludes pkg would run this with the fact undefined and
+# silently fail to enable the wsgi module.
 - include_role:
     name: pem/server/config/webserver
+  when:
+    - task_selector|selects('pem-server', 'pem-webserver', 'pkg')
 

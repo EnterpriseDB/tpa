@@ -96,6 +96,41 @@
     set_fact:
       bdr5_minor_version_upgrade: "{{ not (bdr3_major_version_upgrade or bdr4_major_version_upgrade) }}"
 
+# A BDR 4→PGD 5 major upgrade that was interrupted after the data nodes
+# reached v5 but before harp-proxy was replaced with pgd-proxy looks, from the
+# BDR catalog's perspective, like a minor v5 upgrade. Detect the half-migrated
+# state (harp-proxy still running on a host that carries both proxy roles) so
+# we can reclassify it below and let the major playbook finish the migration.
+- import_playbook: "{{ tpa_dir }}/architectures/lib/upgrade/detect-harp-proxy-state.yml"
+
+- name: Reclassify resumed major upgrades misdetected as minor
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+  - set_fact:
+      any_harp_proxy_still_running:
+        "{{ groups['role_harp-proxy']|default([])
+            |map('extract', hostvars, 'harp_proxy_still_running')
+            |select('defined')
+            |contains(true) }}"
+
+  # Route the unfinished migration through upgrade_major_4to5.yml. Once the
+  # catalog is at v5 the remaining work (the harp→pgd-proxy migration) is
+  # identical whether the upgrade originally started from BDR 3 or 4, so
+  # 4to5 is a correct resume target for both; the not-bdr3 guard simply leaves
+  # a genuine, still-at-v3 resumption on the 3to5 path.
+  - name: Treat a half-migrated cluster as a major BDR 4→5 upgrade
+    set_fact:
+      bdr4_major_version_upgrade: True
+      bdr5_minor_version_upgrade: False
+    when:
+      - any_harp_proxy_still_running
+      - not bdr3_major_version_upgrade
+
 - name: Set upgrade facts for all hosts
   any_errors_fatal: true
   max_fail_percentage: 0
@@ -140,6 +175,44 @@
   - set_fact:
       enable_proxy_monitoring:
         "{{ enable_proxy_monitoring|default(false) }}"
+
+# A BDR 3/4 → PGD 5 major upgrade performs the harp → pgd-proxy migration in
+# the same job that upgrades the data nodes, and must keep postgres, pgd-proxy
+# and pgdcli on the same version — pgdcli in particular has to move to the
+# PGD 5 line, as the v1 CLI shipped with BDR 4 lacks the subcommands TPA uses
+# for post-upgrade health checks. Splitting these leaves the cluster in the
+# half-migrated state this dispatcher has to recover from, so refuse to start a
+# major upgrade that upgrades some but not all of the three. Selecting none of
+# them (e.g. a deliberate barman-only or pgbouncer-only run) is still allowed.
+- name: Major upgrades must upgrade postgres, pgd-proxy and pgdcli together
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  run_once: true
+  tasks:
+  - vars:
+      pgd_migration_components: [postgres, pgd-proxy, pgdcli]
+    assert:
+      that:
+        # Either everything is selected ('all'), or postgres/pgd-proxy/pgdcli
+        # are all present, or all absent. A partial selection (e.g. postgres
+        # and pgd-proxy but not pgdcli) is rejected.
+        - "'all' in upgrade_components_list
+           or pgd_migration_components|difference(upgrade_components_list)|length == 0
+           or pgd_migration_components|intersect(upgrade_components_list)|length == 0"
+      fail_msg: >-
+        A major BDR 3/4 → PGD 5 upgrade migrates harp-proxy to pgd-proxy and
+        must keep postgres, pgd-proxy and pgdcli on the same version, so these
+        three components must be upgraded together. Add all of 'postgres',
+        'pgd-proxy' and 'pgdcli' (or 'all') to upgrade_components, or none of
+        them. Detected dispatch:
+        bdr3_major_version_upgrade={{ bdr3_major_version_upgrade }},
+        bdr4_major_version_upgrade={{ bdr4_major_version_upgrade }}.
+    when:
+      bdr3_major_version_upgrade or bdr4_major_version_upgrade
 
 # We now are ready to fork to the correct upgrade workflow
 - import_playbook: "{{ tpa_dir }}/architectures/PGD-Always-ON/upgrade_major_4to5.yml"

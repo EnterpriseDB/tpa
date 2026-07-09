@@ -9,7 +9,7 @@
 version: 3
 images:
   base_image:
-    name: 'python:3.12-alpine3.20'
+    name: 'python:3.12-alpine'
 dependencies:
   python_interpreter:
     python_path: /usr/local/bin/python3

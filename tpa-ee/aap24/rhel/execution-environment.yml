@@ -9,7 +9,7 @@
 version: 3
 images:
   base_image:
-    name: 'registry.redhat.io/ubi9/python-312:9.5-1739191330'
+    name: 'registry.redhat.io/ubi9/python-312:9.8-1781023618'
 dependencies:
   python_interpreter:
     python_path: /usr/bin/python3.12

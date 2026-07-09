@@ -11,6 +11,8 @@ from ..filter_plugins.instances import (
     find_replica_tablespace_mismatches,
     ensure_publication,
     ensure_subscription,
+    set_instance_defaults,
+    normalize_roles,
 )
 
 # Each entry in this array represents input that validate_volume_for should
@@ -35,6 +37,44 @@ def test_validate_volume_for():
         validate_volume_for(d, {"volume_for": "postgres_unknown"})
     with pytest.raises(AnsibleFilterError):
         validate_volume_for(d, {"volume_for": "postgres_tablespace"})
+
+
+def test_set_instance_defaults_drops_empty_roles():
+    """
+    A dangling "- " in an instance's role: list parses to None. Confirm
+    set_instance_defaults filters out empty entries so they don't propagate
+    to the deploy-side group_by (which would create a role_None group).
+    """
+    instances = [{"Name": "proxy1", "role": ["harp-proxy", None, ""]}]
+    result = set_instance_defaults(instances, "testcluster", {}, [])
+    assert result[0]["role"] == ["harp-proxy"]
+
+
+def test_set_instance_defaults_keeps_postgres_for_primary():
+    """
+    Filtering empty roles must not disturb the primary/replica -> postgres
+    augmentation.
+    """
+    instances = [{"Name": "node1", "role": ["primary", None]}]
+    result = set_instance_defaults(instances, "testcluster", {}, [])
+    assert result[0]["role"] == ["primary", "postgres"]
+
+
+# Each entry is (input role value, expected normalized list).
+normalize_roles_tests = [
+    (["harp-proxy", None, ""], ["harp-proxy"]),  # empty entries dropped
+    ("primary, replica", ["primary", "replica", "postgres"]),  # comma split
+    (["primary"], ["primary", "postgres"]),  # primary implies postgres
+    (["replica"], ["replica", "postgres"]),  # replica implies postgres
+    (["primary", "postgres"], ["primary", "postgres"]),  # no duplicate postgres
+    (["barman"], ["barman"]),  # untouched otherwise
+]
+
+
+@pytest.mark.parametrize("role,expected", normalize_roles_tests)
+def test_normalize_roles(role, expected):
+    """normalize_roles splits strings, drops empties, and tags postgres."""
+    assert normalize_roles(role, "anyname") == expected
 
 
 # Each entry in this array is a tuple whose first item represents the input to

@@ -67,8 +67,11 @@
   when:
     not cert_verify_passed
 
-# Calls to sys/ssl roles will overwrite these variables, so we
-# export them, so they can be used by the caller as more specific names
+# Export this client's certificate paths under a service-specific name so
+# the caller can consume them without colliding with any other identity
+# created on the same host. These come straight from the per-call
+# certificate_path/privatekey_path/ca_path, so unlike sys/ssl/server this
+# role never routed them through shared facts (see TPA-1373).
 
 - name: Set SSL file locations
   action: set_fact

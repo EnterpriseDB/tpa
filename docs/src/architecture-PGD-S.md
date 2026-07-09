@@ -4,6 +4,11 @@ description: Configuring a PGD-S cluster with TPA.
 
 # PGD-S
 
+!!!Warning
+PGD-S (PGD Essential) is no longer offered as a product. New PGD 6
+deployments should use [PGD-X](architecture-PGD-X/) instead.
+!!!
+
 !!!Note
 This architecture is for Postgres Distributed 6 only.
 If you require PGD 5 please use [PGD-Always-ON](architecture-PGD-Always-ON/).

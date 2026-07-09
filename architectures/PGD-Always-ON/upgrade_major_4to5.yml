@@ -225,6 +225,28 @@
       that:
         ansible_play_hosts == ansible_play_hosts_all
 
+
+# Part and rejoin witness nodes so that the full bdrdb catalog (including
+# pgdproxy and other roles created during the upgrade) is synchronized
+# from the data nodes—matching a fresh PGD5 deployment.
+- name: Synchronize witness nodes with data node catalog
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_witness:&role_bdr
+  tasks:
+  - include_role:
+      name: postgres/bdr
+      tasks_from: bdr5/drop-node.yml
+  - include_role:
+      name: postgres/bdr
+      tasks_from: bdr5/create-node.yml
+  - include_role:
+      name: postgres/bdr
+      tasks_from: bdr5/join-single-node.yml
+
 - name: Upgrade pgd-cli
   any_errors_fatal: true
   max_fail_percentage: 0

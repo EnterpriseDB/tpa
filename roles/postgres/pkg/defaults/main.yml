@@ -37,7 +37,6 @@ postgres_packages:
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-pltcl"
     RedHat: &redhat_epas_packages
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server"
-      - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-devel"
       - "{{ postgres_package_name }}{{ postgres_versionNN }}-server-plperl"
     Ubuntu: *debian_epas_packages
     SLES: *redhat_epas_packages
