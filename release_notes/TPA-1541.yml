@@ -1,0 +1,10 @@
+- summary: Stop deploy warning that raw does not support the environment keyword
+  description: |
+    Every deploy logged an Ansible warning, "raw module does not support the
+    environment keyword", from the task that records the deploy in the log
+    file. The task inherited a play-level environment it never used. It is now
+    given an empty environment, so the spurious warning no longer appears. This
+    is purely cosmetic; deployment behaviour is unchanged.
+  type: minor_change
+  jira_tickets:
+  - TPA-1541
