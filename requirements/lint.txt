@@ -88,8 +88,9 @@ pylint==3.3.9 \
 pylint-celery==0.3 \
     --hash=sha256:41e32094e7408d15c044178ea828dd524beedbdbe6f83f712c5e35bde1de4beb
     # via prospector
-pylint-django==2.7.0 \
-    --hash=sha256:76ef7e7bbbcf7ee86adbb2beac0ffaa7232509a17bf4a488d81467a1bbaa215b
+pylint-django==2.8.0 \
+    --hash=sha256:42accea9098e4a3298b4bfbae0e4da81f909f8bff0deda9485efbd6035a86d6a \
+    --hash=sha256:706eb2cc8d7692236be9fd033a341042afe3bbbf99df9234a659db931016ef5d
     # via
     #   -r requirements/lint.in
     #   prospector
