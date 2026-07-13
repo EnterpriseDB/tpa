@@ -27,6 +27,7 @@ requirements:
     - libcurl4-gnutls-dev
     - "{{ python_pkg_prefix }}-dev"
     - "{{ python_pkg_prefix }}-venv"
+    - pkg-config
   RedHat:
     - autoconf
     - automake
