@@ -1,0 +1,13 @@
+- summary: Fix update_hosts robustness for PGD5-to-PGD6 and PGD6 minor upgrades
+  description: |
+    Several plays in the PGD5-to-PGD6 major upgrade and PGD6 minor upgrade
+    playbooks were incorrectly scoped to the update_hosts subset when they
+    actually depend on cluster-wide state (the connection manager endpoint
+    for every node, and write-leader detection). This caused upgrades to
+    fail or silently skip proxy downtime monitoring whenever update_hosts
+    was used to upgrade a subset of hosts that excluded the cluster's
+    current primary or write leader. These plays now always run across
+    the whole cluster, regardless of update_hosts.
+  type: bugfix
+  jira_tickets:
+  - TPA-1500
