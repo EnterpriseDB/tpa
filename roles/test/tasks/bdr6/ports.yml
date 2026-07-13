@@ -23,10 +23,13 @@
 
 - name: determine ports for Connection Manager
   set_fact:
-    read_write_port: "{{ top_group[options][read_write_port]|default(postgres_port|int + 1000) }}"
-    read_only_port: "{{ top_group[options][read_only_port]|default(postgres_port|int + 1001) }}"
+    read_write_port: "{{ group_options|selectattr('read_write_port', 'defined')|map(attribute='read_write_port')|list|first|default(postgres_port|int + 1000) }}"
+    read_only_port: "{{ group_options|selectattr('read_only_port', 'defined')|map(attribute='read_only_port')|list|first|default(postgres_port|int + 1001) }}"
   vars:
-    top_group: bdr_node_groups|select(name, '==', cluster_name)
+    group_options:
+      "{{ (bdr_node_groups|default([]))
+          |selectattr('name', 'equalto', cluster_name)
+          |map(attribute='options')|list }}"
 
 - name: connect to Connection Manager read-only dsn
   postgresql_query:
