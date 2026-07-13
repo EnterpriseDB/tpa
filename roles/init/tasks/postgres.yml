@@ -249,19 +249,6 @@
       {%- else -%}xlog
       {%- endif -%}
 
-- name: Ensure read_listen_port is configured for BDR 5.5 and later
-  assert:
-    msg: >-
-      BDR 5.5 and later require read_listen_port to be set in
-      default_pgd_proxy_options in config.yml.
-    that:
-      - "'read_listen_port' in pgd_proxy_options"
-  run_once: true
-  when:
-    - groups['role_pgd-proxy']|default([]) is not empty
-    - bdr_package_version|default('') is match('.*[0-9]+\.[0-9]+')
-    - bdr_package_version|regex_search('[0-9]+\.[0-9]+') is version('5.5', '>=')
-
 - name: Ensure pgextended is not used with PGD 5 or later
   assert:
     msg: >-
@@ -273,18 +260,79 @@
     - "'bdr' in role"
     - postgres_flavour == 'pgextended'
 
-- name: Fail if pgbouncer and pgd-proxy are co-hosted with the same listen port
-  assert:
-    that:
-      - pgbouncer_port|int != pgd_proxy_options.listen_port|int
-    fail_msg: >-
-      Instance {{ inventory_hostname }} hosts both 'pgbouncer' and 'pgd-proxy'
-      with the same listen port ({{ pgbouncer_port }}). Set pgbouncer_port
-      (or pgd_proxy_options.listen_port) to a different value for this host
-      in config.yml.
+- name: Check pgd-proxy listen port configuration
   when:
-    - "'pgbouncer' in role"
     - "'pgd-proxy' in role"
+  block:
+    - name: Require read_listen_port when the BDR version is unknown
+      assert:
+        that:
+          - "'read_listen_port' in pgd_proxy_options and pgd_proxy_options.read_listen_port is not none"
+        fail_msg: >-
+          `pgd-proxy` role found on {{ inventory_hostname }}, this needs
+          read_listen_port to be set in default_pgd_proxy_options.
+      run_once: true
+      when:
+        - bdr_package_version|default('') is not match('.*[0-9]+\.[0-9]+')
+
+    - name: Ensure read_listen_port is configured for BDR 5.5 and later
+      assert:
+        that:
+          - "'read_listen_port' in pgd_proxy_options and pgd_proxy_options.read_listen_port is not none"
+        fail_msg: >-
+          BDR 5.5 and later require read_listen_port to be set in
+          default_pgd_proxy_options in config.yml.
+      run_once: true
+      when:
+        - bdr_package_version|default('') is match('.*[0-9]+\.[0-9]+')
+        - bdr_package_version|regex_search('[0-9]+\.[0-9]+') is version('5.5', '>=')
+
+    - name: Ensure pgd-proxy listen_port is configured before checking for conflicts
+      assert:
+        that:
+          - "'listen_port' in pgd_proxy_options and pgd_proxy_options.listen_port is not none"
+        fail_msg: >-
+          Instance {{ inventory_hostname }} hosts 'pgd-proxy' but
+          pgd_proxy_options.listen_port is not set. Set
+          default_pgd_proxy_options.listen_port (or a per-instance override) in
+          config.yml.
+
+    - name: Ensure pgbouncer_port is configured before checking for conflicts
+      assert:
+        that:
+          - pgbouncer_port is not none
+        fail_msg: >-
+          Instance {{ inventory_hostname }} hosts both 'pgbouncer' and
+          'pgd-proxy' but pgbouncer_port is explicitly set to null in
+          config.yml. Remove the override or give it a real port number.
+      when:
+        - "'pgbouncer' in role"
+
+    - name: Fail if pgbouncer and pgd-proxy listen on the same read-write port
+      assert:
+        that:
+          - pgbouncer_port|int != pgd_proxy_options.listen_port|int
+        fail_msg: >-
+          Instance {{ inventory_hostname }} hosts both 'pgbouncer' and
+          'pgd-proxy' listening on the same port ({{ pgbouncer_port }}). Set
+          pgbouncer_port or pgd_proxy_options.listen_port to a different value
+          for this host in config.yml.
+      when:
+        - "'pgbouncer' in role"
+
+    - name: Fail if pgbouncer and pgd-proxy read-only port clash
+      assert:
+        that:
+          - pgbouncer_port|int != pgd_proxy_options.read_listen_port|int
+        fail_msg: >-
+          Instance {{ inventory_hostname }} hosts 'pgbouncer' listening on the
+          same port as pgd-proxy's read-only port
+          ({{ pgd_proxy_options.read_listen_port }}). Set pgbouncer_port or
+          pgd_proxy_options.read_listen_port to a different value for this
+          host in config.yml.
+      when:
+        - "'pgbouncer' in role"
+        - "'read_listen_port' in pgd_proxy_options and pgd_proxy_options.read_listen_port is not none"
 
 - name: Split extension from postgres_log_file
   set_fact:
