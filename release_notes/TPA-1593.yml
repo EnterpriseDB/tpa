@@ -1,0 +1,9 @@
+- summary: Fix PEM agent restart failure when using update_hosts with multiple PEM agents
+  description: |
+    Upgrading the pem-agent component with update_hosts restricted to a
+    subset of hosts could fail with an undefined-variable error on any
+    PEM agent host excluded from that subset. The restart step now only
+    runs against the hosts actually being upgraded.
+  type: bugfix
+  jira_tickets:
+  - TPA-1593
