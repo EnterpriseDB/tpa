@@ -1,0 +1,10 @@
+- summary: Fix spurious upgrade failures on clusters with non-default Connection Manager ports
+  description: |
+    The listening-ports check run during PGD-X/PGD-S minor version upgrades
+    always checked the generic default Connection Manager ports instead of
+    the ports actually configured for the cluster's node group, causing the
+    check to fail with a connection error on any cluster that configures
+    non-default read_write_port/read_only_port values.
+  type: bugfix
+  jira_tickets:
+  - TPA-1592
