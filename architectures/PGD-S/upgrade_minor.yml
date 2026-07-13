@@ -84,6 +84,24 @@
     vars:
       upgrade_from: '6'
 
+  # postgres_pkg_check has now been registered - examine its output
+  # should we actually verify something about version numbers?
+
+# The write leader and connection manager endpoint are cluster-wide facts
+# that must be established regardless of which hosts update_hosts selects
+# for this run (e.g. so that a run excluding the current write leader can
+# still identify it, and so proxy downtime monitoring can watch every
+# node). So this play runs on all of role_bdr, not just g_update_hosts.
+
+- name: Determine write leader and connection manager endpoint for cluster {{ cluster_dir }}
+  any_errors_fatal: true
+  max_fail_percentage: 0
+  become_user: root
+  become: yes
+  environment: "{{ target_environment }}"
+  hosts: role_bdr
+  tasks:
+
   - block:
     - name: Get group information
       command: >
@@ -123,16 +141,17 @@
             else (top_port[0] if top_port|length > 0
                   else postgres_port|int + 1000) }}"
 
-  # postgres_pkg_check has now been registered - examine its output
-  # should we actually verify something about version numbers?
-
 - name: Start monitoring proxy downtime
+  # This runs once, on first_bdr_primary, to monitor every non-witness
+  # bdr node in the cluster - so it must run even if first_bdr_primary
+  # is not itself part of update_hosts this run, or none of the nodes
+  # actually being upgraded would have their downtime monitored.
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr
   tasks:
   - include_role:
       name: test
@@ -261,12 +280,15 @@
       tasks_from: bdr6/ports.yml
 
 - name: Stop monitoring proxy downtime
+  # See the comment on "Start monitoring proxy downtime" above: this must
+  # also run unrestricted so it can find first_bdr_primary regardless of
+  # update_hosts.
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr
   tasks:
   - include_role:
       name: test

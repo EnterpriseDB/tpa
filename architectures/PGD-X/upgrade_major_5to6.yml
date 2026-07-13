@@ -21,12 +21,16 @@
 # 4. Check that the cluster looks normal at the end
 
 - name: Check preconditions to upgrade cluster {{ cluster_dir }}
+  # These are cluster-wide checks and facts (e.g. the connection manager
+  # endpoint for every node, used later for proxy downtime monitoring
+  # regardless of update_hosts), so this play is not restricted to
+  # g_update_hosts.
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr
   tasks:
 
   - name: Ensure that BDR major version upgrades start from a recent version of PGD 5
@@ -136,12 +140,16 @@
 # connections
 
 - name: Start monitoring proxy downtime
+  # This runs once, on first_bdr_primary, to monitor every non-witness
+  # bdr node in the cluster - so it must run even if first_bdr_primary
+  # is not itself part of update_hosts this run, or none of the nodes
+  # actually being upgraded would have their downtime monitored.
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr
   tasks:
   - include_role:
       name: test
@@ -281,12 +289,15 @@
       inventory_hostname == first_bdr_primary
 
 - name: Stop monitoring proxy downtime
+  # See the comment on "Start monitoring proxy downtime" above: this must
+  # also run unrestricted so it can find first_bdr_primary regardless of
+  # update_hosts.
   any_errors_fatal: true
   max_fail_percentage: 0
   become_user: root
   become: yes
   environment: "{{ target_environment }}"
-  hosts: role_bdr:&g_update_hosts
+  hosts: role_bdr
   tasks:
   - include_role:
       name: test
