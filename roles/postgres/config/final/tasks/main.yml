@@ -124,6 +124,13 @@
 # Now we issue a CREATE EXTENSION command for each extension in
 # `postgres_extensions`, in the postgres and template1 databases.
 
+# For BDR clusters, extensions that create their own schema (marked with
+# own_schema: true in the extensions dictionary) are excluded from
+# template1 to prevent bdrdb from inheriting the schema via template
+# inheritance. This avoids "schema already exists" conflicts during
+# synchronize_structure's pg_restore at BDR node join time. These
+# extensions are installed in bdrdb after BDR join.
+
 - name: Install default Postgres extensions
   postgresql_ext:
     port: "{{ postgres_port }}"
@@ -134,10 +141,16 @@
   with_nested:
     - [postgres, template1]
     - "{{ postgres_extensions }}"
+  vars:
+    _own_schema_for_bdr: >-
+      {{ 'bdr' in role
+         and item.0 == 'template1'
+         and item.1 in own_schema_extensions|default([]) }}
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    item.1 not in cluster_facts.databases[item.0].extensions|default({})
+    - item.1 not in cluster_facts.databases[item.0].extensions|default({})
+    - not _own_schema_for_bdr
 
 # Now we issue CREATE TABLESPACE for each entry in postgres_tablespaces.
 # (We create tablespaces before databases because postgres_databases may

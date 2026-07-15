@@ -68,3 +68,4 @@ entries to shared_preload_libraries.
 - postgis
 - pgaudit
 - passwordcheck
+- pgfs

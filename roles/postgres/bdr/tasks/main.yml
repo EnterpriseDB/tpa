@@ -90,6 +90,19 @@
   vars:
     bdr_database_facts: "{{ cluster_facts.databases[bdr_database] }}"
 
+- name: Install own-schema extensions in BDR database
+  postgresql_ext:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    db: "{{ bdr_database }}"
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ own_schema_extensions|default([]) }}"
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    - inventory_hostname == first_bdr_primary
+
 - name: Change Postgres configuration if required
   include_tasks:
     file: postgres-reconfig.yml

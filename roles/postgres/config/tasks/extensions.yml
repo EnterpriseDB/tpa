@@ -78,3 +78,13 @@
   set_fact:
     postgres_extensions:
       "{{ postgres_extensions|difference(modules) }}"
+
+- name: Identify extensions that create their own schema
+  set_fact:
+    own_schema_extensions: >-
+      {{ postgres_extensions_dictionary | dict2items
+         | selectattr('value.own_schema', 'defined')
+         | selectattr('value.own_schema')
+         | map(attribute='key') | list
+         | intersect(postgres_extensions) }}
+

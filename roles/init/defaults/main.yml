@@ -433,7 +433,30 @@ default_postgres_extensions_dictionary:
   passwordcheck:
     spl: passwordcheck
     module: true
-
+  
+  pgfs:
+    own_schema: true
+    packages:
+      postgresql:
+        Debian: &debian_pg_pgfs_packages
+          - edb-pg{{ postgres_versionNN }}-pgfs
+        RedHat: &redhat_pg_pgfs_packages
+          - edb-pg{{ postgres_versionNN }}-pgfs
+        Ubuntu: *debian_pg_pgfs_packages
+      epas:
+        Debian: &pgfs_as_packages
+          - edb-as{{ postgres_versionNN }}-pgfs
+        RedHat: *pgfs_as_packages
+        Ubuntu: *pgfs_as_packages
+      pgextended:
+        Debian: *debian_pg_pgfs_packages
+        RedHat: *redhat_pg_pgfs_packages
+        Ubuntu: *debian_pg_pgfs_packages
+      edbpge:
+        Debian: &pgfs_pge_packages
+          - edb-postgresextended-{{ postgres_versionNN }}-pgfs
+        RedHat: *pgfs_pge_packages
+        Ubuntu: *pgfs_pge_packages
 
 default_postgres_extensions:
   - pg_stat_statements
