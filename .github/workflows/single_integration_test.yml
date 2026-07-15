@@ -35,7 +35,6 @@ on:
         - BDR-Always-ON
         - PGD-Always-ON
         - PGD-X
-        - PGD-S
       tpa_os_image:
         description: "TPA OS image"
         required: true
@@ -78,12 +77,6 @@ on:
         - "efm"
         - "repmgr"
         - "patroni"
-      tpa_pgds_layout:
-        description: "Layout (for PGD-S only)"
-        type: choice
-        options:
-        - "standard"
-        - "near-far"
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean
@@ -139,4 +132,3 @@ jobs:
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager}}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
-          tpa_pgds_layout: ${{ github.event.inputs.tpa_pgds_layout }}

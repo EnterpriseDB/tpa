@@ -803,7 +803,6 @@ class TestBdrPackageVersion:
             # immediately.
             ("PGD-Always-ON", None, True),
             ("PGD-X", None, True),
-            ("PGD-S", None, True),
             ("BDR-Always-ON", None, True),
             # Architecture-driven change in flight: wait for the
             # specialist to flip cluster.architecture to the target.
@@ -834,7 +833,6 @@ class TestBdrPackageVersion:
             # BDR-Always-ON for BDR 3.x / 4.x minor upgrades).
             ("PGD-Always-ON", None, 0),
             ("PGD-X", None, 0),
-            ("PGD-S", None, 0),
             ("BDR-Always-ON", None, 0),
             # Architecture-driven changes: the specialist will validate
             # whether the source→target transition is supported; we
@@ -1004,7 +1002,7 @@ class TestBdrPackageVersion:
 
     @pytest.mark.parametrize(
         "architecture",
-        ["PGD-X", "PGD-S", "BDR-Always-ON"],
+        ["PGD-X", "BDR-Always-ON"],
     )
     def test_description_omits_read_listen_port_on_non_pgd_proxy_arch(
         self, architecture

@@ -6,7 +6,6 @@ defaults:
     - "BDR-Always-ON"
     - "PGD-Always-ON"
     - "PGD-X"
-    - "PGD-S"
   tpa_os_image_list: &all_supported_images
     - "ubuntu:22.04"
     - "ubuntu:24.04"
@@ -49,8 +48,6 @@ simple:
       tpa_postgres_version: *default_postgres_version
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_version: *default_postgres_version
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_version: *default_postgres_version
     - tpa_architecture: "PGD-X"
       tpa_postgres_version: *default_postgres_version
 
@@ -64,7 +61,7 @@ simple:
 
 
 full:
-  # matrix for M1, PGD-Always-ON, PGD-S, PGD-X
+  # matrix for M1, PGD-Always-ON, PGD-X
   cpu_architecture: [ *default_cpu_architecture ]
   tpa_architecture: *default_tpa_architectures
   tpa_os_image: *all_supported_images
@@ -81,8 +78,6 @@ full:
       tpa_postgres_flavour: "postgresql"
     # PGD6 architectures only edbpge or epas
     - tpa_architecture: "PGD-X"
-      tpa_postgres_flavour: "postgresql"
-    - tpa_architecture: "PGD-S"
       tpa_postgres_flavour: "postgresql"
 
   include:
@@ -205,7 +200,6 @@ full:
 s390x:
   cpu_architecture: [ "s390x" ]
   tpa_architecture:
-    - "PGD-S"
     - "PGD-X"
   tpa_os_image:
     - "sles:15"
@@ -215,9 +209,6 @@ s390x:
   tpa_postgres_version:
     - 17
     - 16
-  exclude:
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_flavour: "postgresql"
 
 # for each architecture, a matrix which tests it across OS images and
 # pg flavours
@@ -263,14 +254,6 @@ PGD-Always-ON:
   cpu_architecture: [ *default_cpu_architecture ]
   exclude:
     - tpa_postgres_flavour: "postgresql"
-
-PGD-S:
-  tpa_architecture: ["PGD-S"]
-  tpa_os_image: *all_supported_images
-  tpa_postgres_flavour: *all_flavours
-  tpa_postgres_version: [ *default_postgres_version ]
-  cpu_architecture: [ *default_cpu_architecture ]
-  tpa_pgds_layout: ["standard", "near-far"]
 
 PGD-X:
   tpa_architecture: ["PGD-X"]

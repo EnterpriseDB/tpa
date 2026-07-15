@@ -7,7 +7,6 @@ default:
     - "BDR-Always-ON"
     - "PGD-Always-ON"
     - "PGD-X"
-    - "PGD-S"
   tpa_platform:
     - "docker"
   tpa_os_image:
@@ -60,20 +59,10 @@ default:
       tpa_architecture: "PGD-Always-ON"
     - tpa_harp_consensus_protocol: "etcd"
       tpa_architecture: "PGD-X"
-    - tpa_harp_consensus_protocol: "etcd"
-      tpa_architecture: "PGD-S"
     - tpa_architecture: "PGD-X"
-      tpa_postgres_version: "14"
-    - tpa_architecture: "PGD-S"
       tpa_postgres_version: "14"
     - tpa_architecture: "PGD-X"
       tpa_postgres_flavour: "pgextended"
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_flavour: "pgextended"
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_flavour: "postgresql"
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_flavour: "postgresql"
   include:
     - tpa_architecture: "M1"
       tpa_failover_manager: "repmgr"
@@ -130,8 +119,6 @@ simple:
       tpa_postgres_version: "14"
     - tpa_architecture: "PGD-Always-ON"
       tpa_postgres_version: "14"
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_version: "14"
     - tpa_architecture: "PGD-X"
       tpa_postgres_version: "14"
     - tpa_architecture: "BDR-Always-ON"
@@ -148,8 +135,6 @@ simple:
       tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "M1"
       tpa_postgres_flavour: "edbpge"
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_flavour: "pgextended"
     - tpa_architecture: "PGD-X"
       tpa_postgres_flavour: "pgextended"
   include:
@@ -241,7 +226,6 @@ m1_layouts:
         tpa_layout_name: "1x2"
 s390x:
   tpa_architecture:
-    - "PGD-S"
     - "PGD-X"
   tpa_os_image:
     - "sles:15"
@@ -254,6 +238,3 @@ s390x:
   tpa_postgres_version:
     - 17
     - 16
-  exclude:
-    - tpa_architecture: "PGD-S"
-      tpa_postgres_flavour: "postgresql"
