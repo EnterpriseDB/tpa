@@ -4,6 +4,12 @@ description: Postgres extensions and how to configure them with TPA.
 
 # Adding Postgres extensions
 
+!!!Note
+Extensions that have been installed on the cluster, currently can't be removed via TPA.
+In order to remove any extension, you will need to manually remove it, and delete its 
+entry from the extension list in the configuration file to avoid its re-installation.
+!!!
+
 ## Default Postgres extensions
 By default, TPA adds the following extensions to every Postgres database
 (and if needed, automatically adds the corresponding entries into shared
