@@ -1,11 +1,3 @@
-#build_arg_defaults:
-#  # redhat minimal EE image using redhat9 and ansible-core 2.15
-#  EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest'
-#  # redhat EE image + redhat supported collections using redhat9 and ansible-core 2.15
-#  #EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest'
-#  # redhat EE image  using redhat8 and ansible-core 2.9
-#  #EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform-24/ee-29-rhel8:latest'
-
 version: 3
 images:
   base_image:

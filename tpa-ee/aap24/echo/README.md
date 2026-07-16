@@ -16,7 +16,7 @@ The basic requirements to achieve this are:
 
 python 3.12 pre-installed and configured (built under `/usr/local`).
 This is "Echo Linux", a Debian-derivative (`ID_LIKE=debian`, apt-based) published
-on the internal `reg.echohq.com` registry. The `slim` variant keeps the footprint
+on the non-public `reg.echohq.com` registry. The `slim` variant keeps the footprint
 low while giving us a glibc base, so most Python dependencies (`cryptography`,
 `cffi`, `psutil`, ...) install from prebuilt manylinux wheels rather than
 compiling from source.
