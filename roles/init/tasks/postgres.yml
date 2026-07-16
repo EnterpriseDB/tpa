@@ -732,6 +732,21 @@
   set_fact:
     pemagent_extensions: "{{ pemagent_extensions|default(default_pemagent_extensions) }}"
 
+- name: Ensure that pgfs is in the list of extensions when pgaa is present
+  assert:
+    msg: >
+      'pgaa' requires 'pgfs', 'pgfs' not found in 'extra_postgres_extensions' 
+      or 'postgres_databases'.
+    that: >
+      'pgfs' in extra_postgres_extensions|default([])
+      or 'pgfs' in _db_extensions
+  when: >-
+    'pgaa' in extra_postgres_extensions|default([])
+    or 'pgaa' in _db_extensions
+  vars:
+    _db_extensions: >-
+      {{ postgres_databases|default([])|json_query('[*].extensions[*].name|[]') }}
+
 - name: Set list of Postgres extensions
   set_fact:
     postgres_extensions: "{{

@@ -436,6 +436,7 @@ default_postgres_extensions_dictionary:
   
   pgfs:
     own_schema: true
+    spl: pgfs
     packages:
       postgresql:
         Debian: &debian_pg_pgfs_packages
@@ -457,6 +458,31 @@ default_postgres_extensions_dictionary:
           - edb-postgresextended-{{ postgres_versionNN }}-pgfs
         RedHat: *pgfs_pge_packages
         Ubuntu: *pgfs_pge_packages
+
+  pgaa:
+    own_schema: true
+    spl: pgaa
+    packages:
+      postgresql:
+        Debian: &debian_pg_pgaa_packages
+          - postgresql-{{ postgres_versionNN }}-pgaa
+        RedHat: &redhat_pg_pgaa_packages
+          - postgresql-{{ postgres_versionNN }}-pgaa
+        Ubuntu: *debian_pg_pgaa_packages
+      epas:
+        Debian: &pgaa_as_packages
+          - edb-as{{ postgres_versionNN }}-pgaa
+        RedHat: *pgaa_as_packages
+        Ubuntu: *pgaa_as_packages
+      pgextended:
+        Debian: *debian_pg_pgaa_packages
+        RedHat: *redhat_pg_pgaa_packages
+        Ubuntu: *debian_pg_pgaa_packages
+      edbpge:
+        Debian: &pgaa_pge_packages
+          - edb-postgresextended-{{ postgres_versionNN }}-pgaa
+        RedHat: *pgaa_pge_packages
+        Ubuntu: *pgaa_pge_packages
 
 default_postgres_extensions:
   - pg_stat_statements

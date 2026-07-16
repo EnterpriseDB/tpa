@@ -75,3 +75,4 @@ entries to shared_preload_libraries.
 - pgaudit
 - passwordcheck
 - pgfs
+- pgaa

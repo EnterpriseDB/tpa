@@ -1,0 +1,13 @@
+- summary: Add `pgaa` extension support
+  description: |
+    The `pgaa` extension is now available to be installed via TPA 
+    when listed in the extensions list. 
+    `pgaa` has `pgfs` as a prerequisite, TPA will check the presence
+    of `pgfs when `pgaa` is listed in the extensions to install to avoid
+    failing at a later stage of the deployment.
+
+    To check the list of supported platforms and postgres versions, see 
+    https://www.enterprisedb.com/docs/pgaa/latest/overview/compatibility/.
+  type: minor_change
+  jira_tickets:
+  - TPA-1566

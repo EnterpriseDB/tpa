@@ -131,6 +131,18 @@
 # synchronize_structure's pg_restore at BDR node join time. These
 # extensions are installed in bdrdb after BDR join.
 
+- name: Adjust ordering of pgaa related to pgfs if required
+  when:
+    - p_and_f is subset(postgres_extensions)
+    - pgaa_pos < pgfs_pos
+  set_fact:
+    postgres_extensions: >-
+      {{ (postgres_extensions | reject('equalto', 'pgaa') | list) + ['pgaa'] }}
+  vars:
+    p_and_f: ['pgfs', 'pgaa']
+    pgaa_pos: "{{ postgres_extensions.index('pgaa') }}"
+    pgfs_pos: "{{ postgres_extensions.index('pgfs') }}"
+
 - name: Install default Postgres extensions
   postgresql_ext:
     port: "{{ postgres_port }}"
@@ -145,7 +157,7 @@
     _own_schema_for_bdr: >-
       {{ 'bdr' in role
          and item.0 == 'template1'
-         and item.1 in own_schema_extensions|default([]) }}
+         and item.1 in own_schema_extensions|default({}) }}
   become_user: "{{ postgres_user }}"
   become: yes
   when:
@@ -200,6 +212,26 @@
       {{ db.name }}
   become_user: "{{ postgres_user }}"
   become: yes
+
+# We make this exception to ensure that pgfs is installed before pgaa in per-database extensions.
+- name: Ensure pgfs is installed before pgaa in per-database extensions
+  postgresql_ext:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    db: "{{ item.name }}"
+    name: pgfs
+    state: present
+  loop: "{{ postgres_databases|default([]) }}"
+  loop_control:
+    label: >-
+      {{ item.name }}/pgfs
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    - p_and_f is subset(_ext_names)
+  vars:
+    p_and_f: ['pgfs', 'pgaa']
+    _ext_names: "{{ item.extensions|default([])|map(attribute='name')|list|flatten }}"
 
 # Apart from the extensions we create in template1 (which are inherited
 # by every other database), each entry in postgres_databases can also
