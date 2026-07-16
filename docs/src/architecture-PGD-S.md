@@ -7,6 +7,7 @@ description: Configuring a PGD-S cluster with TPA.
 !!!Warning
 PGD-S (PGD Essential) is no longer offered as a product. New PGD 6
 deployments should use [PGD-X](architecture-PGD-X/) instead.
+`tpaexec configure --architecture PGD-S` will refuse to proceed.
 !!!
 
 !!!Note

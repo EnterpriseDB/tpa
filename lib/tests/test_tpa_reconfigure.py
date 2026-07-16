@@ -7,11 +7,12 @@
 import pytest
 from tpa.commands.reconfigure import reconfigure, write_output
 from tpa.cluster import Cluster
-from tpa.exceptions import ConfigureError
+from tpa.exceptions import ConfigureError, PGDSDeprecatedError
 import yaml
 import os
 
 CLUSTER_DIR = "lib/tests/config/basic-cluster"
+PGDS_CLUSTER_DIR = "lib/tests/config/pgds-cluster"
 
 
 @pytest.fixture
@@ -21,6 +22,18 @@ def create_cluster():
         os.mkdir(CLUSTER_DIR)
         with open(os.path.join(CLUSTER_DIR, "config.yml"), "w") as config:
             config.write(cluster.to_yaml())
+    return cluster
+
+
+@pytest.fixture
+def create_pgds_cluster():
+    # Simulates a config.yml hand-edited (or left over from before PGD-S
+    # was blocked at configure time) to say architecture: PGD-S.
+    cluster = Cluster(PGDS_CLUSTER_DIR, "PGD-S")
+    if not os.path.exists(PGDS_CLUSTER_DIR):
+        os.mkdir(PGDS_CLUSTER_DIR)
+    with open(os.path.join(PGDS_CLUSTER_DIR, "config.yml"), "w") as config:
+        config.write(cluster.to_yaml())
     return cluster
 
 
@@ -60,6 +73,11 @@ class TestReconfigure:
                 assert x.value.args[0] == result["msg"]
         else:
             reconfigure(args=input)
+
+    def test_reconfigure_rejects_pgds(self, create_pgds_cluster):
+        """test that reconfigure rejects a config.yml specifying PGD-S"""
+        with pytest.raises(PGDSDeprecatedError):
+            reconfigure(args=[PGDS_CLUSTER_DIR, "--describe"])
 
     def test_reconfigure_write_output(
         self,

@@ -7,7 +7,7 @@ import shutil
 from typing import List
 from argparse import ArgumentParser
 
-from tpa.exceptions import ConfigureError
+from tpa.exceptions import ConfigureError, PGDSDeprecatedError
 
 from ..cluster import Cluster
 from ..transmogrifier import apply, describe, check
@@ -53,6 +53,9 @@ def reconfigure(args: List[str]) -> None:
         raise ConfigureError(f"{config_file} does not exist")
 
     cluster = Cluster.from_yaml(config_file, cluster_name=cluster_name)
+
+    if cluster.architecture == "PGD-S":
+        raise PGDSDeprecatedError()
 
     # Next, parse the remaining command-line arguments to obtain a list of
     # Transmogrifiers; and describe, check, or apply the requested changes.

@@ -9,12 +9,18 @@ import os
 
 import pytest
 
+from tpa.architectures.pgd_s import PGDS
 from tpa.architectures.pgd_x import PGDX
 from tpa.commands.configure import configure
+from tpa.exceptions import PGDSDeprecatedError
 
 CONFIG_PATH = {
     "PGDX": "lib/tests/config/cluster-PGDX",
 }
+
+# PGDS() raises before ever touching this path, so it's just a placeholder
+# argument, not a real registered cluster config path like CONFIG_PATH.
+PGDS_CLUSTER_PATH = "lib/tests/config/cluster-PGDS"
 
 
 def cleanup(path):
@@ -649,35 +655,52 @@ class TestPGDXArchitecture:
             cleanup(CONFIG_PATH["PGDX"])
 
 
+class TestPGDSDeprecated:
+    """Test suite confirming PGD-S is rejected at configure time"""
+
+    def test_pgds_construction_raises(self):
+        """Test that constructing PGDS always raises, regardless of args"""
+        with pytest.raises(PGDSDeprecatedError):
+            PGDS(directory=None, lib=None, argv=[])
+
+    def test_pgds_configure_raises(self):
+        """Test that configure() rejects --architecture PGD-S end-to-end"""
+        cleanup(PGDS_CLUSTER_PATH)
+        argv = [
+            PGDS_CLUSTER_PATH,
+            "--architecture",
+            "PGD-S",
+            "--no-git",
+            "--postgresql",
+            "16",
+        ]
+        try:
+            with pytest.raises(PGDSDeprecatedError):
+                configure(argv, tpa_dir=".")
+            assert not os.path.exists(PGDS_CLUSTER_PATH)
+        finally:
+            cleanup(PGDS_CLUSTER_PATH)
+
+
+# @patch.object(Architecture, "expand_template", expand_template)
+
 # @patch.object(Architecture, "expand_template", expand_template)
 class TestPGDCommon:
     """Test suite for common PGD functionality"""
 
-    @pytest.mark.parametrize(
-        "argv, architecture_class",
-        [
-            (
-                [
-                    CONFIG_PATH["PGDX"],
-                    "--architecture",
-                    "PGD-X",
-                    "--no-git",
-                    "--postgresql",
-                    "16",
-                    "--pgd-routing",
-                    "local",
-                ],
-                PGDX,
-            ),
-        ],
-    )
-    def test_supported_versions(self, argv, architecture_class):
-        """Test that the architecture supports Postgres 14-18 with BDR 6"""
-        arch = architecture_class(
-            directory=f"architectures/{architecture_class.__name__.replace('PGD', 'PGD-')}",
-            lib="architectures/lib",
-            argv=argv,
-        )
+    def test_supported_versions(self):
+        """Test that PGD-X supports Postgres 14-18 with BDR 6"""
+        argv = [
+            CONFIG_PATH["PGDX"],
+            "--architecture",
+            "PGD-X",
+            "--no-git",
+            "--postgresql",
+            "16",
+            "--pgd-routing",
+            "local",
+        ]
+        arch = PGDX(directory="architectures/PGD-X", lib="architectures/lib", argv=argv)
 
         supported = arch.supported_versions()
 
@@ -695,6 +718,26 @@ class TestPGDCommon:
             assert (
                 version in supported
             ), f"Expected {version} to be in supported versions"
+
+    @pytest.mark.parametrize("postgres_version", ["13", "14", "16", "18"])
+    def test_pgds_construction_raises_regardless_of_postgres_version(
+        self, postgres_version
+    ):
+        """PGD-S is rejected before postgres/BDR version inference ever runs"""
+        cleanup(PGDS_CLUSTER_PATH)
+        argv = [
+            PGDS_CLUSTER_PATH,
+            "--architecture",
+            "PGD-S",
+            "--no-git",
+            "--postgresql",
+            postgres_version,
+        ]
+        try:
+            with pytest.raises(PGDSDeprecatedError):
+                ConfiguredCluster(PGDS, argv, PGDS_CLUSTER_PATH)
+        finally:
+            cleanup(PGDS_CLUSTER_PATH)
 
     @pytest.mark.parametrize(
         "name, expected",
