@@ -17,7 +17,7 @@ build_arg_defaults:
   PKGMGR_PRESERVE_CACHE: 'always'
 additional_build_steps:
   prepend_base:
-   - RUN export DEBIAN_FRONTEND=noninteractive && $PKGMGR update && $PKGMGR install -y --no-install-recommends openssh-client git gcc build-essential libffi-dev && $PKGMGR clean && rm -rf /var/lib/apt/lists/*
+   - RUN export DEBIAN_FRONTEND=noninteractive && $PKGMGR update && $PKGMGR install -y --no-install-recommends openssh-client gcc build-essential libffi-dev && $PKGMGR clean && rm -rf /var/lib/apt/lists/*
    - RUN $PYCMD -m pip install --upgrade pip
 
   append_final:

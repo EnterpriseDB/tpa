@@ -65,7 +65,7 @@ This generates a couple more steps to manage manually the apt and pip caches.
 
 We also install a compiler toolchain (`gcc`, `build-essential`, `libffi-dev`) so
 that python can build any wheel that is not available prebuilt, plus
-`openssh-client` and `git` needed as part of TPA.
+`openssh-client` needed as part of TPA.
 
 ## building
 
