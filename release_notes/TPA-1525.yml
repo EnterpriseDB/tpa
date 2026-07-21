@@ -1,0 +1,11 @@
+- summary: Fix HARP cluster becoming unroutable after re-deploy
+  description: |
+    TPA now re-applies the HARP cluster bootstrap configuration when the
+    consensus store (DCS) has lost it, not only when the on-disk bootstrap
+    file has changed. Previously, if the DCS was emptied or re-provisioned,
+    or an initial bootstrap was interrupted, while the bootstrap file was
+    left unchanged, a re-deploy would silently skip re-applying it and
+    leave HARP-proxy unable to route connections.
+  type: bugfix
+  jira_tickets:
+  - TPA-1525
