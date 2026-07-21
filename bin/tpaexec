@@ -376,6 +376,9 @@ playbook() {
         elif [[ $arg == --included?tasks=* ]]; then
             inclusion="${arg#*=}"
             args+=(-e included_tasks=$inclusion)
+        elif [[ $arg == --opt?in?tasks=* ]]; then
+            opt_in="${arg#*=}"
+            args+=(-e opt_in_tasks=$opt_in)
         elif [[ $arg == --components=* ]]; then
             inclusion="${arg#*=}"
             args+=(-e upgrade_components=$inclusion)
