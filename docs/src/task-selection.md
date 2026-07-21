@@ -389,6 +389,17 @@ The following selectors are supported only for exclusion:
 
     Tasks related to the kernel watchdog on a patroni cluster.
 
+The following selectors run only when opted in to via `opt_in_tasks`:
+
+- sysctl_net
+
+    The TPA-managed network and connection-tuning sysctls
+    (`net.core.rmem_max`, `net.core.wmem_max`,
+    `net.ipv4.tcp_max_syn_backlog`, `net.ipv4.ip_local_port_range`).
+    `tpaexec configure --platform aws` opts the cluster in to this
+    selector by default; on other platforms it is opt-in. See
+    [Setting sysctl values](sysctl_values.md).
+
 ## Supported selectors for `tpaexec test`
 
 The following selectors apply only for execution of `tpaexec test`:

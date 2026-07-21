@@ -284,7 +284,16 @@ class aws(CloudPlatform):
                 location["az"] = location.get("az", az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        pass
+        # AWS instances boot with stock kernel defaults and benefit from
+        # TPA's busy-server network tuning; opt the cluster in to the
+        # sysctl_net task selector by default. Bare-metal users typically
+        # have their own opinions about these settings and stay opted out.
+        # We use opt_in_tasks (not included_tasks) so we don't engage
+        # the whitelist semantics that would gate every other task out.
+        opt_in = list(cluster_vars.get("opt_in_tasks") or [])
+        if "sysctl_net" not in opt_in:
+            opt_in.append("sysctl_net")
+        cluster_vars["opt_in_tasks"] = opt_in
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml("platforms/aws/instance_defaults.yml.j2", args)

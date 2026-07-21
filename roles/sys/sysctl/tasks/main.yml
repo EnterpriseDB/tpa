@@ -2,39 +2,49 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-# Set any sysctl values specified by the caller, which may augment or
-# override the default values defined in by this role. When the chosen
-# hugepage size is the architecture default we include vm.nr_hugepages
-# here so the kernel sees it on boot. For a non-default size that
-# sysctl is meaningless (it only ever applies to the default-size pool)
-# so we omit it from /etc/sysctl.conf and reserve pages on the kernel
-# command line instead.
+# TPA writes its managed sysctl settings to /etc/sysctl.d/30-tpa.conf
+# (not /etc/sysctl.conf), so an operator can override them by dropping
+# a file with a higher numeric prefix under /etc/sysctl.d/ without
+# round-tripping through config.yml. Older versions of TPA wrote into
+# /etc/sysctl.conf directly; clean those lines out on first deploy
+# under the new layout so they don't shadow the new file.
 
-- name: Set sysctl values
-  linesinfile:
+- name: Migrate legacy TPA-managed sysctls out of /etc/sysctl.conf
+  lineinfile:
     path: /etc/sysctl.conf
-    lines: "{{ sysctl_conf_settings|dict_format('{key}={value}') }}"
+    regexp: '^\s*{{ item|regex_escape }}\s*='
+    state: absent
+  loop: "{{ _legacy_tpa_sysctl_keys }}"
+  register: sysctl_conf_legacy
+  when:
+    platform not in ['docker', 'lxd']
+    and target_container_type is not defined
+
+# The template renders three sections: a TPA-diagnostic baseline that
+# is always written; a Postgres-tuning vm group gated by sysctl_vm
+# (selects: on by default unless excluded); and a busy-server network
+# group gated by sysctl_net (opts_in: opt-in only, set by tpaexec
+# configure for aws clusters). User-supplied sysctl_values are
+# rendered last so they win over anything TPA chose.
+
+- name: Write TPA-managed sysctls to /etc/sysctl.d/30-tpa.conf
+  template:
+    src: 30-tpa.conf.j2
+    dest: /etc/sysctl.d/30-tpa.conf
+    owner: root
+    group: root
+    # 0644 matches the convention for /etc/sysctl.conf and every other
+    # file in /etc/sysctl.d/. The contents are non-sensitive kernel
+    # tuning parameters; admins reading them need visibility, and
+    # write access is correctly restricted to root.
+    mode: "0644"
   register: sysctl_conf
   vars:
-    sysctl_conf_settings:
-      "{{ sysctl_defaults
-          |combine(_ip_forward)
-          |combine(_user_sysctls)
-          |combine(_hugepages_sysctl) }}"
-    _ip_forward:
-      "{{ ('openvpn-server' in role)
-          |ternary({'net.ipv4.ip_forward': 1}, {}) }}"
     _user_sysctls: >-
       {%- if _huge_page_size_is_default | bool -%}
         {{ sysctl_values }}
       {%- else -%}
         {{ sysctl_values | dict2items | rejectattr('key', 'equalto', 'vm.nr_hugepages') | list | items2dict }}
-      {%- endif -%}
-    _hugepages_sysctl: >-
-      {%- if _huge_page_size_is_default | bool -%}
-        {{ {'vm.nr_hugepages': _nr_hugepages | int} }}
-      {%- else -%}
-        {}
       {%- endif -%}
   when:
     platform not in ['docker', 'lxd']
@@ -42,8 +52,9 @@
 
 - name: Reload sysctl values if changed
   command:
-    sysctl -p /etc/sysctl.conf
+    sysctl --system
   when:
     sysctl_conf is changed
+    or sysctl_conf_legacy is changed
 
 - include_tasks: hugepages.yml

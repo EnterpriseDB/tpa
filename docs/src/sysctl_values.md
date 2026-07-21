@@ -5,32 +5,73 @@ description: Setting sysctl values for target instances.
 
 # Setting sysctl values
 
-By default, TPA sets various sysctl values on target instances, and
-includes them in `/etc/sysctl.conf` so that they persist across reboots.
+TPA writes its managed sysctl settings to `/etc/sysctl.d/30-tpa.conf`.
+The settings persist across reboots and can be reloaded at any time
+with `sysctl --system`. To override any of them, drop a file with a
+higher numeric prefix under `/etc/sysctl.d/` (for example,
+`/etc/sysctl.d/90-local.conf`): `sysctl --system` loads files in
+lexical order, so later definitions win. You don't need to round-trip
+through `config.yml` to do this.
 
-You can optionally specify your own values in `sysctl_values`:
+Docker and lxd instances don't support setting sysctls, so TPA will
+skip this step altogether for those platforms.
+
+## What TPA manages
+
+TPA's managed settings fall into three groups:
+
+* **Baseline** — currently just `kernel.core_pattern`, which sets a
+  consistent core-dump path. Always written when the `sysctl` task
+  runs.
+
+* **`sysctl_vm`** — Postgres-specific kernel tuning (the `vm.dirty_*`
+  family and `vm.zone_reclaim_mode`). Applied by default; opt out
+  by adding `sysctl_vm` to `excluded_tasks`.
+
+* **`sysctl_net`** — busy-server network tuning (`net.core.rmem_max`,
+  `net.core.wmem_max`, `net.ipv4.tcp_max_syn_backlog`,
+  `net.ipv4.ip_local_port_range`). These have to be opted in to
+  explicitly because the right values depend on workload
+  characteristics that only the operator knows. Opt in by adding
+  `sysctl_net` to `opt_in_tasks`. `tpaexec configure --platform
+  aws` opts the cluster in automatically; bare-metal clusters stay
+  opted out by default.
+
+So a typical bare-metal cluster gets the baseline plus `sysctl_vm`,
+and a typical AWS cluster gets all three. On an AWS cluster you can
+opt out of `sysctl_net` again by editing `config.yml`:
+
+```yaml
+cluster_vars:
+  excluded_tasks:
+    - sysctl_net
+```
+
+## Overriding TPA's values via config.yml
+
+You can also override individual settings — from any group — by
+listing them in `sysctl_values`:
 
 ```yaml
 cluster_vars:
   sysctl_values:
-    kernel.core_pattern: core.%e.%p.%t
-    vm.dirty_bytes: 4294967296
-    vm.zone_reclaim_mode: 0
+    vm.dirty_bytes: 8589934592
+    net.core.somaxconn: 16384
 ```
 
-Any values you specify will take precedence over TPA's default
-values for that variable (if any). The settings will first be added to
-`sysctl.conf` line-by-line, and finally loaded with `sysctl -p`.
-
-Docker and lxd instances do not support setting sysctls, so TPA will
-skip this step altogether for those platforms.
+`sysctl_values` entries are written after the TPA defaults, so they
+win. This route is convenient if you want to manage a couple of
+overrides as part of your cluster definition; for ad-hoc or
+operationally-imposed values, dropping a file in `/etc/sysctl.d/` on
+the host directly is usually simpler.
 
 ## Hugepages
 
 By default, TPA reserves hugepages of the architecture's default size
 (2MB on x86_64) for Postgres to use for `shared_buffers`. It does this
 by adding `hugepages=N` to the kernel command line and writing
-`vm.nr_hugepages = N` to `/etc/sysctl.conf`.
+`vm.nr_hugepages = N` to the `sysctl_vm` section of
+`/etc/sysctl.d/30-tpa.conf`.
 
 If you want Postgres to use a larger hugepage size (typically 1GB on
 x86_64), set `huge_page_size` to a Postgres-style memory string:
@@ -46,9 +87,9 @@ When `huge_page_size` is set, TPA will:
 
 * reserve pages of that size on the kernel command line, e.g.
   `hugepagesz=1G hugepages=N`;
-* omit `vm.nr_hugepages` from `/etc/sysctl.conf` (that sysctl only ever
-  applies to the architecture's default-size pool, and is silently
-  ineffective for any other size); and
+* omit `vm.nr_hugepages` from `/etc/sysctl.d/30-tpa.conf` (that sysctl
+  only ever applies to the architecture's default-size pool, and is
+  silently ineffective for any other size); and
 * set the `huge_page_size` GUC in `postgresql.conf` so Postgres uses
   pages from the chosen pool.
 

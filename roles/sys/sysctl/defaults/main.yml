@@ -8,9 +8,9 @@ transparent_hugepage: never
 # (2MB on x86_64). To use a larger size, set huge_page_size to a
 # Postgres-style memory string such as "1GB". When set, TPA will reserve
 # pages of that size on the kernel command line, omit vm.nr_hugepages
-# from /etc/sysctl.conf (which targets only the architecture's default
-# size pool), and configure Postgres to use the chosen pool via the
-# huge_page_size GUC.
+# from /etc/sysctl.d/30-tpa.conf (which targets only the architecture's
+# default size pool), and configure Postgres to use the chosen pool via
+# the huge_page_size GUC.
 
 huge_page_size: null
 
@@ -22,30 +22,57 @@ huge_page_size: null
 
 nr_hugepages: null
 
-# The caller may supply sysctl_values, which will be merged with the
-# sysctl_defaults values described below:
-#
-# zone_reclaim_mode should be disabled by default, but make sure anyway.
-#
-# When we accumulate more than 256MB of dirty pages, we want to start
-# writing them out in the background; writes should become synchronous
-# when we accumulate more than 4GB of dirty pages. Regardless of volume,
-# dirty pages should be written out every 10s at most.
+# Users can supply additional or overriding sysctl values in
+# sysctl_values; these are written last, so they win over any of the
+# TPA-managed defaults below.
 
 sysctl_values: {}
-sysctl_defaults:
+
+# TPA manages three groups of sysctl settings:
+#
+# - sysctl_defaults_baseline is always written when the sysctl role
+#   runs. kernel.core_pattern lands here because it's a TPA-diagnostic
+#   setting (consistent core-dump path) and not workload-specific.
+#
+# - sysctl_defaults_vm is written when the sysctl_vm task is selected
+#   (default: yes; exclude with excluded_tasks: [sysctl_vm]). These
+#   are Postgres-specific kernel tuning recommendations.
+#
+# - sysctl_defaults_net is written only when sysctl_net is explicitly
+#   opted in to (opt_in_tasks: [sysctl_net]). These are busy-server
+#   network tunings whose right values depend on workload. The right
+#   default is opt-in, so an operator who has tuned these values on
+#   the host directly doesn't see TPA stomp on them during deploy.
+#   `tpaexec configure --platform aws` opts the cluster in by default.
+
+sysctl_defaults_baseline:
   kernel.core_pattern: core.%e.%p.%t
-  net.ipv4.ip_local_port_range: 1024 65535
-  net.ipv4.tcp_tw_reuse: 1
-  net.core.rmem_max: 16777216
-  net.core.wmem_max: 16777216
-  net.ipv4.tcp_max_syn_backlog: 4096
-  net.ipv4.tcp_syncookies: 1
-  net.core.somaxconn: 1024
+
+# zone_reclaim_mode 0: avoid NUMA reclaim during page allocation.
+# dirty_bytes / dirty_background_bytes / dirty_expire_centisecs:
+# start writing dirty pages out in the background once we accumulate
+# more than 256MB, force synchronous writes past 4GB, and flush
+# anything older than 10s regardless of volume.
+
+sysctl_defaults_vm:
   vm.zone_reclaim_mode: 0
   vm.dirty_bytes: 4294967296
   vm.dirty_background_bytes: 268435456
   vm.dirty_expire_centisecs: 1000
+
+# rmem_max / wmem_max 16MB: lifts socket buffer ceiling for
+# replication and other bulk streaming traffic. tcp_max_syn_backlog
+# 4096: modest uplift over the kernel's dynamic auto-tune for busy
+# servers. ip_local_port_range starts at 32768 (the kernel default
+# floor; the older TPA value of 1024 overlapped privileged ports)
+# and extends the upper end from the kernel default of 60999 to
+# 65535 to make ~4500 more ephemeral ports available.
+
+sysctl_defaults_net:
+  net.core.rmem_max: 16777216
+  net.core.wmem_max: 16777216
+  net.ipv4.tcp_max_syn_backlog: 4096
+  net.ipv4.ip_local_port_range: 32768 65535
 
 # Derived helpers. _huge_page_size_is_default is true when huge_page_size
 # is unset (i.e. we're using the architecture's default page size).
@@ -85,3 +112,23 @@ _nr_hugepages: >-
   {%- else -%}
     {{ ((shared_buffers_mb + ansible_memtotal_mb * 0.03) * 1024 / (_huge_page_size_kb | int)) | round(0, 'ceil') | int }}
   {%- endif -%}
+
+# The full list of keys TPA has historically managed in /etc/sysctl.conf
+# (back when it wrote there directly). Used by the one-time migration
+# step in tasks/main.yml to clean those lines out — we own them, so we
+# remove them when switching to /etc/sysctl.d/30-tpa.conf.
+
+_legacy_tpa_sysctl_keys:
+  - kernel.core_pattern
+  - net.ipv4.ip_local_port_range
+  - net.ipv4.tcp_tw_reuse
+  - net.core.rmem_max
+  - net.core.wmem_max
+  - net.ipv4.tcp_max_syn_backlog
+  - net.ipv4.tcp_syncookies
+  - net.core.somaxconn
+  - vm.zone_reclaim_mode
+  - vm.dirty_bytes
+  - vm.dirty_background_bytes
+  - vm.dirty_expire_centisecs
+  - vm.nr_hugepages
