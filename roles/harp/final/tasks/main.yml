@@ -26,8 +26,11 @@
 # With BDR, we've already made sure there is only one harp_location
 # across the cluster, so the same code will do the right thing.
 #
-# We check to ensure `harpctl apply` runs only when harp.cluster.init.yml
-# has changed (true for a fresh installation as well)
+# We (re-)apply the bootstrap when the desired config changed on disk
+# (harp_bootstrap_required, notified by the template task) or when the DCS
+# has lost it even though the file is unchanged -- e.g. a re-provisioned
+# etcd or an interrupted first apply. We detect the latter by comparing
+# the proxies HARP expects against those registered in the DCS (TPA-1525).
 
 - meta: flush_handlers
 
@@ -39,16 +42,40 @@
         key: "{{ harp_location_group }}"
       changed_when: false
 
+    - name: Read proxies registered in the HARP DCS
+      command: "harpctl get proxies -o json"
+      become_user: "{{ postgres_user }}"
+      become: yes
+      changed_when: false
+      failed_when: false
+      register: harp_dcs_proxies
+      when:
+        inventory_hostname == groups[harp_location_group]|sort|first
+
+    - name: Read desired HARP bootstrap configuration
+      slurp:
+        src: "{{ harp_directory }}/harp.cluster.init.yml"
+      register: harp_cluster_init
+      when:
+        inventory_hostname == groups[harp_location_group]|sort|first
+
     - name: Initialise cluster with harpctl apply
       command: "harpctl apply {{ harp_directory }}/harp.cluster.init.yml"
       become_user: "{{ postgres_user }}"
       become: yes
-      when:
+      vars:
+        harp_desired_proxies: "{{ (harp_cluster_init.content | b64decode | from_yaml).proxies.instances | default([]) | map(attribute='name') | list }}"
+        harp_dcs_proxy_names: "{{ (harp_dcs_proxies.stdout | default('[]', true) | from_json) | map(attribute='name') | reject('equalto', 'global') | list }}"
+      when: >
         inventory_hostname == groups[harp_location_group]|sort|first
+        and (
+          harp_bootstrap_required|default(false)|bool
+          or harp_dcs_proxies.rc != 0
+          or harp_desired_proxies|difference(harp_dcs_proxy_names)|length > 0
+        )
   when: >
     'bdr' in role
     and inventory_hostname in first_bdr_primary_candidates
-    and (harp_bootstrap_required|default(false))|bool
 
 - include_role:
     name: harp/service
