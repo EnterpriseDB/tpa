@@ -1,0 +1,8 @@
+- summary: Ensure that `--pgd-proxy-routing` is specified in BDR4 to PGD5 reconfiguration
+  description: |
+    When reconfiguring a BDR4 cluster to PGD5, a new check has been introduced, where the 
+    `--pgd-proxy-routing` option is checked to be present.
+    This change ensures that the reconfiguration process will fail if this option is not provided.
+  type: minor_change
+  jira_tickets:
+  - TPA-1483

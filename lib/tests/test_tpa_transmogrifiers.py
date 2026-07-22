@@ -480,6 +480,11 @@ class TestBDR4PGD5:
                 None,
             ),
             (
+                {"target_architecture": "PGD-Always-ON", "pgd_proxy_routing": None},
+                {"bdr_node_group": "basic", "bdr_version": "4"},
+                "Must specify --pgd-proxy-routing global or --pgd-proxy-routing local",
+            ),
+            (
                 {"target_architecture": "PGD-Always-ON", "pgd_proxy_routing": "global"},
                 {
                     "bdr_node_group": "basic",
