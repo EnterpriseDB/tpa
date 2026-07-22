@@ -3,6 +3,9 @@
 Description=EnterpriseDB Failover Manager {{ efm_version }}
 Wants=network-online.target
 After=network.target network-online.target
+{% if efm_autostart_db %}
+Before={{ postgres_service_name }}.service
+{% endif %}
 
 [Service]
 Type=forking

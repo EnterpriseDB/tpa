@@ -626,6 +626,7 @@ default_efm_bin_dir: "/usr/edb/efm-{{ efm_version }}/bin"
 default_efm_bind_port: 7800
 default_efm_conf_dir: "/etc/edb/efm-{{ efm_version }}"
 default_efm_user_is_superuser: true
+default_efm_autostart_db: false
 default_efm_user_password_encryption:
   "{{ (compliance|default('') == 'stig')
       |ternary('scram-sha-256', 'md5') }}"

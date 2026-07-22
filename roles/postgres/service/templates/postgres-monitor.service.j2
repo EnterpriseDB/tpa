@@ -3,6 +3,9 @@
 Description=Postgres startup monitor
 After=postgres.service
 Requires=postgres.service
+{% if failover_manager == 'efm' and efm_autostart_db %}
+After=edb-efm-{{ efm_version }}.service
+{% endif %}
 
 [Service]
 Type=oneshot
