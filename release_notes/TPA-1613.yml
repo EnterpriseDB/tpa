@@ -1,0 +1,14 @@
+- summary: Fix M1 deploy failure when efm tasks are excluded
+  description: |
+    Deploying an M1 cluster configured with `--enable-efm` using
+    `tpaexec deploy --excluded-tasks=efm` failed on the primary with
+    "Role 'efm_role' does not exist": the task granting privileges to
+    `efm_role` did not honour the task selector, while the tasks that
+    create the role did. The grant tasks are now skipped along with the
+    rest of the efm tasks. In addition, the replication user's `.pgpass`
+    entry was only written by the (excluded) efm role, leaving
+    pg_basebackup waiting forever for a password when cloning the
+    replica; the entry is now written regardless of the task selector.
+  type: bugfix
+  jira_tickets:
+  - TPA-1613
