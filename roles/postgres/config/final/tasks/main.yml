@@ -264,7 +264,8 @@
     file: efm_role.yml
   when: >
     failover_manager == 'efm' and
-    'pem-server' not in role
+    'pem-server' not in role and
+    task_selector|selects('efm')
 
 # Now we can complete the task of granting roles to `postgres_users`.
 - name: Grant roles to Postgres users if required
