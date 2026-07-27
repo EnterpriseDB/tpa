@@ -141,6 +141,40 @@ The CA certificate can be found on the cluster directory on the TPA node at:
 
 see pgd-proxy documentation for more information on the available api endpoints.
 
+### pgd_proxy_service_environment
+
+The `pgd-proxy` process is started by systemd, which does not pass a
+user's ambient environment through to the service. `pgd-proxy` relies on
+libpq to connect to Postgres, so it needs a couple of libpq environment
+variables to find its password file and to require TLS. TPA sets these
+in the systemd unit file via `pgd_proxy_service_environment`, which
+defaults to:
+
+```yaml
+pgd_proxy_service_environment:
+  PGPASSFILE: '{{ pgd_proxy_home }}/.pgpass'
+  PGSSLMODE: 'require'
+```
+
+Each key/value pair is rendered as an `Environment=KEY=VALUE` line in
+`/etc/systemd/system/pgd-proxy.service`.
+
+You can override this under `cluster_vars` (for all proxies) or under a
+pgd-proxy instance's `vars`:
+
+```yaml
+cluster_vars:
+  pgd_proxy_service_environment:
+    PGPASSFILE: /etc/edb/pgd-proxy/.pgpass
+    PGSSLMODE: require
+```
+
+Note that the value you supply *replaces* the default mapping in full;
+it is not merged key by key. If you override this variable to change one
+entry, include every entry you still want — for example, keep
+`PGSSLMODE: require` when changing only `PGPASSFILE`, otherwise
+`pgd-proxy` falls back to libpq's default `sslmode`.
+
 ## Updating pgd-proxy using `tpaexec upgrade`
 
 When trying to upgrade to a specific package version, ensure the `pgd_proxy_package_version` in
