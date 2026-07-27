@@ -10,6 +10,17 @@
     group: root
     mode: "0644"
   register: pgd_proxy_unit
+  notify:
+    - Note pgd-proxy restart required
+
+# systemd caches unit files in memory, so a changed unit file on disk has no
+# effect on the running service until systemd is reloaded. Reload here (before
+# the restart triggered by the handler above) so that unit-file changes, such
+# as pgd_proxy_service_environment, actually take effect on redeploy.
+- name: Reload systemd when the pgd-proxy unit file changed
+  systemd:
+    daemon_reload: yes
+  when: pgd_proxy_unit is changed
 
 - name: Ensure pgd-proxy service is enabled on boot
   service:
