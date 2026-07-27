@@ -1,0 +1,14 @@
+- summary: Apply pgd-proxy systemd unit changes on redeploy
+  description: |
+    Changes to the `pgd-proxy` systemd unit file (for example, editing
+    `pgd_proxy_service_environment`) were written to disk but did not take
+    effect on the running service when re-running `tpaexec deploy` on an
+    existing cluster: the role restarted the service without first running
+    `systemctl daemon-reload`, so systemd kept using its cached unit, and
+    a change confined to the unit file did not trigger a restart at all.
+
+    TPA now reloads systemd and restarts `pgd-proxy` whenever the unit file
+    changes, so unit-file settings are applied on redeploy as expected.
+  type: bugfix
+  jira_tickets:
+  - TPA-1614
