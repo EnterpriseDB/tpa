@@ -331,6 +331,18 @@
     when: >
       'pgd-proxy' in role
 
+  # A former harp-proxy node becomes a pgd-proxy node here and gets pgd-cli for
+  # the first time. The earlier "Upgrade pgd-cli" play only installs the package;
+  # its config was never written, leaving pgd-cli unusable on these nodes
+  # (TPA-1618). Write it now: "Set up pgd-proxy" above has just created the
+  # pgdproxy user that owns the pgd-cli config, so this must run after it (and
+  # before the pgd-cli diagnostic below, which runs pgd-cli as that user).
+  - name: Configure pgd-cli on the new pgd-proxy node
+    include_role:
+      name: pgdcli/config
+    when: >
+      'pgd-proxy' in role
+
   - name: Stop harp-proxy
     service:
       name: harp-proxy
