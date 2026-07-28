@@ -684,8 +684,15 @@
       host={{ inventory_hostname }} port={{ pgbouncer_port }}
     harp_dcs_node_dsn: >-
       host={{ inventory_hostname }} port={{ postgres_port }} user={{ postgres_user }} {{ harp_dcs_client_dsn_attributes }}
+    # pgd_cli_dsn deliberately carries no user=. It describes how to reach a
+    # node as a pgd-cli endpoint, but the user pgd-cli must authenticate as is
+    # a property of the node *running* pgd-cli, not of the node being reached:
+    # postgres_user on postgres/bdr nodes, but pgd_proxy_user on dedicated
+    # pgd-proxy nodes (whose .pgpass only holds the proxy user's password). That
+    # local user isn't known here, so roles/pgdcli/config/templates/pgd-cli-config.j2
+    # appends user=<pgd_cli_user> to each endpoint when it renders the config.
     pgd_cli_dsn: >-
-      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} user={{ postgres_user }} {{ pgd_cli_dsn_attributes }}
+      host={{ inventory_hostname }} port={{ postgres_port }} dbname={{ bdr_database }} {{ pgd_cli_dsn_attributes }}
   vars:
     _repmgr_hostname: "{{ repmgr_hostname|default(inventory_hostname) }}"
 

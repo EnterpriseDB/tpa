@@ -1,9 +1,13 @@
 cluster:
   name: {{ pgd_cluster_name }}
   endpoints:
+{# v.pgd_cli_dsn carries no user= (see roles/init/tasks/postgres.yml): the client
+   user depends on this node, not the endpoint. pgd_cli_user is postgres_user on
+   postgres/bdr nodes and pgd_proxy_user on dedicated pgd-proxy nodes, matching the
+   only credential each node's .pgpass holds. #}
 {%  for h in groups[bdr_node_group] %}
 {%    set v = hostvars[h] %}
-    - "{{ v.pgd_cli_dsn }}"
+    - "{{ v.pgd_cli_dsn|dbname(v.bdr_database, user=pgd_cli_user) }}"
 {%  endfor %}
 {% if bdr_version is version('5', '>=') and pgd_ssl_password_command|default(None) %}
   ssl:
