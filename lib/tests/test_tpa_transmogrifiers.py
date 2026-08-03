@@ -437,6 +437,7 @@ class TestBDR4PGD5:
     ):
         """test check function"""
         x = BDR4PGD5()
+        x._args = Namespace(pgd_proxy_routing="local")
         assert len(x.check(basic_bdr_cluster).errors) == 0
         assert len(x.check(basic_bdr_cluster).warnings) == 0
 
@@ -467,6 +468,30 @@ class TestBDR4PGD5:
         assert len(x.check(basic_bdr_cluster).warnings) == 4
 
     @pytest.mark.parametrize(
+        "pgd_proxy_routing, error",
+        [
+            ("local", None),
+            ("global", None),
+            (None, "--pgd-proxy-routing must be 'global' or 'local', got 'None'"),
+            (
+                "invalid",
+                "--pgd-proxy-routing must be 'global' or 'local', got 'invalid'",
+            ),
+        ],
+    )
+    def test_bdr4pgd5_check_pgd_proxy_routing(
+        self, pgd_proxy_routing, error, basic_bdr_cluster
+    ):
+        """check() rejects a missing or invalid --pgd-proxy-routing value"""
+        x = BDR4PGD5()
+        x._args = Namespace(pgd_proxy_routing=pgd_proxy_routing)
+        errors = x.check(basic_bdr_cluster).errors
+        if error:
+            assert error in errors
+        else:
+            assert error not in [e for e in errors if "pgd-proxy-routing" in e]
+
+    @pytest.mark.parametrize(
         "args, vars, error",
         [
             (
@@ -478,11 +503,6 @@ class TestBDR4PGD5:
                 {"target_architecture": "PGD-Always-ON", "pgd_proxy_routing": "global"},
                 {"bdr_node_group": "basic", "bdr_version": "4"},
                 None,
-            ),
-            (
-                {"target_architecture": "PGD-Always-ON", "pgd_proxy_routing": None},
-                {"bdr_node_group": "basic", "bdr_version": "4"},
-                "Must specify --pgd-proxy-routing global or --pgd-proxy-routing local",
             ),
             (
                 {"target_architecture": "PGD-Always-ON", "pgd_proxy_routing": "global"},
