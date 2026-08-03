@@ -115,9 +115,9 @@ def find_latest(ec2, owner, pattern, sort_key):
         Filters=[{"Name": "name", "Values": [pattern]}],
     )
     if not response["Images"]:
-        raise RuntimeError(f"AWS returned 0 AMIs for owner={owner} pattern={pattern!r}")
+        print(f"Warning: AWS returned 0 AMIs for owner={owner} pattern={pattern!r}")
+        return
     return max(response["Images"], key=sort_key)
-
 
 def main():
     parsed = [parse_images(f) for f in FILES]
@@ -143,7 +143,7 @@ def main():
             except RuntimeError as exc:
                 print(f"ERROR: {exc}", file=sys.stderr)
                 return 1
-            if latest["Name"] != current_name:
+            if latest and latest["Name"] != current_name:
                 print(f"  {distro}: {current_name}\n      -> {latest['Name']}")
                 updates.append((current_name, latest["Name"]))
 

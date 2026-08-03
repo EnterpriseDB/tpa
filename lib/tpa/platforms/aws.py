@@ -67,11 +67,6 @@ class aws(CloudPlatform):
     def image(self, label, **kwargs):
         images = {
             "debian": {
-                "debian-10-amd64-20240703-1797": {
-                    "versions": ["10", "buster"],
-                    "owner": "136693071363",
-                    "user": "admin",
-                },
                 "debian-11-amd64-20260419-2453": {
                     "versions": ["11", "bullseye", "default"],
                     "owner": "136693071363",
