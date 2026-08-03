@@ -46,6 +46,7 @@ class BDR4PGD5(Transmogrifier):
     def check(self, cluster):
         res = CheckResult()
 
+        pgd_proxy_routing = self.args.pgd_proxy_routing
         source_arch = cluster.architecture
         if source_arch == "PGD-Always-ON":
             res.error("This is already a PGD-Always-ON cluster")
@@ -84,6 +85,11 @@ class BDR4PGD5(Transmogrifier):
                 "PGD-Always-ON clusters with only two locations will "
                 "lose global consensus entirely if any one location fails. "
                 "Consider adding another location (which may be a --witness-only-location)."
+            )
+        
+        if pgd_proxy_routing == None:
+            res.error(
+                "Must specify --pgd-proxy-routing global or --pgd-proxy-routing local"
             )
 
         return res
@@ -142,11 +148,6 @@ class BDR4PGD5(Transmogrifier):
         bdr_node_groups = [{"name": top}]
 
         pgd_proxy_routing = self.args.pgd_proxy_routing
-
-        if pgd_proxy_routing == None:
-            raise ConfigureError(
-                "Must specify --pgd-proxy-routing global or --pgd-proxy-routing local"
-            )
         
         if pgd_proxy_routing == "global":
             bdr_node_groups[0]["options"] = {"enable_proxy_routing": True}
