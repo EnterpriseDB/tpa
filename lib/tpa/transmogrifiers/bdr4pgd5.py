@@ -87,9 +87,9 @@ class BDR4PGD5(Transmogrifier):
                 "Consider adding another location (which may be a --witness-only-location)."
             )
         
-        if pgd_proxy_routing == None:
+        if pgd_proxy_routing not in ("global", "local"):
             res.error(
-                "Must specify --pgd-proxy-routing global or --pgd-proxy-routing local"
+                f"--pgd-proxy-routing must be 'global' or 'local', got '{pgd_proxy_routing}'"
             )
 
         return res

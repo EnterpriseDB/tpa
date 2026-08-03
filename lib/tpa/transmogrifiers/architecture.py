@@ -74,7 +74,6 @@ class Architecture(Transmogrifier):
                 help="Configure each PGD-Proxy to route connections to a "
                 "globally-elected write leader (global) or a write leader "
                 "within its own location (local)",
-                choices=["global", "local"],
                 dest="pgd_proxy_routing",
                 default=None,
             ),
