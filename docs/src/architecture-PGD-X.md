@@ -125,5 +125,26 @@ each region as CAMO partners.
 You may optionally specify `--enable-pgd-probes [{http, https}]` to
 enable http(s) api endpoints that will allow to easily probe proxy's health.
 
+You may optionally modify the defaults read/write or write-only ports on the configuration
+file if global routing is enabled, these should be different from each other and from the
+postgres port (`postgres_port`) for the cluster, and they should be defined under the 
+`options` for `bdr_node_groups` variable:
+
+```yaml
+cluster_vars:
+  postgres_port: 6444
+  bdr_node_groups:
+  - name: <cluster-name>
+    options:
+      read_write_port: 5444
+      read_only_port: 5445
+      enable_routing: true
+  - name: first_subgroup
+    parent_group_name: <cluster-name>
+    options:
+      location: first
+      enable_routing: false
+```
+
 You may also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).
