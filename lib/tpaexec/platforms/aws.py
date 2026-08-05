@@ -309,16 +309,14 @@ class aws(CloudPlatform):
         if args["regions"]:
             args["regions"] = list(dict.fromkeys(args["regions"]))
             if len(args["regions"]) > 1:
-                print(
-                    """Warning:
+                print("""Warning:
 When using multiple regions you MUST manually edit config.yml to ensure that
 `ec2_vpc` `cidr` don't overlap to allow vpc peering between regions.
 `cluster_rules` and `locations` `subnet` values must all be changed
 accordingly. See documentation https://documentation.enterprisedb.com/tpa/release/latest/platform-aws/#regions
 
 VPC peering must be setup manually after `tpaexec provision` is run.
-                    """
-                )
+                    """)
         else:
             args["regions"] = [args.get("region")]
 
