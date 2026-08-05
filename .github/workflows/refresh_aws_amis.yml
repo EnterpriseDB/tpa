@@ -50,6 +50,7 @@ jobs:
         run: black --check lib/tpa/platforms/aws.py lib/tpaexec/platforms/aws.py
 
       - name: Open draft PR
+        id: open-draft-pr
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GH_SLONIK }}
@@ -76,3 +77,11 @@ jobs:
             Refresh AWS AMIs to currently-available images
 
             Automated refresh by .github/workflows/refresh_aws_amis.yml.
+
+      - name: Trigger AWS integration tests on refreshed AMIs
+        if: steps.open-draft-pr.outputs.pull-request-operation != 'none'
+        env:
+          GH_TOKEN: ${{ secrets.GH_SLONIK }}
+        run: |
+          gh workflow run aws_integration_tests.yml \
+            --ref "${{ steps.open-draft-pr.outputs.pull-request-branch }}"
