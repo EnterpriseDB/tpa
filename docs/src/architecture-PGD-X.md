@@ -126,9 +126,9 @@ You may optionally specify `--enable-pgd-probes [{http, https}]` to
 enable http(s) api endpoints that will allow to easily probe proxy's health.
 
 You may optionally modify the defaults read/write or write-only ports on the configuration
-file if global routing is enabled, these should be different from each other and from the
-postgres port (`postgres_port`) for the cluster, and they should be defined under the 
-`options` for `bdr_node_groups` variable:
+file (see the [Additional Options](#additional-options) table for more information), these
+should be different from each other and from the postgres port (`postgres_port`) for the
+cluster, and they should be defined under the `options` for the corresponding BDR (sub)group:
 
 ```yaml
 cluster_vars:
