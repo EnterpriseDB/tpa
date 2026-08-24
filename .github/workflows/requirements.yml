@@ -122,7 +122,10 @@ jobs:
       - name: Setup container
         uses: ./foundation/actions/linux/container/setup
         with:
-          force-qemu: ${{ case(matrix.architecture == 's390x', 'true', 'false') }}
+          # TEMPORARY: re-testing the native s390x executor on this
+          # throwaway branch (force-qemu was added ~Feb 2026 to work
+          # around native s390x runners timing out for no apparent
+          # reason). Restore the force-qemu line above if that recurs.
           architecture: ${{ matrix.architecture }}
           distro: ${{ matrix.distro }}
           distro-version: ${{ matrix.distro-version }}
