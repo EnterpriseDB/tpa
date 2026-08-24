@@ -92,8 +92,12 @@ def family_for(name):
 
         return pattern, sort_key
 
-    # Rocky-{maj}-EC2-Base-{maj}.{min}-{date}.{N}.{arch}
-    m = re.match(r"^Rocky-(\d+)-EC2-Base-\d+\.\d+-\d+\.\d+\.(x86_64|aarch64)$", name)
+    # Rocky-{maj}-EC2-Base-{maj}.{min}-{date}[.{N}].{arch}
+    # The build-revision digit is sometimes omitted (seen on Rocky 8, while
+    # Rocky 9/10 still carry it), so it's optional here.
+    m = re.match(
+        r"^Rocky-(\d+)-EC2-Base-\d+\.\d+-\d+(?:\.\d+)?\.(x86_64|aarch64)$", name
+    )
     if m:
         major, arch = m.group(1), m.group(2)
         pattern = f"Rocky-{major}-EC2-Base-*.{arch}"
