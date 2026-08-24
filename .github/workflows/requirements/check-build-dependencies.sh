@@ -64,6 +64,18 @@ function create_venv_and_prep_stuff {
         --extra-index-url=https://dl.cloudsmith.io/public/cloudsmith/cli/python/index/ \
         --extra-index-url="https://downloads.enterprisedb.com/$TPA_PIP_CS_API/build-dependencies/python/simple/"
     $PIP install --no-index --find-links "$PIP_DEST" cloudsmith-cli
+
+    # cloudsmith-cli's dependency tree also drags in plenty of pure-python
+    # wheels (e.g. six, certifi, PyJWT) that pip had to build locally only
+    # because they're not already sitting in $PIP_DEST -- they aren't tied
+    # to $DISTRO_ARCHITECTURE and don't belong in this per-architecture
+    # index. A wheel's platform tag (the last "-"-delimited field before
+    # ".whl") ends in "_$DISTRO_ARCHITECTURE" only for the actual compiled,
+    # arch-specific wheels (cryptography, pycryptodome,
+    # argon2-cffi-bindings...) we actually want to publish; drop the rest
+    # now that cloudsmith-cli is already installed and doesn't need them
+    # in $PIP_DEST any more.
+    find "$PIP_DEST" -name '*.whl' ! -name "*_${DISTRO_ARCHITECTURE}.whl" -delete
 }
 
 function check_any_wheel_created_and_upload {
