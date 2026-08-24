@@ -52,9 +52,18 @@ function create_venv_and_prep_stuff {
     # Add EDB repositories as index to ensure the already generated wheels for
     # this specific architecture are available as dependencies for the base
     # environment such as cloudsmith cli (needs cryptography)
-    $PIP install --upgrade cloudsmith-cli \
+    #
+    # cloudsmith-cli pulls in its own compiled dependencies (cryptography,
+    # pycryptodome, argon2-cffi-bindings via keyrings-cryptfile) that have no
+    # prebuilt wheel for this architecture, so pip has to build them from
+    # source. Building into $PIP_DEST (instead of a plain `pip install`)
+    # means those wheels get picked up by check_any_wheel_created_and_upload
+    # and published too, so future runs can reuse them instead of rebuilding
+    # from source every time.
+    $PIP wheel -w "$PIP_DEST" cloudsmith-cli \
         --extra-index-url=https://dl.cloudsmith.io/public/cloudsmith/cli/python/index/ \
         --extra-index-url="https://downloads.enterprisedb.com/$TPA_PIP_CS_API/build-dependencies/python/simple/"
+    $PIP install --no-index --find-links "$PIP_DEST" cloudsmith-cli
 }
 
 function check_any_wheel_created_and_upload {
