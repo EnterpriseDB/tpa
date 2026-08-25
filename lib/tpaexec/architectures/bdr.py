@@ -243,6 +243,15 @@ class BDR(Architecture):
                     and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
+            n = instances[-1].get("node") + 1
+            instances.append(
+                {
+                    "node": n,
+                    "Name": self.args["hostnames"][n],
+                    "role": ["pem-server"],
+                    "location": self.args["locations"][0]["Name"],
+                }
+            )
 
     def _update_instance_beacon(self, instances):
         """
