@@ -166,7 +166,7 @@ pgd-proxy instance's `vars`:
 cluster_vars:
   pgd_proxy_service_environment:
     PGPASSFILE: /etc/edb/pgd-proxy/.pgpass
-    PGSSLMODE: require
+    PGSSLMODE: 'require'
 ```
 
 Note that the value you supply *replaces* the default mapping in full;
