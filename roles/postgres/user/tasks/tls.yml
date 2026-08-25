@@ -31,7 +31,7 @@
 
 - name: Retrieve list of key/certificate files
   shell: >
-    find /etc/tpa -name '*.crt' -o -name '*.key' &&
+    find /etc/tpa -maxdepth 1 \( -name '*.crt' -o -name '*.key' \) &&
     find ~{{ postgres_user }}/.postgresql -name '*.crt' -o -name '*.key'
   args:
     executable: /bin/bash
