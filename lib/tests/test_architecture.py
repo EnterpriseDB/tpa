@@ -547,3 +547,24 @@ class TestPGDArchitecture:
         """
         pgd_architecture.configure(force=True)
         assert "upgrade_components" not in pgd_architecture.args["cluster_vars"]
+
+    @pytest.mark.parametrize(
+        "argv, expect_pemserver",
+        [
+            (MINIMUM_PGD_ARGV, False),
+            (MINIMUM_PGD_ARGV + ["--enable-pem"], True),
+        ],
+    )
+    def test_pgd_always_on_enable_pem(self, argv, expect_pemserver, pgd_architecture):
+        """Regression test (TPA-761): PGD-Always-ON's template-added pem-server instance must not be duplicated by BDR._update_instance_pem()."""
+        pgd_architecture.configure(force=True)
+        instances = pgd_architecture.args["instances"]
+        pemserver_instances = [
+            i for i in instances if "pem-server" in i.get("role", [])
+        ]
+        if expect_pemserver:
+            assert (
+                len(pemserver_instances) == 1
+            ), "Should have exactly one pem-server instance"
+        else:
+            assert pemserver_instances == []
