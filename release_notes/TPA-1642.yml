@@ -1,0 +1,15 @@
+- summary: Avoid a Raft consensus race when creating BDR node groups
+  description: |
+    During the initial deploy of a BDR3/4/5/6-based cluster,
+    `bdr.create_node_group()` was called on the first BDR primary
+    immediately after all nodes were created with `bdr.create_node()`.
+    Creating a node group makes BDR establish Raft consensus for it, and
+    right after node creation the Raft workers weren't always up yet, so
+    this could fail intermittently with "could not establish consensus
+    leader".
+
+    TPA now retries node group creation when this happens, rather than
+    failing the deploy outright.
+  type: bugfix
+  jira_tickets:
+  - TPA-1642

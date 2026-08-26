@@ -173,6 +173,16 @@
 # We always call create_node_group() with "node_group_name := %s" and
 # the name of the node group; if _group_create_options specifies any
 # other parameters, we pass them through as well.
+#
+# bdr.create_node_group() itself has to establish Raft consensus among
+# the nodes as part of creating the group, and right after
+# bdr.create_node() the Raft workers may not all be up yet, so this can
+# fail transiently with "could not establish consensus leader". There
+# is no pre-existing Raft state to poll beforehand (no node group
+# exists until this call succeeds), so we retry the call itself rather
+# than trying to wait for a precondition that can't be observed yet.
+# The call is a single statement, so a failed attempt leaves nothing
+# behind for the retry to collide with.
 
 - name: Create BDR node groups if necessary
   postgresql_query:
@@ -183,6 +193,9 @@
   become_user: "{{ postgres_user }}"
   become: yes
   register: new_bdr_group
+  until: new_bdr_group is succeeded
+  retries: 60
+  delay: 1
   with_items: "{{ want_bdr_group_names }}"
   loop_control:
     loop_var: _group
