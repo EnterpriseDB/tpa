@@ -46,6 +46,16 @@
         common_name: "{{ CA_CN }}"
         basic_constraints: CA:TRUE
         basic_constraints_critical: yes
+        # Python 3.13's ssl module enables strict X.509 verification by
+        # default, and strict mode rejects a CA certificate that has no
+        # keyUsage extension at all (TPA-1631). This only affects newly
+        # generated CAs; see verify.yml for why we don't retrofit it onto
+        # CAs that already exist on disk.
+        key_usage:
+          - digitalSignature
+          - keyCertSign
+          - cRLSign
+        key_usage_critical: yes
 
     - name: Generate self-signed CA certificate
       community.crypto.x509_certificate:
