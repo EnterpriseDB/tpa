@@ -135,8 +135,9 @@ group:
 - with `--pgd-routing global`, the top-level group;
 - with `--pgd-routing local`, each location subgroup.
 
-Ports defined on a group that does not have routing enabled have no
-effect.
+A routing-enabled subgroup that does not define these ports itself
+inherits them from its parent group, so an existing cluster that has them
+on the top-level group keeps working when you switch to local routing.
 
 With global routing, the ports belong to the top-level group:
 
@@ -173,12 +174,6 @@ cluster_vars:
       read_only_port: 7433
       enable_routing: true
 ```
-
-!!! Note
-    With `--pgd-routing local`, `tpaexec configure` writes
-    `--read-write-port` and `--read-only-port` to the top-level group. You
-    must move them to the location subgroups, as shown above, for them to
-    take effect.
 
 If you do not set these options at all, Connection Manager listens on
 `postgres_port` + 1000 for read-write connections and `postgres_port` +
