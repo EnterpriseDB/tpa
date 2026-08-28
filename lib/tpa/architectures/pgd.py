@@ -7,6 +7,15 @@ from ..exceptions import PGDArchitectureError
 from typing import List, Tuple
 import re
 
+# Connection Manager reads these node group options from whichever group has
+# routing enabled, so they must be set on that group and nowhere else.
+CONNECTION_MANAGER_OPTIONS = (
+    "read_write_port",
+    "read_only_port",
+    "http_port",
+    "use_https",
+)
+
 
 class PGD(Architecture):
     def supported_versions(self) -> List[Tuple[str, str]]:
@@ -138,7 +147,7 @@ class PGD(Architecture):
         cluster_vars.update({"bdr_node_group": self.args["bdr_node_group"]})
 
         bdr_node_group_options = {}
-        for opt in ["read_write_port", "read_only_port", "http_port", "use_https"]:
+        for opt in CONNECTION_MANAGER_OPTIONS:
             if self.args[opt] is not None:
                 bdr_node_group_options[opt] = self.args[opt]
 

@@ -290,51 +290,151 @@ class TestPGDXArchitecture:
                 == expected_project_id
             )
 
+    # Connection Manager reads these options from whichever group has routing
+    # enabled, so --pgd-routing decides where they must land: the top-level
+    # group under global routing, each location subgroup under local routing.
     @pytest.mark.parametrize(
-        "argv, option_name, expected_value",
+        "argv, routing, option_name, expected_value",
         [
             (
-                STANDARD_PGDX_ARGV + ["--read-write-port", "7432"],
+                STANDARD_PGDX_ARGV
+                + ["--pgd-routing", "global", "--read-write-port", "7432"],
+                "global",
                 "read_write_port",
                 7432,
             ),
-            (STANDARD_PGDX_ARGV + ["--read-only-port", "7433"], "read_only_port", 7433),
-            (STANDARD_PGDX_ARGV + ["--http-port", "8080"], "http_port", 8080),
-            (STANDARD_PGDX_ARGV + ["--use-https"], "use_https", True),
+            (
+                STANDARD_PGDX_ARGV
+                + ["--pgd-routing", "local", "--read-write-port", "7432"],
+                "local",
+                "read_write_port",
+                7432,
+            ),
+            (
+                STANDARD_PGDX_ARGV
+                + ["--pgd-routing", "global", "--read-only-port", "7433"],
+                "global",
+                "read_only_port",
+                7433,
+            ),
+            (
+                STANDARD_PGDX_ARGV
+                + ["--pgd-routing", "local", "--read-only-port", "7433"],
+                "local",
+                "read_only_port",
+                7433,
+            ),
+            (
+                STANDARD_PGDX_ARGV + ["--pgd-routing", "global", "--http-port", "8080"],
+                "global",
+                "http_port",
+                8080,
+            ),
+            (
+                STANDARD_PGDX_ARGV + ["--pgd-routing", "local", "--http-port", "8080"],
+                "local",
+                "http_port",
+                8080,
+            ),
+            (
+                STANDARD_PGDX_ARGV + ["--pgd-routing", "global", "--use-https"],
+                "global",
+                "use_https",
+                True,
+            ),
+            (
+                STANDARD_PGDX_ARGV + ["--pgd-routing", "local", "--use-https"],
+                "local",
+                "use_https",
+                True,
+            ),
         ],
     )
-    def test_pgdx_cm_options(self, argv, option_name, expected_value, pgdx_cluster):
-        """Test that Connection Manager options are set correctly in bdr_node_groups"""
-        bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
-        top_group = bdr_node_groups[0]
-        assert top_group.get("options", {}).get(option_name) == expected_value
+    def test_pgdx_cm_options(
+        self, argv, routing, option_name, expected_value, pgdx_cluster
+    ):
+        """CM options are set on the group that has routing enabled, and only there"""
+        groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
+        top = [g for g in groups if not g.get("parent_group_name")]
+        subs = [g for g in groups if g.get("parent_group_name")]
+
+        assert len(top) == 1, "Should have exactly one top-level group"
+        assert subs, "Should have at least one location subgroup"
+
+        routed, unrouted = (top, subs) if routing == "global" else (subs, top)
+
+        for group in routed:
+            assert group["options"].get(option_name) == expected_value
+        for group in unrouted:
+            assert option_name not in group["options"]
+
+    @pytest.mark.parametrize(
+        "argv, routing",
+        [
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--pgd-routing",
+                    "global",
+                    "--read-write-port",
+                    "7432",
+                    "--http-port",
+                    "8080",
+                    "--use-https",
+                ],
+                "global",
+            ),
+            (
+                STANDARD_PGDX_ARGV
+                + [
+                    "--pgd-routing",
+                    "local",
+                    "--read-write-port",
+                    "7432",
+                    "--http-port",
+                    "8080",
+                    "--use-https",
+                ],
+                "local",
+            ),
+        ],
+    )
+    def test_pgdx_combined_cm_ports(self, argv, routing, pgdx_cluster):
+        """Multiple CM options move together, without disturbing enable_routing"""
+        groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
+
+        # Should only have one top-level group (not duplicates)
+        top_level_groups = [g for g in groups if not g.get("parent_group_name")]
+        assert len(top_level_groups) == 1, "Should have exactly one top-level group"
+
+        if routing == "global":
+            routed = top_level_groups
+        else:
+            routed = [g for g in groups if g.get("parent_group_name")]
+
+        for group in routed:
+            options = group["options"]
+            assert options.get("read_write_port") == 7432
+            assert options.get("http_port") == 8080
+            assert options.get("use_https") is True
+            # enable_routing must survive the move
+            assert options.get("enable_routing") is True
 
     @pytest.mark.parametrize(
         "argv",
         [
-            STANDARD_PGDX_ARGV
-            + ["--read-write-port", "7432", "--http-port", "8080", "--use-https"],
+            STANDARD_PGDX_ARGV + ["--pgd-routing", "global"],
+            STANDARD_PGDX_ARGV + ["--pgd-routing", "local"],
         ],
     )
-    def test_pgdx_combined_cm_ports(self, argv, pgdx_cluster):
-        """Test that multiple CM port options are correctly combined"""
-        bdr_node_groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
-
-        # Should only have one top-level group (not duplicates)
-        top_level_groups = [
-            g for g in bdr_node_groups if not g.get("parent_group_name")
-        ]
-        assert len(top_level_groups) == 1, "Should have exactly one top-level group"
-
-        top_group = top_level_groups[0]
-        options = top_group.get("options", {})
-
-        # Check all options are present in the single top-level group
-        assert options.get("read_write_port") == 7432
-        assert options.get("http_port") == 8080
-        assert options.get("use_https") is True
-        # Verify enable_routing is still present (wasn't accidentally removed during merge)
-        assert "enable_routing" in options
+    def test_pgdx_no_cm_options_when_flags_omitted(self, argv, pgdx_cluster):
+        """Omitting the port flags must leave the keys out altogether, so that
+        Connection Manager applies its own postgres_port+1000/+1001 defaults"""
+        groups = pgdx_cluster.cluster_vars.get("bdr_node_groups", [])
+        assert groups, "Should still generate bdr_node_groups for enable_routing"
+        for group in groups:
+            for option_name in ("read_write_port", "read_only_port", "http_port"):
+                assert option_name not in group.get("options", {})
 
     @pytest.mark.parametrize(
         "argv, expected_witness_count",

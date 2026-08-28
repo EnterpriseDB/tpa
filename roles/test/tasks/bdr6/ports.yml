@@ -18,18 +18,30 @@
       PGPASSWORD: "{{ vars['%s_password' % postgres_user] }}"
   environment: "{{ target_environment|combine(_task_environment) }}"
 
-# cm default ports are in node group options if set; else they are
-# postgres_port + 1000 and postgres_port + 1001
+# Connection Manager reads its ports from the node group that has routing
+# enabled: this node's own subgroup under local routing, or the top-level
+# group under global routing. A routing-enabled subgroup with no ports of
+# its own inherits them from its parent, so looking at this node's group
+# and then the top-level group covers both. If neither sets them, CM uses
+# postgres_port + 1000 and postgres_port + 1001.
 
 - name: determine ports for Connection Manager
   set_fact:
     read_write_port: "{{ group_options|selectattr('read_write_port', 'defined')|map(attribute='read_write_port')|list|first|default(postgres_port|int + 1000) }}"
     read_only_port: "{{ group_options|selectattr('read_only_port', 'defined')|map(attribute='read_only_port')|list|first|default(postgres_port|int + 1001) }}"
   vars:
-    group_options:
+    # This node's own group is listed first, so a local-routing subgroup
+    # wins over the top-level group. Keyed on bdr_node_group rather than
+    # cluster_name, because bdr_safe_name() may rewrite the cluster name.
+    _own_group_options:
       "{{ (bdr_node_groups|default([]))
-          |selectattr('name', 'equalto', cluster_name)
+          |selectattr('name', 'equalto', bdr_child_group|default(bdr_node_group))
           |map(attribute='options')|list }}"
+    _top_group_options:
+      "{{ (bdr_node_groups|default([]))
+          |selectattr('name', 'equalto', bdr_node_group)
+          |map(attribute='options')|list }}"
+    group_options: "{{ _own_group_options + _top_group_options }}"
 
 - name: connect to Connection Manager read-only dsn
   postgresql_query:
