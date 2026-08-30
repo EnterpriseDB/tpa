@@ -20,3 +20,22 @@ cluster.
 For all platforms, it will remove all the files created locally by
 `tpaexec provision`, including ssh keys, stored passwords, ansible
 inventory, and logs.
+
+## Retaining ansible.log across deprovision
+
+By default, the cluster directory's `ansible.log` is deleted along with
+everything else. If you're iterating on the same cluster directory
+(provision, deploy, test, deprovision, repeat) and want to keep each
+run's log for comparison, set `ansible_log_rotate: true` at the top
+level of `config.yml` (alongside settings like `keyring_backend`, not
+under `cluster_vars` - this is local, operator-side behaviour, not a
+property of the cluster):
+
+```yaml
+ansible_log_rotate: true
+```
+
+With this set, deprovision rotates `ansible.log` instead of deleting
+it: existing `ansible.log.N` files are shifted up by one, and the
+current `ansible.log` becomes `ansible.log.0`. Rotation is unbounded -
+older files accumulate until you remove them yourself.

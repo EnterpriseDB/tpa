@@ -2,6 +2,20 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+- name: Rotate ansible.log before deprovisioning removes it
+  shell: >
+    cd "{{ cluster_dir }}" &&
+    if [ -f ansible.log ]; then
+      for f in $(ls ansible.log.* 2>/dev/null | grep -E '^ansible\.log\.[0-9]+$' | sed 's/ansible\.log\.//' | sort -rn); do
+        mv "ansible.log.$f" "ansible.log.$((f+1))";
+      done;
+      mv ansible.log ansible.log.0;
+    fi
+  args:
+    executable: /bin/bash
+  when: ansible_log_rotate|default(false)
+  changed_when: true
+
 - name: Delete generated files for this cluster
   file:
     path: "{{ cluster_dir }}/{{ item }}"
