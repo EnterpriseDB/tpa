@@ -39,3 +39,15 @@ With this set, deprovision rotates `ansible.log` instead of deleting
 it: existing `ansible.log.N` files are shifted up by one, and the
 current `ansible.log` becomes `ansible.log.0`. Rotation is unbounded -
 older files accumulate until you remove them yourself.
+
+If `config.yml` doesn't set `ansible_log_rotate` at all, the
+`ANSIBLE_LOG_ROTATE` environment variable is used instead (accepted
+values: `1`, `true`, `yes`, `on`, case-insensitive) - useful for
+enabling this for a single command without editing `config.yml`:
+
+```bash
+ANSIBLE_LOG_ROTATE=true tpaexec deprovision <cluster_dir>
+```
+
+An explicit `ansible_log_rotate` in `config.yml`, `true` or `false`,
+always takes precedence over the environment variable.

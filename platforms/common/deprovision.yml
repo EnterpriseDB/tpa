@@ -13,7 +13,13 @@
     fi
   args:
     executable: /bin/bash
-  when: ansible_log_rotate|default(false)
+  vars:
+    # ansible_log_rotate in config.yml wins if set at all; ANSIBLE_LOG_ROTATE
+    # in the environment tpaexec was invoked in is only a fallback for when
+    # config.yml doesn't set it.
+    _ansible_log_rotate_env: "{{ lookup('env', 'ANSIBLE_LOG_ROTATE')|default('', true)|trim|lower }}"
+    _ansible_log_rotate: "{{ ansible_log_rotate|default(_ansible_log_rotate_env in ['1', 'true', 'yes', 'on']) }}"
+  when: _ansible_log_rotate
   changed_when: true
 
 - name: Delete generated files for this cluster
