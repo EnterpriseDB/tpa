@@ -58,17 +58,20 @@
     # (missing binary, malformed /etc/harp/config.yml, a postgres_user
     # permission problem) into the same bucket, so the operator would only
     # see a misleading failure one task later at "Initialise cluster with
-    # harpctl apply" instead of the real cause here.
+    # harpctl apply" instead of the real cause here. Ansible's command
+    # module always registers a (possibly empty) "msg", even on success, so
+    # that field can't be used to spot a broken environment -- checking that
+    # stdout is a usable JSON list is the only reliable signal we have.
     - name: Fail loudly if 'harpctl get proxies' itself is broken, not just empty
       assert:
         that:
-          - harp_dcs_proxies.msg is not defined
-          - harp_dcs_proxies.stdout | default('', true) | trim | length > 0
-          - (harp_dcs_proxies.stdout | from_json) is iterable
+          - >-
+            (harp_dcs_proxies.stdout | default('', true) | trim | length > 0)
+            and ((harp_dcs_proxies.stdout | from_json) is iterable)
         fail_msg: >-
           'harpctl get proxies' did not return the JSON list HARP needs to detect
           whether the DCS has lost its bootstrap (rc={{ harp_dcs_proxies.rc | default('?') }},
-          stderr={{ harp_dcs_proxies.stderr | default('') }}, msg={{ harp_dcs_proxies.msg | default('') }}).
+          stderr={{ harp_dcs_proxies.stderr | default('') }}).
           This usually means the harpctl binary is missing, /etc/harp/config.yml is
           invalid, or {{ postgres_user }} lacks permission to run harpctl -- fix the
           environment before retrying, rather than relying on the automatic bootstrap
