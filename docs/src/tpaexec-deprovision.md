@@ -26,28 +26,31 @@ inventory, and logs.
 By default, the cluster directory's `ansible.log` is deleted along with
 everything else. If you're iterating on the same cluster directory
 (provision, deploy, test, deprovision, repeat) and want to keep each
-run's log for comparison, set `ansible_log_rotate: true` at the top
+run's log for comparison, set `preserve_ansible_log: true` at the top
 level of `config.yml` (alongside settings like `keyring_backend`, not
 under `cluster_vars` - this is local, operator-side behaviour, not a
 property of the cluster):
 
 ```yaml
-ansible_log_rotate: true
+preserve_ansible_log: true
 ```
 
-With this set, deprovision rotates `ansible.log` instead of deleting
-it: existing `ansible.log.N` files are shifted up by one, and the
-current `ansible.log` becomes `ansible.log.0`. Rotation is unbounded -
-older files accumulate until you remove them yourself.
+With this set, deprovision preserves `ansible.log` instead of deleting
+it: the current `ansible.log` is renamed to `ansible.log.N`, where `N`
+is one more than the highest suffix already present (or `0` if there
+are no `ansible.log.N` files yet). Existing `ansible.log.N` files are
+left untouched under their original names, so each run keeps a stable
+filename you can refer back to. Accumulation is unbounded - older
+files stay until you remove them yourself.
 
-If `config.yml` doesn't set `ansible_log_rotate` at all, the
-`ANSIBLE_LOG_ROTATE` environment variable is used instead (accepted
+If `config.yml` doesn't set `preserve_ansible_log` at all, the
+`PRESERVE_ANSIBLE_LOG` environment variable is used instead (accepted
 values: `1`, `true`, `yes`, `on`, case-insensitive) - useful for
 enabling this for a single command without editing `config.yml`:
 
 ```bash
-ANSIBLE_LOG_ROTATE=true tpaexec deprovision <cluster_dir>
+PRESERVE_ANSIBLE_LOG=true tpaexec deprovision <cluster_dir>
 ```
 
-An explicit `ansible_log_rotate` in `config.yml`, `true` or `false`,
+An explicit `preserve_ansible_log` in `config.yml`, `true` or `false`,
 always takes precedence over the environment variable.

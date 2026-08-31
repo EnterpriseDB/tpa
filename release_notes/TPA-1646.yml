@@ -1,9 +1,10 @@
 - summary: Add an option to preserve ansible.log across deprovision instead of deleting it
   description: |
     tpaexec deprovision always deleted the cluster directory's ansible.log
-    along with other generated files. Setting ansible_log_rotate: true at the
-    top level of config.yml now rotates it instead (ansible.log.N files shift
-    up by one, and the current log becomes ansible.log.0), which is useful
+    along with other generated files. Setting preserve_ansible_log: true at
+    the top level of config.yml now preserves it instead (the current log is
+    renamed to ansible.log.N, one more than the highest existing suffix,
+    leaving earlier logs under their original names), which is useful
     when repeatedly provisioning and deprovisioning the same cluster
     directory during development. Default behavior is unchanged.
   type: minor_change
