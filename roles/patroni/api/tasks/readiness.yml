@@ -28,13 +28,34 @@
 
   register: patroni_readiness_api_output
 
-  # If the patroni daemon has just been started it can take a second or two before the
-  # API endpoint starts listening, so ignore the first few connection refused statuses
-  until:
-    (patroni_readiness_api_output.attempts < 3)
-    |ternary(
-      patroni_readiness_api_output.status == 200,
-      patroni_readiness_api_output.status in [-1, 200]
-    )
+  # ignore_errors lets the diagnostics block below run instead of Ansible
+  # halting the play the moment the last retry fails; the block re-raises
+  # the failure itself once it has captured Patroni's log.
+  ignore_errors: true
+
+  # If the patroni daemon has just been started it can take a second or
+  # two before the API endpoint starts listening; retries/delay alone
+  # give it that tolerance, so a plain status == 200 check is enough.
+  until: patroni_readiness_api_output.status == 200
   retries: 90
   delay: 2
+
+- when:
+    - patroni_readiness_api_output is not successful
+    - task_selector|permits('fail')
+  become: yes
+  block:
+    - name: Retrieve last five minutes of patroni server logfile
+      command: >
+        journalctl
+        -x
+        -u patroni@{{ cluster_name }}
+        --no-pager
+        --since "5 min ago"
+        -o cat
+      register: patroni_readiness_journal
+      changed_when: false
+
+    - name: Fail with patroni server logfile excerpt since it did not become ready
+      fail:
+        msg: "{{ patroni_readiness_journal.stdout }}"
