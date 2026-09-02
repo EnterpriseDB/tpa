@@ -277,6 +277,28 @@ class TestM1Architecture:
         else:
             assert architecture_m1.configure(force=True) is expected
 
+    @pytest.mark.parametrize(
+        argnames=("argv", "expect_edb_repo"),
+        argvalues=(
+            (ARGS + ["--failover-manager", "repmgr"], False),
+            (ARGS + ["--failover-manager", "repmgr", "--enable-pem"], True),
+            (ARGS + ["--failover-manager", "repmgr", "--enable-beacon-agent"], True),
+            (ARGS + ["--failover-manager", "repmgr", "--enable-pg-backup-api"], True),
+        ),
+    )
+    def test_m1_enable_pg_backup_api_requires_edb_repo(
+        self, argv, expect_edb_repo, architecture_m1
+    ):
+        """Regression test (TPA-1633): --enable-pg-backup-api on community
+        Postgres must not leave edb_repositories empty, since pg-backup-api
+        is only published to EDB's Cloudsmith repos."""
+        architecture_m1.configure(force=True)
+        edb_repos = architecture_m1.args["cluster_vars"]["edb_repositories"]
+        if expect_edb_repo:
+            assert edb_repos != []
+        else:
+            assert edb_repos == []
+
 
 @pytest.fixture
 def bdr_architecture(argv):

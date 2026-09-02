@@ -212,6 +212,18 @@ class TestPGDXArchitecture:
         assert edb_repos == expected_repos
 
     @pytest.mark.parametrize(
+        "argv",
+        [STANDARD_PGDX_ARGV + ["--enable-pg-backup-api"]],
+    )
+    def test_pgdx_enable_pg_backup_api_keeps_repos(self, argv, pgdx_cluster):
+        """PGD-X always requires EDB repos regardless of --enable-pg-backup-api
+        (TPA-1633 companion check — PGD-X is excluded by name from the
+        community-Postgres empty-repo shortcut, so this should never
+        regress)."""
+        edb_repos = pgdx_cluster.cluster_vars.get("edb_repositories", [])
+        assert edb_repos != []
+
+    @pytest.mark.parametrize(
         "argv, check_barman",
         [
             (STANDARD_PGDX_ARGV + ["--enable-pem"], False),

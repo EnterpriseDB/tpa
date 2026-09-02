@@ -16,6 +16,9 @@ cluster_vars:
   enable_pg_backup_api: true
 ```
 
+Note that pg-backup-api is only available via EDB's package repositories
+and therefore requires a valid subscription.
+
 ## PG Backup API package version
 
 By default, TPA installs the latest available version of pg-backup-api.
