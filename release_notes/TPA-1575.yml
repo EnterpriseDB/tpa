@@ -1,15 +1,19 @@
-- summary: Install PostgreSQL from PGDG/EDB instead of AppStream on RHEL/Rocky/AlmaLinux 10
+- summary: Fix PostgreSQL being installed from the OS repository instead of PGDG/EDB on RHEL, Rocky Linux, AlmaLinux, CentOS Stream and Oracle Linux 10
   description: |
-    On EL10 (RHEL, Rocky and AlmaLinux 10) the OS AppStream repository ships
-    a postgresqlNN-server package whose systemd unit is the unversioned
-    postgresql.service rather than the postgresql-NN.service that TPA expects.
-    Because DNF modularity was removed in EL10, TPA's previous mechanism for
-    keeping AppStream from providing PostgreSQL no longer had any effect, so
-    PostgreSQL could be installed from AppStream and deployment then failed
-    while trying to disable the postgresql-NN.service unit.
-    TPA now excludes PostgreSQL (and Barman/repmgr) packages from the OS
-    BaseOS and AppStream repositories on EL10, ensuring PostgreSQL is
-    installed from the PGDG/EDB repositories as intended.
+    On RHEL, Rocky Linux, AlmaLinux, CentOS Stream and Oracle Linux 10, the
+    OS BaseOS/AppStream repositories ship their own PostgreSQL packages.
+    Because DNF modularity — which TPA previously relied on to keep the OS
+    repositories from providing PostgreSQL — was removed in these EL10
+    distributions, TPA could end up installing PostgreSQL from the OS
+    repository instead of PGDG or EDB. The OS package's systemd unit is
+    named differently from the one TPA expects, so deployment then failed
+    while trying to manage the PostgreSQL service.
+
+    TPA now excludes PostgreSQL, Barman and repmgr packages from the OS
+    BaseOS and AppStream repositories on all of these EL10 distributions,
+    so PostgreSQL is always installed from PGDG or EDB as intended. This
+    matches the exclusion behaviour already in place for earlier RHEL
+    family versions (7, 8, and 9, which rely on DNF module exclusion).
   type: bugfix
   jira_tickets:
   - TPA-1575

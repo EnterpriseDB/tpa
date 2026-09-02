@@ -88,7 +88,35 @@
   failed_when: _task is not successful and _task.rc != 257
   when: ansible_distribution_id == "rhel"
 
-- name: Exclude postgresql packages from CentOS base repositories
+# On CentOS 7/8, the OS base/AppStream repos are excluded by editing
+# the yum .repo files directly (rhnplugin.conf, used above for RHEL,
+# doesn't exist on these systems).
+#
+# From EL10 onwards, DNF modularity has been removed, so the "Disable
+# builtin postgresql module for DNF" task below is a no-op there, and
+# the OS AppStream repository ships a postgresqlNN-server package
+# whose systemd unit is the unversioned postgresql.service rather than
+# the postgresql-NN.service that PGDG/EDB packages provide. If
+# AppStream (or BaseOS) is allowed to satisfy postgresqlNN-server,
+# later tasks that manage postgresql-NN.service fail. We use the same
+# ini_file mechanism, keyed by distribution and major version, to
+# exclude postgres (and barman/repmgr) from the OS repos there too.
+#
+# os_repos[ansible_distribution_id][ansible_distribution_major_version]
+# is a list of {file, sections} entries. A distribution or major
+# version not listed here safely yields an empty list via the
+# default(...) filters below, so the task is a clean no-op rather than
+# a hard failure — this also fixes a pre-existing bug where an
+# undefined dict-key lookup (e.g. CentOS Stream 9/10 previously) was
+# returned as a literal unrendered template string by
+# with_nested_dependents instead of skipping cleanly.
+#
+# Note: a section that exists in the file but doesn't yet have the
+# exclude= key is silently appended to rather than flagged — this
+# mirrors the same limitation already accepted by every other ini_file
+# task in this file.
+
+- name: Exclude postgresql packages from OS base/AppStream repositories
   ini_file:
     dest: "/etc/yum.repos.d/{{ item.0.file }}"
     create: no
@@ -96,32 +124,66 @@
     option: exclude
     value: "postgresql* barman* repmgr*"
   with_nested_dependents:
-  - base_repos[ansible_distribution_major_version|int]
+  - "(os_repos[ansible_distribution_id]|default({}))[ansible_distribution_major_version|int]|default([])"
   - item.0.sections
-  when: ansible_distribution_id == "centos"
+  loop_control:
+    label: "{{ item.0.file }} [{{ item.1 }}]"
+  when: ansible_distribution_id in os_repos
   register: exclude
   failed_when:
     exclude is not successful and exclude.rc != 257
   vars:
-    base_repos:
-      7:
-      - file: CentOS-Base.repo
-        sections:
-        - base
-        - updates
-      8:
-      - file: CentOS-Base.repo
-        sections:
-        - BaseOS
-      - file: CentOS-AppStream.repo
-        sections:
-        - AppStream
-      - file: CentOS-Linux-BaseOS.repo
-        sections:
-        - baseos
-      - file: CentOS-Linux-AppStream.repo
-        sections:
-        - appstream
+    os_repos:
+      centos:
+        7:
+        - file: CentOS-Base.repo
+          sections:
+          - base
+          - updates
+        8:
+        - file: CentOS-Base.repo
+          sections:
+          - BaseOS
+        - file: CentOS-AppStream.repo
+          sections:
+          - AppStream
+        - file: CentOS-Linux-BaseOS.repo
+          sections:
+          - baseos
+        - file: CentOS-Linux-AppStream.repo
+          sections:
+          - appstream
+        10:
+        - file: centos.repo
+          sections:
+          - baseos
+          - appstream
+      rocky:
+        10:
+        - file: rocky.repo
+          sections:
+          - baseos
+          - appstream
+      almalinux:
+        10:
+        - file: almalinux-baseos.repo
+          sections:
+          - baseos
+        - file: almalinux-appstream.repo
+          sections:
+          - appstream
+      rhel:
+        10:
+        - file: redhat.repo
+          sections:
+          - "rhel-10-for-{{ ansible_architecture }}-baseos-rpms"
+          - "rhel-10-for-{{ ansible_architecture }}-appstream-rpms"
+      ol:
+        10:
+        - file: oracle-linux-ol10.repo
+          sections:
+          - ol10_baseos_latest
+          - ol10_appstream
 
 # The pgbouncer package from EPEL depends on python-psycopg2, which
 # conflicts with our python2-psycopg2 package.
@@ -151,39 +213,6 @@
   register: dnfmod
   changed_when: >
     dnfmod.stdout.strip() == 'ok'
-
-# RHEL/Rocky/AlmaLinux 10 removed DNF modularity, so the module-disable task
-# above is a no-op there. Their AppStream repo now ships postgresqlNN-server
-# packages directly, but the unit those install is the unversioned
-# postgresql.service rather than the postgresql-NN.service that PGDG/EDB
-# packages provide. If AppStream is allowed to satisfy postgresqlNN-server,
-# later tasks looking for postgresql-NN.service fail. Exclude postgres (and
-# barman/repmgr) from the OS repos so those packages come from PGDG/EDB.
-
-- name: Exclude postgresql packages from OS repositories on EL >= 10
-  ini_file:
-    dest: "/etc/yum.repos.d/{{ item.file }}"
-    create: no
-    section: "{{ item.section }}"
-    option: exclude
-    value: "postgresql* barman* repmgr*"
-  with_items: "{{ el_os_repos[ansible_distribution_id]|default([]) }}"
-  loop_control:
-    label: "{{ item.file }} [{{ item.section }}]"
-  register: el_os_exclude
-  failed_when: el_os_exclude is not successful and el_os_exclude.rc != 257
-  when: ansible_distribution_major_version|int >= 10
-  vars:
-    el_os_repos:
-      rocky:
-      - {file: rocky.repo, section: baseos}
-      - {file: rocky.repo, section: appstream}
-      almalinux:
-      - {file: almalinux-baseos.repo, section: baseos}
-      - {file: almalinux-appstream.repo, section: appstream}
-      centos:
-      - {file: centos.repo, section: baseos}
-      - {file: centos.repo, section: appstream}
 
 # The PGDG repo RPM installs a pgdg-redhat-all.repo file that contains
 # entries for all available repositories for every version of Postgres,
