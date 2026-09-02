@@ -65,6 +65,10 @@ inputs:
   tpa_failover_manager:
     required: false
     description: "Failover manager (for M1 only)"
+  tpa_efm_bind_by_hostname:
+    required: false
+    description: "Configure EFM to bind by hostname instead of IP (for M1 with efm only)"
+    default: "false"
   tpa_location_names:
     required: false
     description: "Location names (for M1 only)"
@@ -217,6 +221,10 @@ runs:
 
         if [ "${{ inputs.tpa_architecture }}" == "M1" ] ;then
           CONFIGURE_OPTS+=(--failover-manager "${{ inputs.tpa_failover_manager }}")
+
+          if [ "${{ inputs.tpa_failover_manager }}" == "efm" ] && [ "${{ inputs.tpa_efm_bind_by_hostname }}" == "true" ] ;then
+            CONFIGURE_OPTS+=(--efm-bind-by-hostname)
+          fi
 
           if [ "${{ inputs.tpa_failover_manager }}" != "patroni" ] ;then
           #Architecture error: TPA does not support Patroni with multiple locations

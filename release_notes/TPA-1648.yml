@@ -1,0 +1,22 @@
+- summary: Fix efm_bind_by_hostname being silently reset during EFM switchover and upgrade health checks
+  description: |
+    When a cluster was configured with `--efm-bind-by-hostname`, EFM
+    switchover (`tpaexec switchover`, and the EFM switchover step used
+    mid-upgrade by `tpaexec upgrade`) and the EFM health checks run
+    around `tpaexec upgrade`/`tpaexec upgrade-efm` incorrectly used the
+    node's IP address instead of its hostname to identify itself when
+    querying `efm cluster-status-json`. Both task files unconditionally
+    reloaded EFM's role defaults (including `efm_bind_by_hostname:
+    false`) over the user-configured value, silently reverting the
+    cluster to IP-based identification. As a result, tasks that look up
+    a node by its EFM identity (`efm set-priority`, cluster-status
+    polling, and the "node is part of allowed nodes" check) could fail
+    on clusters configured with `--efm-bind-by-hostname`.
+
+    The role defaults are now only used as a fallback for variables that
+    are not already defined, so a user-configured `efm_bind_by_hostname`
+    (and `efm_cluster_status_retries`/`efm_cluster_status_retry_delay`,
+    if overridden) is preserved.
+  type: bugfix
+  jira_tickets:
+  - TPA-1648

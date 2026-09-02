@@ -8,11 +8,21 @@
 
 # This is a task file, not a role, so efm/config's defaults are not loaded
 # automatically. We include them explicitly to make the retry vars
-# (efm_cluster_status_retries, efm_cluster_status_retry_delay) available
-# for the cluster-status-json command below.
+# (efm_cluster_status_retries, efm_cluster_status_retry_delay) and
+# efm_bind_by_hostname available for the tasks below. We only fall back
+# to the role defaults for variables that are not already defined, so a
+# user-configured efm_bind_by_hostname (e.g. from group_vars) is not
+# clobbered by the role defaults. See TPA-1648.
 - name: Include EFM config defaults
   include_vars:
+    name: _efm_config_defaults
     file: "{{ tpa_dir }}/roles/efm/config/defaults/main.yml"
+
+- name: Apply EFM config defaults for variables not already defined
+  set_fact:
+    efm_bind_by_hostname: "{{ efm_bind_by_hostname|default(_efm_config_defaults.efm_bind_by_hostname) }}"
+    efm_cluster_status_retries: "{{ efm_cluster_status_retries|default(_efm_config_defaults.efm_cluster_status_retries) }}"
+    efm_cluster_status_retry_delay: "{{ efm_cluster_status_retry_delay|default(_efm_config_defaults.efm_cluster_status_retry_delay) }}"
 
 - name: Ensure we use efm failover_manager
   assert:

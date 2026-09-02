@@ -43,6 +43,10 @@ inputs:
     required: true
     description: "Failover manager"
     default: "repmgr"
+  tpa_efm_bind_by_hostname:
+    required: false
+    description: "Configure EFM to bind by hostname instead of IP (efm only)"
+    default: "false"
   tpa_package_cache:
     required: false
     description: "Enable local repo and reuse packages"
@@ -74,6 +78,7 @@ runs:
         tpa_postgres_flavour: ${{ inputs.tpa_postgres_flavour }}
         tpa_postgres_version: ${{ inputs.tpa_postgres_version }}
         tpa_failover_manager: ${{ inputs.tpa_failover_manager }}
+        tpa_efm_bind_by_hostname: ${{ inputs.tpa_efm_bind_by_hostname }}
         tpa_package_cache: ${{ inputs.tpa_package_cache }}
         cluster: ${{ inputs.cluster }}
 
