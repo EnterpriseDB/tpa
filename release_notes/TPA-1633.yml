@@ -1,0 +1,13 @@
+- summary: Enable standard repo when enabling pg-backup-api
+  description: |
+    pg-backup-api is only published to EDB's Cloudsmith repositories, never
+    to PGDG. Configuring a community-Postgres cluster with
+    --enable-pg-backup-api (without --enable-pem or --enable-beacon-agent)
+    previously produced a config.yml with an empty edb_repositories list,
+    so the generated configuration could not install pg-backup-api. TPA
+    now enables the standard EDB repository whenever --enable-pg-backup-api
+    is used, matching the existing behaviour for --enable-pem and
+    --enable-beacon-agent.
+  type: bugfix
+  jira_tickets:
+  - TPA-1633
