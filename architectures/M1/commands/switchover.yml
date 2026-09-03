@@ -12,6 +12,8 @@
   become: yes
   environment: "{{ target_environment }}"
   hosts: all
+  handlers:
+  - import_tasks: "{{ tpa_dir }}/roles/efm/handlers/main.yml"
   tasks:
   - assert:
       msg: "Switchover target host is not a member of this cluster: {{ target }}"
