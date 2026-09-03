@@ -115,6 +115,14 @@
 # exclude= key is silently appended to rather than flagged — this
 # mirrors the same limitation already accepted by every other ini_file
 # task in this file.
+#
+# rhel:10 lists both the subscription-manager repo file (redhat.repo,
+# with per-arch section names) and the RHUI repo file that ships on
+# AWS's pay-as-you-go RHEL AMIs (redhat-rhui.repo, no arch in the
+# section name) — confirmed by live-testing on a real AWS RHEL 10
+# instance, which registers no redhat.repo at all and uses RHUI
+# exclusively. Whichever one doesn't apply to a given host is a clean
+# no-op via the rc == 257 tolerance above.
 
 - name: Exclude postgresql packages from OS base/AppStream repositories
   ini_file:
@@ -178,6 +186,10 @@
           sections:
           - "rhel-10-for-{{ ansible_architecture }}-baseos-rpms"
           - "rhel-10-for-{{ ansible_architecture }}-appstream-rpms"
+        - file: redhat-rhui.repo
+          sections:
+          - rhel-10-baseos-rhui-rpms
+          - rhel-10-appstream-rhui-rpms
       ol:
         10:
         - file: oracle-linux-ol10.repo
