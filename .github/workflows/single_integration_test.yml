@@ -45,6 +45,7 @@ on:
         - tpa/debian:10
         - tpa/debian:11
         - tpa/debian:12
+        - tpa/debian:13
         - tpa/redhat:8
         - tpa/redhat:9
         - tpa/sles:15
