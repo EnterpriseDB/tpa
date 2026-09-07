@@ -165,11 +165,17 @@ class docker(Platform):
                     "buster",
                     "bullseye",
                     "bookworm",
+                    "trixie",
                     "9",
                     "10",
                     "11",
                     "12",
+                    "13",
                 ],
+                # Debian 13 is experimental, so an unqualified "Debian" still
+                # means 12. (Without this, valid_version() would fall back to
+                # versions.pop() and silently select 13.)
+                "default_version": "12",
                 "os": "Debian",
             },
             "tpa/redhat": {

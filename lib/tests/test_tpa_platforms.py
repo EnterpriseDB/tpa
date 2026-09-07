@@ -6,8 +6,10 @@
 
 import pytest
 
+from tpa.exceptions import DockerPlatformError
 from tpa.platform import Platform
 from tpa.platforms.aws import aws as AwsPlatform
+from tpa.platforms.docker import docker as DockerPlatform
 
 
 @pytest.fixture
@@ -61,3 +63,35 @@ class TestAwsClusterVars:
         cluster_vars = {"opt_in_tasks": None}
         aws_platform.update_cluster_vars(cluster_vars, args={})
         assert cluster_vars["opt_in_tasks"] == ["sysctl_net"]
+
+
+class TestDockerDebianImages:
+    """image() resolution for the tpa/debian image.
+
+    Debian 13/trixie is supported but experimental, so an unqualified
+    "Debian" must still resolve to 12. This matters because valid_version()
+    falls back to versions.pop() — the *last* list entry — when neither an
+    explicit version nor a default_version is given, so adding "13" to the
+    list would silently retarget every --os Debian without --os-version.
+    The explicit default_version is what pins it.
+    """
+
+    @pytest.fixture
+    def docker_platform(self):
+        return DockerPlatform("docker", arch=None)
+
+    def test_unqualified_debian_still_means_12(self, docker_platform):
+        assert docker_platform.image("Debian")["version"] == "12"
+
+    def test_bare_image_name_still_means_12(self, docker_platform):
+        assert docker_platform.image("tpa/debian")["version"] == "12"
+
+    @pytest.mark.parametrize("version", ["13", "trixie", "12", "bookworm"])
+    def test_explicit_version_is_honoured(self, docker_platform, version):
+        image = docker_platform.image(f"tpa/debian:{version}")
+        assert image["version"] == version
+        assert image["os"] == "Debian"
+
+    def test_unknown_version_is_rejected(self, docker_platform):
+        with pytest.raises(DockerPlatformError):
+            docker_platform.image("tpa/debian:14")
