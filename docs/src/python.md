@@ -14,7 +14,8 @@ according to the distribution.
 
 Distribution| Python 2| Python 3
 ----|----|----
-Debian 12/bookworm|✓|✓ (3.11)
+Debian 13/trixie|✗|✓ (3.13)
+Debian 12/bookworm|✗|✓ (3.11)
 Debian 11/bullseye|✓|✓ (3.9)
 Debian 10/buster|✓|✓ (3.7)
 Ubuntu 24.04/noble|✗|✓ (3.12)
@@ -27,7 +28,9 @@ RHEL 7.x|✓|✗ (3.6)
 SLES 15|✗|✓ (3.6)
 
 
-Ubuntu 20.04, 22.04, 24.04, RHEL 8.x, 9.x, 10.x, and SLES 15 can be used only with Python 3.
+Debian 12 and 13, Ubuntu 20.04, 22.04, 24.04, RHEL 8.x, 9.x, 10.x, and SLES 15
+can be used only with Python 3. Bullseye was the last Debian release to ship
+python2.
 
 RHEL 7.x ships with Python 3.6, but the librpm bindings for system Python 3 are
 not available.

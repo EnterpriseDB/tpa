@@ -14,10 +14,17 @@ and is not suitable for production use.
 Fully supported platforms are supported both as host systems for running
 TPA and target systems on which TPA deploys the Postgres cluster.
 
+Platforms marked 'experimentally supported' are recent releases that TPA
+recognises and can deploy to, but for which not every architecture or
+software option works yet, because that depends on packages having been
+published for the platform upstream. They are not suitable for production
+use until they become fully supported.
+
 ## ARM64 (aarch64) distros
 
 ### Debian
 
+* Debian 13/trixie is experimentally supported
 * Debian 12/bookworm is fully supported
 
 ### RedHat
@@ -31,6 +38,7 @@ TPA and target systems on which TPA deploys the Postgres cluster.
 
 ### Debian
 
+* Debian 13/trixie is experimentally supported
 * Debian 12/bookworm is fully supported
 * Debian 11/bullseye is fully supported
 * Debian 10/buster is a legacy distribution

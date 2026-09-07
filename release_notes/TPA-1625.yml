@@ -1,0 +1,7 @@
+- summary: Support running TPA on Debian 13
+  description: |
+    The TPA controller can now be a system running Debian 13 ("trixie"). On
+    these systems the system python packages (python 3.13) can be used.
+  type: notable_change
+  jira_tickets:
+  - TPA-1625
