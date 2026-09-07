@@ -34,7 +34,11 @@ class TestTransmogrifiers:
     @pytest.mark.parametrize(
         "args, error, expected",
         [
-            (["--architecture", "PGD-Always-ON"], None, [Common, Architecture]),
+            (
+                ["--architecture", "PGD-Always-ON", "--pgd-proxy-routing", "local"],
+                None,
+                [Common, Architecture],
+            ),
             (["--edb-repositories", "dev"], None, [Common, Repositories]),
             (
                 [
@@ -57,6 +61,8 @@ class TestTransmogrifiers:
                 [
                     "--architecture",
                     "PGD-Always-ON",
+                    "--pgd-proxy-routing",
+                    "local",
                     "--bdr-package-version",
                     "5.5.0",
                 ],
@@ -97,6 +103,8 @@ class TestTransmogrifiers:
             [
                 "--architecture",
                 "PGD-Always-ON",
+                "--pgd-proxy-routing",
+                "local",
                 "--edb-repositories",
                 "dev",
             ]
@@ -316,7 +324,9 @@ class TestArchitecture:
         it via require() so the framework sees it in the dependency tree.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture=target))
+        x.set_parsed_args(
+            Namespace(target_architecture=target, pgd_proxy_routing="local")
+        )
         assert len(x.required) == 1
         assert isinstance(x.required[0], specialist_class)
 
@@ -329,7 +339,11 @@ class TestArchitecture:
         command-line values via self.args.
         """
         x = Architecture()
-        args = Namespace(target_architecture="PGD-Always-ON", edb_repositories=None)
+        args = Namespace(
+            target_architecture="PGD-Always-ON",
+            pgd_proxy_routing="local",
+            edb_repositories=None,
+        )
         x.set_parsed_args(args)
         specialist = x.required[0]
         assert specialist.args is args
@@ -345,7 +359,9 @@ class TestArchitecture:
         the deduplication logic in transmogrifiers_from_args() can see them.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
+        )
         required_classes = [type(t) for t in x.all_required()]
         assert BDR4PGD5 in required_classes
         assert Repositories in required_classes
@@ -373,7 +389,9 @@ class TestArchitecture:
         avoid either double-processing or adding spurious findings.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
+        )
         result = x.check(basic_bdr_cluster)
         assert len(result.errors) == 0
         assert len(result.warnings) == 0
@@ -388,7 +406,7 @@ class TestArchitecture:
         """
         x = Architecture()
         x.set_parsed_args(
-            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing=None)
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
         )
         before = dict(basic_bdr_cluster.vars)
         x.apply(basic_bdr_cluster)
@@ -405,7 +423,9 @@ class TestArchitecture:
         output surface at the correct nesting level via t.required.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
+        )
         desc = x.description(basic_bdr_cluster)
         assert desc._items == []
         assert desc._title is None
@@ -489,7 +509,7 @@ class TestBDR4PGD5:
         if error:
             assert error in errors
         else:
-            assert error not in [e for e in errors if "pgd-proxy-routing" in e]
+            assert not [e for e in errors if "pgd-proxy-routing" in e]
 
     @pytest.mark.parametrize(
         "args, vars, error",

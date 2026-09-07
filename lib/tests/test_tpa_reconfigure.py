@@ -79,6 +79,31 @@ class TestReconfigure:
         with pytest.raises(PGDSDeprecatedError):
             reconfigure(args=[PGDS_CLUSTER_DIR, "--describe"])
 
+    @pytest.mark.parametrize("mode", ["--describe", "--check"])
+    def test_reconfigure_requires_pgd_proxy_routing(self, create_cluster, mode):
+        """--pgd-proxy-routing is required for --architecture PGD-Always-ON
+
+        This must be enforced up front, before dispatching to describe, check
+        or apply, so that --describe can't silently skip it the way it would
+        if this were left to the specialist's check() alone.
+        """
+        with pytest.raises(ConfigureError):
+            reconfigure(args=[CLUSTER_DIR, "--architecture", "PGD-Always-ON", mode])
+
+    def test_reconfigure_rejects_invalid_pgd_proxy_routing(self, create_cluster):
+        """--pgd-proxy-routing only accepts 'global' or 'local'"""
+        with pytest.raises(ConfigureError):
+            reconfigure(
+                args=[
+                    CLUSTER_DIR,
+                    "--architecture",
+                    "PGD-Always-ON",
+                    "--pgd-proxy-routing",
+                    "bogus",
+                    "--describe",
+                ]
+            )
+
     def test_reconfigure_write_output(
         self,
         create_cluster,

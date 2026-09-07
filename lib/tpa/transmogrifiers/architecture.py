@@ -69,6 +69,14 @@ class Architecture(Transmogrifier):
             ),
             # This option is specific to the BDR4->PGD5 path, but it must be
             # defined here in the dispatcher so it's available to the user.
+            # Note: this option deliberately has no choices=[...]. Unlike
+            # --architecture, it isn't used to distinguish between competing
+            # Transmogrifier classes, and transmogrifiers_from_args()'s
+            # options_match() treats any choices-constrained value as a
+            # selector: an out-of-choice value there would make Architecture
+            # silently fail to match at all (dropped from tlist with no
+            # error), rather than raising a proper error. Validation happens
+            # below in set_parsed_args() instead.
             **opt(
                 "--pgd-proxy-routing",
                 help="Configure each PGD-Proxy to route connections to a "
@@ -97,6 +105,26 @@ class Architecture(Transmogrifier):
                 raise ConfigureError(
                     f"No supported upgrade path for target architecture '{target}'"
                 )
+
+            # --pgd-proxy-routing is only meaningful for the BDR4->PGD5 path,
+            # but it's required (as "global" or "local") there. We can't
+            # express that with argparse's own choices/required= (the option
+            # isn't required for other target architectures, and choices=
+            # would break dedup in transmogrifiers_from_args(), see options()
+            # above), so we enforce it here instead, as soon as we know the
+            # target. This runs before describe/check/apply, so --describe
+            # can't silently skip it the way it would if this were left to
+            # the specialist's check().
+            pgd_proxy_routing = self.args.pgd_proxy_routing
+            if target == "PGD-Always-ON" and pgd_proxy_routing not in (
+                "global",
+                "local",
+            ):
+                raise ConfigureError(
+                    "--pgd-proxy-routing must be 'global' or 'local', got "
+                    f"'{pgd_proxy_routing}'"
+                )
+
             specialist = specialist_class()
             specialist.set_parsed_args(parsed_args)
             self.require(specialist)
