@@ -104,6 +104,21 @@ class TestReconfigure:
                 ]
             )
 
+    def test_reconfigure_pgd_x_unaffected_by_pgd_proxy_routing_requirement(
+        self, create_cluster, capsys
+    ):
+        """--architecture PGD-X doesn't need --pgd-proxy-routing
+
+        --pgd-proxy-routing is required only for the BDR4->PGD5
+        (--architecture PGD-Always-ON) path. This confirms --architecture
+        PGD-X still dispatches and runs its own checks without being blocked
+        by that requirement, and that whatever it does report is its own
+        business (unrelated to pgd-proxy-routing).
+        """
+        reconfigure(args=[CLUSTER_DIR, "--architecture", "PGD-X", "--check"])
+        output = capsys.readouterr().out
+        assert "pgd-proxy-routing" not in output
+
     def test_reconfigure_write_output(
         self,
         create_cluster,

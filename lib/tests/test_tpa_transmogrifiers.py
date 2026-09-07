@@ -41,6 +41,13 @@ class TestTransmogrifiers:
             ),
             (["--edb-repositories", "dev"], None, [Common, Repositories]),
             (
+                # --pgd-proxy-routing is only required for the BDR4->PGD5
+                # path: --architecture PGD-X must dispatch fine without it.
+                ["--architecture", "PGD-X"],
+                None,
+                [Common, Architecture],
+            ),
+            (
                 [
                     "--architecture",
                     "PGD-Always-ON",
