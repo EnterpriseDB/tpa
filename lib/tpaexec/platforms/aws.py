@@ -77,10 +77,20 @@ class aws(CloudPlatform):
                     "owner": "136693071363",
                     "user": "admin",
                 },
+                "debian-13-amd64-20260819-2575": {
+                    "versions": ["13", "trixie"],
+                    "owner": "136693071363",
+                    "user": "admin",
+                },
             },
             "debian-arm": {
                 "debian-12-arm64-20260821-2577": {
                     "versions": ["12", "bookworm", "default"],
+                    "owner": "136693071363",
+                    "user": "admin",
+                },
+                "debian-13-arm64-20260819-2575": {
+                    "versions": ["13", "trixie"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
