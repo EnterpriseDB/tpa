@@ -46,6 +46,10 @@ pem_server_modwsgi_package_name:
       "9": edb-python312-mod-wsgi
       "8": edb-python312-mod-wsgi
     Debian:
+      # Debian 13 ships Python 3.13, so the distribution package is the
+      # only one that matches; there is no edb-python313-mod-wsgi. This
+      # mirrors what Ubuntu 24 already does below.
+      "13": libapache2-mod-wsgi-py3
       "12": edb-python312-mod-wsgi
       "11": edb-python312-mod-wsgi
     Ubuntu:
@@ -59,6 +63,7 @@ pem_server_modwsgi_package_name:
       "9": python3-mod_wsgi
       "8": edb-python310-mod-wsgi
     Debian:
+      "13": libapache2-mod-wsgi-py3
       "12": libapache2-mod-wsgi-py3
       "11": edb-python310-mod-wsgi
     Ubuntu:
