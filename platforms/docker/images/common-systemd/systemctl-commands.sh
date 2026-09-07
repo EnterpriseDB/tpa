@@ -4,7 +4,10 @@ export SYSTEMD_COLORS=0
 source /etc/os-release
 
 if [[ $ID = "debian" || $ID = "ubuntu" ]]; then
-    apt-get update -y && apt-get install -y systemd
+    # systemd alone does not pull in systemd-sysv, which is what provides
+    # /sbin/init; without it the container fails to start with
+    # "exec: /sbin/init: stat: no such file or directory".
+    apt-get update -y && apt-get install -y systemd systemd-sysv
 fi
 
 if [[ $ID = "rocky" ]]; then
@@ -13,7 +16,7 @@ fi
 
 if [[ $ID = "sles" ]]; then
     zypper -n install systemd
-    if [ ! -e "/sbin/init"]; then
+    if [[ ! -e "/sbin/init" ]]; then
         ln -s /usr/lib/systemd/systemd /sbin/init
     fi
     zypper -n install awk
@@ -59,4 +62,4 @@ fi
 
 systemctl mask "${UNITS_TO_MASK[@]}"
 
-[ -e /sbin/init ] || ln -s /bin/systemd /sbin/init
+[[ -e /sbin/init ]] || ln -s /usr/lib/systemd/systemd /sbin/init
