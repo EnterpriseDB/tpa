@@ -1,0 +1,10 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+# Debian 13 dropped openjdk-17-jre; it ships openjdk-21-jre and
+# openjdk-25-jre. 21 is the LTS, and is what Ubuntu.yml already asks for.
+efm_dependency_packages:
+  - openjdk-21-jre
+  - iputils-ping
+  - procps
