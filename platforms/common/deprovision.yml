@@ -2,23 +2,40 @@
 
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
-- name: Preserve ansible.log before deprovisioning removes it
-  shell: >
-    cd "{{ cluster_dir }}" &&
-    if [ -f ansible.log ]; then
-      n=$(ls ansible.log.* 2>/dev/null | grep -E '^ansible\.log\.[0-9]+$' | sed 's/ansible\.log\.//' | sort -rn | head -n1);
-      if [ -z "$n" ]; then n=-1; fi;
-      mv ansible.log "ansible.log.$((n+1))";
-    fi
-  args:
-    executable: /bin/bash
-  vars:
+- name: Determine whether to preserve ansible.log across deprovision
+  set_fact:
     # preserve_ansible_log in config.yml wins if set at all; PRESERVE_ANSIBLE_LOG
     # in the environment tpaexec was invoked in is only a fallback for when
     # config.yml doesn't set it.
-    _preserve_ansible_log_env: "{{ lookup('env', 'PRESERVE_ANSIBLE_LOG')|default('', true)|trim|lower }}"
-    _preserve_ansible_log: "{{ preserve_ansible_log|default(_preserve_ansible_log_env in ['1', 'true', 'yes', 'on']) }}"
+    _preserve_ansible_log: >-
+      {{ preserve_ansible_log
+         | default(lookup('env', 'PRESERVE_ANSIBLE_LOG') | default(false, true) | bool) }}
+
+- name: Check for an existing ansible.log to preserve
+  stat:
+    path: "{{ cluster_dir }}/ansible.log"
+  register: _ansible_log_stat
   when: _preserve_ansible_log
+
+- name: Find previously rotated ansible.log.N files
+  find:
+    paths: "{{ cluster_dir }}"
+    patterns: '^ansible\.log\.[0-9]+$'
+    use_regex: true
+  register: _ansible_log_rotated
+  when: _preserve_ansible_log and _ansible_log_stat.stat.exists
+
+- name: Preserve ansible.log before deprovisioning removes it
+  command:
+    cmd: >-
+      mv ansible.log ansible.log.{{
+        (([-1] + (_ansible_log_rotated.files
+                    | map(attribute='path') | map('basename')
+                    | map('regex_replace', '^ansible\.log\.', '')
+                    | map('int') | list)) | max) + 1
+      }}
+    chdir: "{{ cluster_dir }}"
+  when: _preserve_ansible_log and _ansible_log_stat.stat.exists
   changed_when: true
 
 - name: Delete generated files for this cluster

@@ -45,8 +45,10 @@ files stay until you remove them yourself.
 
 If `config.yml` doesn't set `preserve_ansible_log` at all, the
 `PRESERVE_ANSIBLE_LOG` environment variable is used instead (accepted
-values: `1`, `true`, `yes`, `on`, case-insensitive) - useful for
-enabling this for a single command without editing `config.yml`:
+values: any string Ansible's `bool` filter recognizes as true/false -
+`yes`/`no`, `true`/`false`, `1`/`0`, `on`/`off`, case-insensitive) -
+useful for enabling this for a single command without editing
+`config.yml`:
 
 ```bash
 PRESERVE_ANSIBLE_LOG=true tpaexec deprovision <cluster_dir>
