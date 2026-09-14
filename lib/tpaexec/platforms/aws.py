@@ -72,24 +72,24 @@ class aws(CloudPlatform):
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-12-amd64-20260821-2577": {
+                "debian-12-amd64-20260909-2596": {
                     "versions": ["12", "bookworm"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-13-amd64-20260819-2575": {
+                "debian-13-amd64-20260831-2587": {
                     "versions": ["13", "trixie"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
             },
             "debian-arm": {
-                "debian-12-arm64-20260821-2577": {
+                "debian-12-arm64-20260909-2596": {
                     "versions": ["12", "bookworm", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-13-arm64-20260819-2575": {
+                "debian-13-arm64-20260831-2587": {
                     "versions": ["13", "trixie"],
                     "owner": "136693071363",
                     "user": "admin",
@@ -102,7 +102,7 @@ class aws(CloudPlatform):
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-8.10.0_HVM-20260721-x86_64-2225-Hourly2-GP3": {
+                "RHEL-8.10.0_HVM-20260901-x86_64-2273-Hourly2-GP3": {
                     "versions": ["8", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
@@ -159,7 +159,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20260731": {
+                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20260904": {
                     "versions": [
                         "22.04",
                         "jammy",
@@ -167,7 +167,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260714": {
+                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260904": {
                     "versions": [
                         "24.04",
                         "noble",
