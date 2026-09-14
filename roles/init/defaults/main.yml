@@ -142,6 +142,33 @@ pgaudit_package_name:
   Ubuntu: *debian_package_name_convention
   SLES: *redhat_package_name_convention
 
+# Since Barman 3.20.0, EDB's own apt repository ships the Python client
+# library under a new package name, edb-python312-barman (installed into
+# a dedicated venv), because it can no longer accurately claim to Provide
+# the old python3-barman virtual package (see BAR-1600 and TPA-1654).
+# PGDG keeps publishing python3-barman at all versions, and RedHat/dnf
+# already resolves the rename correctly via Obsoletes, so this only needs
+# to branch for Debian/Ubuntu when installing from EDB's own repositories.
+#
+# barman_package_version may carry an apt epoch (e.g. '2:3.20.0-1') or a
+# wildcard (e.g. '3.20.0*'), per docs/src/barman.md, so it is sanitised
+# down to a bare X.Y[.Z] before comparison: first any leading 'N:' epoch
+# is dropped, then everything from the first character that isn't a
+# digit or a dot is discarded.
+default_barman_python_package: "{{
+    (
+      ansible_distribution in ('Debian', 'Ubuntu')
+      and edb_repositories|default([]) != []
+      and (
+        barman_package_version is not defined
+        or barman_package_version
+           | regex_replace('^[0-9]+:', '')
+           | regex_replace('[^0-9.].*$', '')
+           is version('3.20', '>=')
+      )
+    ) | ternary('edb-python312-barman', python_pkg_prefix + '-barman')
+  }}"
+
 default_postgres_extensions_dictionary:
   edb_pg_tuner:
     packages:

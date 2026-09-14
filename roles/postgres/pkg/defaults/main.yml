@@ -292,7 +292,7 @@ psycopg2_packages:
 barman_client_packages:
   common: &common_barman_client_packages
     - barman-cli
-    - "{{ python_pkg_prefix }}-barman"
+    - "{{ barman_python_package }}"
   Debian: *common_barman_client_packages
   RedHat: *common_barman_client_packages
   Ubuntu: *common_barman_client_packages
@@ -312,10 +312,10 @@ additional_postgres_packages:
 src_extra_packages:
   Debian: &debian_src_extra_packages
     - barman-cli
-    - "{{ python_pkg_prefix }}-barman"
+    - "{{ barman_python_package }}"
   RedHat: &redhat_src_extra_packages
     - barman-cli
-    - "{{ python_pkg_prefix }}-barman"
+    - "{{ barman_python_package }}"
   Ubuntu: *debian_src_extra_packages
   SLES: *redhat_src_extra_packages
 

@@ -808,6 +808,16 @@
   set_fact:
     postgres_extensions_dictionary: "{{ default_postgres_extensions_dictionary }}"
 
+# barman_python_package (used by both the barman role and postgres/pkg's
+# barman_client_packages/src_extra_packages) is resolved here, while
+# default_barman_python_package (defaults/main.yml) is still in scope, and
+# promoted to a fact so it survives into the later, separate plays that
+# actually install packages. This runs for every host, not just
+# 'postgres' nodes, because barman-only nodes need it too.
+- name: Set barman_python_package
+  set_fact:
+    barman_python_package: "{{ default_barman_python_package }}"
+
 - name: Define platypus configuration settings
   set_fact:
     platypus_port: "{{ platypus_port|default(6400) }}"
