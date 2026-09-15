@@ -860,15 +860,41 @@
   args: >
     {{ ('{"twice_postgres_instances": ' ~ num_postgres_instances*2 ~ '}')|from_json }}
 
-- name: Set default values for max_wal_senders and max_replication_slots
+# Calculates minimum required replication slots and WAL senders.
+# User-supplied overrides in config.yml take precedence over calculated values.
+# Enforces the rule: max_wal_senders >= max_replication_slots.
+# 1. max_replication_slots: Uses explicit user setting if defined; otherwise
+#    calculates: (twice_postgres_instances * writers_multiplier + 3).
+# 2. max_wal_senders: Uses explicit user setting if defined; defaults to
+#    max_replication_slots if omitted, guaranteeing 1:1 slot coverage.
+# Ensures max_wal_senders >= max_replication_slots to prevent replication
+# failure due to insufficient WAL sender processes.
+#
+# Note: skip_wal_senders_validation is a deliberate, temporary escape
+# hatch for reconciling an existing cluster whose current values
+# already fail this check (e.g. inherited from an older TPA version's
+# calculation) - not a general-purpose bypass, and it should not be
+# left enabled once the values are reconciled. It also doubles as a
+# way to exercise this task under fault-injection testing.
+#
+- name: Determine replication slot and wal sender targets
   set_fact:
-    max_wal_senders: "{{ [_max_wal_senders|int, _max_replication_slots|int]| max }}"
-    max_replication_slots: "{{ _max_replication_slots }}"
+    max_replication_slots: "{{ max_replication_slots | default(_calculated_slots) | int }}"
+    max_wal_senders: "{{ max_wal_senders | default(max_replication_slots | default(_calculated_slots)) | int }}"
   vars:
-    writers_per_subscription: "{{ (postgres_conf_settings|default({})).get('bdr.writers_per_subscription', default_writers_per_subscription) }}"
-    multiplier: "{{ ('bdr' in role)|ternary(writers_per_subscription, 1) }}"
-    _max_replication_slots: "{{ max_replication_slots|default(twice_postgres_instances * multiplier|int + 3|int) }}"
-    _max_wal_senders: "{{ max_wal_senders|default(_max_replication_slots) }}"
+    _writers: "{{ (postgres_conf_settings | default({})).get('bdr.writers_per_subscription', default_writers_per_subscription) }}"
+    _multiplier: "{{ ('bdr' in role) | ternary(_writers, 1) | int }}"
+    _calculated_slots: "{{ (twice_postgres_instances * (_multiplier|int) + 3) | int }}"
+
+- name: Validate that max_wal_senders is sufficient for max_replication_slots
+  assert:
+    that:
+      - max_wal_senders | int >= max_replication_slots | int
+    fail_msg: >-
+      Invalid configuration: max_wal_senders ({{ max_wal_senders }}) cannot be less than
+      max_replication_slots ({{ max_replication_slots }}). Every active replication slot
+      requires an available WAL sender process.
+  when: not (skip_wal_senders_validation | default(false) | bool)
 
 # https://www.enterprisedb.com/docs/pgd/latest/postgres-configuration/#postgres-settings
 # recommends at least 3 origins per peer node on PG18+. We count the current
