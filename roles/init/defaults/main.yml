@@ -142,13 +142,34 @@ pgaudit_package_name:
   Ubuntu: *debian_package_name_convention
   SLES: *redhat_package_name_convention
 
-# Since Barman 3.20.0, EDB's own apt repository ships the Python client
-# library under a new package name, edb-python312-barman (installed into
-# a dedicated venv), because it can no longer accurately claim to Provide
-# the old python3-barman virtual package (see BAR-1600 and TPA-1654).
-# PGDG keeps publishing python3-barman at all versions, and RedHat/dnf
-# already resolves the rename correctly via Obsoletes, so this only needs
-# to branch for Debian/Ubuntu when installing from EDB's own repositories.
+# Since Barman 3.20.0, EDB's own repository (RPM, apt, and SLES alike)
+# ships the Python client library under a new package name,
+# edb-python312-barman (installed into a dedicated venv), because it can
+# no longer accurately claim to Provide the old python3-barman package
+# (see BAR-1600 and TPA-1654).
+#
+# On apt (Debian/Ubuntu), this breaks every install against the EDB repo:
+# apt never substitutes a differently-named package for one requested by
+# name, Breaks/Replaces or not, so both an unpinned/latest install and
+# any explicit >= 3.20 pin fail outright.
+#
+# On dnf (RedHat family), a request for the bare, unversioned
+# python3-barman is resolved transparently via edb-python312-barman's
+# Obsoletes clause, even on a fresh host with nothing installed yet, and
+# a wildcarded pin (e.g. '3.20.0*') resolves the same way. The one case
+# that still fails is an *exact*, unwildcarded pin to a version that
+# only exists under the new name (e.g. '3.20.0') -- exactly what TPA's
+# own packages_for filter generates whenever a caller sets
+# barman_package_version without a wildcard -- because dnf's NEVRA
+# lookup for that literal string finds nothing to obsolete. SLES/zypper
+# wasn't tested against every one of these cases, but a live deploy
+# confirms the fixed name resolves and installs correctly there too.
+#
+# PGDG never renamed the package on any OS family, so this only needs
+# to branch on edb_repositories being in use -- the narrower dnf/zypper
+# case is still worth fixing the same way, since it's a real failure for
+# anyone who pins an exact >= 3.20 version, and doing so uniformly here
+# costs nothing on the unaffected paths.
 #
 # barman_package_version may carry an apt epoch (e.g. '2:3.20.0-1') or a
 # wildcard (e.g. '3.20.0*'), per docs/src/barman.md, so it is sanitised
@@ -157,8 +178,7 @@ pgaudit_package_name:
 # digit or a dot is discarded.
 default_barman_python_package: "{{
     (
-      ansible_distribution in ('Debian', 'Ubuntu')
-      and edb_repositories|default([]) != []
+      edb_repositories|default([]) != []
       and (
         barman_package_version is not defined
         or barman_package_version

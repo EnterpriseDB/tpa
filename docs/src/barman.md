@@ -52,12 +52,13 @@ If your version does not match, try appending a `*` wildcard. This
 is often necessary when the package version has an epoch qualifier
 like `2:...`.
 
-### Package name on Debian/Ubuntu
+### Package name
 
-Since Barman 3.20.0, installing from EDB's own repository on Debian or
-Ubuntu uses the package name `edb-python312-barman` for Barman's Python
-client library, instead of the `python3-barman` name used for earlier
-versions and for installs from the PGDG repository. TPA selects the
+Since Barman 3.20.0, installing from EDB's own repository uses the
+package name `edb-python312-barman` for Barman's Python client library,
+instead of the `python3-barman` name used for earlier versions and for
+installs from the PGDG repository. This applies on every OS TPA
+supports (Debian, Ubuntu, RedHat family, and SLES). TPA selects the
 correct name automatically based on the repositories and Barman version
 in use; this only affects what appears in the installed package list,
 not any user-facing configuration.
