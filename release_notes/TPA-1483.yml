@@ -1,9 +1,0 @@
-- summary: Ensure that `--pgd-proxy-routing` is specified in BDR4 to PGD5 reconfiguration
-  description: |
-    When reconfiguring a BDR4 cluster to PGD5, `--pgd-proxy-routing` must now be
-    set to `global` or `local`. This is enforced consistently for `--describe`,
-    `--check`, and a real run, so an omitted or invalid value is now reported
-    immediately instead of only being caught partway through the process.
-  type: minor_change
-  jira_tickets:
-  - TPA-1483

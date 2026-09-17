@@ -1,9 +1,0 @@
-- summary: Fix tpaexec upgrade --components=pg-backup-api being a silent no-op
-  description: |
-    Upgrading pg-backup-api via tpaexec upgrade --components=pg-backup-api
-    did nothing unless a specific package version was pinned in config.yml,
-    even when a newer version was available. It now upgrades to the latest
-    available version by default, matching barman, pgbouncer, and PEM.
-  type: bugfix
-  jira_tickets:
-  - TPA-1594

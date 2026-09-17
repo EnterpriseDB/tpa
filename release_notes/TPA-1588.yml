@@ -1,8 +1,0 @@
-- summary: Controlled startup of Postgres service when EFM is used as failover manager
-  description: |
-    A new variable `efm_autostart_db` has been added to control the startup of the 
-    Postgres service when EFM is used as the failover manager (by default, `false`). 
-    When set to `true`, the Postgres service will start automatically after EFM starts.
-  type: minor_change
-  jira_tickets:
-  - TPA-1588

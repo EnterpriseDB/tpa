@@ -1,9 +1,0 @@
-- summary: Fix install from source dependency for Debian
-  description: |
-    The 'pkg-config' package was missing from the list of required packages for Debian-based systems, which caused
-    build failures when compiling software that relies on pkg-config. 
-    This fix adds 'pkg-config' to the list of required packages, ensuring that builds from source can proceed 
-    without errors related to missing dependencies.
-  type: bugfix
-  jira_tickets:
-  - TPA-1561

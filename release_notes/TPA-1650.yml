@@ -1,9 +1,0 @@
-- summary: Fix tpaexec switchover failing on EFM clusters
-  description: |
-    `tpaexec switchover` on a cluster with `failover_manager: efm` no
-    longer fails after promotion with a "requested handler ... was not
-    found" error while regenerating EFM configuration for the new
-    topology.
-  type: bugfix
-  jira_tickets:
-  - TPA-1650

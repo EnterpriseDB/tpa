@@ -1,9 +1,0 @@
-- summary: PEM server nodes receive a generated node name when created
-  description: |
-    PEM server nodes created by `--enable-pem` were given the fixed name `pemserver`.
-    This fix ensures they now receive a generated node name when created, having a consistent naming scheme along
-    other nodes within the generated cluster, this also affects receiving a generated hostname using the flag
-    `--hostnames-from`, previously not being possible.
-  type: minor_change
-  jira_tickets:
-  - TPA-761
