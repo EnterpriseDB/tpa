@@ -4,10 +4,10 @@ cffi==2.1.1 \
     # via
     #   -r /out/requirements-s390x.in
     #   cryptography
-cryptography==50.0.0 \
-    --hash=sha256:0784c38b4244dcf5edf1aa4df06e225bfadc95ec7a204e9783545d4f6bc77384 \
-    --hash=sha256:8d89f3976b10b4ce31118de72329025f70d2c6ead14a8217c5514dd2c6d5a78f \
-    --hash=sha256:f89831ef99dd7dd169ab06d63a831adb9e20a87aac6d380266bbda5823349169
+cryptography==50.0.1 \
+    --hash=sha256:5fe002589592ed749ce77fe0695fcbd3500dd61d7d6db5858a7544c612fa8e45 \
+    --hash=sha256:76de83fbd91ac49c0feaaa983d0748fd7a53176afac5fb3bf7478d244f0eb527 \
+    --hash=sha256:a249eb97949992184bc4fd6a629be5a68fc89187d2cad11c4f33686badc429cd
     # via -r /out/requirements-s390x.in
 markupsafe==3.0.3 \
     --hash=sha256:2a8bcea224a7a20b839f3a792ef54a8378a807453b10004389c58ce2aa111da0 \
