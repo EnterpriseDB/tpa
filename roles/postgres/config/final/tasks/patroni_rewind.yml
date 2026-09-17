@@ -1,0 +1,22 @@
+---
+
+# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
+
+- name: Grant required privileges to {{ patroni_rewind_user }}
+  community.postgresql.postgresql_privs:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    database: postgres
+    privs: EXECUTE
+    schema: pg_catalog
+    type: function
+    objs: "{{ item }}"
+    roles: "{{ patroni_rewind_user }}"
+    state: present
+  with_items:
+    - "pg_ls_dir(text:boolean:boolean)"
+    - "pg_stat_file(text:boolean)"
+    - "pg_read_binary_file(text)"
+    - "pg_read_binary_file(text:bigint:bigint:boolean)"
+  become_user: "{{ postgres_user }}"
+  become: yes

@@ -299,6 +299,17 @@
     'pem-server' not in role and
     task_selector|selects('efm')
 
+# If patroni created a rewind user, grant it the privileges pg_rewind
+# needs to run as a non-superuser (Patroni normally does this itself
+# in post_bootstrap, but TPA hands it an already-initialised cluster,
+# so that step never runs).
+- include_tasks:
+    file: patroni_rewind.yml
+  when:
+    - patroni_rewind_user is defined
+    - postgres_users|json_query("[?username=='%s']" % patroni_rewind_user) != []
+    - task_selector|permits('patroni-rewind')
+
 # Now we can complete the task of granting roles to `postgres_users`.
 - name: Grant roles to Postgres users if required
   postgresql_membership:
