@@ -1,0 +1,28 @@
+version: 3
+images:
+  base_image:
+    name: 'reg.echohq.com/python:3.12-slim'
+dependencies:
+  python_interpreter:
+    python_path: /usr/local/bin/python3
+  ansible_core:
+    package_pip: ansible-core==2.16.*
+  ansible_runner:
+    package_pip: ansible-runner
+  python: ../../../requirements-aap.txt
+  galaxy: ../../../collections/requirements.yml
+options:
+  package_manager_path: /usr/bin/apt-get
+build_arg_defaults:
+  PKGMGR_PRESERVE_CACHE: 'always'
+additional_build_steps:
+  prepend_base:
+   - RUN export DEBIAN_FRONTEND=noninteractive && $PKGMGR update && $PKGMGR install -y --no-install-recommends openssh-client gcc build-essential libffi-dev && $PKGMGR clean && rm -rf /var/lib/apt/lists/*
+   - RUN $PYCMD -m pip install --upgrade pip
+
+  append_final:
+   - RUN mkdir -p /opt/EDB/TPA
+   - COPY . /opt/EDB/TPA
+   - ENV PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}/opt/EDB/TPA/lib"
+   - RUN $PKGMGR clean && rm -rf /var/lib/apt/lists/*
+   - RUN $PYCMD -m pip cache purge

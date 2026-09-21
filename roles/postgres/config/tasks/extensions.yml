@@ -78,3 +78,34 @@
   set_fact:
     postgres_extensions:
       "{{ postgres_extensions|difference(modules) }}"
+
+- name: Identify extensions that create their own schema
+  set_fact:
+    _own_schema_list: >-
+      {{ postgres_extensions_dictionary | dict2items
+         | selectattr('value.own_schema', 'defined')
+         | selectattr('value.own_schema')
+         | map(attribute='key') | list
+         | intersect(postgres_extensions)
+         | default({})
+      }}
+
+- name: Create a dict from own-schema extensions list
+  set_fact:
+    own_schema_extensions: >-
+      {{ own_schema_extensions|default({})|combine({ item: _own_schema_list.index(item)|int }) }}
+  with_items: "{{ _own_schema_list }}"
+
+- name: Adjust ordering of pgaa related to pgfs if required
+  when:
+    - own_schema_extensions is defined
+    - p_and_f is subset(own_schema_extensions.keys())
+    - pgaa_pos < pgfs_pos
+  set_fact:
+    own_schema_extensions: "{{ own_schema_extensions|combine({ 'pgaa': last_pos|int+1 }) }}"
+  vars:
+    p_and_f: ['pgfs', 'pgaa']
+    pgaa_pos: "{{ own_schema_extensions['pgaa']|int }}"
+    pgfs_pos: "{{ own_schema_extensions['pgfs']|int }}"
+    last_pos: "{{ own_schema_extensions.keys()|length }}"
+

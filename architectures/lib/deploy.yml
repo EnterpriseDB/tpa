@@ -45,6 +45,21 @@
           failover_manager == 'repmgr'
           and 'postgres' in role
           and task_selector|selects('repmgr')
+      # The replica clone in the final role needs the replication user's
+      # password in .pgpass. It is normally written by the efm role below,
+      # but that is skipped entirely when efm tasks are excluded, which
+      # would leave pg_basebackup prompting for a password forever. Write
+      # the .pgpass entry here only in that excluded case, so an ordinary
+      # deploy still invokes postgres/pgpass exactly once (via the efm
+      # role).
+      - include_role: name=postgres/pgpass
+        vars:
+          pgpass_users:
+            - "{{ replication_user }}"
+        when: >
+          failover_manager == 'efm'
+          and role|intersect(['primary','replica'])
+          and not task_selector|permits('efm')
       - include_role: name=efm
         when: >
           'efm' in role

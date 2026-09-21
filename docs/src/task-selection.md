@@ -7,19 +7,55 @@ description: Selecting which tasks TPA should run during deployment.
 ## Using task selectors
 
 You can tell TPA to run only a subset of the tasks that constitute a
-full deployment using the `--excluded_tasks` and `--included_tasks`
-options to `tpaexec deploy`. Each of these arguments is a
-string treated as a comma-separated list of selectors. Equivalently, you can set the
-`excluded_tasks` and `included_tasks` variables in `config.yml`, either
-for the whole cluster or for the separate instances. In `config.yml`,
-you can use either a comma-separated string or a yaml list.
+full deployment using the `--excluded_tasks`, `--included_tasks`, and
+`--opt_in_tasks` options to `tpaexec deploy`. Each of these arguments
+is a string treated as a comma-separated list of selectors. Equivalently,
+you can set the `excluded_tasks`, `included_tasks`, and `opt_in_tasks`
+variables in `config.yml`, either for the whole cluster or for the
+separate instances. In `config.yml`, you can use either a
+comma-separated string or a yaml list.
 
-Tasks matched by `excluded_tasks` are always excluded. If you specify
-`included_tasks`, then non-matching tasks are implicitly excluded.
+### excluded_tasks
 
-Some selectors may be used in either list, and some only in the
-`excluded_tasks` list, as detailed below. A separate set of selectors is
-available for `tpaexec test`.
+Names tasks that should not run. Any task listed here is
+unconditionally skipped, even if it would otherwise be enabled by
+the other lists. Empty by default; TPA runs every task that
+applies to the cluster.
+
+### included_tasks
+
+When non-empty, restricts the deploy to only the named tasks: any
+task not in `included_tasks` is implicitly excluded. Useful when you
+want to re-run only a specific subset — for example,
+`included_tasks: [repmgr]` to re-run only the repmgr setup tasks.
+When empty (the default), every task that applies runs.
+
+### opt_in_tasks
+
+Names tasks that should run only when explicitly opted in to. Some
+selectors (listed below as "run only when opted in to") are
+off-by-default and require an entry here to run. Unlike
+`included_tasks`, adding a name to `opt_in_tasks` does *not* engage
+whitelist semantics — it enables that one task without saying
+anything about any other task.
+
+### Interactions
+
+`excluded_tasks` always wins: a task named there does not run, no
+matter what the other lists say. For example, on an AWS cluster
+`sysctl_net` is opted in to by default; to disable it again use
+`excluded_tasks: [sysctl_net]`.
+
+`included_tasks` and `opt_in_tasks` are independent. A non-empty
+`included_tasks` only constrains the set of tasks that would
+normally run; it does not by itself enable opt-in tasks. Conversely,
+listing a task in `opt_in_tasks` enables that one task whether or
+not `included_tasks` is set.
+
+Some selectors may be used in either of the include/exclude lists,
+some only in the `excluded_tasks` list, and some only when opted in
+to, as detailed below. A separate set of selectors is available for
+`tpaexec test`.
 
 ## Examples
 
@@ -352,6 +388,17 @@ The following selectors are supported only for exclusion:
 - watchdog
 
     Tasks related to the kernel watchdog on a patroni cluster.
+
+The following selectors run only when opted in to via `opt_in_tasks`:
+
+- sysctl_net
+
+    The TPA-managed network and connection-tuning sysctls
+    (`net.core.rmem_max`, `net.core.wmem_max`,
+    `net.ipv4.tcp_max_syn_backlog`, `net.ipv4.ip_local_port_range`).
+    `tpaexec configure --platform aws` opts the cluster in to this
+    selector by default; on other platforms it is opt-in. See
+    [Setting sysctl values](sysctl_values.md).
 
 ## Supported selectors for `tpaexec test`
 

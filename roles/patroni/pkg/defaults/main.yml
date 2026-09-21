@@ -17,7 +17,20 @@ community_patroni_packages:
   SUSE: *all_rpm_patroni_packages
 
 patroni_dependency_packages:
-  Debian: &all_patroni_dependency_packages
+  # The community patroni package names its DCS client as an alternatives
+  # group, so apt is free to satisfy it with any one of them. On Debian 13
+  # it picks python3-consul, because the package also carries an
+  # unconditional "python3-consul | python3-supported-max (<< 3.9)" that
+  # nothing else can satisfy there --- and that already satisfies the DCS
+  # group, so python3-etcd never gets installed. Patroni then exits at
+  # startup with "Can not find suitable configuration of distributed
+  # configuration store", having only found consul and kubernetes.
+  # Naming the module we actually use keeps this deterministic. The RedHat
+  # and SUSE lists don't need it: their community_patroni_packages already
+  # ask for patroni-{{ patroni_dcs }} explicitly.
+  Debian:
     - jq
-  RedHat: *all_patroni_dependency_packages
+    - "{{ python_pkg_prefix }}-{{ patroni_dcs|default('etcd') }}"
+  RedHat: &all_patroni_dependency_packages
+    - jq
   SUSE: *all_patroni_dependency_packages

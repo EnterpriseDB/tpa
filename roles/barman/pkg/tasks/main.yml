@@ -32,7 +32,17 @@
         name: "{{ barman_group }}"
         state: present
 
-    - name: Ensure barman user exists
+    # We must clear any account expiry the packaging may have set. Since
+    # barman 3.20.0, the Debian package creates the account from
+    # /usr/lib/sysusers.d/barman.conf with the «u!» (locked) modifier,
+    # and systemd 254 and above implement that by setting the shadow
+    # expiry field to 1, i.e. expired since 1970-01-02. PAM then refuses
+    # every cron session for the account ("account barman has expired"),
+    # so the /etc/cron.d/{{ backup_name }} job that runs «barman cron»
+    # never runs, and no WAL segment is ever archived from streaming/
+    # into wals/. Deploy then fails waiting for the first segment.
+
+    - name: Ensure barman user exists and is not expired
       user:
         name: "{{ barman_user }}"
         group: "{{ barman_group }}"
@@ -40,6 +50,7 @@
         home: "{{ barman_home }}"
         create_home: no
         system: yes
+        expires: -1
         state: present
 
     - name: Ensure barman directories exist with the right ownership and permissions

@@ -1,0 +1,39 @@
+{# © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved. #}
+# This file is managed by TPA — edits will be overwritten on next
+# `tpaexec deploy`. To override these settings, create a file with a
+# higher numeric prefix (e.g. /etc/sysctl.d/90-local.conf); `sysctl
+# --system` loads files in lexical order, so later definitions win.
+
+# Baseline (always written)
+{% for k, v in sysctl_defaults_baseline.items() %}
+{{ k }} = {{ v }}
+{% endfor %}
+{% if task_selector|selects('sysctl_vm') %}
+
+# vm group: Postgres-specific kernel tuning
+{% for k, v in sysctl_defaults_vm.items() %}
+{{ k }} = {{ v }}
+{% endfor %}
+{% if _huge_page_size_is_default|bool %}
+vm.nr_hugepages = {{ _nr_hugepages | int }}
+{% endif %}
+{% endif %}
+{% if task_selector|opts_in('sysctl_net') %}
+
+# net group: busy-server network tuning (opt-in via sysctl_net)
+{% for k, v in sysctl_defaults_net.items() %}
+{{ k }} = {{ v }}
+{% endfor %}
+{% endif %}
+{% if 'openvpn-server' in role %}
+
+# IP forwarding for openvpn-server role
+net.ipv4.ip_forward = 1
+{% endif %}
+{% if _user_sysctls %}
+
+# User overrides from cluster_vars / instance vars
+{% for k, v in _user_sysctls.items() %}
+{{ k }} = {{ v }}
+{% endfor %}
+{% endif %}

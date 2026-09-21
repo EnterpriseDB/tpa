@@ -65,7 +65,6 @@ More detail on the options is provided in the following section.
 | `--data-nodes-per-location`      | The number of data nodes in each location, must be at least 2.                                              | Defaults to 3.                                              |
 | `--enable-camo`                  | Sets two data nodes in each location as CAMO partners.                                                      | CAMO will not be enabled.                                   |
 | `--bdr-database`                 | The name of the database to be used for replication.                                                        | Defaults to `bdrdb`.                                        |
-| `--enable-pgd-probes`            | Enable http(s) api endpoints for pgd-proxy such as `health/is-ready` to allow probing proxy's health.       | Disabled by default.                                        |
 | `--read-write-port`              | The port for Connection Manager to listen on for read-write connections.                                    | Left empty in config.yml, allowing default of the postgres port + 1000 |
 | `--read-only-port`               | The port for Connection Manager to listen on for read-only connections.                                     | Left empty in config.yml, allowing default of the read-write port + 1  |
 
@@ -122,8 +121,63 @@ the database with BDR enabled (default: bdrdb).
 You may optionally specify `--enable-camo` to set two data nodes in
 each region as CAMO partners.
 
-You may optionally specify `--enable-pgd-probes [{http, https}]` to
-enable http(s) api endpoints that will allow to easily probe proxy's health.
+You may optionally change the ports that Connection Manager listens on
+for read-write and read-only connections, either with the
+`--read-write-port` and `--read-only-port` options to `tpaexec configure`
+(see the [Additional Options](#additional-options) table) or by editing
+`config.yml` afterwards. The two ports must differ from each other and
+from the Postgres port (`postgres_port`) for the cluster.
+
+Connection Manager reads these settings from whichever BDR group has
+routing enabled, so you must define them under the `options` for that
+group:
+
+- with `--pgd-routing global`, the top-level group;
+- with `--pgd-routing local`, each location subgroup.
+
+A routing-enabled subgroup that does not define these ports itself
+inherits them from its parent group, so an existing cluster that has them
+on the top-level group keeps working when you switch to local routing.
+
+With global routing, the ports belong to the top-level group:
+
+```yaml
+cluster_vars:
+  postgres_port: 5432
+  bdr_node_groups:
+  - name: <cluster-name>
+    options:
+      read_write_port: 7432
+      read_only_port: 7433
+      enable_routing: true
+  - name: first_subgroup
+    parent_group_name: <cluster-name>
+    options:
+      location: first
+      enable_routing: false
+```
+
+With local routing, they belong to each location subgroup instead:
+
+```yaml
+cluster_vars:
+  postgres_port: 5432
+  bdr_node_groups:
+  - name: <cluster-name>
+    options:
+      enable_routing: false
+  - name: first_subgroup
+    parent_group_name: <cluster-name>
+    options:
+      location: first
+      read_write_port: 7432
+      read_only_port: 7433
+      enable_routing: true
+```
+
+If you do not set these options at all, Connection Manager listens on
+`postgres_port` + 1000 for read-write connections and `postgres_port` +
+1001 for read-only connections.
 
 You may also specify any of the options described by
 [`tpaexec help configure-options`](tpaexec-configure.md).

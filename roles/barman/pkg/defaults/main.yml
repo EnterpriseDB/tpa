@@ -5,10 +5,10 @@
 barman_packages:
   Debian: &debian_barman_packages
     - barman
-    - "{{ python_pkg_prefix }}-barman"
+    - "{{ barman_python_package }}"
   RedHat: &redhat_barman_packages
     - barman
-    - "{{ python_pkg_prefix }}-barman"
+    - "{{ barman_python_package }}"
   Ubuntu: *debian_barman_packages
   SUSE: *redhat_barman_packages
 

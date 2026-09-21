@@ -117,3 +117,11 @@ instances:
   upstream: {{ globals.primary_name }}
 {% endif %}
 
+{% if enable_pem is defined and enable_pem %}
+{% set globals.node_number = globals.node_number + 1 %}
+- node: {{ globals.node_number }}
+  Name: {{ hostnames[globals.node_number] }}
+  location: {{ active_locations[0] }}
+  role:
+    - pem-server
+{% endif %}

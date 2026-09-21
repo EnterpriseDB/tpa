@@ -37,6 +37,10 @@
     # proxy, e.g. for downloading packages
     use_proxy: no
 
+  # mTLS reads patroni_ssl_key_file, owned by postgres_user and mode 0600;
+  # the play calling this task (e.g. tpaexec test) may not run as root.
+  become: yes
+
   register: patroni_restart_api_output
   until:
     patroni_restart_api_output.status is defined

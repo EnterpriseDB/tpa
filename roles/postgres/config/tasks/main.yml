@@ -332,7 +332,11 @@
       barman_server:
         "{{ ([_backup] if _backup is string else _backup)|list|first }}"
       _detected_version: "{{ (_barman_version_output|default({})).stdout | default('') | regex_replace('^.*?(\\d+\\.\\d+).*$', '\\1') }}"
-      _barman_version: "{{ (barman_package_version|default(_detected_version))|default('')|regex_replace('[^0-9.].*$', '') }}"
+      # barman_package_version may carry an apt epoch (e.g. '2:3.20.0-1')
+      # or a wildcard (e.g. '3.20.0*'), per docs/src/barman.md, so strip
+      # any leading 'N:' epoch before discarding everything from the
+      # first non-digit/non-dot character onwards.
+      _barman_version: "{{ (barman_package_version|default(_detected_version))|default('')|regex_replace('^[0-9]+:', '')|regex_replace('[^0-9.].*$', '') }}"
       _compression_flag: "{{ (_barman_version and _barman_version is version('3.12', '<'))|ternary('-z', '--keep-compression') }}"
       barman_command: >-
         /usr/bin/barman-wal-restore -U {{ barman_user }} {{ _compression_flag }} -p 8 --port {{ cluster_ssh_port|default(22)|int }}

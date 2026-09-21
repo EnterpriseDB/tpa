@@ -12,10 +12,8 @@ The default behavior with `--enable-pem` is to enable `pem-agent` role for all
 barman nodes when `--enable-pg-backup-api` command line option is used
 alongside `--enable-pem`.
 
-A dedicated instance named `pemserver` will also be added to the cluster.
-
-Since PEM server uses postgres backend; pemserver instance implicitly uses
-`postgres` role as well which ensures that pemserver gets a valid postgres
+Since PEM server uses postgres backend; the PEM server instance implicitly uses
+`postgres` role as well which ensures that the PEM server gets a valid postgres
 cluster configured for use as PEM backend. All configuration options available
 for a normal postgres instance are valid for PEM's backend postgres instance
 as well. See following for details:
@@ -153,7 +151,7 @@ TPA will handle copying these files over to the pem server instance and
 configure the webserver accordingly.
 
 ```yaml
-- Name: pemserver
+- Name: my-pem-server
   location: main
   node: 4
   role:
@@ -197,12 +195,12 @@ managing multiple clusters in the organization. Shared pem server deployment
 within tpaexec is supported via the `pem_shared` variable that you could set via
 `vars:` under the pem server instance for the given cluster config that plans
 to use an existing pem server. `pem_shared` is a boolean variable so possible
-values are true and false(default). When declaring a pemserver instance as
-shared, we tell the given cluster config that pemserver instance is in fact
+values are true and false(default). When declaring a PEM server instance as
+shared, we tell the given cluster config that the PEM server instance is in fact
 managed by a separate cluster config that provisioned and deployed the pem
 server in the first place. So any changes we wanted to make to the pem server
 instance including postgres backend for pem would be managed by the cluster
-where pemserver instance is NOT declared as a shared pem instance.
+where the PEM server instance is NOT declared as a shared pem instance.
 
 
 A typical workflow for using a shared pem server across multiple clusters
@@ -211,17 +209,17 @@ would look something like this:
 1. Create a tpaexec cluster with a single instance that has `pem-server`
    role (call it 'pem-cluster' for this example). We could as easily use
    the same workflow in a scenario where pem is provisioned as part of a
-   larger cluster and not just a single instance that runs as pemserver but
+   larger cluster and not just a single instance that runs as the PEM server but
    we use a single node cluster because it is easier to use that as an example
    and arguably easy to maintain as well.
 2. In the other cluster (pg-cluster for example), reference this particular
-   pemserver from $clusters/pem-cluster as a shared pem server instance and
-   use `bare` as platform so we are not trying to create a new pemserver instance.
-   Also specify the IP address of the pemserver that this cluster can
-   use to access pemserver instance.
+   PEM server from $clusters/pem-cluster as a shared pem server instance and
+   use `bare` as platform so we are not trying to create a new PEM server instance.
+   Also specify the IP address of the PEM server that this cluster can
+   use to access the PEM server instance.
 
    ```yml
-   - Name: pemserver
+   - Name: my-pem-server
      node: 5
      role:
      - pem-server
@@ -243,7 +241,7 @@ would look something like this:
    $ cd $clusters/pg-cluster
    $ ssh-keyscan -4 $pem-server-ip >> known_hosts
    $ ssh-copy-id -i id_pg-cluster.pub -o 'UserKnownHostsFile=tpa_known_hosts' $user@$pem-server-ip
-   $ ssh -F ssh_config pemserver
+   $ ssh -F ssh_config my-pem-server
    ```
 4. Update postgresql config on pem server node so it allows connections
    from the new pg-cluster. You can modify existing pg_hba.conf on pem
@@ -252,7 +250,7 @@ would look something like this:
 
    ```yml
    instances:
-   - Name: pemserver
+   - Name: my-pem-server
      location: main
      node: 1
      role:
@@ -276,7 +274,7 @@ would look something like this:
    connect and register with the pem server backend, you must first
    `export EDB_PEM_CREDENTIALS_FILE=/path/to/pem/credentials/file`
    before you run `tpaexec deploy`. Credentials file is a text file that
-   contains your access credentials to the pemserver's backend postgres
+   contains your access credentials to the PEM server's backend postgres
    instance in the `username:password` format.
 
    ```shell

@@ -114,7 +114,15 @@ set to a value that AAP can resolve. Make any further changes or
 additions that you may need. See [Cluster
 configuration](configure-cluster.md) for more details.
 
-To generate inventory and other related files, run `tpaexec provision`.
+To generate the inventory and other related files, run `tpaexec
+provision`. Among these files is `ssh_config`, which Ansible uses when
+connecting to the cluster's nodes. On an AAP-enabled cluster this file
+deliberately omits the `IdentityFile` and `IdentitiesOnly` settings that
+TPA writes for a standalone cluster: the SSH key is instead supplied by
+the AAP machine credential you attach to the job template (see
+[Credentials](#credentials) below), and pinning an identity here would
+prevent that credential from being used. The port, `known_hosts` files
+and keepalive settings are generated as usual.
 
 ### On the AAP UI
 

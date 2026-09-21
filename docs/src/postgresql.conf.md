@@ -111,6 +111,48 @@ memory. You can override this default by setting
 `effective_cache_size_mb: 796` to a specific number of MB, or by specifying an
 exact value directly, e.g., `effective_cache_size: "8GB"`.
 
+## max_replication_slots and max_wal_senders
+
+By default, TPA calculates `max_replication_slots` and
+`max_wal_senders` from the number of Postgres instances in the
+cluster (accounting for `bdr.writers_per_subscription` on BDR/PGD
+clusters, since Parallel Apply requires an extra replication origin
+per writer). You can override either by setting the variable
+directly:
+
+```yaml
+cluster_vars:
+  max_replication_slots: 20
+  max_wal_senders: 20
+```
+
+If `max_wal_senders` is not set, it defaults to whatever
+`max_replication_slots` resolves to (explicit or calculated), so that
+every replication slot has an available WAL sender by default.
+
+TPA requires `max_wal_senders` to be at least as large as
+`max_replication_slots`, and fails deployment with an explanatory
+error if that is not the case, rather than silently adjusting either
+value. In the rare case where you need to deploy despite the values
+you have set failing this check (for example, while transitioning an
+existing cluster's configuration), you can bypass the check by
+setting `skip_wal_senders_validation: true`; this is a deliberate,
+temporary escape hatch and should not be left enabled once the
+values are reconciled.
+
+Note that these variables (like most others) only take effect if
+they are not also set via `postgres_conf_settings`, which always
+takes priority; see [postgres_conf_settings](#postgres_conf_settings)
+above. If you set `max_replication_slots`/`max_wal_senders` only via
+`postgres_conf_settings`, TPA still independently calculates and
+writes its own (unused) values for these settings into
+`conf.d/0001-tpa_restart.conf`; because that calculation can change
+between TPA versions, an otherwise no-op upgrade can trigger a
+Postgres restart even though the values actually in effect (from
+`postgres_conf_settings`) never changed. To avoid this, set the
+variables directly (as shown above) with the value you want in
+effect, rather than only under `postgres_conf_settings`.
+
 ## max_active_replication_origins
 
 PostgreSQL 18 introduced the `max_active_replication_origins` GUC to

@@ -11,7 +11,9 @@
 
 - name: Upgrade pg-backup-api package
   include_role: name=pgbackupapi/pkg
-  
+  vars:
+    allow_package_upgrades: yes
+
 - name: Include pg-backup-api-post-update hook
   include_tasks: "{{ hook }}"
   when:

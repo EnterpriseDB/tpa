@@ -129,6 +129,9 @@ class PGD_Always_ON(BDR):
         if self.args["witness_only_location"] is not None:
             res += 1
 
+        if self.args.get("enable_pem", False):
+            res += 1
+
         return res
 
     def validate_arguments(self, args):

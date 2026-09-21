@@ -2,9 +2,671 @@
 
 © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
+## 23.45.0 (2026-09-21)
+
+### Notable changes
+
+- Split TPA's sysctl management into separate vm and network groups
+
+  TPA used to write a single mixed set of sysctls into /etc/sysctl.conf,
+  combining Postgres-specific kernel tuning (the vm.dirty_* family,
+  vm.zone_reclaim_mode) with general-purpose network and connection tuning
+  (net.core.somaxconn, net.ipv4.tcp_max_syn_backlog, and others). A
+  routine `tpaexec deploy` could silently reset network values that an
+  operator had raised on purpose to handle their workload, which has caused
+  production incidents.
+
+  TPA now splits these settings into two task selectors. `sysctl_vm`
+  covers the Postgres-specific group and is applied by default; exclude
+  it with `excluded_tasks: [sysctl_vm]` if you want to manage those
+  settings yourself. `sysctl_net` covers the network group and is opt-in
+  only via a new `opt_in_tasks` mechanism: `tpaexec configure
+  --platform aws` opts the cluster in by default, while bare-metal
+  and other platforms stay opted out unless you add `sysctl_net` to
+  `opt_in_tasks`. The settings are written to
+  `/etc/sysctl.d/30-tpa.conf` rather than `/etc/sysctl.conf`, so an
+  operator's own file under `/etc/sysctl.d/` with a higher numeric
+  prefix (e.g. `/etc/sysctl.d/90-local.conf`) takes precedence through
+  the standard Linux mechanism, without going through `config.yml`.
+
+  `opt_in_tasks` is a new third task-selector list (alongside
+  `included_tasks` and `excluded_tasks`) for tasks that should run
+  only when explicitly opted in. Unlike `included_tasks`, it does not
+  engage whitelist semantics — naming a task in `opt_in_tasks` opts
+  that task in without implicitly excluding any other tasks.
+
+  As part of the same change, the historical network defaults have been
+  audited against current Linux kernel defaults. `net.core.somaxconn`,
+  `net.ipv4.tcp_syncookies`, and `net.ipv4.tcp_tw_reuse` are no longer
+  set by TPA (the first because TPA's old value was lower than the modern
+  kernel default and the operator who tripped this case had raised it
+  above both; the other two because the kernel default is already what
+  we wanted). `net.ipv4.ip_local_port_range` has been narrowed at the
+  bottom end so it no longer overlaps the privileged-port range.
+
+  On first redeploy under the new layout, TPA also removes any of its
+  historical sysctl lines from /etc/sysctl.conf, so the two files don't
+  end up shadowing each other.
+
+  References: TPA-1514.
+
+- Support running TPA on Debian 13
+
+  The TPA controller can now be a system running Debian 13 ("trixie"),
+  either from a source checkout (using the system python 3.13 packages)
+  or via `apt-get install tpaexec`, now that tpaexec packages are
+  published for Debian 13.
+
+  References: TPA-1625, TPA-1630.
+
+- Experimental deployment to Debian 13/trixie nodes
+
+  TPA can now deploy to nodes running Debian 13 ("trixie"). Suitable docker
+  images or ec2 AMIs are selected if the docker or aws platforms are being
+  used, and `bare` instances running Debian 13 are detected correctly.
+
+  This feature is considered experimental because deployment depends on the
+  availability of the various packages for Debian 13, so not all
+  architectures or software options will work until packages are uploaded to
+  upstream repositories.
+
+  Debian 12 remains the default Debian version, so existing clusters and any
+  new cluster configured without an explicit `--os-version` are unaffected.
+
+  References: TPA-1624, TPA-1629.
+
+### Minor changes
+
+- Add an option to preserve ansible.log across deprovision instead of deleting it
+
+  tpaexec deprovision always deleted the cluster directory's ansible.log
+  along with other generated files. Setting preserve_ansible_log: true at
+  the top level of config.yml now preserves it instead (the current log is
+  renamed to ansible.log.N, one more than the highest existing suffix,
+  leaving earlier logs under their original names), which is useful
+  when repeatedly provisioning and deprovisioning the same cluster
+  directory during development. Default behavior is unchanged.
+
+  References: TPA-1646.
+
+- Controlled startup of Postgres service when EFM is used as failover manager
+
+  A new variable `efm_autostart_db` has been added to control the startup of the 
+  Postgres service when EFM is used as the failover manager (by default, `false`). 
+  When set to `true`, the Postgres service will start automatically after EFM starts.
+
+  References: TPA-1588.
+
+- Add an Echo (Debian-based) execution environment variant for AAP 2.4
+
+  A new `echo` execution-environment base is available under
+  `tpa-ee/aap24/echo/`, built on `reg.echohq.com/python:3.12-slim`
+  ("Echo Linux", a Debian-derivative). It's an alternative to the existing
+  `alpine` variant for users who need an apt-based, glibc image. Build it
+  the same way as the other variants: `build.sh -b echo`.
+
+  References: TPA-1586.
+
+- Set libpq environment variables for the pgd-proxy service
+
+  The `pgd-proxy` service is started by systemd, which does not pass a
+  user's ambient environment through to spawned services. As a result,
+  `pgd-proxy` could fail to connect to Postgres when it relied on libpq
+  environment variables (such as `PGPASSFILE` to locate its password
+  file) that were not present in the service's environment.
+
+  TPA now sets these variables directly in the `pgd-proxy` systemd unit
+  file via a new `pgd_proxy_service_environment` variable, which
+  defaults to:
+
+      pgd_proxy_service_environment:
+        PGPASSFILE: '{{ pgd_proxy_home }}/.pgpass'
+        PGSSLMODE: 'require'
+
+  Each entry is rendered as an `Environment=` line in the unit file.
+  You can override the variable under `cluster_vars` or a pgd-proxy
+  instance's `vars` to change or add environment variables; the value
+  you supply replaces the default mapping in full rather than being
+  merged entry by entry.
+
+  References: TPA-1535, 61496, 63632.
+
+- Stop deploy warning that raw does not support the environment keyword
+
+  Every deploy logged an Ansible warning, "raw module does not support the
+  environment keyword", from the task that records the deploy in the log
+  file. The task inherited a play-level environment it never used. It is now
+  given an empty environment, so the spurious warning no longer appears. This
+  is purely cosmetic; deployment behaviour is unchanged.
+
+  References: TPA-1541.
+
+- Add `pgaa` extension support
+
+  The `pgaa` extension is now available to be installed via TPA 
+  when listed in the extensions list. 
+  `pgaa` has `pgfs` as a prerequisite, TPA will check the presence
+  of `pgfs when `pgaa` is listed in the extensions to install to avoid
+  failing at a later stage of the deployment.
+
+  To check the list of supported platforms and postgres versions, see 
+  https://www.enterprisedb.com/docs/pgaa/latest/overview/compatibility/.
+
+  References: TPA-1566.
+
+- Repeat TPA's deliberate warnings in a recap at the end of a run
+
+  Warnings that TPA raises on purpose to draw the operator's attention are
+  printed inline as a run proceeds, where they can scroll out of sight during
+  a long deploy. TPA's output now collects those deliberate warnings and
+  repeats them in a consolidated block after the PLAY RECAP, so they are not
+  missed. Warnings emitted by Ansible itself are left out of this recap, so it
+  stays focused on the messages TPA chose to raise.
+
+  References: TPA-1540.
+
+- Add `pgfs` extension support
+
+  The `pgfs` extension is now available to be installed via TPA 
+  when listed in the `extra_postgres_extensions` list.
+
+  To check the list of supported platforms and postgres versions, see 
+  https://www.enterprisedb.com/docs/pg_extensions/pgfs/compatibility/.
+
+  References: TPA-1565.
+
+- PEM server nodes receive a generated node name when created
+
+  PEM server nodes created by `--enable-pem` were given the fixed name `pemserver`.
+  This fix ensures they now receive a generated node name when created, having a consistent naming scheme along
+  other nodes within the generated cluster, this also affects receiving a generated hostname using the flag
+  `--hostnames-from`, previously not being possible.
+
+  References: TPA-761.
+
+- Ensure that `--pgd-proxy-routing` is specified in BDR4 to PGD5 reconfiguration
+
+  When reconfiguring a BDR4 cluster to PGD5, `--pgd-proxy-routing` must now be
+  set to `global` or `local`. This is enforced consistently for `--describe`,
+  `--check`, and a real run, so an omitted or invalid value is now reported
+  immediately instead of only being caught partway through the process.
+
+  References: TPA-1483.
+
+- Support EFM 5.4's primary.health.check.port property
+
+  Starting with EFM 5.4, there will be a new property 'primary.health.check.port'
+  that can be used with load balancers to locate the primary node in a cluster.
+  When set, an EFM agent will listen on that port for any incoming http
+  requests. Primary agents will respond with a 200 code and other agents
+  will respond with a 404.
+
+  TPA now supports setting this property in efm_conf_settings; it will be ignored if
+  set and a version of  EFM before 5.4 is being deployed.
+
+  References: TPA-1560.
+
+### Bugfixes
+
+- Apply pgd-proxy systemd unit changes on redeploy
+
+  Changes to the `pgd-proxy` systemd unit file (for example, editing
+  `pgd_proxy_service_environment`) were written to disk but did not take
+  effect on the running service when re-running `tpaexec deploy` on an
+  existing cluster: the role restarted the service without first running
+  `systemctl daemon-reload`, so systemd kept using its cached unit, and
+  a change confined to the unit file did not trigger a restart at all.
+
+  TPA now reloads systemd and restarts `pgd-proxy` whenever the unit file
+  changes, so unit-file settings are applied on redeploy as expected.
+
+  References: TPA-1614.
+
+- Fix efm_bind_by_hostname being silently reset during EFM switchover and upgrade health checks
+
+  When a cluster was configured with `--efm-bind-by-hostname`, EFM
+  switchover (`tpaexec switchover`, and the EFM switchover step used
+  mid-upgrade by `tpaexec upgrade`) and the EFM health checks run
+  around `tpaexec upgrade`/`tpaexec upgrade-efm` incorrectly used the
+  node's IP address instead of its hostname to identify itself when
+  querying `efm cluster-status-json`. Both task files unconditionally
+  reloaded EFM's role defaults (including `efm_bind_by_hostname:
+  false`) over the user-configured value, silently reverting the
+  cluster to IP-based identification. As a result, tasks that look up
+  a node by its EFM identity (`efm set-priority`, cluster-status
+  polling, and the "node is part of allowed nodes" check) could fail
+  on clusters configured with `--efm-bind-by-hostname`.
+
+  The role defaults are now only used as a fallback for variables that
+  are not already defined, so a user-configured `efm_bind_by_hostname`
+  (and `efm_cluster_status_retries`/`efm_cluster_status_retry_delay`,
+  if overridden) is preserved.
+
+  References: TPA-1648.
+
+- Grant the Patroni rewind user the privileges pg_rewind needs
+
+  The Patroni rewind user (`patroni_rewind_user`, default `rewind`) was created
+  as a plain non-superuser role with no privileges, so the first pg_rewind
+  Patroni attempted after a failover failed with "permission denied for
+  function pg_read_binary_file", leaving the demoted primary unable to rejoin
+  the cluster as a replica.
+  This fix grants the rewind user EXECUTE on the four pg_catalog functions
+  pg_rewind requires (`pg_ls_dir`, `pg_stat_file`, `pg_read_binary_file`),
+  matching what Patroni itself would grant during bootstrap. Re-running
+  `tpaexec deploy` on an existing cluster applies the fix.
+
+  References: TPA-1656.
+
+- Fix Patroni REST API test/management calls failing under mTLS with a non-root SSH user
+
+  Calls to Patroni's REST API (used by `tpaexec test` and by switchover/restart
+  management operations) could fail with a permission-denied connection error
+  when the cluster used mTLS authentication for the API and the connecting SSH
+  user was not root - the recommended configuration on AWS and bare metal. This
+  no longer happens.
+
+  References: TPA-1640.
+
+- Improve pgbouncer/pgd-proxy port clash in early deployment phase
+
+  TPA already stopped a deploy if pgbouncer and pgd-proxy were both
+  configured to listen on the same port on the same host, but it only
+  checked the main (read-write) port. If the clash was instead on
+  pgd-proxy's read-only port, TPA didn't notice, and one of the two
+  services could quietly fail to start.
+
+  Deploy now checks both ports for a clash. It also fails with a clear
+  message, instead of stopping abruptly with a confusing error, if
+  pgd-proxy's listen port isn't set in config.yml at all.
+
+  Deploy now also stops with a clear message if a host runs pgd-proxy
+  but its read-only port (read_listen_port) isn't set. When
+  bdr_package_version isn't set in config.yml, TPA assumes BDR 5.5 or
+  later, which needs this port, so it requires read_listen_port rather
+  than letting pgd-proxy start without read-only routing.
+
+  References: TPA-810.
+
+- Configure pgd-cli on proxy nodes during BDR 4 to PGD 5 upgrades
+
+  A BDR-Always-ON to PGD-Always-ON major upgrade (BDR 4 to PGD 5)
+  converts dedicated harp-proxy nodes into pgd-proxy nodes, which
+  require pgd-cli. The upgrade installed the pgd-cli package on those
+  nodes but never wrote its configuration file, leaving pgd-cli present
+  but unusable there (`/etc/edb/pgd-cli/pgd-cli-config.yml` was absent).
+  The upgrade reported success regardless, so the problem was silent.
+
+  TPA now writes the pgd-cli configuration on those nodes during the
+  upgrade, so pgd-cli is fully installed and configured on the new
+  pgd-proxy nodes.
+
+  References: TPA-1618.
+
+- Fix pgd-cli authentication on dedicated pgd-proxy nodes
+
+  On a dedicated pgd-proxy node (one with no postgres/bdr role), pgd-cli
+  was configured with endpoints that connect as the Postgres superuser,
+  but the node's `.pgpass` holds only the pgd-proxy user's password. As a
+  result pgd-cli could not authenticate against any endpoint and failed
+  with `fe_sendauth: no password supplied`.
+
+  TPA now sets each pgd-cli endpoint to connect as the user appropriate to
+  the node running pgd-cli — the pgd-proxy user on dedicated pgd-proxy
+  nodes — so pgd-cli works out of the box there. Postgres and BDR nodes are
+  unaffected.
+
+  References: TPA-1617.
+
+- Fix psycopg2 canary test failing on clusters with a non-root login user
+
+  `tpaexec test` aborted at "Install psycopg2 import canary script"
+  with "Destination /etc/tpa not writable" on any cluster whose
+  `ansible_user` is not root (such as the typical AWS or bare-metal
+  cluster). The test now installs and removes its canary script with
+  the privileges it requires, so the psycopg2 import check runs as
+  intended regardless of the login user.
+
+  References: TPA-1584.
+
+- Fix unnecessary Postgres restart from max_wal_senders/max_replication_slots recalculation
+
+  TPA calculates its own defaults for `max_replication_slots` and
+  `max_wal_senders` on every deploy and writes them to
+  `conf.d/0001-tpa_restart.conf`, even on clusters where these
+  settings are actually governed by `postgres_conf_settings` (which
+  takes priority over any other value). Because the calculation
+  formula for `max_replication_slots` has changed across recent TPA
+  versions (to account for PGD 5 Parallel Apply), upgrading TPA
+  could change the value written to `conf.d/0001-tpa_restart.conf`
+  and trigger a Postgres restart, even when the values actually in
+  effect (from `postgres_conf_settings`) never changed.
+
+  TPA now validates that `max_wal_senders` is at least as large as
+  `max_replication_slots`, failing deployment with an explanatory
+  error instead of silently adjusting either value as before. A new
+  `skip_wal_senders_validation` variable is available as a
+  temporary escape hatch for clusters transitioning an existing,
+  inconsistent configuration.
+
+  To avoid the restart described above, set `max_replication_slots`
+  and `max_wal_senders` directly as cluster_vars with the value you
+  want in effect, rather than only under `postgres_conf_settings`
+  (see the updated `postgresql.conf` documentation).
+
+  WARNING: if `max_wal_senders`/`max_replication_slots` are not set
+  directly and only appear under `postgres_conf_settings`, upgrading
+  to this version may still restart Postgres once, if TPA's
+  recalculated (and otherwise unused) value differs from what was
+  previously written to `conf.d/0001-tpa_restart.conf`. Setting the
+  variables directly with your intended value, in the same deploy
+  as the upgrade, avoids this.
+
+  References: TPA-1655, CP65323.
+
+- Fix Barman package installation on Debian/Ubuntu for Barman 3.20+
+
+  Since Barman 3.20.0, installing from EDB's own repository on Debian or
+  Ubuntu ships Barman's Python client library under a new package name,
+  `edb-python312-barman`, instead of `python3-barman`. TPA now selects the
+  correct package name automatically, so deployments and upgrades to
+  Barman 3.20 or later succeed on Debian and Ubuntu when using EDB's
+  repositories. Installs from the PGDG repository, and all RedHat/SUSE
+  installs, are unaffected.
+
+  References: TPA-1654.
+
+- Generate a Tower-compatible ssh_config for Ansible Tower clusters
+
+  When a cluster is managed by Ansible Tower, TPA no longer writes an
+  `IdentityFile` or `IdentitiesOnly` setting into the cluster's
+  `ssh_config`. Tower supplies the SSH key through its own machine
+  credential, and pinning TPA's own key here prevented that credential
+  from being used, which forced operators to override
+  `ansible_ssh_common_args` by hand after every provision.
+
+  The generated `ssh_config` still sets the connection port, the
+  cluster's `known_hosts` files and `ServerAliveInterval`, so Tower
+  clusters now get the correct SSH behaviour out of the box with no
+  manual editing. Clusters that are not managed by Tower are unaffected.
+
+  References: TPA-1536, 61496.
+
+- Fix HARP cluster becoming unroutable after re-deploy
+
+  TPA now re-applies the HARP cluster bootstrap configuration when the
+  consensus store (DCS) has lost it, not only when the on-disk bootstrap
+  file has changed. Previously, if the DCS was emptied or re-provisioned,
+  or an initial bootstrap was interrupted, while the bootstrap file was
+  left unchanged, a re-deploy would silently skip re-applying it and
+  leave HARP-proxy unable to route connections.
+
+  References: TPA-1525.
+
+- Fix tpaexec upgrade --components=pg-backup-api being a silent no-op
+
+  Upgrading pg-backup-api via tpaexec upgrade --components=pg-backup-api
+  did nothing unless a specific package version was pinned in config.yml,
+  even when a newer version was available. It now upgrades to the latest
+  available version by default, matching barman, pgbouncer, and PEM.
+
+  References: TPA-1594.
+
+- Fix TLS certificate ownership of colocated services being reset on redeploy
+
+  Redeploying a cluster where a TLS-using service (for example etcd) shares
+  a node with Postgres could leave that service's certificate and CA files
+  owned by the Postgres system user instead of the service's own user,
+  breaking TLS for that service until the files were manually fixed. This
+  no longer happens.
+
+  References: TPA-1637.
+
+- Fix install from source dependency for Debian
+
+  The 'pkg-config' package was missing from the list of required packages for Debian-based systems, which caused
+  build failures when compiling software that relies on pkg-config. 
+  This fix adds 'pkg-config' to the list of required packages, ensuring that builds from source can proceed 
+  without errors related to missing dependencies.
+
+  References: TPA-1561.
+
+- Fix tpaexec switchover failing on EFM clusters
+
+  `tpaexec switchover` on a cluster with `failover_manager: efm` no
+  longer fails after promotion with a "requested handler ... was not
+  found" error while regenerating EFM configuration for the new
+  topology.
+
+  References: TPA-1650.
+
+- Fix permanent Raft consensus failure on Postgres 16+ BDR/PGD clusters
+
+  Postgres 16 added `output_plugin_libraries`, an allow-list GUC that
+  rejects any output plugin not named in it (default: `pgoutput,
+  test_decoding`). BDR/PGD's consensus worker uses the `bdr` library
+  itself as an output plugin, so on any build where this GUC exists and
+  doesn't already allow `bdr`, the consensus worker crashed at first
+  startup. That happened during the cluster's very first boot, while
+  Raft was still bootstrapping, permanently stranding that node with no
+  Raft leader: every later `bdr.create_node_group()` call then failed
+  with "could not establish consensus leader", and the deploy failed.
+
+  TPA now adds `bdr` to `output_plugin_libraries` before Postgres ever
+  starts, on any build that supports the GUC, so the consensus worker
+  never crashes in the first place.
+
+  TPA also now retries BDR node group creation on transient consensus
+  errors, as a defensive measure independent of the above.
+
+  References: TPA-1642.
+
+- Fix M1 deploy failure when efm tasks are excluded
+
+  Deploying an M1 cluster configured with `--enable-efm` using
+  `tpaexec deploy --excluded-tasks=efm` failed on the primary with
+  "Role 'efm_role' does not exist": the task granting privileges to
+  `efm_role` did not honour the task selector, while the tasks that
+  create the role did. The grant tasks are now skipped along with the
+  rest of the efm tasks. In addition, the replication user's `.pgpass`
+  entry was only written by the (excluded) efm role, leaving
+  pg_basebackup waiting forever for a password when cloning the
+  replica; the entry is now written regardless of the task selector.
+
+  References: TPA-1613.
+
+- Fix PEM agent restart failure when using update_hosts with multiple PEM agents
+
+  Upgrading the pem-agent component with update_hosts restricted to a
+  subset of hosts could fail with an undefined-variable error on any
+  PEM agent host excluded from that subset. The restart step now only
+  runs against the hosts actually being upgraded.
+
+  References: TPA-1593.
+
+- Enable standard repo when enabling pg-backup-api
+
+  pg-backup-api is only published to EDB's Cloudsmith repositories, never
+  to PGDG. Configuring a community-Postgres cluster with
+  --enable-pg-backup-api (without --enable-pem or --enable-beacon-agent)
+  previously produced a config.yml with an empty edb_repositories list,
+  so the generated configuration could not install pg-backup-api. TPA
+  now enables the standard EDB repository whenever --enable-pg-backup-api
+  is used, matching the existing behaviour for --enable-pem and
+  --enable-beacon-agent.
+
+  References: TPA-1633.
+
+- Fix spurious upgrade failures on clusters with non-default Connection Manager ports
+
+  The listening-ports check run during PGD-X/PGD-S minor version upgrades
+  always checked the generic default Connection Manager ports instead of
+  the ports actually configured for the cluster's node group, causing the
+  check to fail with a connection error on any cluster that configures
+  non-default read_write_port/read_only_port values.
+
+  References: TPA-1592.
+
+- Fix DDL failures during BDR3/BDR4 to PGD5 and PGD5 to PGD6 major version upgrades
+
+  During a BDR3→PGD5, BDR4→PGD5, or PGD5→PGD6 (PGD-X) major version
+  upgrade, TPA could run Postgres user and role DDL (creating users,
+  granting roles) on a node immediately after restarting it, before
+  BDR Raft consensus had stabilized and before the node was unfenced.
+  This could cause replicated DDL to fail with errors such as
+  "failed to get a DDL epoch" or "consensus request timed out".
+
+  TPA now waits for Raft consensus to stabilize before running this
+  DDL, and only unfences the node afterwards, matching the correct
+  sequence: fence, stop/update/restart Postgres, wait for consensus,
+  run DDL, unfence.
+
+  References: TPA-1563, 61496.
+
+- Fix PostgreSQL being installed from the OS repository instead of PGDG/EDB on RHEL, Rocky Linux, AlmaLinux, CentOS Stream and Oracle Linux 10
+
+  On RHEL, Rocky Linux, AlmaLinux, CentOS Stream and Oracle Linux 10, the
+  OS BaseOS/AppStream repositories ship their own PostgreSQL packages.
+  Because DNF modularity — which TPA previously relied on to keep the OS
+  repositories from providing PostgreSQL — was removed in these EL10
+  distributions, TPA could end up installing PostgreSQL from the OS
+  repository instead of PGDG or EDB. The OS package's systemd unit is
+  named differently from the one TPA expects, so deployment then failed
+  while trying to manage the PostgreSQL service.
+
+  TPA now excludes PostgreSQL, Barman and repmgr packages from the OS
+  BaseOS and AppStream repositories on all of these EL10 distributions,
+  so PostgreSQL is always installed from PGDG or EDB as intended. This
+  matches the exclusion behaviour already in place for earlier RHEL
+  family versions (7, 8, and 9, which rely on DNF module exclusion).
+
+  References: TPA-1575.
+
+- Fix Patroni readiness check giving up early despite its retry budget
+
+  The wait for a Patroni node to report itself ready during deploy,
+  switchover, and `tpaexec test` could abandon its 3-minute retry budget
+  after only a few seconds, causing spurious failures on nodes whose
+  Patroni API was simply slow to start listening. When the wait does
+  fail, TPA now includes a recent excerpt of Patroni's own log in the
+  error, making the underlying cause visible without having to log in
+  to the node.
+
+  References: TPA-1632.
+
+- Add a keyUsage extension to newly generated cluster CAs
+
+  TPA's generated cluster CA carried no X509v3 Key Usage extension. Python
+  3.13 enables strict X.509 verification by default, and strict
+  verification rejects a CA certificate that has no keyUsage extension at
+  all, so any Python TLS client running on a node with Python 3.13 or
+  newer (for example Debian 13) and verifying against TPA's CA would fail,
+  even though the CA itself was otherwise valid.
+  This fix adds the required keyUsage extension to newly generated CAs.
+  Existing clusters are not affected: a CA already on disk keeps working
+  exactly as before and is never regenerated by this change. If you later
+  need a fixed CA for an existing cluster (for example, before adding a
+  node running Python 3.13 or newer), delete `<cluster_dir>/ssl/CA.crt`
+  (keep `CA.key`) and redeploy to have it re-signed with the new
+  extension.
+
+  References: TPA-1631.
+
+- Apply Connection Manager ports correctly when local routing is enabled
+
+  PGD reads the Connection Manager options (read_write_port,
+  read_only_port, http_port and use_https) only from the node group that
+  has routing enabled. With `--pgd-routing local` that is each location
+  subgroup, but `tpaexec configure` wrote the ports to the top-level
+  group, where they had no effect: Connection Manager silently fell back
+  to listening on postgres_port + 1000 and postgres_port + 1001 instead
+  of the requested ports.
+
+  `tpaexec configure` now places these options on the location subgroups
+  when local routing is selected, and on the top-level group when global
+  routing is selected. Existing clusters do not need their config.yml
+  edited: a routing-enabled subgroup that does not set these options
+  itself now inherits them from its parent group, so redeploying moves
+  Connection Manager onto the configured ports.
+
+  References: TPA-1622.
+
+- Fix update_hosts robustness for PGD5-to-PGD6 and PGD6 minor upgrades
+
+  Several plays in the PGD5-to-PGD6 major upgrade and PGD6 minor upgrade
+  playbooks were incorrectly scoped to the update_hosts subset when they
+  actually depend on cluster-wide state (the connection manager endpoint
+  for every node, and write-leader detection). This caused upgrades to
+  fail or silently skip proxy downtime monitoring whenever update_hosts
+  was used to upgrade a subset of hosts that excluded the cluster's
+  current primary or write leader. These plays now always run across
+  the whole cluster, regardless of update_hosts.
+
+  References: TPA-1500.
+
+### Breaking changes
+
+- Reject the deprecated PGD-S architecture at configure time
+
+  PGD-S (PGD Essential) is no longer offered as a product. `tpaexec
+  configure --architecture PGD-S` now fails immediately with a clear
+  error instead of creating a cluster. The same check applies to
+  `tpaexec reconfigure` and `tpaexec provision`/`deploy` against an
+  existing cluster whose config.yml still specifies `architecture:
+  PGD-S`. Use PGD-X for new PGD 6 deployments instead.
+
+  References: TPA-1519.
+
 ## v23.44.1 (2026-07-07)
 
 ### Bugfixes
+
+- Write boolean postgres_conf_settings values as on/off
+
+  YAML parses unquoted `off`, `on`, `yes` and `no` as booleans, so a
+  setting such as `bdr.default_streaming_mode: off` in
+  `postgres_conf_settings` reached TPA as a boolean and was written to
+  `postgresql.conf` as `False`. Postgres accepts that for genuine
+  boolean parameters, but rejects it for enum parameters whose valid
+  values include `off` or `on` (for example `bdr.default_streaming_mode`,
+  where the value was silently ignored and the parameter left at its
+  default).
+
+  TPA now writes boolean values in `postgres_conf_settings` as `on` or
+  `off`, which Postgres accepts both as boolean values and as enum
+  labels. Quoting values exactly as they should appear in
+  `postgresql.conf` remains the recommended practice.
+
+  WARNING: on clusters which used unquoted boolean values in
+  `postgres_conf_settings`, postgres will be restarted on the next run
+  of `tpaexec deploy`.
+
+  References: TPA-1352
+
+- Resume an interrupted BDR 4 to PGD 5 upgrade instead of aborting
+
+  A BDR 4 to PGD 5 upgrade that was interrupted after the data nodes
+  reached PGD 5 but before harp-proxy was replaced with pgd-proxy used
+  to be misdetected as a minor PGD 5 upgrade on the next run, and would
+  abort trying to stop a pgd-proxy service that had never been installed.
+  `tpaexec upgrade` now recognises this half-migrated state and resumes
+  the harp to pgd-proxy migration, so a failed upgrade can be recovered
+  simply by re-running the command.
+
+  To make this reliable, reconfiguring a BDR 3/4 cluster to PGD 5 now
+  defaults `upgrade_components` to `postgres, pgd-proxy, pgdcli` (unless
+  you have already set it), so the upgrade migrates the data nodes,
+  replaces harp-proxy with pgd-proxy, and moves pgd-cli onto the PGD 5
+  line in the same run. These three components must be upgraded together,
+  and a major BDR 3/4 to PGD 5 upgrade that would upgrade some but not all
+  of them now stops before making any changes.
+
+  Upgrading pgd-proxy now also re-renders its configuration file and
+  systemd unit between installing the new package and restarting the
+  service, so a newer pgd-proxy that changes its configuration layout or
+  service unit starts cleanly against freshly rendered files.
+
+  References: TPA-1527
 
 - Fix EPAS package resolution failure on RHEL 9.7+ by dropping server-devel
 

@@ -5,9 +5,9 @@ name: Integration Tests on s390x architecture
 on:
   pull_request:
     types:
-      - review_requested
+      - opened
     branches:
-      - main
+      - 'rc/*'
   workflow_dispatch:
 
 env:

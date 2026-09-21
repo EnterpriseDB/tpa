@@ -4,7 +4,14 @@
 
 - name: Include EFM config defaults
   include_vars:
+    name: _efm_config_defaults
     file: "{{ tpa_dir }}/roles/efm/config/defaults/main.yml"
+
+- name: Apply EFM config defaults for variables not already defined
+  set_fact:
+    efm_bind_by_hostname: "{{ efm_bind_by_hostname|default(_efm_config_defaults.efm_bind_by_hostname) }}"
+    efm_cluster_status_retries: "{{ efm_cluster_status_retries|default(_efm_config_defaults.efm_cluster_status_retries) }}"
+    efm_cluster_status_retry_delay: "{{ efm_cluster_status_retry_delay|default(_efm_config_defaults.efm_cluster_status_retry_delay) }}"
 
 - name: Check that required argument `target` was supplied
   assert:

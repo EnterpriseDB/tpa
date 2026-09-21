@@ -92,8 +92,12 @@ def family_for(name):
 
         return pattern, sort_key
 
-    # Rocky-{maj}-EC2-Base-{maj}.{min}-{date}.{N}.{arch}
-    m = re.match(r"^Rocky-(\d+)-EC2-Base-\d+\.\d+-\d+\.\d+\.(x86_64|aarch64)$", name)
+    # Rocky-{maj}-EC2-Base-{maj}.{min}-{date}[.{N}].{arch}
+    # The build-revision digit is sometimes omitted (seen on Rocky 8, while
+    # Rocky 9/10 still carry it), so it's optional here.
+    m = re.match(
+        r"^Rocky-(\d+)-EC2-Base-\d+\.\d+-\d+(?:\.\d+)?\.(x86_64|aarch64)$", name
+    )
     if m:
         major, arch = m.group(1), m.group(2)
         pattern = f"Rocky-{major}-EC2-Base-*.{arch}"
@@ -115,9 +119,9 @@ def find_latest(ec2, owner, pattern, sort_key):
         Filters=[{"Name": "name", "Values": [pattern]}],
     )
     if not response["Images"]:
-        raise RuntimeError(f"AWS returned 0 AMIs for owner={owner} pattern={pattern!r}")
+        print(f"Warning: AWS returned 0 AMIs for owner={owner} pattern={pattern!r}")
+        return
     return max(response["Images"], key=sort_key)
-
 
 def main():
     parsed = [parse_images(f) for f in FILES]
@@ -143,7 +147,7 @@ def main():
             except RuntimeError as exc:
                 print(f"ERROR: {exc}", file=sys.stderr)
                 return 1
-            if latest["Name"] != current_name:
+            if latest and latest["Name"] != current_name:
                 print(f"  {distro}: {current_name}\n      -> {latest['Name']}")
                 updates.append((current_name, latest["Name"]))
 

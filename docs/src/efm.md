@@ -87,6 +87,19 @@ documentation](https://www.enterprisedb.com/docs/efm/latest/installing/prerequis
 You can change EFM's user privileges by switching this variable from `true` to `false` and viceversa
 via `tpaexec deploy`.
 
+## efm_autostart_db
+
+On a new deployed cluster, TPA by default does not determine an order for EFM and Postgres, this means that on a cluster's maintenance, EFM
+can start before Postgres, and viceversa (leading to invalid cluster states after outages or patching). This can be modified by defining `efm_autostart_db` to `true` under `cluster_vars` (by default, set to `false`):
+
+```yaml
+cluster_vars:
+  efm_autostart_db: true
+```
+
+TPA will modify the systemd service files for Postgres, Postgres monitor and EFM in a way that EFM will start before Postgres, as well as modifying the value of [auto.resume.startup.period](https://www.enterprisedb.com/docs/efm/latest/04_configuring_efm/01_cluster_properties/#auto_resume_startup_period) to 1 (must be different than 0), which aligns to EFM's prerequisites(see [the EFM 
+documentation](https://www.enterprisedb.com/docs/efm/latest/installing/prerequisites/#using-autostart-for-the-database-servers)).
+
 ### EFM witness
 
 TPA will install and configure EFM as witness on instances whose `role`

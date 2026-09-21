@@ -67,25 +67,30 @@ class aws(CloudPlatform):
     def image(self, label, **kwargs):
         images = {
             "debian": {
-                "debian-10-amd64-20240703-1797": {
-                    "versions": ["10", "buster"],
-                    "owner": "136693071363",
-                    "user": "admin",
-                },
-                "debian-11-amd64-20260419-2453": {
+                "debian-11-amd64-20260821-2577": {
                     "versions": ["11", "bullseye", "default"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
-                "debian-12-amd64-20260413-2447": {
+                "debian-12-amd64-20260909-2596": {
                     "versions": ["12", "bookworm"],
+                    "owner": "136693071363",
+                    "user": "admin",
+                },
+                "debian-13-amd64-20260831-2587": {
+                    "versions": ["13", "trixie"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
             },
             "debian-arm": {
-                "debian-12-arm64-20260413-2447": {
+                "debian-12-arm64-20260909-2596": {
                     "versions": ["12", "bookworm", "default"],
+                    "owner": "136693071363",
+                    "user": "admin",
+                },
+                "debian-13-arm64-20260831-2587": {
+                    "versions": ["13", "trixie"],
                     "owner": "136693071363",
                     "user": "admin",
                 },
@@ -97,50 +102,50 @@ class aws(CloudPlatform):
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-8.10.0_HVM-20260318-x86_64-2090-Hourly2-GP3": {
+                "RHEL-8.10.0_HVM-20260901-x86_64-2273-Hourly2-GP3": {
                     "versions": ["8", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-9.7.0_HVM-20260331-x86_64-0-Hourly2-GP3": {
+                "RHEL-9.8.0_HVM-20260728-x86_64-0-Hourly2-GP3": {
                     "versions": ["9"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-10.1.0_HVM-20260331-x86_64-0-Hourly2-GP3": {
+                "RHEL-10.2.0_HVM-20260728-x86_64-0-Hourly2-GP3": {
                     "versions": ["10"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
             },
             "redhat-arm": {
-                "RHEL-9.7.0_HVM-20260331-arm64-0-Hourly2-GP3": {
+                "RHEL-9.8.0_HVM-20260728-arm64-0-Hourly2-GP3": {
                     "versions": ["9", "default"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
-                "RHEL-10.1.0_HVM-20260331-arm64-0-Hourly2-GP3": {
+                "RHEL-10.2.0_HVM-20260728-arm64-0-Hourly2-GP3": {
                     "versions": ["10"],
                     "owner": "309956199498",
                     "user": "ec2-user",
                 },
             },
             "rocky": {
-                "Rocky-8-EC2-Base-8.10-20240528.0.x86_64": {
+                "Rocky-8-EC2-Base-8.10-20260625.x86_64": {
                     "versions": ["8"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
                     "user": "rocky",
                     "os_family": "RedHat",
                 },
-                "Rocky-9-EC2-Base-9.7-20251123.2.x86_64": {
+                "Rocky-9-EC2-Base-9.8-20260525.0.x86_64": {
                     "versions": ["9", "default"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
                     "user": "rocky",
                     "os_family": "RedHat",
                 },
-                "Rocky-10-EC2-Base-10.1-20251116.0.x86_64": {
+                "Rocky-10-EC2-Base-10.2-20260525.0.x86_64": {
                     "versions": ["10"],
                     "preferred_python_version": "python3",
                     "owner": "792107900819",
@@ -154,7 +159,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20260424": {
+                "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20260904": {
                     "versions": [
                         "22.04",
                         "jammy",
@@ -162,7 +167,7 @@ class aws(CloudPlatform):
                     "owner": "099720109477",
                     "user": "ubuntu",
                 },
-                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260424": {
+                "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260904": {
                     "versions": [
                         "24.04",
                         "noble",
@@ -173,7 +178,7 @@ class aws(CloudPlatform):
                 },
             },
             "sles": {
-                "suse-sles-15-sp7-v20260123-ecs-hvm-ssd-x86_64": {
+                "suse-sles-15-sp7-v20260722-ecs-hvm-ssd-x86_64": {
                     "versions": ["15"],
                     "preferred_python_version": "python3",
                     "owner": "013907871322",
@@ -284,7 +289,16 @@ class aws(CloudPlatform):
                 location["az"] = location.get("az", az)
 
     def update_cluster_vars(self, cluster_vars, args, **kwargs):
-        pass
+        # AWS instances boot with stock kernel defaults and benefit from
+        # TPA's busy-server network tuning; opt the cluster in to the
+        # sysctl_net task selector by default. Bare-metal users typically
+        # have their own opinions about these settings and stay opted out.
+        # We use opt_in_tasks (not included_tasks) so we don't engage
+        # the whitelist semantics that would gate every other task out.
+        opt_in = list(cluster_vars.get("opt_in_tasks") or [])
+        if "sysctl_net" not in opt_in:
+            opt_in.append("sysctl_net")
+        cluster_vars["opt_in_tasks"] = opt_in
 
     def update_instance_defaults(self, instance_defaults, args, **kwargs):
         y = self.arch.load_yaml("platforms/aws/instance_defaults.yml.j2", args)
@@ -305,16 +319,14 @@ class aws(CloudPlatform):
         if args["regions"]:
             args["regions"] = list(dict.fromkeys(args["regions"]))
             if len(args["regions"]) > 1:
-                print(
-                    """Warning:
+                print("""Warning:
 When using multiple regions you MUST manually edit config.yml to ensure that
 `ec2_vpc` `cidr` don't overlap to allow vpc peering between regions.
 `cluster_rules` and `locations` `subnet` values must all be changed
 accordingly. See documentation https://documentation.enterprisedb.com/tpa/release/latest/platform-aws/#regions
 
 VPC peering must be setup manually after `tpaexec provision` is run.
-                    """
-                )
+                    """)
         else:
             args["regions"] = [args.get("region")]
 

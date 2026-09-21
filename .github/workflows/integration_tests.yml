@@ -29,7 +29,6 @@ on:
         - "M1"
         - "BDR-Always-ON"
         - "PGD-Always-ON"
-        - "PGD-S"
         - "PGD-X"
         - "s390x"
       postgres_version:

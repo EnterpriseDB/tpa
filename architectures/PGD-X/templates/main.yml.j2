@@ -38,4 +38,13 @@ instances:
   role:
     - bdr
     - witness
+{%   set ns.counter = ns.counter + 1 %}
+{% endif %}
+{% if enable_pem is defined and enable_pem %}
+- node: {{ ns.counter }}
+  Name: {{ hostnames[ns.counter] }}
+  location: {{ location_names[0] }}
+  role:
+    - pem-server
+{%   set ns.counter = ns.counter + 1 %}
 {% endif %}

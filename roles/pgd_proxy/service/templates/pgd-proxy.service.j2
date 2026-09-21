@@ -9,6 +9,11 @@ Wants=network-online.target
 Type=simple
 User={{ pgd_proxy_user }}
 Group={{ pgd_proxy_group }}
+{% if pgd_proxy_service_environment is defined and pgd_proxy_service_environment is mapping %}
+{%   for k,v in pgd_proxy_service_environment.items() %}
+Environment={{ k }}={{ v }}
+{%   endfor %}
+{% endif %}
 Restart=on-failure
 RestartSec=1s
 ExecStart=/usr/bin/pgd-proxy -f {{ pgd_proxy_config_directory }}/pgd-proxy-config.yml

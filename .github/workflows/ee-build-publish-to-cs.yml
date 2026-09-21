@@ -20,14 +20,18 @@ on:
         type: string
         required: false
       ee_images_list:
-        description: "Select what EE images to build (comma-separated: rhel, alpine)"
+        description: "Select what EE images to build (comma-separated: rhel, alpine, echo)"
         required: false
         type: choice
-        default: "['rhel','alpine']"
+        default: "['echo']"
         options:
           - "['rhel']"
           - "['alpine']"
+          - "['echo']"
           - "['rhel','alpine']"
+          - "['echo','alpine']"
+          - "['rhel','echo']"
+          - "['rhel','alpine','echo']"
       maturity:
         description: "Select maturity of the EE images (snapshot, release)"
         type: choice
@@ -60,7 +64,7 @@ jobs:
           exit 1
       - name: Verify that the tag used is the same as the one defined on the input section
         if: >-
-          github.event.inputs.maturity == 'release' && github.ref_name != inputs.tag 
+          github.event.inputs.maturity == 'release' && github.ref_name != inputs.tag
         run: |
           echo "::error:: Validation Failed! If you use 'release' maturity, the tag defined on the input section must match the branch tag. Current reference name is: ${{ github.ref_name }} and input tag is ${{ github.event.inputs.tag }}"
           exit 1
@@ -80,7 +84,7 @@ jobs:
 
       - name: Build EE images
         uses: ./.github/actions/execution-environment-image-build
-        with: 
+        with:
           tag: ${{ inputs.tag }}
           environment_file: ${{ inputs.environment_file }}
           tpa-internal-ref: ${{ inputs.tpa-internal-ref }}
@@ -88,7 +92,8 @@ jobs:
           GH_SLONIK: ${{ secrets.GH_SLONIK }}
           RH_TPA_USERNAME: ${{ secrets.RH_TPA_USERNAME }}
           RH_TPA_TOKEN: ${{ secrets.RH_TPA_TOKEN }}
-    
+          ECHOHQ_TOKEN: ${{ secrets.ECHOHQ_TOKEN }}
+
   foundation-prepare:
     runs-on: ubuntu-latest
     if: >-
@@ -106,7 +111,7 @@ jobs:
         id: gh_run_identifier
         run: |
           echo "GH_RUN_IDENTIFIER=${GITHUB_REPOSITORY##*/}-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}-${{ github.event.inputs.tag }}-${{ github.event.inputs.maturity }}" >> $GITHUB_OUTPUT
-      
+
       # This is only needed if maturity is 'release' and we want to publish to production
       - name: Define CS_DESTINATION
         id: cs_destination
@@ -117,7 +122,7 @@ jobs:
         id: define_app_name
         run: |
           APP_NAME="tpa-ee-images"
-          echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT          
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
 
       - name: Define APP_VERSION
         id: define_app_version
@@ -167,7 +172,7 @@ jobs:
             source-registry: ghcr.io
             gh-run-identifier: ${{ needs.foundation-prepare.outputs.gh_run_identifier }}
             cs-destination: ${{ needs.foundation-prepare.outputs.cs_destination }}
-        
+
   anchore-stateful-scan:
     if: >-
       needs.checks-pre-execution.result == 'success' &&
@@ -188,7 +193,7 @@ jobs:
       gh-app-id: ${{ secrets.FOUNDATION_SECURITY_APP_ID }}
       cr-password: ${{ secrets.GH_SLONIK }}
       anchore-token: ${{ secrets.ANCHORE_CI_TOKEN }}
-      
+
   publish:
     runs-on: ubuntu-latest
     if: >-
@@ -207,7 +212,7 @@ jobs:
           token: ${{ secrets.GH_SLONIK }}
           path: foundation
           ref: ${{ env.FOUNDATION_PACKAGING_VERSION }}
-      
+
       # For some reason (GitHub error?), if you pass a variable to 'environment', it won't
       # catch it later on the 'conveyor-upload' action, and the bucket will be 'conveyor-storage-/(...)'
       # resulting in error

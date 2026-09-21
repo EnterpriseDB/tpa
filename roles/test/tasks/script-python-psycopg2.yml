@@ -9,6 +9,10 @@
 # of failure where the shebang-resolved Python lacks the psycopg2 the
 # rest of TPA has installed.
 
+# The test play has no play-level become, so the tasks that write to and
+# remove the root-owned canary in /etc/tpa must escalate explicitly; only
+# the canary run itself is meant to happen as the postgres user.
+
 - name: Install psycopg2 import canary script
   template:
     src: psycopg2_import_check.py.j2
@@ -16,6 +20,7 @@
     owner: root
     group: root
     mode: "0555"
+  become: yes
 
 - name: Run psycopg2 import canary as postgres user
   command: /etc/tpa/psycopg2-import-check
@@ -34,6 +39,7 @@
   file:
     path: /etc/tpa/psycopg2-import-check
     state: absent
+  become: yes
 
 - name: Fail with diagnostic if psycopg2 could not be imported
   fail:

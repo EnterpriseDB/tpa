@@ -12,16 +12,25 @@ edb_repo_hostname_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-sta
 edb_repo_name_suffix: "{{ edb_testing_repo|default(false)|bool|ternary('-testing', '') }}"
 
 apt_repositories: {}
+# Where apt-key(8) is unavailable (removed as of Debian 13/trixie), keys
+# are written straight into /etc/apt/trusted.gpg.d instead. apt decides
+# how to read them from the file extension, so key_format must match what
+# key_url actually serves: "asc" for ASCII-armored keys, "gpg" for binary
+# ones. It defaults to "asc" and is worth setting explicitly on your own
+# apt_repositories entries, because a mismatch is not reported here --- it
+# surfaces later as NO_PUBKEY on the next apt update.
 default_apt_repositories:
   PGDG:
     key_id: ACCC4CF8
     key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    key_format: asc
     repo: >-
       deb https://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
 
   EDB:
     key_id: 4EC55148FE026ECC
     key_url: https://apt.enterprisedb.com/edb-deb.gpg.key
+    key_format: gpg
     filename: >-
       edb-{{ ansible_distribution_release }}
     repo: >-

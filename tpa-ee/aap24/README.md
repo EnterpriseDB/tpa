@@ -2,12 +2,16 @@
 
 ## choice of base image
 
-TPA provides execution-environment.yml files for both ubi9/python-312 and python3.12-alpine base images
-depending on your needs.
+TPA provides execution-environment.yml files for ubi9/python-312, python3.12-alpine and
+reg.echohq.com/python:3.12-slim base images depending on your needs.
 
 - rhel9 base image is a RedHat generated image including python 3.12.
 
 - python3.12-alpine image is lightweight, minimalist and benefits from alpine's focus on security and docker oriented environment.
+
+- echo base image ("Echo Linux", a Debian-derivative) uses a glibc base so most python dependencies
+  install from prebuilt manylinux wheels rather than compiling from source. See `echo/README.md`
+  for details.
 
 ## tpa repos ref
 
@@ -27,6 +31,12 @@ run the following command to build an Alpine based EE:
 
 ```bash
 ./build.sh --tag tpa-ee-alpine:vA.B.C --base-image alpine -v
+```
+
+run the following command to build an Echo based EE:
+
+```bash
+./build.sh --tag tpa-ee-echo:vA.B.C --base-image echo -v
 ```
 
 this script will create a python venv, install the build requirements, run ansible-builder that will use the corresponding execution-environment.yml file to generate a docker image usable on AAP 2.4 for TPA deployment.

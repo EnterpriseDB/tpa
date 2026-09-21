@@ -25,13 +25,18 @@ inputs:
     description: RedHat password
     type: string
     required: true
+  ECHOHQ_TOKEN:
+    description: Echo container registry token (reg.echohq.com)
+    type: string
+    required: false
   base-image:
-    description: "base image (rhel, alpine)"
+    description: "base image (rhel, alpine, echo)"
     type: choice
     default: rhel
     options:
     - rhel
     - alpine
+    - echo
   tpa-internal-ref:
     description: "ref used for tpa-internal repo"
     type: string
@@ -77,6 +82,15 @@ runs:
         registry: registry.redhat.io
         username: ${{ inputs.RH_TPA_USERNAME }}
         password: ${{ inputs.RH_TPA_TOKEN }}
+
+    # login to the Echo container registry to pull the python:3.12-slim base image
+    - name: Login to Echo Container Registry
+      if: ${{ inputs.base-image == 'echo' }}
+      uses: docker/login-action@v4
+      with:
+        registry: reg.echohq.com
+        username: EDB-CI
+        password: ${{ inputs.ECHOHQ_TOKEN }}
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v4

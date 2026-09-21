@@ -17,8 +17,22 @@
       "{{ bdr_database_facts.bdr.node_group_summary
           |selectattr('node_group_name', 'equalto', node_group.name)
           |list }}"
+    # Connection Manager reads these options from the group that has routing
+    # enabled. Clusters configured before TPA-1622 have them on the top-level
+    # group even under local routing, where they have no effect, so a
+    # routing-enabled subgroup falls back to its parent's values.
+    _cm_option_names:
+      ['read_write_port', 'read_only_port', 'http_port', 'use_https']
+    _parent_options:
+      "{{ (bdr_node_groups|default([]))
+          |selectattr('name', 'equalto', node_group.parent_group_name|default(''))
+          |map(attribute='options')|list|first|default({}, true) }}"
+    _inherited_options:
+      "{{ _parent_options|extract_keys(_cm_option_names)
+          if node_group.options|default({})|try_subkey('enable_routing', true)|bool
+          else {} }}"
   with_dict:
-    "{{ node_group.options|default({}) }}"
+    "{{ _inherited_options|combine(node_group.options|default({})) }}"
   loop_control:
     loop_var: option
     label: >

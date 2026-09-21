@@ -230,6 +230,7 @@ class M1(Architecture):
         #   - 1 node if there is a witness-only location
         #   - 1 node if there is a single-node location
         #   - 1 barman node at the primary location
+        #   - 1 PEM server node if --enable-pem is specified
 
         instances_per_active_location = (
             self.args.get("data_nodes_per_location")
@@ -242,6 +243,7 @@ class M1(Architecture):
             + (1 if self.args.get("witness_only_location") else 0)
             + (1 if self.args.get("single_node_location") else 0)
             + 1
+            + (1 if self.args.get("enable_pem") else 0)
         )
 
     def default_location_names(self):
@@ -250,7 +252,7 @@ class M1(Architecture):
     def update_instances(self, instances):
         # If --enable-pem is specified, we collect all the instances with role
         # [primary, replica, witness] and append 'pem-agent' role to the existing
-        # set of roles assigned to them. We later add a dedicated 'pemserver'
+        # set of roles assigned to them. We later add a dedicated 'pem-server' role
         # instance to host our PEM server.
 
         if self.args.get("enable_pem"):
@@ -262,21 +264,6 @@ class M1(Architecture):
                     and self.args["cluster_vars"].get("enable_pg_backup_api", False)
                 ):
                     instance["role"].append("pem-agent")
-            n = instances[-1].get("node")
-            pemserver_name = (
-                f"{self.args['cluster_name']}-pemserver"
-                if self.args.get("cluster_prefixed_hostnames")
-                else "pemserver"
-            )
-
-            instances.append(
-                {
-                    "node": n + 1,
-                    "Name": pemserver_name,
-                    "role": ["pem-server"],
-                    "location": self.args["locations"][0]["Name"],
-                }
-            )
 
         if self.args.get("enable_beacon_agent"):
             self._add_beacon_agent_role(instances)

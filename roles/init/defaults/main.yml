@@ -142,6 +142,53 @@ pgaudit_package_name:
   Ubuntu: *debian_package_name_convention
   SLES: *redhat_package_name_convention
 
+# Since Barman 3.20.0, EDB's own repository (RPM, apt, and SLES alike)
+# ships the Python client library under a new package name,
+# edb-python312-barman (installed into a dedicated venv), because it can
+# no longer accurately claim to Provide the old python3-barman package
+# (see BAR-1600 and TPA-1654).
+#
+# On apt (Debian/Ubuntu), this breaks every install against the EDB repo:
+# apt never substitutes a differently-named package for one requested by
+# name, Breaks/Replaces or not, so both an unpinned/latest install and
+# any explicit >= 3.20 pin fail outright.
+#
+# On dnf (RedHat family), a request for the bare, unversioned
+# python3-barman is resolved transparently via edb-python312-barman's
+# Obsoletes clause, even on a fresh host with nothing installed yet, and
+# a wildcarded pin (e.g. '3.20.0*') resolves the same way. The one case
+# that still fails is an *exact*, unwildcarded pin to a version that
+# only exists under the new name (e.g. '3.20.0') -- exactly what TPA's
+# own packages_for filter generates whenever a caller sets
+# barman_package_version without a wildcard -- because dnf's NEVRA
+# lookup for that literal string finds nothing to obsolete. SLES/zypper
+# wasn't tested against every one of these cases, but a live deploy
+# confirms the fixed name resolves and installs correctly there too.
+#
+# PGDG never renamed the package on any OS family, so this only needs
+# to branch on edb_repositories being in use -- the narrower dnf/zypper
+# case is still worth fixing the same way, since it's a real failure for
+# anyone who pins an exact >= 3.20 version, and doing so uniformly here
+# costs nothing on the unaffected paths.
+#
+# barman_package_version may carry an apt epoch (e.g. '2:3.20.0-1') or a
+# wildcard (e.g. '3.20.0*'), per docs/src/barman.md, so it is sanitised
+# down to a bare X.Y[.Z] before comparison: first any leading 'N:' epoch
+# is dropped, then everything from the first character that isn't a
+# digit or a dot is discarded.
+default_barman_python_package: "{{
+    (
+      edb_repositories|default([]) != []
+      and (
+        barman_package_version is not defined
+        or barman_package_version
+           | regex_replace('^[0-9]+:', '')
+           | regex_replace('[^0-9.].*$', '')
+           is version('3.20', '>=')
+      )
+    ) | ternary('edb-python312-barman', python_pkg_prefix + '-barman')
+  }}"
+
 default_postgres_extensions_dictionary:
   edb_pg_tuner:
     packages:
@@ -433,7 +480,56 @@ default_postgres_extensions_dictionary:
   passwordcheck:
     spl: passwordcheck
     module: true
+  
+  pgfs:
+    own_schema: true
+    spl: pgfs
+    packages:
+      postgresql:
+        Debian: &debian_pg_pgfs_packages
+          - edb-pg{{ postgres_versionNN }}-pgfs
+        RedHat: &redhat_pg_pgfs_packages
+          - edb-pg{{ postgres_versionNN }}-pgfs
+        Ubuntu: *debian_pg_pgfs_packages
+      epas:
+        Debian: &pgfs_as_packages
+          - edb-as{{ postgres_versionNN }}-pgfs
+        RedHat: *pgfs_as_packages
+        Ubuntu: *pgfs_as_packages
+      pgextended:
+        Debian: *debian_pg_pgfs_packages
+        RedHat: *redhat_pg_pgfs_packages
+        Ubuntu: *debian_pg_pgfs_packages
+      edbpge:
+        Debian: &pgfs_pge_packages
+          - edb-postgresextended-{{ postgres_versionNN }}-pgfs
+        RedHat: *pgfs_pge_packages
+        Ubuntu: *pgfs_pge_packages
 
+  pgaa:
+    own_schema: true
+    spl: pgaa
+    packages:
+      postgresql:
+        Debian: &debian_pg_pgaa_packages
+          - postgresql-{{ postgres_versionNN }}-pgaa
+        RedHat: &redhat_pg_pgaa_packages
+          - postgresql-{{ postgres_versionNN }}-pgaa
+        Ubuntu: *debian_pg_pgaa_packages
+      epas:
+        Debian: &pgaa_as_packages
+          - edb-as{{ postgres_versionNN }}-pgaa
+        RedHat: *pgaa_as_packages
+        Ubuntu: *pgaa_as_packages
+      pgextended:
+        Debian: *debian_pg_pgaa_packages
+        RedHat: *redhat_pg_pgaa_packages
+        Ubuntu: *debian_pg_pgaa_packages
+      edbpge:
+        Debian: &pgaa_pge_packages
+          - edb-postgresextended-{{ postgres_versionNN }}-pgaa
+        RedHat: *pgaa_pge_packages
+        Ubuntu: *pgaa_pge_packages
 
 default_postgres_extensions:
   - pg_stat_statements
@@ -577,6 +673,7 @@ default_efm_bin_dir: "/usr/edb/efm-{{ efm_version }}/bin"
 default_efm_bind_port: 7800
 default_efm_conf_dir: "/etc/edb/efm-{{ efm_version }}"
 default_efm_user_is_superuser: true
+default_efm_autostart_db: false
 default_efm_user_password_encryption:
   "{{ (compliance|default('') == 'stig')
       |ternary('scram-sha-256', 'md5') }}"

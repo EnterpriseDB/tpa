@@ -6,6 +6,10 @@ if [ "${FS_SCANNER}" = "blackduck" ]; then
     case "${FS_SCANNER_STAGE}" in
     "pre")
         echo "Setup for BlackDuck pre stage"
+        # Upgrade setuptools so BlackDuck's PIP detector doesn't flag the
+        # old version Ubuntu ships (pip alone won't do this: it manages
+        # its own version, not setuptools')
+        pip install --upgrade pip setuptools
         # install ansible requirements for community use case only
         pip install -r requirements.txt
         echo DETECT_PIP_REQUIREMENTS_PATH="./source/requirements.txt" >> $GITHUB_ENV
@@ -45,10 +49,15 @@ if [[ "${FS_SCANNER}" = "sonarqube" ]]; then
         echo "Python version: $(python --version)"
         echo "Pip version: $(pip --version)"
 
-        # 6. Install Tox
+        # 6. Upgrade setuptools so it doesn't get flagged as an old,
+        # vulnerable component (pip alone won't do this: it manages its
+        # own version, not setuptools')
+        pip install --upgrade pip setuptools
+
+        # 7. Install Tox
         pip install tox
 
-        # 7. Run the specific Tox environment
+        # 8. Run the specific Tox environment
         echo "--- Running Tox py312-test ---"
         tox -e py312-test
             ;;

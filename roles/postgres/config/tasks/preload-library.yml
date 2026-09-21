@@ -116,6 +116,19 @@
     and bdr_version is version('4', '>=')
     and 'pglogical' in _preload_list
 
+- name: Adjust ordering of pgaa related to pgfs if required
+  when:
+    - p_and_f is subset(_preload_dict.keys())
+    - pgaa_pos < pgfs_pos
+  set_fact:
+    _preload_dict: "{{ _preload_dict|combine({ 'pgaa':  last_pos|int+1 }) }}"
+  register: ordering_4
+  vars:
+    p_and_f: ['pgfs', 'pgaa']
+    pgaa_pos: "{{ _preload_dict['pgaa']|int }}"
+    pgfs_pos: "{{ _preload_dict['pgfs']|int }}"
+    last_pos: "{{ _preload_dict.keys()|length }}"
+
 # When it comes to writing out the file again, we don't make any attempt
 # to retain whatever was in it before; as the warning clearly says, this
 # file—like any other in _include_dir—is subject to being overwritten.
@@ -141,7 +154,54 @@
   when:
     - _postgres_config_split
     - (_old_list|symmetric_difference(_preload_dict.keys()) is not empty)
-      or [ordering_1 is not skipped, ordering_2 is not skipped, ordering_3 is not skipped] is any
+      or [ordering_1 is not skipped, ordering_2 is not skipped, ordering_3 is not skipped, ordering_4 is not skipped] is any
 
   notify:
     - Note Postgres restart required
+
+# Some Postgres builds added output_plugin_libraries, an allow-list GUC
+# that rejects any output plugin not named in it (default: pgoutput,
+# test_decoding). BDR/PGD's consensus worker uses the bdr library itself
+# as an output plugin, so without this it fails to elect a Raft leader
+# ("could not establish consensus leader") wherever the GUC exists.
+#
+# Gating this on postgres_version alone isn't reliable: the GUC isn't
+# tied to a fixed major version across every build we test against (it
+# shows up in some EDB builds before it lands in vanilla community
+# Postgres of the same major version, if at all). Instead, ask the
+# actual installed build whether it knows about the GUC, the same way
+# postgresql.conf.sample is checked elsewhere: it lists every valid GUC
+# for that specific build, so grepping it is authoritative regardless of
+# version. A vanilla build without the GUC will otherwise fail to start
+# with 'unrecognized configuration parameter "output_plugin_libraries"'.
+- name: Check whether this Postgres build supports output_plugin_libraries
+  shell: >
+    set -o pipefail;
+    "{{ postgres_bin_dir }}/pg_config" --sharedir 2>/dev/null
+    | xargs -I{} grep -q output_plugin_libraries {}/postgresql.conf.sample
+  args:
+    executable: /bin/bash
+  register: _output_plugin_libraries_supported
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  when:
+    - _postgres_config_split
+    - "'bdr' in role"
+
+- name: Allow bdr as a trusted output plugin (if output_plugin_libraries exists)
+  lineinfile:
+    path: "{{ _include_dir }}/8888-shared_preload_libraries.conf"
+    regexp: "^output_plugin_libraries\\s*="
+    line: "output_plugin_libraries = 'pgoutput, test_decoding, bdr'"
+    create: yes
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "0644"
+  when:
+    - _postgres_config_split
+    - "'bdr' in role"
+    - _output_plugin_libraries_supported is not skipped
+    - _output_plugin_libraries_supported.rc == 0
+  notify:
+    - Note Postgres reload required

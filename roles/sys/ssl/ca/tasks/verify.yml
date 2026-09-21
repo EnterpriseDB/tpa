@@ -4,6 +4,17 @@
 
 # Verify x509 CA certificate and private key pair
 # Verify that the certificate is current and the public and private key match
+#
+# Deliberately not checked here: whether the CA certificate has the
+# keyUsage extension added for TPA-1631. Setting ca_cert_verify_passed
+# to false is what triggers main.yml to regenerate the CA, so adding
+# that check here would force every existing cluster to have its CA
+# re-signed (new serial, redistributed to every node) on its very next
+# deploy, whether or not it's ever exposed to strict TLS verification.
+# New CAs get the extension from main.yml; existing ones are left alone.
+# An operator who needs to fix an existing CA (e.g. before adding a
+# Debian 13 node) can delete the local ssl/CA.crt (keep CA.key) and
+# redeploy to force a re-sign.
 
 - block:
     - name: "Get information on the private key {{ local_ca_privatekey_path }}"

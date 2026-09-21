@@ -24,6 +24,7 @@ on:
         options:
         - debian:11
         - debian:12
+        - debian:13
         - ubuntu:22.04
         - ubuntu:24.04
         - redhat:8
@@ -65,6 +66,11 @@ on:
         - "repmgr"
         - "efm"
         - "patroni"
+      tpa_efm_bind_by_hostname:
+        description: "Configure EFM to bind by hostname instead of IP (only used when tpa_failover_manager is efm)"
+        required: false
+        default: false
+        type: boolean
       tpa_package_cache:
         description: "Use the downloader"
         type: boolean
@@ -106,6 +112,7 @@ jobs:
           tpa_postgres_version: ${{ github.event.inputs.tpa_postgres_version }}
           tpa_postgres_package_version: ${{ github.event.inputs.tpa_postgres_package_version }}
           tpa_failover_manager: ${{ github.event.inputs.tpa_failover_manager }}
+          tpa_efm_bind_by_hostname: ${{ github.event.inputs.tpa_efm_bind_by_hostname }}
           tpa_package_cache: ${{ github.event.inputs.tpa_package_cache }}
           upgrade_component_name: postgres
           upgrade_component_base_version: ${{ github.event.inputs.tpa_postgres_package_version }}

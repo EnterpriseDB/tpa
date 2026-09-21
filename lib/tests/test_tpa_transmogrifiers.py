@@ -34,8 +34,19 @@ class TestTransmogrifiers:
     @pytest.mark.parametrize(
         "args, error, expected",
         [
-            (["--architecture", "PGD-Always-ON"], None, [Common, Architecture]),
+            (
+                ["--architecture", "PGD-Always-ON", "--pgd-proxy-routing", "local"],
+                None,
+                [Common, Architecture],
+            ),
             (["--edb-repositories", "dev"], None, [Common, Repositories]),
+            (
+                # --pgd-proxy-routing is only required for the BDR4->PGD5
+                # path: --architecture PGD-X must dispatch fine without it.
+                ["--architecture", "PGD-X"],
+                None,
+                [Common, Architecture],
+            ),
             (
                 [
                     "--architecture",
@@ -57,6 +68,8 @@ class TestTransmogrifiers:
                 [
                     "--architecture",
                     "PGD-Always-ON",
+                    "--pgd-proxy-routing",
+                    "local",
                     "--bdr-package-version",
                     "5.5.0",
                 ],
@@ -97,6 +110,8 @@ class TestTransmogrifiers:
             [
                 "--architecture",
                 "PGD-Always-ON",
+                "--pgd-proxy-routing",
+                "local",
                 "--edb-repositories",
                 "dev",
             ]
@@ -316,7 +331,9 @@ class TestArchitecture:
         it via require() so the framework sees it in the dependency tree.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture=target))
+        x.set_parsed_args(
+            Namespace(target_architecture=target, pgd_proxy_routing="local")
+        )
         assert len(x.required) == 1
         assert isinstance(x.required[0], specialist_class)
 
@@ -329,7 +346,11 @@ class TestArchitecture:
         command-line values via self.args.
         """
         x = Architecture()
-        args = Namespace(target_architecture="PGD-Always-ON", edb_repositories=None)
+        args = Namespace(
+            target_architecture="PGD-Always-ON",
+            pgd_proxy_routing="local",
+            edb_repositories=None,
+        )
         x.set_parsed_args(args)
         specialist = x.required[0]
         assert specialist.args is args
@@ -345,7 +366,9 @@ class TestArchitecture:
         the deduplication logic in transmogrifiers_from_args() can see them.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
+        )
         required_classes = [type(t) for t in x.all_required()]
         assert BDR4PGD5 in required_classes
         assert Repositories in required_classes
@@ -373,7 +396,9 @@ class TestArchitecture:
         avoid either double-processing or adding spurious findings.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
+        )
         result = x.check(basic_bdr_cluster)
         assert len(result.errors) == 0
         assert len(result.warnings) == 0
@@ -388,7 +413,7 @@ class TestArchitecture:
         """
         x = Architecture()
         x.set_parsed_args(
-            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing=None)
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
         )
         before = dict(basic_bdr_cluster.vars)
         x.apply(basic_bdr_cluster)
@@ -405,7 +430,9 @@ class TestArchitecture:
         output surface at the correct nesting level via t.required.
         """
         x = Architecture()
-        x.set_parsed_args(Namespace(target_architecture="PGD-Always-ON"))
+        x.set_parsed_args(
+            Namespace(target_architecture="PGD-Always-ON", pgd_proxy_routing="local")
+        )
         desc = x.description(basic_bdr_cluster)
         assert desc._items == []
         assert desc._title is None
@@ -437,6 +464,7 @@ class TestBDR4PGD5:
     ):
         """test check function"""
         x = BDR4PGD5()
+        x._args = Namespace(pgd_proxy_routing="local")
         assert len(x.check(basic_bdr_cluster).errors) == 0
         assert len(x.check(basic_bdr_cluster).warnings) == 0
 
@@ -465,6 +493,30 @@ class TestBDR4PGD5:
 
         assert len(x.check(basic_bdr_cluster).errors) == 1
         assert len(x.check(basic_bdr_cluster).warnings) == 4
+
+    @pytest.mark.parametrize(
+        "pgd_proxy_routing, error",
+        [
+            ("local", None),
+            ("global", None),
+            (None, "--pgd-proxy-routing must be 'global' or 'local', got 'None'"),
+            (
+                "invalid",
+                "--pgd-proxy-routing must be 'global' or 'local', got 'invalid'",
+            ),
+        ],
+    )
+    def test_bdr4pgd5_check_pgd_proxy_routing(
+        self, pgd_proxy_routing, error, basic_bdr_cluster
+    ):
+        """check() rejects a missing or invalid --pgd-proxy-routing value"""
+        x = BDR4PGD5()
+        x._args = Namespace(pgd_proxy_routing=pgd_proxy_routing)
+        errors = x.check(basic_bdr_cluster).errors
+        if error:
+            assert error in errors
+        else:
+            assert not [e for e in errors if "pgd-proxy-routing" in e]
 
     @pytest.mark.parametrize(
         "args, vars, error",
@@ -803,7 +855,6 @@ class TestBdrPackageVersion:
             # immediately.
             ("PGD-Always-ON", None, True),
             ("PGD-X", None, True),
-            ("PGD-S", None, True),
             ("BDR-Always-ON", None, True),
             # Architecture-driven change in flight: wait for the
             # specialist to flip cluster.architecture to the target.
@@ -834,7 +885,6 @@ class TestBdrPackageVersion:
             # BDR-Always-ON for BDR 3.x / 4.x minor upgrades).
             ("PGD-Always-ON", None, 0),
             ("PGD-X", None, 0),
-            ("PGD-S", None, 0),
             ("BDR-Always-ON", None, 0),
             # Architecture-driven changes: the specialist will validate
             # whether the source→target transition is supported; we
@@ -1004,7 +1054,7 @@ class TestBdrPackageVersion:
 
     @pytest.mark.parametrize(
         "architecture",
-        ["PGD-X", "PGD-S", "BDR-Always-ON"],
+        ["PGD-X", "BDR-Always-ON"],
     )
     def test_description_omits_read_listen_port_on_non_pgd_proxy_arch(
         self, architecture

@@ -32,11 +32,20 @@
   assert:
     that:
     - cluster_vars is defined
-    - cluster_vars is not empty 
+    - cluster_vars is not empty
     fail_msg: >
       'cluster_vars' dictionary not found in the configuration file.
       If it is defined, it may be incorrectly formatted or improperly templated.
-      
+
+- name: Reject deprecated PGD-S architecture
+  assert:
+    that:
+    - architecture is not defined or architecture != "PGD-S"
+    fail_msg: >
+      PGD-S is deprecated and no longer offered as a product; use PGD-X
+      for new PGD 6 deployments. This cluster's config.yml specifies
+      'architecture: PGD-S', which is no longer supported.
+
 # Try to load config_hashes (written by inventory/post-write.yml) from
 # the inventory, and add the hash of the current contents of config.yml
 

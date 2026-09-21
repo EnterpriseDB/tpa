@@ -25,4 +25,9 @@
     # if the body requests a scheduled switchover, the API will return
     # 202 on success
     status_code: [200, 202]
+
+  # mTLS reads patroni_ssl_key_file, owned by postgres_user and mode 0600;
+  # the play calling this task (e.g. tpaexec test) may not run as root.
+  become: yes
+
   register: patroni_switchover_api_output

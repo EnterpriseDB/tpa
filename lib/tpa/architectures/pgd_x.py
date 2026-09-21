@@ -3,7 +3,7 @@
 # © Copyright EnterpriseDB UK Limited 2015-2026 - All rights reserved.
 
 from tpa.exceptions import PGDXArchitectureError
-from .pgd import PGD
+from .pgd import PGD, CONNECTION_MANAGER_OPTIONS
 from typing import List, Tuple
 
 from argparse import SUPPRESS
@@ -183,6 +183,15 @@ class PGDX(PGD):
             top_group_entry["options"] = {}
         top_group_entry["options"]["enable_routing"] = routing_enabled
 
+        # Connection Manager reads its options from the group that has routing
+        # enabled. Under local routing that is each location subgroup, not the
+        # top-level group the parent class wrote them to, so move them down.
+        cm_options = {}
+        if not routing_enabled:
+            for opt in CONNECTION_MANAGER_OPTIONS:
+                if opt in top_group_entry["options"]:
+                    cm_options[opt] = top_group_entry["options"].pop(opt)
+
         # Add location subgroups
         location_names = self.args["location_names"]
         for _location in location_names:
@@ -192,6 +201,7 @@ class PGDX(PGD):
                 "options": {
                     "location": _location,
                     "enable_routing": not routing_enabled,  # Opposite of parent
+                    **cm_options,
                 },
             }
             existing_groups.append(new_group)

@@ -63,7 +63,6 @@ pgd5_versions:
 
 pgd6_versions:
   tpa_architecture:
-    - "PGD-S"
     - "PGD-X"
   tpa_postgres_flavour: *default_tpa_postgres_flavour
   tpa_os_image:

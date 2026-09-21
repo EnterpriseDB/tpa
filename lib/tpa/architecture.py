@@ -1304,7 +1304,9 @@ class Architecture:
             and self.name
             not in ("PGD-Always-ON", "BDR-Always-ON", "Lightweight", "PGD-X", "PGD-S")
             and not (
-                self.args.get("enable_pem") or self.args.get("enable_beacon_agent")
+                self.args.get("enable_pem")
+                or self.args.get("enable_beacon_agent")
+                or self.args.get("enable_pg_backup_api")
             )
         ):
             repos = []

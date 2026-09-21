@@ -73,6 +73,9 @@ release.vip.post.wait={{ efm_conf_settings['release.vip.post.wait']|default(0) }
 {% if efm_version is version('5.2', '>=') %}
 auto.basebackup={{ efm_conf_settings['auto.basebackup']|default(false) }}
 {% endif %}
+{% if efm_version is version('5.4', '>=') %}
+primary.health.check.port={{ efm_conf_settings['primary.health.check.port']|default('') }}
+{% endif %}
 reconfigure.num.sync={{ efm_conf_settings['reconfigure.num.sync']|default(false) | bool }}
 reconfigure.num.sync.max={{ efm_conf_settings['reconfigure.num.sync.max']|default('') }}
 reconfigure.sync.primary={{ efm_conf_settings['reconfigure.sync.primary']|default(false) | bool }}
@@ -81,7 +84,7 @@ priority.standbys={{ efm_conf_settings['priority.standbys']|default('') }}
 recovery.check.period={{ efm_conf_settings['recovery.check.period']|default(1) }}
 restart.connection.timeout={{ efm_conf_settings['restart.connection.timeout']|default(60) }}
 {% if efm_version is version('5', '>=') %}
-auto.resume.startup.period={{ efm_conf_settings['auto.resume.startup.period']|default(0) }}
+auto.resume.startup.period={{ efm_conf_settings['auto.resume.startup.period']|default(1 if efm_autostart_db else 0) }}
 auto.resume.failure.period={{ efm_conf_settings['auto.resume.failure.period']|default(0) }}
 {% else %}
 auto.resume.period={{ efm_conf_settings['auto.resume.period']|default(0) }}

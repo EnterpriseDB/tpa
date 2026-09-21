@@ -197,15 +197,6 @@
       - "'bdr' in role"
       - inventory_hostname in first_bdr_primary_candidates
 
-  - include_role:
-      name: pgd_proxy/dbuser
-      apply:
-        tags: [pgd-proxy, dbuser]
-    when:
-      failover_manager == 'pgd'
-      and 'bdr' in role
-      and 'pem-server' not in role
-
   - name: Stop/update/restart Postgres on {{ inventory_hostname }}
     block:
     - include_role: name=postgres/restart
@@ -221,6 +212,37 @@
       vars:
         upgrade_from: 3
     - include_role: name=postgres/config
+    - include_role: name=postgres/restart
+      vars:
+        postgres_service_end_state: started
+    when: >
+      'postgres' in role
+
+  - name: Wait for bdr nodes to reach consensus before proceeding
+    postgresql_query:
+      conninfo: "{{ dsn|dbname(bdr_database) }}"
+      query: >
+        select s->>'leader_id' != '0' or s->>'leader' != '0' status from bdr.get_raft_status() s;
+    register: bdr_raft
+    until: bdr_raft.status == true
+    retries: 60
+    delay: 1
+    become_user: "{{ postgres_user }}"
+    become: yes
+    when: >
+      'bdr' in role
+
+  - include_role:
+      name: pgd_proxy/dbuser
+      apply:
+        tags: [pgd-proxy, dbuser]
+    when:
+      failover_manager == 'pgd'
+      and 'bdr' in role
+      and 'pem-server' not in role
+
+  - name: Run DDL on {{ inventory_hostname }}
+    block:
     - include_role: name=postgres/final
     when: >
       'postgres' in role
@@ -253,20 +275,6 @@
     when:
       - "'bdr' in role"
       - inventory_hostname in first_bdr_primary_candidates
-
-  - name: Wait for bdr nodes to reach consensus before proceeding
-    postgresql_query:
-      conninfo: "{{ dsn|dbname(bdr_database) }}"
-      query: >
-        select s->>'leader_id' != '0' or s->>'leader' != '0' status from bdr.get_raft_status() s;
-    register: bdr_raft
-    until: bdr_raft.status == true
-    retries: 60
-    delay: 1
-    become_user: "{{ postgres_user }}"
-    become: yes
-    when: >
-      'bdr' in role
 
   # On instances that don't run Postgres, we can usually get away with a
   # much simpler upgrade process.

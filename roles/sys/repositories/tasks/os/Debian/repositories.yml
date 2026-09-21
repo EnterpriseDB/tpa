@@ -12,6 +12,17 @@
     that: item in default_apt_repositories|combine(apt_repositories)
   with_items: "{{ apt_repository_list }}"
 
+  # apt-key(8) was removed in Debian 13 (trixie), so the apt_key module
+  # fails there with "Failed to find required executable apt-key". We test
+  # for the binary rather than for a distribution version because that is
+  # the fact that actually matters, and it does not need revisiting for
+  # forky, later Ubuntu releases, or any derivative that drops apt-key.
+- name: Check whether apt-key is available
+  stat:
+    path: /usr/bin/apt-key
+  register: apt_key_binary
+  changed_when: false
+
 - name: Install apt repository signing keys
   apt_key:
     id: "{{ r.key_id|default(omit) }}"
@@ -21,6 +32,28 @@
   vars:
     repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
     r: "{{ repos[item] }}"
+  when: apt_key_binary.stat.exists
+
+  # Note this does not verify the downloaded key against r.key_id, which
+  # apt_key does when given both id and url. Trusting the TLS connection to
+  # key_url is the tradeoff for apt-key no longer existing.
+- name: Install apt repository signing keys without apt-key
+  get_url:
+    url: "{{ r.key_url }}"
+    dest: "/etc/apt/trusted.gpg.d/{{ item }}.{{ r.key_format|default('asc') }}"
+    # This has to be world-readable, and 0600 does not work: apt verifies
+    # signatures with a helper (sqv on Debian 13) that runs as the _apt
+    # user, not as root. With stricter permissions apt reports "the key(s)
+    # in the keyring ... are ignored as the file is not readable by user
+    # executing gpgv" and then rejects the repository as unsigned. The key
+    # is public material, so there is nothing here to protect anyway --- it
+    # is exactly how Debian ships its own keyrings.
+    mode: "0644"  # NOSONAR: public signing key, must be readable by _apt
+  with_items: "{{ apt_repository_list }}"
+  vars:
+    repos: "{{ default_apt_repositories|combine(apt_repositories) }}"
+    r: "{{ repos[item] }}"
+  when: not apt_key_binary.stat.exists
 
 - name: Install apt repositories
   apt_repository:

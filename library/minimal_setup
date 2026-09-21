@@ -29,13 +29,21 @@ case "${ID}:${VERSION_ID%.*}" in
         python=python2.7
         python_pkg_prefix=python
         ;;
-    debian:9|debian:10|debian:11|debian:12)
+    debian:9|debian:10|debian:11)
         distribution=Debian
         release=${VERSION_CODENAME:-stretch}
         python=${preferred_python_version:-python3}
         if [[ $python == "python2" ]]; then
             python_pkg_prefix=python
         fi
+        ;;
+    # Bullseye was the last Debian to ship python2, so from bookworm on
+    # there is no python2 to prefer and the setting is ignored, as it is
+    # for every other python3-only distribution below.
+    debian:12|debian:13)
+        distribution=Debian
+        release=$VERSION_CODENAME
+        python=python3
         ;;
     ubuntu:16|ubuntu:18)
         distribution=Ubuntu

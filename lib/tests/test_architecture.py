@@ -124,6 +124,46 @@ class TestBarePlatform:
             architecture_bare.setup_local_repo()
 
 
+class TestAwsClusterVars:
+    """update_cluster_vars on the aws platform opts the cluster in to
+    sysctl_net via opt_in_tasks, so AWS clusters get TPA's busy-server
+    network tuning without the user having to ask. Bare-metal stays
+    opted-out. opt_in_tasks (not included_tasks) — populating
+    included_tasks engages whitelist semantics and would gate every
+    other task out of the deploy."""
+
+    @pytest.fixture
+    def aws_platform(self, architecture):
+        from tpaexec.platforms.aws import aws as AwsPlatform
+
+        return AwsPlatform("aws", architecture)
+
+    def test_adds_sysctl_net_when_opt_in_tasks_unset(self, aws_platform):
+        cluster_vars = {}
+        aws_platform.update_cluster_vars(cluster_vars, args={})
+        assert cluster_vars["opt_in_tasks"] == ["sysctl_net"]
+
+    def test_does_not_touch_included_tasks(self, aws_platform):
+        cluster_vars = {}
+        aws_platform.update_cluster_vars(cluster_vars, args={})
+        assert "included_tasks" not in cluster_vars
+
+    def test_preserves_existing_opt_in_tasks(self, aws_platform):
+        cluster_vars = {"opt_in_tasks": ["something_else"]}
+        aws_platform.update_cluster_vars(cluster_vars, args={})
+        assert cluster_vars["opt_in_tasks"] == ["something_else", "sysctl_net"]
+
+    def test_idempotent_when_already_opted_in(self, aws_platform):
+        cluster_vars = {"opt_in_tasks": ["sysctl_net"]}
+        aws_platform.update_cluster_vars(cluster_vars, args={})
+        assert cluster_vars["opt_in_tasks"] == ["sysctl_net"]
+
+    def test_handles_none_opt_in_tasks(self, aws_platform):
+        cluster_vars = {"opt_in_tasks": None}
+        aws_platform.update_cluster_vars(cluster_vars, args={})
+        assert cluster_vars["opt_in_tasks"] == ["sysctl_net"]
+
+
 class TestClusterNameValidation:
     def test_invalid_cluster_name_rejected(self):
         bad_path = "lib/tests/config/cluster.bad"
@@ -236,6 +276,28 @@ class TestM1Architecture:
                 architecture_m1.configure(force=True)
         else:
             assert architecture_m1.configure(force=True) is expected
+
+    @pytest.mark.parametrize(
+        argnames=("argv", "expect_edb_repo"),
+        argvalues=(
+            (ARGS + ["--failover-manager", "repmgr"], False),
+            (ARGS + ["--failover-manager", "repmgr", "--enable-pem"], True),
+            (ARGS + ["--failover-manager", "repmgr", "--enable-beacon-agent"], True),
+            (ARGS + ["--failover-manager", "repmgr", "--enable-pg-backup-api"], True),
+        ),
+    )
+    def test_m1_enable_pg_backup_api_requires_edb_repo(
+        self, argv, expect_edb_repo, architecture_m1
+    ):
+        """Regression test (TPA-1633): --enable-pg-backup-api on community
+        Postgres must not leave edb_repositories empty, since pg-backup-api
+        is only published to EDB's Cloudsmith repos."""
+        architecture_m1.configure(force=True)
+        edb_repos = architecture_m1.args["cluster_vars"]["edb_repositories"]
+        if expect_edb_repo:
+            assert edb_repos != []
+        else:
+            assert edb_repos == []
 
 
 @pytest.fixture
@@ -382,6 +444,30 @@ class TestBDRArchitecture:
             bdr_architecture.configure(force=True)
             assert len(bdr_architecture.args["locations"]) == 2
 
+    @pytest.mark.parametrize(
+        "argv, expect_pemserver",
+        [
+            (MINIMUM_BDR_ARGV, False),
+            (MINIMUM_BDR_ARGV + ["--enable-pem"], True),
+        ],
+    )
+    def test_bdr_always_on_enable_pem(self, argv, expect_pemserver, bdr_architecture):
+        """Regression test (TPA-761): --enable-pem must add a pem-server instance for BDR-Always-ON."""
+        bdr_architecture.configure(force=True)
+        instances = bdr_architecture.args["instances"]
+        pemserver_instances = [
+            i for i in instances if "pem-server" in i.get("role", [])
+        ]
+        if expect_pemserver:
+            assert (
+                len(pemserver_instances) == 1
+            ), "Should have exactly one pem-server instance"
+            for instance in instances:
+                if "bdr" in instance.get("role", []):
+                    assert "pem-agent" in instance["role"]
+        else:
+            assert pemserver_instances == []
+
 
 @pytest.fixture
 def pgd_architecture(argv):
@@ -483,3 +569,24 @@ class TestPGDArchitecture:
         """
         pgd_architecture.configure(force=True)
         assert "upgrade_components" not in pgd_architecture.args["cluster_vars"]
+
+    @pytest.mark.parametrize(
+        "argv, expect_pemserver",
+        [
+            (MINIMUM_PGD_ARGV, False),
+            (MINIMUM_PGD_ARGV + ["--enable-pem"], True),
+        ],
+    )
+    def test_pgd_always_on_enable_pem(self, argv, expect_pemserver, pgd_architecture):
+        """Regression test (TPA-761): PGD-Always-ON's template-added pem-server instance must not be duplicated by BDR._update_instance_pem()."""
+        pgd_architecture.configure(force=True)
+        instances = pgd_architecture.args["instances"]
+        pemserver_instances = [
+            i for i in instances if "pem-server" in i.get("role", [])
+        ]
+        if expect_pemserver:
+            assert (
+                len(pemserver_instances) == 1
+            ), "Should have exactly one pem-server instance"
+        else:
+            assert pemserver_instances == []

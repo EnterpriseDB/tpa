@@ -124,6 +124,25 @@
 # Now we issue a CREATE EXTENSION command for each extension in
 # `postgres_extensions`, in the postgres and template1 databases.
 
+# For BDR clusters, extensions that create their own schema (marked with
+# own_schema: true in the extensions dictionary) are excluded from
+# template1 to prevent bdrdb from inheriting the schema via template
+# inheritance. This avoids "schema already exists" conflicts during
+# synchronize_structure's pg_restore at BDR node join time. These
+# extensions are installed in bdrdb after BDR join.
+
+- name: Adjust ordering of pgaa related to pgfs if required
+  when:
+    - p_and_f is subset(postgres_extensions)
+    - pgaa_pos < pgfs_pos
+  set_fact:
+    postgres_extensions: >-
+      {{ (postgres_extensions | reject('equalto', 'pgaa') | list) + ['pgaa'] }}
+  vars:
+    p_and_f: ['pgfs', 'pgaa']
+    pgaa_pos: "{{ postgres_extensions.index('pgaa') }}"
+    pgfs_pos: "{{ postgres_extensions.index('pgfs') }}"
+
 - name: Install default Postgres extensions
   postgresql_ext:
     port: "{{ postgres_port }}"
@@ -134,10 +153,16 @@
   with_nested:
     - [postgres, template1]
     - "{{ postgres_extensions }}"
+  vars:
+    _own_schema_for_bdr: >-
+      {{ 'bdr' in role
+         and item.0 == 'template1'
+         and item.1 in own_schema_extensions|default({}) }}
   become_user: "{{ postgres_user }}"
   become: yes
   when:
-    item.1 not in cluster_facts.databases[item.0].extensions|default({})
+    - item.1 not in cluster_facts.databases[item.0].extensions|default({})
+    - not _own_schema_for_bdr
 
 # Now we issue CREATE TABLESPACE for each entry in postgres_tablespaces.
 # (We create tablespaces before databases because postgres_databases may
@@ -187,6 +212,26 @@
       {{ db.name }}
   become_user: "{{ postgres_user }}"
   become: yes
+
+# We make this exception to ensure that pgfs is installed before pgaa in per-database extensions.
+- name: Ensure pgfs is installed before pgaa in per-database extensions
+  postgresql_ext:
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_user }}"
+    db: "{{ item.name }}"
+    name: pgfs
+    state: present
+  loop: "{{ postgres_databases|default([]) }}"
+  loop_control:
+    label: >-
+      {{ item.name }}/pgfs
+  become_user: "{{ postgres_user }}"
+  become: yes
+  when:
+    - p_and_f is subset(_ext_names)
+  vars:
+    p_and_f: ['pgfs', 'pgaa']
+    _ext_names: "{{ item.extensions|default([])|map(attribute='name')|list|flatten }}"
 
 # Apart from the extensions we create in template1 (which are inherited
 # by every other database), each entry in postgres_databases can also
@@ -251,7 +296,19 @@
     file: efm_role.yml
   when: >
     failover_manager == 'efm' and
-    'pem-server' not in role
+    'pem-server' not in role and
+    task_selector|selects('efm')
+
+# If patroni created a rewind user, grant it the privileges pg_rewind
+# needs to run as a non-superuser (Patroni normally does this itself
+# in post_bootstrap, but TPA hands it an already-initialised cluster,
+# so that step never runs).
+- include_tasks:
+    file: patroni_rewind.yml
+  when:
+    - patroni_rewind_user is defined
+    - postgres_users|json_query("[?username=='%s']" % patroni_rewind_user) != []
+    - task_selector|permits('patroni-rewind')
 
 # Now we can complete the task of granting roles to `postgres_users`.
 - name: Grant roles to Postgres users if required

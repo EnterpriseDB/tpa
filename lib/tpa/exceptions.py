@@ -39,6 +39,15 @@ class PGDArchitectureError(Exception):
     MSG = "Error"
 
 
+class PGDSDeprecatedError(PGDArchitectureError):
+    def __init__(
+        self,
+        message="PGD-S is deprecated and no longer offered as a product; "
+        "use PGD-X for new PGD 6 deployments",
+    ):
+        super().__init__(message)
+
+
 class PGDXArchitectureError(Exception):
     MSG = "Error"
 

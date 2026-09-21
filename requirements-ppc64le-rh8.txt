@@ -1,13 +1,12 @@
-cffi==2.0.0 \
-    --hash=sha256:1e3a615586f05fc4065a8b22b8152f0c1b00cdbc60596d187c2a74f9e3036e4e \
-    --hash=sha256:81afed14892743bbe14dacb9e36d9e0e504cd204e0b165062c488942b9718037
+cffi==2.1.1 \
+    --hash=sha256:3143d81e29e1e20a9ce10901ec369012947876596f75a222235965f2b7ae832e \
+    --hash=sha256:4a7c934f7360e8cd64fe9efadcbd10c7c6364f531e432b9a4bf5ccbc9e0e8b50
     # via
     #   -r /out/requirements-ppc64le-rh8.in
     #   cryptography
-cryptography==49.0.0 \
-    --hash=sha256:2eda353d8a27bcbcaa4cbed18994a74ab4d19a2ca897db188ea269ab9b71419b \
-    --hash=sha256:d0527ce944105f257f605a827d6ebead966c752038b6e8656abb9c5edee6fc68 \
-    --hash=sha256:df882e51352b81c3a41c8786026878f3771128367197fca78aaa706c42a51004
+cryptography==50.0.1 \
+    --hash=sha256:5fe002589592ed749ce77fe0695fcbd3500dd61d7d6db5858a7544c612fa8e45 \
+    --hash=sha256:76de83fbd91ac49c0feaaa983d0748fd7a53176afac5fb3bf7478d244f0eb527
     # via -r /out/requirements-ppc64le-rh8.in
 markupsafe==3.0.3 \
     --hash=sha256:2a8bcea224a7a20b839f3a792ef54a8378a807453b10004389c58ce2aa111da0 \
